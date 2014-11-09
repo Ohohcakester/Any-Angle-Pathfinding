@@ -12,14 +12,21 @@ import javax.swing.JPanel;
 
 public class DrawCanvas extends JPanel implements MouseListener{
     
-    private GridGraphDrawer gridGraphDrawer;
-    private GridLineDrawer gridLineDrawer;
+    private static final int RES_Y = 600;
+    private static final int RES_X = 600;
+    
+    private final Drawer gridGraphDrawer;
+    private Drawer gridLineDrawer;
+    private Drawer gridPointDrawer;
+    private final GridGraph gridGraph;
     
     public DrawCanvas(GridGraph gridGraph, GridLineSet gridLineSet) {
         super();
-        setPreferredSize(new Dimension(600,600));
-        gridGraphDrawer = new GridGraphDrawer(gridGraph, 600, 600);
-        gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, 600, 600);
+        setPreferredSize(new Dimension(RES_X,RES_Y));
+        
+        this.gridGraph = gridGraph;
+        gridGraphDrawer = new GridGraphDrawer(gridGraph, RES_X, RES_Y);
+        gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, RES_X, RES_Y);
     }
     
     @Override
@@ -28,7 +35,18 @@ public class DrawCanvas extends JPanel implements MouseListener{
         
         g.setColor(Color.BLACK);
         gridGraphDrawer.draw(g);
-        gridLineDrawer.draw(g);
+        if (gridLineDrawer != null) {
+            gridLineDrawer.draw(g);
+        }
+        if (gridPointDrawer != null) {
+            gridPointDrawer.draw(g);
+        }
+    }
+    
+    public void changeSet(GridLineSet gridLineSet, GridPointSet gridPointSet) {
+        gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, RES_X, RES_Y);
+        gridPointDrawer = new GridPointDrawer(gridGraph, gridPointSet, RES_X, RES_Y);
+        repaint();
     }
 
     @Override

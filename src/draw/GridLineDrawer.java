@@ -2,10 +2,13 @@ package draw;
 
 import grid.GridGraph;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
 
-public class GridLineDrawer {
+public class GridLineDrawer implements Drawer {
     
     private final GridLineSet gridLineSet;
     private final GridGraph gridGraph;
@@ -20,10 +23,23 @@ public class GridLineDrawer {
         this.gridLineSet = gridLineSet;
     }
     
+    /* (non-Javadoc)
+     * @see draw.Drawer#draw(java.awt.Graphics)
+     */
+    @Override
     public void draw(Graphics g) {
+        if (gridLineSet == null) {
+            return;
+        }
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(2));
+        
         for (GridLineSet.Line line : gridLineSet.getLineList()) {
             drawLine(g, line);
         }
+        
+        g2.setStroke(new BasicStroke(1));
     }
     
     private void drawLine(Graphics g, GridLineSet.Line line) {
@@ -35,6 +51,8 @@ public class GridLineDrawer {
         int y2 = (int)(height*line.y2);
         
         g.setColor(line.color);
+
+        //g2.draw(new Line2D.Float(x1, y1, x2, y2));
         g.drawLine(x1, y1, x2, y2);
         g.setColor(Color.BLACK);
     }

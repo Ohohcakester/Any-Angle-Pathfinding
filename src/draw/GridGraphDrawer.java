@@ -4,7 +4,7 @@ import grid.GridGraph;
 import java.awt.Graphics;
 
 
-public class GridGraphDrawer {
+public class GridGraphDrawer implements Drawer {
     private final GridGraph gridGraph;
     
     private final int resX;
@@ -16,6 +16,7 @@ public class GridGraphDrawer {
         this.resY = resY;
     }
     
+    @Override
     public void draw(Graphics g) {
         for(int x = 0; x < gridGraph.sizeX; x++) {
             for(int y = 0; y < gridGraph.sizeY; y++) {

@@ -1,14 +1,20 @@
 import grid.AStar;
 import grid.BasicThetaStar;
 import grid.GridGraph;
+import grid.PathFindingAlgorithm;
 
 import java.awt.Color;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
 
 import draw.DrawCanvas;
 import draw.GridLineSet;
+import draw.GridObjects;
+import draw.GridPointSet;
+import draw.KeyToggler;
 
 /**
  * 5000 Runs, seed 51, frequency 11 on 40x40 BlockMap with fillCorners.
@@ -24,33 +30,45 @@ import draw.GridLineSet;
  */
 public class AnyAnglePathfinding {
     
-    private static boolean seededRandom = true;;
+    private static boolean seededRandom = false;
     private static int seed = 5311;
     
     public static Random rand = new Random();
-    private static int sizeX = 80;
-    private static int sizeY = 80;
+    private static int sizeX = 40;
+    private static int sizeY = 40;
+
+    private static int sx = 0;
+    private static int sy = 0;
+    private static int ex = 10;
+    private static int ey = 10;
+    /*private static int sx = 0;
+    private static int sy = 0;
+    private static int ex = 70;
+    private static int ey = 42;*/
     
     public static void main(String[] args) {
         
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
         GridLineSet gridLineSet = new GridLineSet();
 
-        if (seededRandom) {
-            rand = new Random(seed);    
+        if (!seededRandom) {
+            seed = rand.nextInt();
+            System.out.println("Starting random with random seed = " + seed);
+        } else {
+            System.out.println("Starting random with predefined seed = " + seed);
         }
+        rand = new Random(seed);
         
-        generateRandomBlockMap(gridGraph, 11);
+        generateRandomBlockMap(gridGraph, 9);
         fillCorners(gridGraph);
+        
+        GraphImporter graphImporter = new GraphImporter("maze.txt");
+        gridGraph = graphImporter.retrieve();
         
         //generateRandomTestLines(gridGraph, gridLineSet, 100);
 
-        int sx = 26;
-        int sy = 57;
-        int ex = 56;
-        int ey = 18;
-        gridGraph.setBlocked(sx, sy, false);
-        gridGraph.setBlocked(ex, ey, false);
+        //gridGraph.trySetBlocked(sx, sy, false);
+        //gridGraph.trySetBlocked(ex, ey, false);
 
         //testSpeed(gridGraph, sx, sy, ex, ey);
         //testSpeed(gridGraph, sx, sy, ex, ey);
@@ -66,22 +84,59 @@ public class AnyAnglePathfinding {
                             path[i+1][0], path[i+1][1]);
         }
         System.out.println("Path Length: " + pathLength);
-        
+
+        LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, sx, sy, ex, ey);
+        lineSetList.addLast(new GridObjects(gridLineSet, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
-        setupMainFrame(drawCanvas);
+        
+        setupMainFrame(drawCanvas, lineSetList);
+    }
+    
+    private static AStar getAlgo(GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        return new BasicThetaStar(gridGraph, sx, sy, ex, ey);
     }
 
 
     private static void testAlgorithmSpeed(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
-        new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+        PathFindingAlgorithm algo = getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
     }
 
     private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
-        AStar aStar = new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+        AStar aStar = getAlgo(gridGraph, sx, sy, ex, ey);
+        aStar.computePath();
         int[][] path = aStar.getPath();
         return path;
+    }
+    
+    private static LinkedList<GridObjects> recordAlgorithmOperation (
+            GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        PathFindingAlgorithm algo = getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.startRecording();
+        algo.computePath();
+        algo.stopRecording();
+        LinkedList<List<Integer[]>> snapshotList = algo.retrieveSnapshotList();
+        LinkedList<GridObjects> gridObjectsList = new LinkedList<>();
+        for (List<Integer[]> snapshot : snapshotList) {
+            gridObjectsList.add(createGridObjects(snapshot));
+        }
+        return gridObjectsList;
+    }
+    
+    private static GridObjects createGridObjects(List<Integer[]> snapshot) {
+        GridLineSet gridLineSet = new GridLineSet();
+        GridPointSet gridPointSet = new GridPointSet();
+        for (Integer[] edge : snapshot) {
+            if (edge.length == 4) {
+                gridLineSet.addLine(edge[0], edge[1], edge[2], edge[3], Color.GRAY);
+            } else if (edge.length == 2) {
+                gridPointSet.addPoint(edge[0], edge[1], Color.BLUE);
+            }
+        }
+        return new GridObjects(gridLineSet,gridPointSet);
     }
 
     private static void testSpeed(GridGraph gridGraph,
@@ -215,9 +270,12 @@ public class AnyAnglePathfinding {
         
     }
     
-    private static void setupMainFrame(DrawCanvas drawCanvas) {
+    private static void setupMainFrame(DrawCanvas drawCanvas, LinkedList<GridObjects> gridObjectsList) {
+        KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
+        
         JFrame mainFrame = new JFrame();
         mainFrame.add(drawCanvas);
+        mainFrame.addKeyListener(keyToggler);
         mainFrame.setResizable(false);
         mainFrame.pack();
         mainFrame.setLocationRelativeTo(null);

@@ -1,7 +1,8 @@
 package grid;
 
 
-public class AStar {
+
+public class AStar extends PathFindingAlgorithm {
 
     protected boolean postSmoothingOn() {
         return true;
@@ -9,41 +10,23 @@ public class AStar {
     protected float heuristicWeight() {
         return 1f;
     }
-    
-    protected GridGraph graph;
-    protected Float distance[];
-    protected int parent[];
+
+    protected Float[] distance;
+    protected boolean[] visited;
     
     IndirectHeap<Float> pq; 
-    
-    private final int sizeX;
-    private final int sizeY;
 
     private int finish;
-    private int ex;
-    private int ey;
 
-
-    private int toOneDimIndex(int x, int y) {
-        return y*sizeX + x;
-    }
-    
-    private int toTwoDimX(int index) {
-        return index%sizeX;
-    }
-    
-    private int toTwoDimY(int index) {
-        return index/sizeX;
-    }
     
     public AStar(GridGraph graph, int sx, int sy, int ex, int ey) {
-        this.graph = graph;
-        sizeX = graph.sizeX;
-        sizeY = graph.sizeY;
+        super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
+    }
+    
+    @Override
+    public void computePath() {
         int totalSize = (graph.sizeX+1) * (graph.sizeY+1);
 
-        this.ex = ex;
-        this.ey = ey;
         int start = toOneDimIndex(sx, sy);
         finish = toOneDimIndex(ex, ey);
         
@@ -51,7 +34,7 @@ public class AStar {
         parent = new int[totalSize];
         
         initialise(start);
-        boolean[] visited = new boolean[totalSize];
+        visited = new boolean[totalSize];
         
         pq = new IndirectHeap<Float>(distance, true);
         pq.heapify();
@@ -59,6 +42,7 @@ public class AStar {
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             if (current == finish) {
+                maybeSaveSearchSnapshot();
                 maybePostSmooth();
                 return;
             }
@@ -77,7 +61,8 @@ public class AStar {
             tryRelax(visited, current, x, y, x-1, y+1);
             tryRelax(visited, current, x, y, x, y+1);
             tryRelax(visited, current, x, y, x+1, y+1);
-            
+
+            maybeSaveSearchSnapshot();
         }
         
         maybePostSmooth();
@@ -121,6 +106,7 @@ public class AStar {
         if (newWeight < distance[v]) {
             distance[v] = newWeight;
             parent[v] = u;
+            maybeSaveSearchSnapshot();
             return true;
         }
         return false;
@@ -182,6 +168,7 @@ public class AStar {
                     if (lineOfSight(current,next)) {
                         parent[current] = next;
                         next = parent[next];
+                        maybeSaveSearchSnapshot();
                     } else {
                         next = -1;
                     }
@@ -212,6 +199,10 @@ public class AStar {
         }
         
         return path;
-        
+    }
+    
+    @Override
+    protected boolean selected(int index) {
+        return visited[index];
     }
 }

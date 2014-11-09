@@ -1,0 +1,111 @@
+
+
+
+/*
+private void relaxO(int y, Fraction xL, Fraction xR) {
+TreeSet<Interval> intervalSet = intervalSets[y];
+Interval left = new Interval(y,xL,xL, 0);
+Interval right = intervalSet.ceiling(new Interval(y,xR,xR, 0));
+
+NavigableSet<Interval> subset = intervalSet.subSet(left, false, right, true);
+subset = new TreeSet<Interval>(subset);
+
+// STEP 1: TRIM VISITED INTERVALS FROM ENDS
+while (!subset.isEmpty() && subset.first().visited) {
+    left = subset.pollFirst();
+}
+while (!subset.isEmpty() && subset.last().visited) {
+    subset.pollLast();
+    if (!subset.isEmpty()) {
+        right = subset.last();
+    }
+}
+
+// Nothing to relax.
+if (subset.isEmpty()) {
+    return;
+}
+
+// now left.xR = left boundary of unvisited, right.xR = right boundary of unvisited.
+// also, subset is non-empty.
+// STEP 2: INTERVAL SPLITTING. Note: we do not split visited nodes.
+Fraction x1_L = null;
+Fraction x2_L = null;
+Fraction x3_L = null;
+Fraction x1_R = null;
+Fraction x2_R = null;
+Fraction x3_R = null;
+
+// Check whether left requires splitting
+if (!left.xR.equals(subset.first().xL)) { // left.xR != first.xL
+    // This means first.xL < left.xR < first.xR
+    assert subset.first().xL.isLessThan(left.xR) && left.xR.isLessThan(subset.first().xR);
+    x1_L = subset.first().xL;
+    x2_L = left.xR;
+    x3_L = subset.first().xR;
+}
+// Check whether right requires splitting
+if (!right.xR.equals(subset.last().xR)) { // right.xR != last.xR
+    // This means last.xL < right.xR < last.xR
+    assert subset.last().xL.isLessThan(right.xR) && right.xR.isLessThan(subset.last().xR);
+    x1_R = subset.last().xL;
+    x2_R = right.xR;
+    x3_R = subset.last().xR;
+}
+
+if (x1_L != null && x1_R != null && x1_L.equals(x1_R)) { // Special case. Both left and right in same interval.
+    assert x3_L.equals(x3_R);
+    assert x2_L.isLessThan(x2_R);
+    
+    // We split this single interval into three.
+    // x1_L=x1_R < x2_L < x2_R < x3_L=x3_R
+    Interval in1 = new Interval(y, x1_L, x2_L);
+    Interval in2 = new Interval(y, x2_L, x2_R);
+    Interval in3 = new Interval(y, x2_R, x3_R);
+    intervalSet.remove(in3); // original interval has same xR as in3.
+
+    intervalSet.add(in1);
+    intervalSet.add(in2);
+    intervalSet.add(in3);
+    
+    left = in2;
+    right = in2;
+} else {
+    if (x1_L != null) {
+        // We split a single interval into two.
+        // x1_L < x2_L < x3_L
+        Interval in1 = new Interval(y, x1_L, x2_L);
+        Interval in2 = new Interval(y, x2_L, x3_L);
+        
+        intervalSet.remove(in2); // original interval has same xR as in2.
+
+        intervalSet.add(in1);
+        intervalSet.add(in2);
+        left = in2;
+    }
+    if (x1_R != null) {
+        // We split a single interval into two.
+        // x1_R < x2_R < x3_R
+        Interval in1 = new Interval(y, x1_R, x2_R);
+        Interval in2 = new Interval(y, x2_R, x3_R);
+        intervalSet.remove(in2); // original interval has same xR as in2.
+
+        intervalSet.add(in1);
+        intervalSet.add(in2);
+        right = in1;
+    }
+}
+
+if (x1_L != null || x1_R != null) { // If splitting has occurred
+    subset = intervalSet.subSet(left, true, right, true);
+}
+
+
+// Step 3: RELAXATION - FINALLY
+for (Interval interval : subset) {
+    if (!interval.visited) {
+        relax(interval);
+    }
+}
+}
+*/
