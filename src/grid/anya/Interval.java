@@ -21,7 +21,6 @@ public class Interval implements Comparable<Interval> {
         this.fValue = 0;
         isStartPoint = true;
         parent = new Point(xStart, yStart);
-        visited = true;
     }
 
     
@@ -41,12 +40,17 @@ public class Interval implements Comparable<Interval> {
         int result = this.xR.compareTo(o.xR);
         if (result == 0) {
             if (this.isStartPoint) { // start point comes after.
-                assert !o.isStartPoint;
-                return 1;
-            } else if (o.isStartPoint) {
-                return -1;
+                if (o.isStartPoint) {
+                    return 0;
+                } else {
+                    return 1;
+                }
             } else {
-                return 0;
+                if (o.isStartPoint) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             }
         }
         return result;
@@ -82,6 +86,11 @@ public class Interval implements Comparable<Interval> {
         if (y != other.y)
             return false;
         return true;
+    }
+    
+    @Override
+    public String toString() {
+        return "("+y+", "+xL+", "+xR+")";
     }
 }
 

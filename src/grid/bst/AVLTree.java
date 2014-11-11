@@ -188,8 +188,9 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
                     parent.prev = newNode;
                 }
             }
+            return newNode;
         }
-        
+
         int compare = data.compareTo(current.data);
         
         if (compare == 0)

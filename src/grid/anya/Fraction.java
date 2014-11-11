@@ -147,4 +147,8 @@ public class Fraction implements Comparable<Fraction> {
         return (float)Math.sqrt((fWidth*fWidth) + (height*height));
     }
 
+    @Override
+    public String toString() {
+        return n+"/"+d;
+    }
 }

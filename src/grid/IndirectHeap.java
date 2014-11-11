@@ -42,24 +42,6 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         }
     }
     
-    /*public IndirectHeap(E[][] array, boolean minHeap) {
-        this(minHeap);
-        int size = array.length*array[0].length;
-        keyList.ensureCapacity(size);
-        inList.ensureCapacity(size);
-        outList.ensureCapacity(size);
-        
-        int index = 0;
-        for (int i=0; i<array.length; i++) {
-            for (E e : array[i]) {
-                keyList.add(e);
-                inList.add(index);
-                outList.add(index);
-                index++;
-            }
-        }
-    }*/
-    
     public void setComparator(Comparator<E> comparator) {
         this.comparator = comparator;
     }
@@ -97,12 +79,18 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         swapI(outList, a, b);
     }
     
+    /**
+     * swap integers in list
+     */
     private void swapI(ArrayList<Integer> list, int i1, int i2) {
         Integer temp = list.get(i1);
         list.set(i1,list.get(i2));
         list.set(i2,temp);
     }
     
+    /**
+     * swap elements in list.
+     */
     private void swapE(ArrayList<E> list, int i1, int i2) {
         E temp = list.get(i1);
         list.set(i1,list.get(i2));
@@ -147,6 +135,8 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         bubbleUp(inIndex);
     }
     
+
+    
     public int popMinIndex() {
         if (keyList.size() == 0)
             throw new NullPointerException("Indirect Heap is empty!");
@@ -182,6 +172,47 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         
         return s;
     }
+
+    
+    public E popMinValue() {
+        if (keyList.size() == 0)
+            throw new NullPointerException("Indirect Heap is empty!");
+        else if (keyList.size() == 1) {
+            int s = outList.get(0);
+            inList.set(s,-1);
+            E value = keyList.get(0);
+            keyList.remove(0);
+            outList.remove(0);
+            return value;
+        }
+        // nodeList.size() > 1
+        
+        // s = Data at 0 = out[0]
+        // t = Data at lastIndex = out[lastIndex]
+        // key[0] = key[lastIndex], remove key[lastIndex]
+        // in[s] = -1
+        // in[t] = 0
+        // out[0] = out[lastIndex], remove out[lastIndex]
+        
+        //E temp = keyList.get(0);
+        int lastIndex = keyList.size()-1;
+        
+        int s = outList.get(0);
+        int t = outList.get(lastIndex);
+        
+        keyList.set(0,keyList.get(lastIndex));
+        E value = keyList.get(lastIndex);
+        keyList.remove(lastIndex);
+        inList.set(s,-1);
+        inList.set(t,0);
+        outList.set(0,outList.get(lastIndex));
+        outList.remove(lastIndex);
+        
+        bubbleDown(0);
+        
+        return value;
+    }
+
     
     public String arrayToString() {
         StringBuilder sb = new StringBuilder();

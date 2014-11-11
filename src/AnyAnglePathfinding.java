@@ -1,4 +1,4 @@
-import grid.AStar;
+import grid.Anya;
 import grid.BasicThetaStar;
 import grid.GridGraph;
 import grid.PathFindingAlgorithm;
@@ -37,8 +37,8 @@ public class AnyAnglePathfinding {
     private static int sizeX = 40;
     private static int sizeY = 40;
 
-    private static int sx = 0;
-    private static int sy = 0;
+    private static int sx = 1;
+    private static int sy = 1;
     private static int ex = 10;
     private static int ey = 10;
     /*private static int sx = 0;
@@ -92,9 +92,10 @@ public class AnyAnglePathfinding {
         setupMainFrame(drawCanvas, lineSetList);
     }
     
-    private static AStar getAlgo(GridGraph gridGraph, int sx, int sy,
+    private static PathFindingAlgorithm getAlgo(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
-        return new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+        return new Anya(gridGraph, sx, sy, ex, ey);
+        //return new BasicThetaStar(gridGraph, sx, sy, ex, ey);
     }
 
 
@@ -104,11 +105,22 @@ public class AnyAnglePathfinding {
         algo.computePath();
     }
 
+    /*private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        PathFindingAlgorithm algo = getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        return path;
+    }*/
+
     private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
-        AStar aStar = getAlgo(gridGraph, sx, sy, ex, ey);
-        aStar.computePath();
-        int[][] path = aStar.getPath();
+        int[][] path = new int[1][];
+        path[0] = new int[4];
+        path[0][0] = sx;
+        path[0][1] = sx;
+        path[0][2] = ey;
+        path[0][3] = ey;
         return path;
     }
     
@@ -116,7 +128,11 @@ public class AnyAnglePathfinding {
             GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         PathFindingAlgorithm algo = getAlgo(gridGraph, sx, sy, ex, ey);
         algo.startRecording();
-        algo.computePath();
+        try {
+            algo.computePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         algo.stopRecording();
         LinkedList<List<Integer[]>> snapshotList = algo.retrieveSnapshotList();
         LinkedList<GridObjects> gridObjectsList = new LinkedList<>();
@@ -131,7 +147,7 @@ public class AnyAnglePathfinding {
         GridPointSet gridPointSet = new GridPointSet();
         for (Integer[] edge : snapshot) {
             if (edge.length == 4) {
-                gridLineSet.addLine(edge[0], edge[1], edge[2], edge[3], Color.GRAY);
+                gridLineSet.addLine(edge[0], edge[1], edge[2], edge[3], Color.RED);
             } else if (edge.length == 2) {
                 gridPointSet.addPoint(edge[0], edge[1], Color.BLUE);
             }

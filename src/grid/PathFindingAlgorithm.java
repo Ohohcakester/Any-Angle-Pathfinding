@@ -69,7 +69,7 @@ public abstract class PathFindingAlgorithm {
         snapshotList.addLast(computeSearchSnapshot());
     }
     
-    private List<Integer[]> computeSearchSnapshot() {
+    protected List<Integer[]> computeSearchSnapshot() {
         List<Integer[]> list = new ArrayList<>();
         
         for (int i=0; i<parent.length; i++) {
@@ -107,5 +107,10 @@ public abstract class PathFindingAlgorithm {
     
     protected boolean selected(int index) {
         return false;
+    }
+
+    public int[][] getPath() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
