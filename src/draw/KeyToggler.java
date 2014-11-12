@@ -35,10 +35,10 @@ public class KeyToggler implements KeyListener {
         GridPointSet gridPointSet = gridObjects.gridPointSet;
         drawCanvas.changeSet(gridLineSet, gridPointSet);
 
-        if (gridLineSet != null)
+        /*if (gridLineSet != null)
             System.out.println("lines = " + gridObjects.gridLineSet.getLineList().size());
         if (gridPointSet != null)
-            System.out.println("points = " + gridObjects.gridPointSet.getPointList().size());
+            System.out.println("points = " + gridObjects.gridPointSet.getPointList().size());*/
     }
     
     @Override

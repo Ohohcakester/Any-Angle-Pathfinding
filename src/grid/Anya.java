@@ -13,12 +13,20 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class Anya extends PathFindingAlgorithm {
+    
+    private interface CheckFunction {
+        public boolean check(int x, int y);
+    }
+    
     private ArrayList<ExploredInterval> exploredList;
+    private ArrayList<ExploredInterval> recordList;
 
     private ArrayList<AVLTree<Interval>> intervalSets;
     private float[] distance;
+    private Interval[] pointInterval;
     
     private Interval start;
+    private Interval finish;
     private PriorityQueue<Interval> pq;
     
     private final Fraction rightBoundary;
@@ -28,7 +36,7 @@ public class Anya extends PathFindingAlgorithm {
             int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
         leftBoundary = new Fraction(0);
-        rightBoundary = new Fraction(graph.sizeY+1);
+        rightBoundary = new Fraction(graph.sizeX);
     }
     
 
@@ -37,13 +45,14 @@ public class Anya extends PathFindingAlgorithm {
         int totalSize = (graph.sizeX+1) * (graph.sizeY+1);
         initialiseIndirectHeap();
         initialiseIntervalSets();
+        pointInterval = new Interval[totalSize];
         distance = new float[totalSize];
         for (int i=0;i<totalSize;i++) {
             distance[i] = Float.POSITIVE_INFINITY;
         }
-        setDistance(sx, sy, 0);
+        setDistance(sx, sy, 0, start);
         
-        while (!pq.isEmpty()) {
+        while (finish == null && !pq.isEmpty()) {
             Interval interval = pq.poll();
             explore(interval);
         }
@@ -55,8 +64,18 @@ public class Anya extends PathFindingAlgorithm {
     
     private void explore(Interval interval) {
         System.out.println("EXPLORE "+interval);
+        tryRecordExploredInterval(interval.y, interval.xL, interval.xR, interval.parent);
         assert !interval.visited;
+        assert interval.fValue != Float.POSITIVE_INFINITY;
+        assert interval.parent != null;
+        count(18, () -> breakPoint());
+        
         interval.visited = true;
+        
+        if (containsFinishPoint(interval)) {
+            finish = interval;
+            return;
+        }
         
         Point curParent = interval.parent;
         
@@ -99,12 +118,12 @@ public class Anya extends PathFindingAlgorithm {
             } else if (yUp <= graph.sizeY+1 && bottomLeftOfBlockedTile(pivotX, pivotY)) {
                 // Pivot up
                 setGValueOfLeftEndpoint(interval);
-                exploreUpLeft(interval, pivot, interval.xL);
+                exploreUpLeft(interval, pivot, interval.xL, leftBoundary);
                 
             } else if (yDown >= 0 && topLeftOfBlockedTile(pivotX, pivotY)) { // cannot happen simultaneously...?
                 // Pivot down
                 setGValueOfLeftEndpoint(interval);
-                exploreDownLeft(interval, pivot, interval.xL);
+                exploreDownLeft(interval, pivot, interval.xL, leftBoundary);
             }
         }
         if (interval.xR.isWholeNumber()) {
@@ -125,12 +144,12 @@ public class Anya extends PathFindingAlgorithm {
             } else if (yUp <= graph.sizeY+1 && bottomRightOfBlockedTile(pivotX, pivotY)) {
                 // Pivot up
                 setGValueOfRightEndpoint(interval);
-                exploreUpRight(interval, pivot, interval.xR);
+                exploreUpRight(interval, pivot, interval.xR, rightBoundary);
                 
             } else if (yDown >= 0 && topRightOfBlockedTile(pivotX, pivotY)) { // cannot happen simultaneously...?
                 // Pivot down
                 setGValueOfRightEndpoint(interval);
-                exploreDownRight(interval, pivot, interval.xR);
+                exploreDownRight(interval, pivot, interval.xR, rightBoundary);
             }
         }
     }
@@ -146,10 +165,13 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xR = null;
         
         //if (yUp <= graph.sizeY+1) {
+        boolean blockedAbove;
         if (bottomLeftOfBlockedTile(interval.xL.floor(), interval.y)) { // blocked above.
+            blockedAbove = true;
             xL = interval.xL;
             xR = interval.xR;
         } else {
+            blockedAbove = false;
             // explore up.
             int dy = interval.y - curParent.y;
             
@@ -160,20 +182,27 @@ public class Anya extends PathFindingAlgorithm {
             xR = interval.xR.minus(curParent.x);
             xR = xR.multiplyDivide(dy+1,dy); // *= (dy+1)/dy
             xR = xR.plus(curParent.x);
-   
+
             xL = restrictLeft(interval.xL, yUp, xL, isUpwards);
             xR = restrictRight(interval.xR, yUp, xR, isUpwards);
-                
+
             processDirectSuccessors(interval, yUp, xL, xR, isUpwards);
         }
  //     }
         if (interval.xL.isWholeNumber()) {
             int pivotX = interval.xL.n;
             int pivotY = interval.y;
-            if (bottomLeftOfBlockedTile(pivotX, pivotY)) {
-                setGValueOfLeftEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-                exploreUpLeft(interval, pivot, xL);
+            if (blockedAbove) {
+                if (!bottomRightOfBlockedTile(pivotX, pivotY)) {
+                    setGValueOfLeftEndpoint(interval);
+                    Point pivot = new Point(pivotX, pivotY);
+
+                    int dy = pivotY - curParent.y;
+                    int dx = pivotX - curParent.x;
+                    Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
+
+                    exploreUpLeft(interval, pivot, xL, xLimit);
+                }
                 
             } else if (topRightOfBlockedTile(pivotX, pivotY) != bottomRightOfBlockedTile(pivotX, pivotY)) { //XOR
                 setGValueOfLeftEndpoint(interval);
@@ -183,10 +212,9 @@ public class Anya extends PathFindingAlgorithm {
                     searchLeft(interval, pivot);
                 }
                 //if (yUp <= graph.sizeY+1) {
-                exploreUpLeft(interval, pivot, xL);
+                exploreUpLeft(interval, pivot, xL, leftBoundary);
                 //}
             }
-            
         }
         if (interval.xR.isWholeNumber()) {
             int pivotX = interval.xR.n;
@@ -194,7 +222,12 @@ public class Anya extends PathFindingAlgorithm {
             if (bottomRightOfBlockedTile(pivotX, pivotY)) {
                 setGValueOfRightEndpoint(interval);
                 Point pivot = new Point(pivotX, pivotY);
-                exploreUpRight(interval, pivot, xR);
+
+                int dy = pivotY - curParent.y;
+                int dx = pivotX - curParent.x;
+                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
+                
+                exploreUpRight(interval, pivot, xR, xLimit);
                 
             } else if (topLeftOfBlockedTile(pivotX, pivotY) != bottomLeftOfBlockedTile(pivotX, pivotY)) { //XOR
                 setGValueOfRightEndpoint(interval);
@@ -204,7 +237,7 @@ public class Anya extends PathFindingAlgorithm {
                     searchRight(interval, pivot);
                 }
                 //if (yUp <= graph.sizeY+1) {
-                exploreUpRight(interval, pivot, xR);
+                exploreUpRight(interval, pivot, xR, rightBoundary);
                 //}
             }
         }
@@ -220,7 +253,7 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xL = null;
         Fraction xR = null;
         
-        if (topLeftOfBlockedTile(interval.xL.floor(), interval.y)) { // blocked below.
+        if (topLeftOfBlockedTile(interval.xL.floor(), interval.y)) { // blocked above.
             xL = interval.xL;
             xR = interval.xR;
         } else {
@@ -246,7 +279,12 @@ public class Anya extends PathFindingAlgorithm {
             if (topLeftOfBlockedTile(pivotX, pivotY)) {
                 setGValueOfLeftEndpoint(interval);
                 Point pivot = new Point(pivotX, pivotY);
-                exploreDownLeft(interval, pivot, xL);
+
+                int dy = curParent.y - pivotY;
+                int dx = pivotX - curParent.x;
+                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
+                
+                exploreDownLeft(interval, pivot, xL, xLimit);
                 
             } else if (bottomRightOfBlockedTile(pivotX, pivotY) != topRightOfBlockedTile(pivotX, pivotY)) { //XOR
                 setGValueOfLeftEndpoint(interval);
@@ -255,7 +293,7 @@ public class Anya extends PathFindingAlgorithm {
                 if (bottomRightOfBlockedTile(pivotX, pivotY)) {
                     searchLeft(interval, pivot);
                 }
-                exploreDownLeft(interval, pivot, xL);
+                exploreDownLeft(interval, pivot, xL, leftBoundary);
             }
         }
         if (interval.xR.isWholeNumber()) {
@@ -264,7 +302,12 @@ public class Anya extends PathFindingAlgorithm {
             if (topRightOfBlockedTile(pivotX, pivotY)) {
                 setGValueOfRightEndpoint(interval);
                 Point pivot = new Point(pivotX, pivotY);
-                exploreDownRight(interval, pivot, xR);
+
+                int dy = curParent.y - pivotY;
+                int dx = pivotX - curParent.x;
+                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
+                
+                exploreDownRight(interval, pivot, xR, xLimit);
                 
             } else if (bottomLeftOfBlockedTile(pivotX, pivotY) != topLeftOfBlockedTile(pivotX, pivotY)) { //XOR
                 setGValueOfRightEndpoint(interval);
@@ -273,17 +316,17 @@ public class Anya extends PathFindingAlgorithm {
                 if (bottomLeftOfBlockedTile(pivotX, pivotY)) {
                     searchRight(interval, pivot);
                 }
-                exploreDownRight(interval, pivot, xR);
+                exploreDownRight(interval, pivot, xR, rightBoundary);
             }
         }
     }
 
-    private void exploreUpLeft(Interval interval, Point pivot, Fraction xL) {
+    private void exploreUpLeft(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
         int yUp = pivot.y+1;
-        Fraction leftEnd = restrictLeft(xL, yUp, leftBoundary, true);
-        if (!leftEnd.isLessThan(xL)) return;
+        Fraction leftEnd = restrictLeft(fromX, yUp, toX, true);
+        if (!leftEnd.isLessThan(fromX)) return;
 
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, leftEnd, xL);
+        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, leftEnd, fromX);
 
         Fraction intervalLeft = null;
         for (Fraction intervalRight : splitList) {
@@ -296,12 +339,12 @@ public class Anya extends PathFindingAlgorithm {
         }
     }
 
-    private void exploreUpRight(Interval interval, Point pivot, Fraction xR) {
+    private void exploreUpRight(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
         int yUp = pivot.y+1;
-        Fraction rightEnd = restrictRight(xR, yUp, rightBoundary, true);
-        if (!xR.isLessThan(rightEnd)) return;
+        Fraction rightEnd = restrictRight(fromX, yUp, toX, true);
+        if (!fromX.isLessThan(rightEnd)) return;
 
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, xR, rightEnd);
+        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, fromX, rightEnd);
 
         Fraction intervalLeft = null;
         for (Fraction intervalRight : splitList) {
@@ -314,12 +357,16 @@ public class Anya extends PathFindingAlgorithm {
         }
     }
 
-    private void exploreDownLeft(Interval interval, Point pivot, Fraction xL) {
+    private void exploreDownLeft(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
+        if (toX.isLessThan(leftBoundary)) {
+            toX = leftBoundary;
+        }
+        
         int yDown = pivot.y-1;
-        Fraction leftEnd = restrictLeft(xL, yDown, leftBoundary, false);
-        if (!leftEnd.isLessThan(xL)) return;
+        Fraction leftEnd = restrictLeft(fromX, yDown, toX, false);
+        if (!leftEnd.isLessThan(fromX)) return;
 
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yDown, leftEnd, xL);
+        LinkedList<Fraction> splitList = splitByBlocksAbove(yDown, leftEnd, fromX);
 
         Fraction intervalLeft = null;
         for (Fraction intervalRight : splitList) {
@@ -332,12 +379,16 @@ public class Anya extends PathFindingAlgorithm {
         }
     }
 
-    private void exploreDownRight(Interval interval, Point pivot, Fraction xR) {
+    private void exploreDownRight(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
+        if (rightBoundary.isLessThan(toX)) {
+            toX = rightBoundary;
+        }
+        
         int yDown = pivot.y-1;
-        Fraction rightEnd = restrictRight(xR, yDown, rightBoundary, false);
-        if (!xR.isLessThan(rightEnd)) return;
+        Fraction rightEnd = restrictRight(fromX, yDown, toX, false);
+        if (!fromX.isLessThan(rightEnd)) return;
 
-        LinkedList<Fraction> splitList = splitByBlocksBelow(yDown, xR, rightEnd);
+        LinkedList<Fraction> splitList = splitByBlocksBelow(yDown, fromX, rightEnd);
 
         Fraction intervalLeft = null;
         for (Fraction intervalRight : splitList) {
@@ -395,7 +446,7 @@ public class Anya extends PathFindingAlgorithm {
 
     private void searchLeft(Interval interval, Point pivot) {
         Fraction pivotX = new Fraction(pivot.x);
-        Interval left = new Interval(pivot.y, pivotX, pivotX, 0);
+        Interval left = new Interval(pivot.y, pivotX, pivotX);
         Node<Interval> fromNode = intervalSets.get(pivot.y).search(left);
         
         if (fromNode == null) {
@@ -412,14 +463,14 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xR = pivotX;
 
         float distance = getDistance(pivot);
-        float fValue = distance - xL.minus(pivot.x).toFloat(); // distance + (pivot.X - xL)
+        float fValue = distance;// - xL.minus(pivot.x).toFloat(); // distance + (pivot.X - xL)
         tryRelax(pivot.y, xL, xR, pivot, fValue);
     }
 
     
     private void searchRight(Interval interval, Point pivot) {
         Fraction pivotX = new Fraction(pivot.x);
-        Interval right = new Interval(pivot.y, pivotX, pivotX, 0);
+        Interval right = new Interval(pivot.y, pivotX, pivotX);
         System.out.println(intervalSets.get(pivot.y).inorderToString());
         Node<Interval> fromNode = intervalSets.get(pivot.y).search(right);
         assert fromNode != null;
@@ -438,13 +489,13 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xR = rightSearchTillCorner(pivotX, pivot.y, right.xR);
 
         float distance = getDistance(pivot);
-        float fValue = distance + xR.minus(pivot.x).toFloat(); // distance + (xR - pivot.x)
+        float fValue = distance;// + xR.minus(pivot.x).toFloat(); // distance + (xR - pivot.x)
         tryRelax(pivot.y, xL, xR, pivot, fValue);
     }
 
     private void searchLeftDirect(Interval interval, Point pivot) {
         Fraction leftEndpoint = interval.xL;
-        Interval left = new Interval(pivot.y, leftEndpoint, leftEndpoint, 0);
+        Interval left = new Interval(pivot.y, leftEndpoint, leftEndpoint);
         //left.isStartPoint = interval.isStartPoint;
         
         Node<Interval> fromNode = intervalSets.get(pivot.y).search(left);
@@ -463,13 +514,13 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xR = leftEndpoint;
 
         float distance = getDistance(pivot);
-        float fValue = distance - xL.minus(pivot.x).toFloat(); // distance + (pivot.X - xL)
+        float fValue = distance - xR.minus(pivot.x).toFloat(); // distance + (pivot.X - xR)
         tryRelax(pivot.y, xL, xR, pivot, fValue);
     }
 
     private void searchRightDirect(Interval interval, Point pivot) {
         Fraction rightEndpoint = interval.xR;
-        Interval right = new Interval(pivot.y, rightEndpoint, rightEndpoint, 0);
+        Interval right = new Interval(pivot.y, rightEndpoint, rightEndpoint);
         right.isStartPoint = interval.isStartPoint;
 
         Node<Interval> fromNode = intervalSets.get(pivot.y).search(right);
@@ -489,7 +540,7 @@ public class Anya extends PathFindingAlgorithm {
         Fraction xR = rightSearchTillCorner(rightEndpoint, pivot.y, right.xR);
 
         float distance = getDistance(pivot);
-        float fValue = distance + xR.minus(pivot.x).toFloat(); // distance + (xR - pivot.x)
+        float fValue = distance + xL.minus(pivot.x).toFloat(); // distance + (xL - pivot.x)
         tryRelax(pivot.y, xL, xR, pivot, fValue);
     }
 
@@ -501,7 +552,7 @@ public class Anya extends PathFindingAlgorithm {
             int parentY = interval.parent.y;
             float gValue = getDistance(parentX, parentY);
             gValue += distance2D(x, y, parentX, parentY);
-            setDistance(x, y, gValue);
+            setDistance(x, y, gValue, interval);
         }
     }
     
@@ -513,7 +564,7 @@ public class Anya extends PathFindingAlgorithm {
             int parentY = interval.parent.y;
             float gValue = getDistance(parentX, parentY);
             gValue += distance2D(x, y, parentX, parentY);
-            setDistance(x, y, gValue);
+            setDistance(x, y, gValue, interval);
         }
     }
     
@@ -757,7 +808,7 @@ public class Anya extends PathFindingAlgorithm {
             AVLTree<Interval> avlTree = new AVLTree<>();
             intervalSets.add(avlTree);
             if (i != sy) {
-                Interval interval = new Interval(i, leftBoundary, rightBoundary, Float.POSITIVE_INFINITY);
+                Interval interval = new Interval(i, leftBoundary, rightBoundary);
                 pq.add(interval);
                 avlTree.insert(interval);
             } else {
@@ -766,13 +817,13 @@ public class Anya extends PathFindingAlgorithm {
                 pq.add(start);
                 
                 if (!startX.equals(leftBoundary)) {
-                    Interval interval = new Interval(i, leftBoundary, startX, Float.POSITIVE_INFINITY);
+                    Interval interval = new Interval(i, leftBoundary, startX);
                     pq.add(interval);
                     avlTree.insert(interval);
                 }
                 avlTree.insert(start);
                 if (!startX.equals(rightBoundary)) {
-                    Interval interval = new Interval(i, startX, rightBoundary, Float.POSITIVE_INFINITY);
+                    Interval interval = new Interval(i, startX, rightBoundary);
                     pq.add(interval);
                     avlTree.insert(interval);
                 }
@@ -782,15 +833,16 @@ public class Anya extends PathFindingAlgorithm {
     
     
     private void tryRelax(int y, Fraction xL, Fraction xR, Point newParent, float newFValue) {
-        if (xL.equals(xR)) return;
+        if (!xL.isLessThan(xR)) return;
         
         AVLTree<Interval> intervalSet = intervalSets.get(y);
-        Interval left = new Interval(y,xL,xL, 0);
-        Interval right = new Interval(y,xR,xR, 0);
+        Interval left = new Interval(y,xL,xL);
+        Interval right = new Interval(y,xR,xR);
 
         Node<Interval> leftMost = intervalSet.ceiling(left);
         while (left.xL.equals(leftMost.getData().xR)) leftMost = leftMost.getNext();
         Node<Interval> rightMost = intervalSet.ceiling(right);
+        if (rightMost == null) rightMost = intervalSet.getLast();
 
         // STEP 1: TRIM VISITED INTERVALS FROM ENDS
         while (leftMost.getData().visited || leftMost.getData().fValue < newFValue) {
@@ -852,10 +904,11 @@ public class Anya extends PathFindingAlgorithm {
             
             // We split this single interval into three.
             float fValue = leftMost.getData().fValue;
+            Point parent = leftMost.getData().parent;
             // x1_L=x1_R < x2_L < x2_R < x3_L=x3_R
-            Interval in1 = new Interval(y, x1_L, x2_L, fValue);
-            Interval in2 = new Interval(y, x2_L, x2_R, fValue);
-            Interval in3 = new Interval(y, x2_R, x3_R, fValue);
+            Interval in1 = new Interval(y, x1_L, x2_L, fValue, parent);
+            Interval in2 = new Interval(y, x2_L, x2_R, fValue, parent);
+            Interval in3 = new Interval(y, x2_R, x3_R, fValue, parent);
             intervalSet.delete(in3); // original interval has same xR as in3.
             pq.remove(in3);
 
@@ -873,9 +926,10 @@ public class Anya extends PathFindingAlgorithm {
             if (x1_L != null) {
                 // We split a single interval into two.
                 float fValue = leftMost.getData().fValue;
+                Point parent = leftMost.getData().parent;
                 // x1_L < x2_L < x3_L
-                Interval in1 = new Interval(y, x1_L, x2_L, fValue);
-                Interval in2 = new Interval(y, x2_L, x3_L, fValue);
+                Interval in1 = new Interval(y, x1_L, x2_L, fValue, parent);
+                Interval in2 = new Interval(y, x2_L, x3_L, fValue, parent);
                 
                 intervalSet.delete(in2); // original interval has same xR as in2.
                 boolean result = pq.remove(in2); assert result;
@@ -894,11 +948,12 @@ public class Anya extends PathFindingAlgorithm {
             if (x1_R != null) {
                 // We split a single interval into two.
                 float fValue = rightMost.getData().fValue;
+                Point parent = rightMost.getData().parent;
                 // x1_R < x2_R < x3_R
-                Interval in1 = new Interval(y, x1_R, x2_R, fValue);
-                Interval in2 = new Interval(y, x2_R, x3_R, fValue);
+                Interval in1 = new Interval(y, x1_R, x2_R, fValue, parent);
+                Interval in2 = new Interval(y, x2_R, x3_R, fValue, parent);
                 intervalSet.delete(in2); // original interval has same xR as in2.
-                boolean result = pq.remove(in2);; assert result;
+                boolean result = pq.remove(in2); assert result;
 
                 intervalSet.insert(in1);
                 intervalSet.insert(in2);
@@ -928,20 +983,28 @@ public class Anya extends PathFindingAlgorithm {
     
     private void tryRelax(Interval interval, Point newParent, float newFValue) {
         if (newFValue < interval.fValue) {
+            System.out.println("RELAX: " + interval + "from " + interval.fValue + " --> " + newFValue); 
+            
             boolean result = pq.remove(interval); assert result;
             interval.fValue = newFValue;
             interval.parent = newParent;
             pq.add(interval);
-            tryRecordInterval(interval.y, interval.xL, interval.xR);
-            maybeSaveSearchSnapshot();
+            tryRecordInterval(interval.y, interval.xL, interval.xR, interval.parent);
         }
     }
+    
+    private boolean containsFinishPoint(Interval interval) {
+        if (ey != interval.y) return false; // ey == y
+        if (interval.xR.isLessThan(ex)) return false; // ex <= xR
+        return (interval.xL.isLessThanOrEqual(ex)); // xL <= ex
+    }
 
-    private void setDistance(int x, int y, float value) {
-        System.out.println("SET " + x+","+y + " --> " + toOneDimIndex(x,y));
-        //assert distance[toOneDimIndex(x, y)] == Float.POSITIVE_INFINITY : x + "," + y;
+    private void setDistance(int x, int y, float value, Interval interval) {
+        System.out.println("SET: " + x+","+y + " from " + distance[toOneDimIndex(x, y)] + " --> " + value); 
         if (value < distance[toOneDimIndex(x, y)]) {
-            distance[toOneDimIndex(x, y)] = value;
+            int index = toOneDimIndex(x, y);
+            distance[index] = value;
+            pointInterval[index] = interval;
         }
     }
 
@@ -992,14 +1055,54 @@ public class Anya extends PathFindingAlgorithm {
         return bottomLeftOfBlockedTile(x,y) || topLeftOfBlockedTile(x,y);
     }
     
-    private interface CheckFunction {
-        public boolean check(int x, int y);
+    public int[][] emptyPath() {
+        return new int[0][];
+    }
+
+    @Override
+    public int[][] getPath() {
+        LinkedList<int[]> pathList = new LinkedList<>();
+        Interval currentInterval = finish;
+        if (currentInterval == null) {
+            return emptyPath();
+        }
+
+        int[] node = new int[2];
+        node[0] = ex;
+        node[1] = ey;
+        pathList.add(node);
+        
+        Point current = currentInterval.parent;
+        while (!currentInterval.isStartPoint) {
+            currentInterval = pointInterval[toOneDimIndex(current.x, current.y)];
+
+            node = new int[2];
+            node[0] = current.x;
+            node[1] = current.y;
+            pathList.add(node);
+            
+            current = currentInterval.parent;
+        }
+        
+        int[][] path = new int[pathList.size()][];
+        return pathList.toArray(path);
     }
     
     
-    private void tryRecordInterval(int y, Fraction xL, Fraction xR) {
+    
+    
+    
+
+    private void tryRecordInterval(int y, Fraction xL, Fraction xR, Point parent) {
+        if (recordList != null) {
+            recordList.add(new ExploredInterval(xR,xL,y, parent));
+            maybeSaveSearchSnapshot();
+        }
+    }
+    private void tryRecordExploredInterval(int y, Fraction xL, Fraction xR, Point parent) {
         if (exploredList != null) {
-            exploredList.add(new ExploredInterval(xR,xL,y));
+            exploredList.add(new ExploredInterval(xR,xL,y, parent));
+            maybeSaveSearchSnapshot();
         }
     }
     
@@ -1007,39 +1110,79 @@ public class Anya extends PathFindingAlgorithm {
     public void startRecording() {
         super.startRecording();
         exploredList = new ArrayList<>();
+        recordList = new ArrayList<>();
     }
 
     @Override
     protected List<Integer[]> computeSearchSnapshot() {
         ArrayList<Integer[]> list = new ArrayList<>(exploredList.size());
 
+        for (ExploredInterval in : recordList) {
+            // y, xLn, xLd, xRn, xRd, px, py
+            
+            Integer[] line = new Integer[7];
+            line[0] = in.y;
+            line[1] = in.xL.n;
+            line[2] = in.xL.d;
+            line[3] = in.xR.n;
+            line[4] = in.xR.d;
+            line[5] = in.parent.x;
+            line[6] = in.parent.y;
+            list.add(line);
+        }
         for (ExploredInterval in : exploredList) {
-            Integer[] line = new Integer[4];
-            line[0] = in.xL.floor();
-            line[1] = in.y;
-            line[2] = in.xR.ceil();
-            line[3] = in.y;
+            // y, xLn, xLd, xRn, xRd, px, py
+            Integer[] line = new Integer[5];
+            line[0] = in.y;
+            line[1] = in.xL.n;
+            line[2] = in.xL.d;
+            line[3] = in.xR.n;
+            line[4] = in.xR.d;
             list.add(line);
         }
         
         return list;
     }
 
+    /**
+     * Debugging tool : abruptly terminate the algorithm.
+     */
     private void crash() {
         throw new UnsupportedOperationException("Terminated");
     }
 
+    /**
+     * Debugging tool : set a break point.
+     */
+    private void breakPoint() {
+    }
+    
+    private int counter = 0;
+    /**
+     * Debugging tool : call the function (e.g. break point) after this method
+     * has been called triggerAtThisNumber times.
+     */
+    private void count(int triggerAtThisNumber, Runnable function) {
+        counter++;
+        if (counter == triggerAtThisNumber) {
+            System.out.println("Trigger: " + counter);
+            function.run();
+        } else {
+            System.out.println("Count: " + counter);
+        }
+    }
 }
 
 class ExploredInterval {
     public final Fraction xL;
     public final Fraction xR;
     public final int y;
+    public final Point parent;
     
-    public ExploredInterval(Fraction xL, Fraction xR, int y) {
-        super();
+    public ExploredInterval(Fraction xL, Fraction xR, int y, Point parent) {
         this.xL = xL;
         this.xR = xR;
         this.y = y;
+        this.parent = parent;
     }
 }

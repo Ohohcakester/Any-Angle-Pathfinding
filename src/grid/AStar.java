@@ -4,23 +4,31 @@ package grid;
 
 public class AStar extends PathFindingAlgorithm {
 
-    protected boolean postSmoothingOn() {
-        return true;
-    }
-    protected float heuristicWeight() {
-        return 1f;
-    }
+    protected boolean postSmoothingOn = false;
+    protected float heuristicWeight = 1f;
 
     protected Float[] distance;
     protected boolean[] visited;
     
-    IndirectHeap<Float> pq; 
+    protected IndirectHeap<Float> pq; 
 
     private int finish;
 
     
     public AStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
+    }
+
+    public static AStar postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        AStar aStar = new AStar(graph, sx, sy, ex, ey);
+        aStar.postSmoothingOn = true;
+        return aStar;
+    }
+
+    public static AStar dijkstra(GridGraph graph, int sx, int sy, int ex, int ey) {
+        AStar aStar = new AStar(graph, sx, sy, ex, ey);
+        aStar.heuristicWeight = 0;
+        return aStar;
     }
     
     @Override
@@ -86,7 +94,7 @@ public class AStar extends PathFindingAlgorithm {
 
     private float heuristic(int x, int y) {
         //return 0;
-        return heuristicWeight()*graph.distance(x, y, ex, ey);
+        return heuristicWeight*graph.distance(x, y, ex, ey);
     }
 
 
@@ -152,7 +160,7 @@ public class AStar extends PathFindingAlgorithm {
     }
     
     private void maybePostSmooth() {
-        if (postSmoothingOn()) {
+        if (postSmoothingOn) {
             postSmooth();
         }
     }

@@ -1,7 +1,8 @@
-import grid.Anya;
-import grid.BasicThetaStar;
+import grid.AStar;
 import grid.GridGraph;
 import grid.PathFindingAlgorithm;
+import grid.VisibilityGraphAlgorithm;
+import grid.anya.Fraction;
 
 import java.awt.Color;
 import java.util.LinkedList;
@@ -31,20 +32,30 @@ import draw.KeyToggler;
 public class AnyAnglePathfinding {
     
     private static boolean seededRandom = false;
-    private static int seed = 5311;
+    private static int seed = -159182402;
     
     public static Random rand = new Random();
-    private static int sizeX = 40;
-    private static int sizeY = 40;
+    private static int sizeX = 35;
+    private static int sizeY = 35;
 
     private static int sx = 1;
     private static int sy = 1;
-    private static int ex = 10;
-    private static int ey = 10;
+    private static int ex = 33;
+    private static int ey = 32;
     /*private static int sx = 0;
     private static int sy = 0;
     private static int ex = 70;
     private static int ey = 42;*/
+    
+    private static PathFindingAlgorithm getAlgo(GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        //return new AStar(gridGraph, sx, sy, ex, ey);
+        //return AStar.postSmooth(gridGraph, sx, sy, ex, ey);
+        //return AStar.dijkstra(gridGraph, sx, sy, ex, ey);
+        //return new Anya(gridGraph, sx, sy, ex, ey);
+        return new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        //return new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+    }
     
     public static void main(String[] args) {
         
@@ -62,13 +73,13 @@ public class AnyAnglePathfinding {
         generateRandomBlockMap(gridGraph, 9);
         fillCorners(gridGraph);
         
-        GraphImporter graphImporter = new GraphImporter("maze.txt");
-        gridGraph = graphImporter.retrieve();
+        //GraphImporter graphImporter = new GraphImporter("maze.txt");
+        //gridGraph = graphImporter.retrieve();
         
         //generateRandomTestLines(gridGraph, gridLineSet, 100);
 
-        //gridGraph.trySetBlocked(sx, sy, false);
-        //gridGraph.trySetBlocked(ex, ey, false);
+        gridGraph.trySetBlocked(sx, sy, false);
+        gridGraph.trySetBlocked(ex, ey, false);
 
         //testSpeed(gridGraph, sx, sy, ex, ey);
         //testSpeed(gridGraph, sx, sy, ex, ey);
@@ -91,12 +102,6 @@ public class AnyAnglePathfinding {
         
         setupMainFrame(drawCanvas, lineSetList);
     }
-    
-    private static PathFindingAlgorithm getAlgo(GridGraph gridGraph, int sx, int sy,
-            int ex, int ey) {
-        return new Anya(gridGraph, sx, sy, ex, ey);
-        //return new BasicThetaStar(gridGraph, sx, sy, ex, ey);
-    }
 
 
     private static void testAlgorithmSpeed(GridGraph gridGraph, int sx, int sy,
@@ -105,15 +110,19 @@ public class AnyAnglePathfinding {
         algo.computePath();
     }
 
-    /*private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
+    private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         PathFindingAlgorithm algo = getAlgo(gridGraph, sx, sy, ex, ey);
-        algo.computePath();
+        try {
+            algo.computePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         int[][] path = algo.getPath();
         return path;
-    }*/
+    }
 
-    private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
+    /*private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         int[][] path = new int[1][];
         path[0] = new int[4];
@@ -122,7 +131,7 @@ public class AnyAnglePathfinding {
         path[0][2] = ey;
         path[0][3] = ey;
         return path;
-    }
+    }*/
     
     private static LinkedList<GridObjects> recordAlgorithmOperation (
             GridGraph gridGraph, int sx, int sy, int ex, int ey) {
@@ -150,6 +159,24 @@ public class AnyAnglePathfinding {
                 gridLineSet.addLine(edge[0], edge[1], edge[2], edge[3], Color.RED);
             } else if (edge.length == 2) {
                 gridPointSet.addPoint(edge[0], edge[1], Color.BLUE);
+            } else if (edge.length == 7) {
+                // y, xLn, xLd, xRn, xRd, px, py
+                Fraction y = new Fraction (edge[0]);
+                Fraction xL = new Fraction(edge[1], edge[2]);
+                Fraction xR = new Fraction(edge[3], edge[4]);
+                Fraction xMid = xR.minus(xL).multiplyDivide(1, 2).plus(xL);
+                Fraction px = new Fraction (edge[5]);
+                Fraction py = new Fraction (edge[6]);
+                gridLineSet.addLine(px, py, xL, y, Color.CYAN);
+                gridLineSet.addLine(px, py, xMid, y, Color.CYAN);
+                gridLineSet.addLine(px, py, xR, y, Color.CYAN);
+                gridLineSet.addLine(xL, y, xR, y, Color.RED);
+                gridPointSet.addPoint(edge[5], edge[6], Color.BLUE);
+            } else if (edge.length == 5) {
+                Fraction y = new Fraction (edge[0]);
+                Fraction xL = new Fraction(edge[1], edge[2]);
+                Fraction xR = new Fraction(edge[3], edge[4]);
+                gridLineSet.addLine(xL, y, xR, y, Color.GREEN);
             }
         }
         return new GridObjects(gridLineSet,gridPointSet);

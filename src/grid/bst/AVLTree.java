@@ -1,5 +1,7 @@
 package grid.bst;
 
+import grid.anya.Interval;
+
 import java.util.Stack;
 
 class AVLNode<E> extends Node<E> {
@@ -12,7 +14,7 @@ class AVLNode<E> extends Node<E> {
 }
 
 public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E> {
-    
+    private Node<E> first, last;
     
     public AVLTree() {
         root = null;
@@ -176,6 +178,8 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
                     newNode.prev = parent;
                     if (parent.next != null) {
                         parent.next.prev = newNode;
+                    } else {
+                        last = newNode;
                     }
                     parent.next = newNode;
                 } else {
@@ -184,9 +188,15 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
                     newNode.next = parent;
                     if (parent.prev != null) {
                         parent.prev.next = newNode;
+                    } else {
+                        first = newNode;
                     }
                     parent.prev = newNode;
                 }
+            } else {
+                // Root
+                first = newNode;
+                last = newNode;
             }
             return newNode;
         }
@@ -289,6 +299,8 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
                 nodeStack.peek().left = newCurrent.right;
             }
             current.data = newCurrent.data; // replace target data, search for new target.
+            current.next = newCurrent.next;
+            current.prev = newCurrent.prev;
             current = newCurrent.right;
         }
         
@@ -385,9 +397,21 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
     private void linkedListRemove(Node<E> current) {
         if (current.next != null) {
             current.next.prev = current.prev;
+        } else {
+            last = current.prev;
         }
         if (current.prev != null) {
             current.prev.next = current.next;
+        } else {
+            first = current.next;
         }
+    }
+
+    public Node<E> getLast() {
+        return last;
+    }
+
+    public Node<E> getFirst() {
+        return first;
     }
 }

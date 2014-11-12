@@ -2,19 +2,15 @@ package grid;
 
 
 public class BasicThetaStar extends AStar {
-
-    @Override
-    protected boolean postSmoothingOn() {
-        return false;
-    }
-    
-    @Override
-    protected float heuristicWeight() {
-        return 1f;
-    }
     
     public BasicThetaStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
+    }
+    
+    public static BasicThetaStar postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        BasicThetaStar bts = new BasicThetaStar(graph, sx, sy, ex, ey);
+        bts.postSmoothingOn = true;
+        return bts;
     }
 
     @Override

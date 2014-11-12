@@ -9,9 +9,9 @@ public abstract class PathFindingAlgorithm {
     protected GridGraph graph;
 
     protected int parent[];
-    private final int sizeX;
-    private final int sizeXplusOne;
-    private final int sizeY;
+    protected final int sizeX;
+    protected final int sizeXplusOne;
+    protected final int sizeY;
 
     protected final int sx;
     protected final int sy;
@@ -85,7 +85,7 @@ public abstract class PathFindingAlgorithm {
         return list;
     }
     
-    private Integer[] snapshotEdge(int endIndex) {
+    protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
         int startIndex = parent[endIndex];
         edge[0] = toTwoDimX(startIndex);
@@ -95,7 +95,7 @@ public abstract class PathFindingAlgorithm {
         return edge;
     }
     
-    private Integer[] snapshotVertex(int index) {
+    protected Integer[] snapshotVertex(int index) {
         if (selected(index)) {
             Integer[] edge = new Integer[2];
             edge[0] = toTwoDimX(index);
@@ -109,8 +109,5 @@ public abstract class PathFindingAlgorithm {
         return false;
     }
 
-    public int[][] getPath() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    public abstract int[][] getPath();
 }

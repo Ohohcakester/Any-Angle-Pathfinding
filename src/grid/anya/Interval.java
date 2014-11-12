@@ -24,11 +24,19 @@ public class Interval implements Comparable<Interval> {
     }
 
     
-    public Interval(int y, Fraction xL, Fraction xR, float fValue) {
+    public Interval(int y, Fraction xL, Fraction xR) {
+        this.y = y;
+        this.xL = xL;
+        this.xR = xR;
+        this.fValue = Float.POSITIVE_INFINITY;
+    }
+    
+    public Interval(int y, Fraction xL, Fraction xR, float fValue, Point parent) {
         this.y = y;
         this.xL = xL;
         this.xR = xR;
         this.fValue = fValue;
+        this.parent = parent;
     }
 
     public boolean isLessThanOrEqual(Interval o) {

@@ -1,6 +1,6 @@
 package grid;
 
-import draw.GridGraphDrawer;
+import grid.anya.Point;
 
 public class GridGraph {
 
@@ -130,5 +130,62 @@ public class GridGraph {
             }
         }
         return true;
+    }
+
+    public Point findFirstBlockedTile(int x1, int y1, int dx, int dy) {
+        
+        int f = 0;
+
+        int signY = 1;
+        int signX = 1;
+        int offsetX = 0;
+        int offsetY = 0;
+        
+        if (dy < 0) {
+            dy *= -1;
+            signY = -1;
+            offsetY = -1;
+        }
+        if (dx < 0) {
+            dx *= -1;
+            signX = -1;
+            offsetX = -1;
+        }
+        
+        if (dx >= dy) {
+            while (true) {
+                f += dy;
+                if (f >= dx) {
+                    if (isBlocked(x1 + offsetX, y1 + offsetY))
+                        return new Point(x1+offsetX, y1+offsetY);
+                    y1 += signY;
+                    f -= dx;
+                }
+                if (f != 0 && isBlocked(x1 + offsetX, y1 + offsetY))
+                    return new Point(x1+offsetX, y1+offsetY);
+                if (dy == 0 && isBlocked(x1 + offsetX, y1) && isBlocked(x1 + offsetX, y1 - 1))
+                    return new Point(x1+offsetX, -1);
+                
+                x1 += signX;
+            }
+        }
+        else {
+            while (true) {
+                f += dx;
+                if (f >= dy) {
+                    if (isBlocked(x1 + offsetX, y1 + offsetY))
+                        return new Point(x1+offsetX, y1+offsetY);
+                    x1 += signX;
+                    f -= dy;
+                }
+                if (f != 0 && isBlocked(x1 + offsetX, y1 + offsetY))
+                    return new Point(x1+offsetX, y1+offsetY);
+                if (dx == 0 && isBlocked(x1, y1 + offsetY) && isBlocked(x1 - 1, y1 + offsetY))
+                    return new Point(-1, y1+offsetY);
+                
+                y1 += signY;
+            }
+        }
+        //return null;
     }
 }
