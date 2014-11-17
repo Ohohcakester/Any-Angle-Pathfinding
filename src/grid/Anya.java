@@ -63,12 +63,12 @@ public class Anya extends PathFindingAlgorithm {
     }
     
     private void explore(Interval interval) {
-        System.out.println("EXPLORE "+interval);
+        //System.out.println("EXPLORE "+interval);
         tryRecordExploredInterval(interval.y, interval.xL, interval.xR, interval.parent);
         assert !interval.visited;
         assert interval.fValue != Float.POSITIVE_INFINITY;
         assert interval.parent != null;
-        count(18, () -> breakPoint());
+        //count(18, () -> breakPoint());
         
         interval.visited = true;
         
@@ -471,7 +471,7 @@ public class Anya extends PathFindingAlgorithm {
     private void searchRight(Interval interval, Point pivot) {
         Fraction pivotX = new Fraction(pivot.x);
         Interval right = new Interval(pivot.y, pivotX, pivotX);
-        System.out.println(intervalSets.get(pivot.y).inorderToString());
+        //System.out.println(intervalSets.get(pivot.y).inorderToString());
         Node<Interval> fromNode = intervalSets.get(pivot.y).search(right);
         assert fromNode != null;
         
@@ -983,7 +983,7 @@ public class Anya extends PathFindingAlgorithm {
     
     private void tryRelax(Interval interval, Point newParent, float newFValue) {
         if (newFValue < interval.fValue) {
-            System.out.println("RELAX: " + interval + "from " + interval.fValue + " --> " + newFValue); 
+            //System.out.println("RELAX: " + interval + "from " + interval.fValue + " --> " + newFValue); 
             
             boolean result = pq.remove(interval); assert result;
             interval.fValue = newFValue;
@@ -1000,7 +1000,7 @@ public class Anya extends PathFindingAlgorithm {
     }
 
     private void setDistance(int x, int y, float value, Interval interval) {
-        System.out.println("SET: " + x+","+y + " from " + distance[toOneDimIndex(x, y)] + " --> " + value); 
+        //System.out.println("SET: " + x+","+y + " from " + distance[toOneDimIndex(x, y)] + " --> " + value); 
         if (value < distance[toOneDimIndex(x, y)]) {
             int index = toOneDimIndex(x, y);
             distance[index] = value;
@@ -1114,8 +1114,8 @@ public class Anya extends PathFindingAlgorithm {
     }
 
     @Override
-    protected List<Integer[]> computeSearchSnapshot() {
-        ArrayList<Integer[]> list = new ArrayList<>(exploredList.size());
+    protected List<SnapshotItem> computeSearchSnapshot() {
+        ArrayList<SnapshotItem> list = new ArrayList<>(exploredList.size());
 
         for (ExploredInterval in : recordList) {
             // y, xLn, xLd, xRn, xRd, px, py
@@ -1128,7 +1128,7 @@ public class Anya extends PathFindingAlgorithm {
             line[4] = in.xR.d;
             line[5] = in.parent.x;
             line[6] = in.parent.y;
-            list.add(line);
+            list.add(new SnapshotItem(line));
         }
         for (ExploredInterval in : exploredList) {
             // y, xLn, xLd, xRn, xRd, px, py
@@ -1138,7 +1138,7 @@ public class Anya extends PathFindingAlgorithm {
             line[2] = in.xL.d;
             line[3] = in.xR.n;
             line[4] = in.xR.d;
-            list.add(line);
+            list.add(new SnapshotItem(line));
         }
         
         return list;
@@ -1165,10 +1165,10 @@ public class Anya extends PathFindingAlgorithm {
     private void count(int triggerAtThisNumber, Runnable function) {
         counter++;
         if (counter == triggerAtThisNumber) {
-            System.out.println("Trigger: " + counter);
+            //System.out.println("Trigger: " + counter);
             function.run();
         } else {
-            System.out.println("Count: " + counter);
+            //System.out.println("Count: " + counter);
         }
     }
 }

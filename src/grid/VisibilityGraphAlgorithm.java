@@ -4,18 +4,41 @@ import grid.anya.Point;
 import grid.visibilitygraph.Edge;
 import grid.visibilitygraph.VisibilityGraph;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class VisibilityGraphAlgorithm extends AStar {
     private VisibilityGraph visibilityGraph;
+    private boolean reuseGraph = false;
     
     public VisibilityGraphAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }
+    
+    public static VisibilityGraphAlgorithm graphReuse(GridGraph graph, int sx, int sy, int ex, int ey) {
+        VisibilityGraphAlgorithm algo = new VisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
+        algo.reuseGraph = true;
+        return algo;
+    }
 
     @Override
     public void computePath() {
-        visibilityGraph = new VisibilityGraph(graph, sx, sy, ex, ey);
+        if (reuseGraph) {
+            visibilityGraph = VisibilityGraph.getStoredGraph(graph, sx, sy, ex, ey);
+        } else {
+            visibilityGraph = new VisibilityGraph(graph, sx, sy, ex, ey);
+        }
+        
+        if (isRecording()) {
+            visibilityGraph.setSaveSnapshotFunction(()->saveVisibilityGraphSnapshot());
+            visibilityGraph.initialise();
+            saveVisibilityGraphSnapshot();
+        } else {
+            visibilityGraph.initialise();
+        }
+        
         distance = new Float[visibilityGraph.size()];
         parent = new int[visibilityGraph.size()];
 
@@ -29,7 +52,7 @@ public class VisibilityGraphAlgorithm extends AStar {
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             visited[current] = true;
-            super.maybeSaveSearchSnapshot();
+            
             if (current == finish) {
                 break;
             }
@@ -42,8 +65,9 @@ public class VisibilityGraphAlgorithm extends AStar {
                     pq.decreaseKey(edge.dest, distance[edge.dest]);
                 }
             }
+            
+            maybeSaveSearchSnapshot();
         }
-        
     }
     
     protected final boolean relax(Edge edge) {
@@ -119,5 +143,41 @@ public class VisibilityGraphAlgorithm extends AStar {
             return edge;
         }
         return null;
+    }
+    
+    private void saveVisibilityGraphSnapshot() {
+        /*if (!isRecording()) {
+            return;
+        }*/
+        int size = visibilityGraph.size();
+        
+        List<SnapshotItem> snapshotItemList = new ArrayList<>(size);
+
+        for (int i=0;i<size;i++) {
+            Iterator<Edge> iterator = visibilityGraph.edgeIterator(i);
+            while (iterator.hasNext()) {
+                Edge edge = iterator.next();
+                if (edge.source < edge.dest) {
+                    Point start = visibilityGraph.coordinateOf(edge.source);
+                    Point end = visibilityGraph.coordinateOf(edge.dest);
+                    
+                    Integer[] path = new Integer[4];
+                    path[0] = start.x;
+                    path[1] = start.y;
+                    path[2] = end.x;
+                    path[3] = end.y;
+                    
+                    SnapshotItem snapshotItem = new SnapshotItem(path, Color.GREEN);
+                    snapshotItemList.add(snapshotItem);
+                }
+            }
+        }
+        addSnapshot(snapshotItemList);
+    }
+    
+    @Override
+    public void printStatistics() {
+        System.out.println("Nodes: " + visibilityGraph.size());
+        System.out.println("Edges (Directed): " + visibilityGraph.computeSumDegrees());
     }
 }

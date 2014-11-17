@@ -12,6 +12,12 @@ public class BasicThetaStar extends AStar {
         bts.postSmoothingOn = true;
         return bts;
     }
+    
+    public static BasicThetaStar noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
+        BasicThetaStar bts = new BasicThetaStar(graph, sx, sy, ex, ey);
+        bts.heuristicWeight = 0;
+        return bts;
+    }
 
     @Override
     protected boolean relax(int u, int v, float weightUV) {

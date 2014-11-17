@@ -11,6 +11,7 @@ public class KeyToggler implements KeyListener {
     public KeyToggler(DrawCanvas drawCanvas, LinkedList<GridObjects> gridObjectsList) {
         this.drawCanvas = drawCanvas;
         this.gridObjectsList = gridObjectsList;
+        gridObjectsList.addFirst(null);
         System.out.println(gridObjectsList.size());
     }
     
@@ -19,14 +20,40 @@ public class KeyToggler implements KeyListener {
         displayLast();
     }*/
     
-    private void goLeft() {
-        gridObjectsList.addFirst(gridObjectsList.removeLast());
+    private void goLeft(int amount, boolean stopAtEnd) {
+        for (int i=0; i<amount; i++) {
+            rotateLeft(stopAtEnd);
+        }
         displayLast();
     }
+
+    private void rotateLeft(boolean stopAtEnd) {
+        if (gridObjectsList.get(gridObjectsList.size()-2) == null) {
+            if (!stopAtEnd) {
+                gridObjectsList.addFirst(gridObjectsList.removeLast());
+                gridObjectsList.addFirst(gridObjectsList.removeLast());
+            }
+        } else {
+            gridObjectsList.addFirst(gridObjectsList.removeLast());
+        }
+    }
     
-    private void goRight() {
-        gridObjectsList.addLast(gridObjectsList.removeFirst());
+    private void goRight(int amount, boolean stopAtEnd) {
+        for (int i=0; i<amount; i++) {
+            rotateRight(stopAtEnd);
+        }
         displayLast();
+    }
+
+    private void rotateRight(boolean stopAtEnd) {
+        if (gridObjectsList.getFirst() == null) {
+            if (!stopAtEnd) {
+                gridObjectsList.addLast(gridObjectsList.removeFirst());
+                gridObjectsList.addLast(gridObjectsList.removeFirst());
+            }
+        } else {
+            gridObjectsList.addLast(gridObjectsList.removeFirst());
+        }
     }
     
     private void displayLast() {
@@ -45,10 +72,22 @@ public class KeyToggler implements KeyListener {
     public void keyPressed(KeyEvent arg0) {
         switch(arg0.getKeyCode()) {
             case KeyEvent.VK_RIGHT :
-                goRight();
+                goRight(1, false);
                 break;
             case KeyEvent.VK_LEFT :
-                goLeft();
+                goLeft(1, false);
+                break;
+            case KeyEvent.VK_UP :
+                goRight(1, true);
+                break;
+            case KeyEvent.VK_DOWN :
+                goLeft(1, true);
+                break;
+            case KeyEvent.VK_PAGE_UP :
+                goRight(10, false);
+                break;
+            case KeyEvent.VK_PAGE_DOWN :
+                goLeft(10, false);
                 break;
         }
     }

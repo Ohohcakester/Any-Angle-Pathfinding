@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class PathFindingAlgorithm {
-    protected LinkedList<List<Integer[]>> snapshotList;
+    private LinkedList<List<SnapshotItem>> snapshotList;
     protected GridGraph graph;
 
     protected int parent[];
@@ -41,7 +41,7 @@ public abstract class PathFindingAlgorithm {
         recordingMode = false;
     }
     
-    public LinkedList<List<Integer[]>> retrieveSnapshotList() {
+    public LinkedList<List<SnapshotItem>> retrieveSnapshotList() {
         return snapshotList;
     }
     
@@ -64,21 +64,29 @@ public abstract class PathFindingAlgorithm {
             saveSearchSnapshot();
         }
     }
+    
+    protected boolean isRecording() {
+        return recordingMode;
+    }
 
-    protected void saveSearchSnapshot() {
+    private void saveSearchSnapshot() {
         snapshotList.addLast(computeSearchSnapshot());
     }
+
+    protected final void addSnapshot(List<SnapshotItem> snapshotItemList) {
+        snapshotList.addLast(snapshotItemList);
+    }
     
-    protected List<Integer[]> computeSearchSnapshot() {
-        List<Integer[]> list = new ArrayList<>();
+    protected List<SnapshotItem> computeSearchSnapshot() {
+        List<SnapshotItem> list = new ArrayList<>();
         
         for (int i=0; i<parent.length; i++) {
             if (parent[i] != -1) {
-                list.add(snapshotEdge(i));
+                list.add(new SnapshotItem(snapshotEdge(i)));
             }
             Integer[] vertexSnapshot = snapshotVertex(i);
             if (vertexSnapshot != null) {
-                list.add(vertexSnapshot);
+                list.add(new SnapshotItem(vertexSnapshot));
             }
         }
 
@@ -110,4 +118,7 @@ public abstract class PathFindingAlgorithm {
     }
 
     public abstract int[][] getPath();
+    
+    public void printStatistics() {
+    }
 }

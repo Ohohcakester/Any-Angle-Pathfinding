@@ -8,23 +8,46 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class VisibilityGraph {
+    private static VisibilityGraph storedVisibilityGraph;
+    private static GridGraph storedGridGraph;
+    
     private final GridGraph graph;
     private int[][] nodeIndex;
     private int startIndex;
+    private boolean startIsNewNode;
     private int endIndex;
+    private boolean endIsNewNode;
+    private final int sx, sy, ex, ey;
+    
+    private Runnable saveSnapshot;
     
     ArrayList<Point> nodeList;
     ArrayList<LinkedList<Edge>> outgoingEdgeList;
-    
+
     public VisibilityGraph(GridGraph graph, int sx, int sy, int ex, int ey) {
         this.graph = graph;
+        this.sx = sx;
+        this.sy = sy;
+        this.ex = ex;
+        this.ey = ey;
+    }
+
+    public void setSaveSnapshotFunction(Runnable saveSnapshot) {
+        this.saveSnapshot = saveSnapshot;
+    }
+
+    public void initialise() {
+        if (nodeList != null) {
+            //("already initialised.");
+            return;
+        }
         
         nodeList = new ArrayList<>();
         outgoingEdgeList = new ArrayList<>();
         
         addNodes();
-        addStartAndEnd(sx, sy, ex, ey);
         addAllEdges();
+        addStartAndEnd(sx, sy, ex, ey);
     }
 
     private void addNodes() {
@@ -47,22 +70,77 @@ public class VisibilityGraph {
         outgoingEdgeList.add(new LinkedList<Edge>());
         return index;
     }
+
+    private int assignNodeAndConnect(int x, int y) {
+        int index = nodeList.size();
+        nodeList.add(new Point(x,y));
+        outgoingEdgeList.add(new LinkedList<Edge>());
+
+        for (int i=0; i<nodeList.size(); i++) {
+            Point toPoint = coordinateOf(i);
+            if (graph.lineOfSight(x, y, toPoint.x, toPoint.y)) {
+                float weight = computeWeight(x, y, toPoint.x, toPoint.y);
+                addEdge(i, index, weight);
+                addEdge(index, i, weight);
+            }
+        }
+        
+        return index;
+    }
+    
+    /**
+     * Assumption: start and end are the last two nodes, if they exist.
+     */
+    private void removeStartAndEnd() {
+        if (startIsNewNode) {
+            int index = nodeList.size()-1;
+            nodeIndex[sy][sx] = -1;
+            nodeList.remove(index);
+            outgoingEdgeList.remove(index);
+            removeInstancesOf(index);
+
+            startIsNewNode = false;
+        }
+        if (endIsNewNode) {
+            int index = nodeList.size()-1;
+            nodeIndex[ey][ex] = -1;
+            nodeList.remove(index);
+            outgoingEdgeList.remove(index);
+            removeInstancesOf(index);
+
+            endIsNewNode = false;
+        }
+    }
+    
+    private void removeInstancesOf(int index) {
+        for (LinkedList<Edge> edgeList : outgoingEdgeList) {
+            Edge edge = new Edge(0, index, 0);
+            edgeList.remove(edge);
+        }
+    }
     
     private void addStartAndEnd(int sx, int sy, int ex, int ey) {
         if (isNode(sx, sy)) {
             startIndex = indexOf(sx, sy);
+            startIsNewNode = false;
         } else {
-            startIndex = nodeIndex[sy][sx] = assignNode(sx, sy);
+            startIndex = nodeIndex[sy][sx] = assignNodeAndConnect(sx, sy);
+            startIsNewNode = true;
         }
 
         if (isNode(ex, ey)) {
             endIndex = indexOf(ex, ey);
+            endIsNewNode = false;
         } else {
-            endIndex = nodeIndex[ey][ex] = assignNode(ex, ey);
+            endIndex = nodeIndex[ey][ex] = assignNodeAndConnect(ex, ey);
+            endIsNewNode = true;
         }
     }
     
     private void addAllEdges() {
+        int saveFactor = nodeList.size()/10;
+        if (saveFactor == 0) saveFactor = 1;
+        
         for (int i=0; i<nodeList.size(); i++) {
             Point fromPoint = coordinateOf(i);
             for (int j=i+1; j<nodeList.size(); j++) {
@@ -73,6 +151,9 @@ public class VisibilityGraph {
                     addEdge(j, i, weight);
                 }
             }
+            
+            if (i%saveFactor == 0)
+                maybeSaveSnapshot();
         }
     }
     
@@ -132,6 +213,14 @@ public class VisibilityGraph {
         return nodeList.size();
     }
     
+    public int computeSumDegrees() {
+        int sum = 0;
+        for (LinkedList<Edge> list : outgoingEdgeList) {
+            sum += list.size();
+        }
+        return sum;
+    }
+    
     public Iterator<Edge> edgeIterator(int source) {
         return outgoingEdgeList.get(source).iterator();
     }
@@ -154,4 +243,44 @@ public class VisibilityGraph {
     public int endNode() {
         return endIndex;
     }
+    
+    private void maybeSaveSnapshot() {
+        if (saveSnapshot != null)
+            saveSnapshot.run();
+    }
+    
+
+    
+    public static VisibilityGraph repurpose(VisibilityGraph oldGraph, int sx, int sy, int ex, int ey) {
+        oldGraph.removeStartAndEnd();
+        VisibilityGraph newGraph = new VisibilityGraph(oldGraph.graph, sx, sy, ex, ey);
+        newGraph.nodeIndex = oldGraph.nodeIndex;
+        newGraph.startIndex = oldGraph.startIndex;
+        newGraph.startIsNewNode = oldGraph.startIsNewNode;
+        newGraph.endIndex = oldGraph.endIndex;
+        newGraph.endIsNewNode = oldGraph.endIsNewNode;
+        newGraph.nodeList = oldGraph.nodeList;
+        newGraph.outgoingEdgeList = oldGraph.outgoingEdgeList;
+        
+        newGraph.addStartAndEnd(sx, sy, ex, ey);
+        
+        return newGraph;
+    }
+    
+    public static VisibilityGraph getStoredGraph(GridGraph graph, int sx, int sy, int ex, int ey) {
+        VisibilityGraph visibilityGraph = null;
+        if (storedGridGraph != graph || storedVisibilityGraph == null) {
+            //("Get new graph");
+            visibilityGraph = new VisibilityGraph(graph, sx, sy ,ex, ey);
+            storedVisibilityGraph = visibilityGraph;
+            storedGridGraph = graph;
+        } else {
+            //("Reuse graph");
+            visibilityGraph = repurpose(storedVisibilityGraph, sx, sy, ex, ey);
+            storedVisibilityGraph = visibilityGraph;
+        }
+        return visibilityGraph;
+    }
+    
+    
 }

@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+/**
+ * Indirect binary heap. Used for O(lgn) deleteMin and O(lgn) decreaseKey.
+ */
 public class IndirectHeap<E extends Comparable<? super E>> implements Serializable {
 
     private ArrayList<E> keyList;
@@ -26,7 +29,10 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         inList = new ArrayList<>();
         outList = new ArrayList<>();
     }
-    
+
+    /**
+     * Runtime: O(n)
+     */
     public IndirectHeap(E[] array, boolean minHeap) {
         this(minHeap);
         keyList.ensureCapacity(array.length);
@@ -45,7 +51,10 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
     public void setComparator(Comparator<E> comparator) {
         this.comparator = comparator;
     }
-    
+
+    /**
+     * Runtime: O(n)
+     */
     public void heapify() {
         for (int i=keyList.size()/2-1; i>=0; i--) {
             bubbleDown(i);
@@ -124,7 +133,10 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
             bubbleDown(smallerChild);
         }
     }
-    
+
+    /**
+     * Runtime: O(lgn)
+     */
     public void decreaseKey(int outIndex, E newKey) {
         // Assume newKey < old key
         //System.out.println(keyList);
@@ -136,7 +148,10 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
     }
     
 
-    
+    /**
+     * Runtime: O(lgn)
+     * @return index of min element
+     */
     public int popMinIndex() {
         if (keyList.size() == 0)
             throw new NullPointerException("Indirect Heap is empty!");
@@ -173,7 +188,11 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         return s;
     }
 
-    
+
+    /**
+     * Runtime: O(lgn)
+     * @return value of min element
+     */
     public E popMinValue() {
         if (keyList.size() == 0)
             throw new NullPointerException("Indirect Heap is empty!");

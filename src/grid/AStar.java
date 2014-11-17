@@ -12,7 +12,7 @@ public class AStar extends PathFindingAlgorithm {
     
     protected IndirectHeap<Float> pq; 
 
-    private int finish;
+    protected int finish;
 
     
     public AStar(GridGraph graph, int sx, int sy, int ex, int ey) {
@@ -51,24 +51,23 @@ public class AStar extends PathFindingAlgorithm {
             int current = pq.popMinIndex();
             if (current == finish) {
                 maybeSaveSearchSnapshot();
-                maybePostSmooth();
-                return;
+                break;
             }
             visited[current] = true;
 
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
 
-            tryRelax(visited, current, x, y, x-1, y-1);
-            tryRelax(visited, current, x, y, x, y-1);
-            tryRelax(visited, current, x, y, x+1, y-1);
+            tryRelax(current, x, y, x-1, y-1);
+            tryRelax(current, x, y, x, y-1);
+            tryRelax(current, x, y, x+1, y-1);
             
-            tryRelax(visited, current, x, y, x-1, y);
-            tryRelax(visited, current, x, y, x+1, y);
+            tryRelax(current, x, y, x-1, y);
+            tryRelax(current, x, y, x+1, y);
             
-            tryRelax(visited, current, x, y, x-1, y+1);
-            tryRelax(visited, current, x, y, x, y+1);
-            tryRelax(visited, current, x, y, x+1, y+1);
+            tryRelax(current, x, y, x-1, y+1);
+            tryRelax(current, x, y, x, y+1);
+            tryRelax(current, x, y, x+1, y+1);
 
             maybeSaveSearchSnapshot();
         }
@@ -76,13 +75,15 @@ public class AStar extends PathFindingAlgorithm {
         maybePostSmooth();
     }
     
-    private void tryRelax(boolean[] visited, int current, int currentX, int currentY, int x, int y) {
+    private void tryRelax(int current, int currentX, int currentY, int x, int y) {
         if (!graph.isValidCoordinate(x, y))
             return;
         
         int destination = toOneDimIndex(x,y);
         if (visited[destination])
             return;
+        if (parent[current] != -1 && parent[current] == parent[destination]) // OPTIMISATION: [TI]
+            return; // Idea: don't bother trying to relax if parents are equal. using triangle inequality.
         if (!graph.lineOfSight(currentX, currentY, x, y))
             return;
         
@@ -120,10 +121,6 @@ public class AStar extends PathFindingAlgorithm {
         return false;
     }
     
-    /*protected final boolean relax(Edge edge) {
-        // return true iff relaxation is done.
-        return relax(edge.getSource(), edge.getDest(), edge.getWeight());
-    }*/
     
     protected final void initialise(int s) {
         for (int i=0; i<distance.length; i++) {
@@ -159,7 +156,7 @@ public class AStar extends PathFindingAlgorithm {
         return graph.distance(x1, y1, x2, y2);
     }
     
-    private void maybePostSmooth() {
+    protected void maybePostSmooth() {
         if (postSmoothingOn) {
             postSmooth();
         }
@@ -169,9 +166,9 @@ public class AStar extends PathFindingAlgorithm {
 
         int current = finish;
         while (current != -1) {
-            int next = parent[current];
+            int next = parent[current]; // we can skip checking this one as it always has LoS to current.
             if (next != -1) {
-                next = parent[current];
+                next = parent[next];
                 while (next != -1) {
                     if (lineOfSight(current,next)) {
                         parent[current] = next;
