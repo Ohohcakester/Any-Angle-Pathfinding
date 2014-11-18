@@ -1,9 +1,9 @@
 package grid;
 
-import grid.anya.Point;
-
 import java.util.ArrayList;
-import java.util.LinkedList;
+
+import algorithms.BreadthFirstSearch;
+import algorithms.datatypes.Point;
 
 public class ReachableNodes extends BreadthFirstSearch {
 
@@ -12,6 +12,13 @@ public class ReachableNodes extends BreadthFirstSearch {
         super(graph, sx, sy, ex, ey);
     }
     
+    /**
+     * Computes the set of all nodes reachable from (sx,sy) by an unblocked path.
+     * @param graph the grid to use.
+     * @param sx x-coordinate of root node
+     * @param sy y-coordinate of root node
+     * @return An ArrayList of Point objects (nodes reachable from (sx,sy) via an unblocked path).
+     */
     public static ArrayList<Point> computeReachable(GridGraph graph, int sx, int sy) {
         ReachableNodes nodes = new ReachableNodes(graph, sx, sy, -10, -10);
         ArrayList<Point> list = new ArrayList<>();

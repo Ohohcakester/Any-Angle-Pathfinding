@@ -1,14 +1,5 @@
-import grid.AStar;
-import grid.Anya;
-import grid.BasicThetaStar;
-import grid.BreadthFirstSearch;
 import grid.GridGraph;
-import grid.PathFindingAlgorithm;
 import grid.ReachableNodes;
-import grid.SnapshotItem;
-import grid.VisibilityGraphAlgorithm;
-import grid.anya.Fraction;
-import grid.anya.Point;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -19,6 +10,19 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
+import uiandio.CloseOnExitWindowListener;
+import uiandio.FileIO;
+import uiandio.GraphImporter;
+import algorithms.AStar;
+import algorithms.Anya;
+import algorithms.BasicThetaStar;
+import algorithms.BreadthFirstSearch;
+import algorithms.PathFindingAlgorithm;
+import algorithms.VisibilityGraphAlgorithm;
+import algorithms.anya.Fraction;
+import algorithms.datatypes.Point;
+import algorithms.datatypes.SnapshotItem;
+import algorithms.visibilitygraph.VisibilityGraph;
 import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
@@ -41,30 +45,42 @@ import draw.KeyToggler;
  *
  */
 public class AnyAnglePathfinding {
+    public static Random rand = new Random();
     
     private static String PATH_TESTDATA_NAME = "testdata/";
 
-    private static int unblockedRatio = 13;
-    private static boolean seededRandom = true;
-    private static int seed = 1320146292;
+    // GRAPH PROPERTIES - START
+    private static int unblockedRatio = 20;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+    private static boolean seededRandom = true; // set to true to use the seed. false to generate a new graph every time.
+    private static int seed = 1320146292;       // seed for the random. does nothing if seededRandom == false.
     
-    public static Random rand = new Random();
-    private static int sizeX = 40;
-    private static int sizeY = 40;
+    private static int sizeX = 10;              // x-axis size of grid
+    private static int sizeY = 10;              // y-axis size of grid
 
-    private static int sx = 6;
-    private static int sy = 16;
-    private static int ex = 38;
-    private static int ey = 27;
+    private static int sx = 6;                  // x-coordinate of start point
+    private static int sy = 6;                  // y-coordinate of start point
+    private static int ex = 8;                  // x-coordinate of goal point
+    private static int ey = 7;                  // y-coordinate of goal point
+    // GRAPH PROPERTIES - END
     
-    private static AlgoFunction algoFunction;
+    private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
+    
+    public static void main(String[] args) {
+//        runTestAllAlgos();
+//        testVisibilityGraphSize();
+        traceAlgorithm();
+    }
+
+    /**
+     * Choose a maze. (a gridGraph setting)
+     */
     private static GridGraph loadMaze() {
-        int choice = 10;
+        int choice = 0; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 :
-                return generateSeededRandomGraph();
+                return generateSeededRandomGraph(); // Use the data given above to generate a graph
             case 1 :
                 return importGraphFromFile("maze.txt");
             case 2 :
@@ -90,8 +106,11 @@ public class AnyAnglePathfinding {
         }
     }
     
+    /**
+     * Choose an algorithm.
+     */
     private static void setDefaultAlgoFunction() {
-        int choice = 7;
+        int choice = 7; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -120,33 +139,43 @@ public class AnyAnglePathfinding {
                 break;
             case 9 :
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                break;
+            case 10 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                break;
         }
     }
-    
-    
-    public static void main(String[] args) {
-        setDefaultAlgoFunction();
-//        runTestAllAlgos();
-        GridGraph gridGraph = loadMaze();
-//
+
+    /**
+     * Conducts a trace of the current algorithm
+     */
+    private static void traceAlgorithm() {
+        setDefaultAlgoFunction(); // choose an algorithm (go into this method to choose)
+        GridGraph gridGraph = loadMaze(); // choose a grid (go into this method to choose)
+
+        // This is how to generate test data for the grid. (Use the VisibilityGraph algorithm to generate optimal path lengths)
 //        ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
 //        System.out.println(points.size());
-//        
-//        printGraphData(gridGraph);
-        
-//        GridLineSet gridLineSet = generateRandomTestLines(gridGraph, 100);
+//
+//        generateRandomTestDataAndPrint(gridGraph);
 
+        // This is how to conduct a running time / path length test for tha algorithm:
 //        TestResult test1 = testAlgorithm(gridGraph, sx, sy, ex, ey, 1, 1);
 //        System.out.println(test1);
-        TestResult test1 = testAlgorithm(gridGraph, sx, sy, ex, ey, 3, 1);
-        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 10, 1);
-        System.out.println(test2);
+//        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 10, 1);
+//        System.out.println(test2);
         
-        
+        // Call this to record and display the algorithm in operation.
         displayAlgorithmOperation(gridGraph);
     }
 
-    private static void printGraphData(GridGraph gridGraph) {
+    /**
+     * Generates and prints out random test data for the gridGraph in question. <br>
+     * Note: the algorithm used is the one specified in the algoFunction.
+     * Use setDefaultAlgoFunction to choose the algorithm.
+     * @param gridGraph the grid to test.
+     */
+    private static void generateRandomTestDataAndPrint(GridGraph gridGraph) {
         ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
 
         LinkedList<Integer> startX = new LinkedList<>();
@@ -184,26 +213,23 @@ public class AnyAnglePathfinding {
         System.out.println(length);
     }
     
+    /**
+     * Returns true iff there is a path from the start to the end. Uses the current algorithm to check.<br>
+     * Note: the algorithm used is the one specified in the algoFunction.
+     * Use setDefaultAlgoFunction to choose the algorithm.
+     */
     private static boolean hasSolution(GridGraph gridGraph) {
         int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
         return path.length > 1;
     }
 
+    /**
+     * Records the algorithm, the final path computed, and displays a trace of the algorithm.<br>
+     * Note: the algorithm used is the one specified in the algoFunction.
+     * Use setDefaultAlgoFunction to choose the algorithm.
+     * @param gridGraph the grid to operate on.
+     */
     private static void displayAlgorithmOperation(GridGraph gridGraph) {
-        /*GridLineSet gridLineSet2 = new GridLineSet();
-        
-        int[][] path2 = new int[][]{{5, 6}, {5, 7}, {9, 10}, {14, 15}, {22, 21}, {24, 25}, {32, 25}, {34, 24}, {35, 20}, {37, 20}, {43, 24}, {45, 28}, {52, 33}, {54, 42}, {67, 46}, {71, 48}, {75, 52}, {77, 55}, {78, 61}, {81, 71}, {82, 71}, {86, 67}};
-
-        
-        for (int i=0; i<path2.length-1; i++) {
-            gridLineSet2.addLine(path2[i][0], path2[i][1],
-                    path2[i+1][0], path2[i+1][1], Color.BLUE);
-        }
-        float pathLength2 = computePathLength(gridGraph, path2);
-        System.out.println("Path Length: " + pathLength2);
-
-        System.out.println(Arrays.deepToString(path2));*/
-        
         GridLineSet gridLineSet = new GridLineSet();
         
         int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
@@ -217,15 +243,16 @@ public class AnyAnglePathfinding {
 
         System.out.println(Arrays.deepToString(path));
 
-        //LinkedList<GridObjects> lineSetList = new LinkedList<GridObjects>();
         LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, sx, sy, ex, ey);
         lineSetList.addLast(new GridObjects(gridLineSet, null));
-        //lineSetList.addLast(new GridObjects(gridLineSet2, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
         
         setupMainFrame(drawCanvas, lineSetList);
     }
 
+    /**
+     * Compute the length of a given path. (Using euclidean distance)
+     */
     private static float computePathLength(GridGraph gridGraph, int[][] path) {
         float pathLength = 0;
         for (int i=0; i<path.length-1; i++) {
@@ -235,6 +262,10 @@ public class AnyAnglePathfinding {
         return pathLength;
     }
     
+    /**
+     * Import a graph from a file in the AnyAnglePathFinding directory,
+     * and also set the start and goal points.
+     */
     private static GridGraph importGraphFromFile(String filename, int _sx, int _sy, int _ex, int _ey) {
         sx = _sx;
         sy = _sy;
@@ -242,7 +273,29 @@ public class AnyAnglePathfinding {
         ey = _ey;
         return importGraphFromFile(filename);
     }
+
+    /**
+     * Import a graph from a file in the AnyAnglePathFinding directory.
+     */
+    private static GridGraph importGraphFromFile(String filename) {
+        GridGraph gridGraph;
+        GraphImporter graphImporter = new GraphImporter(filename);
+        gridGraph = graphImporter.retrieve();
+        return gridGraph;
+    }
     
+    /**
+     * Generates a graph using the parameters specified in the arguments.
+     * @param _seed The random seed to be used
+     * @param _sizeX x-axis size
+     * @param _sizeY y-axis size
+     * @param _ratio chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+     * @param _sx x-coordinate of start point
+     * @param _sy y-coordinate of start point
+     * @param _ex x-coordinate of goal point
+     * @param _ey y-coordinate of goal point
+     * @return the generated gridGraph.
+     */
     private static GridGraph generateSeededRandomGraph(int _seed, int _sizeX, int _sizeY, int _ratio, int _sx, int _sy, int _ex, int _ey) {
         seededRandom = true;
         seed =_seed;
@@ -256,13 +309,9 @@ public class AnyAnglePathfinding {
         return generateSeededRandomGraph();
     }
 
-    private static GridGraph importGraphFromFile(String filename) {
-        GridGraph gridGraph;
-        GraphImporter graphImporter = new GraphImporter(filename);
-        gridGraph = graphImporter.retrieve();
-        return gridGraph;
-    }
-
+    /**
+     * Generates a graph using the static parameters defined at the beginning of the class.
+     */
     private static GridGraph generateSeededRandomGraph() {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
 
@@ -282,13 +331,20 @@ public class AnyAnglePathfinding {
         return gridGraph;
     }
 
-
+    /**
+     * Tells the algorithm to compute a path. returns nothing.
+     * Used to test how long the algorithm takes to complete the computation.
+     */
     private static void testAlgorithmSpeed(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         algo.computePath();
     }
 
+    /**
+     * Generates a path between two points on a grid.
+     * @return an array of int[2] indicating the coordinates of the path.
+     */
     private static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
@@ -301,99 +357,11 @@ public class AnyAnglePathfinding {
         return path;
     }
     
-    private static LinkedList<GridObjects> recordAlgorithmOperation (
-            GridGraph gridGraph, int sx, int sy, int ex, int ey) {
-        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
-        algo.startRecording();
-        try {
-            algo.computePath();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        algo.stopRecording();
-        algo.printStatistics();
-        LinkedList<List<SnapshotItem>> snapshotList = algo.retrieveSnapshotList();
-        LinkedList<GridObjects> gridObjectsList = new LinkedList<>();
-        for (List<SnapshotItem> snapshot : snapshotList) {
-            gridObjectsList.add(createGridObjects(snapshot));
-        }
-        return gridObjectsList;
-    }
-    
 
-    private static Color or(Color color, Color original) {
-        return (original==null?color:original);
-    }
-    
-    private static GridObjects createGridObjects(List<SnapshotItem> snapshot) {
-        GridLineSet gridLineSet = new GridLineSet();
-        GridPointSet gridPointSet = new GridPointSet();
-        
-        for (SnapshotItem item : snapshot) {
-            Integer[] path = item.path;
-            Color color = item.color;
-            if (path.length == 4) {
-                gridLineSet.addLine(path[0], path[1], path[2], path[3], or(Color.RED,color));
-            } else if (path.length == 2) {
-                gridPointSet.addPoint(path[0], path[1], or(Color.BLUE,color));
-            } else if (path.length == 7) {
-                // y, xLn, xLd, xRn, xRd, px, py
-                Fraction y = new Fraction (path[0]);
-                Fraction xL = new Fraction(path[1], path[2]);
-                Fraction xR = new Fraction(path[3], path[4]);
-                Fraction xMid = xR.minus(xL).multiplyDivide(1, 2).plus(xL);
-                Fraction px = new Fraction (path[5]);
-                Fraction py = new Fraction (path[6]);
-                gridLineSet.addLine(px, py, xL, y, or(Color.CYAN,color));
-                gridLineSet.addLine(px, py, xMid, y, or(Color.CYAN,color));
-                gridLineSet.addLine(px, py, xR, y, or(Color.CYAN,color));
-                gridLineSet.addLine(xL, y, xR, y, or(Color.RED,color));
-                gridPointSet.addPoint(path[5], path[6], or(Color.BLUE,color));
-            } else if (path.length == 5) {
-                Fraction y = new Fraction (path[0]);
-                Fraction xL = new Fraction(path[1], path[2]);
-                Fraction xR = new Fraction(path[3], path[4]);
-                gridLineSet.addLine(xL, y, xR, y, or(Color.GREEN,color));
-            }
-        }
-        return new GridObjects(gridLineSet,gridPointSet);
-    }
-
-    private static TestResult testAlgorithm(GridGraph gridGraph,
-            int startX, int startY, int endX, int endY, int sampleSize, int nTrials) {
-
-        
-        int[] data = new int[sampleSize];
-        
-        int sum = 0;
-        long sumSquare = 0;
-        
-        for (int s = 0; s < sampleSize; s++) {
-            long start = System.currentTimeMillis();
-            for (int i=0;i<nTrials;i++) {
-                testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
-            }
-            long end = System.currentTimeMillis();
-            System.gc();
-            
-            data[s] = (int)(end-start);
-            
-            sum += data[s];
-            sumSquare += data[s]*data[s];
-        }
-        
-        double mean = (double)sum / nTrials / sampleSize;
-        double secondMomentTimesN = (double)sumSquare / nTrials / nTrials;
-        double sampleVariance = (secondMomentTimesN - sampleSize*(mean*mean)) / (sampleSize - 1);
-        double standardDeviation = Math.sqrt(sampleVariance);
-
-        int[][] path = generatePath(gridGraph, startX, startY, endX, endY);
-        float pathLength = computePathLength(gridGraph, path);
-        
-        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, pathLength);
-        return testResult;
-    }
-
+    /**
+     * Generates random lines on the map. Used to test whether the line-of-sight
+     * algorithm is correct. Returns a gridLineSet containing all the test lines.
+     */
     private static GridLineSet generateRandomTestLines(GridGraph gridGraph,
             int amount) {
         GridLineSet gridLineSet = new GridLineSet();
@@ -410,6 +378,25 @@ public class AnyAnglePathfinding {
         return gridLineSet;
     }
 
+    /**
+     * Tests a set of coordinates for line-of-sight. Adds a green line to the 
+     * gridLineSet if there is line-of-sight between (x1,y1) and (x2,y2).
+     * Adds a red line otherwise.
+     */
+    private static void testAndAddLine(int x1, int y1, int x2, int y2,
+            GridGraph gridGraph, GridLineSet gridLineSet) {
+        
+        if (gridGraph.lineOfSight(x1, y1, x2, y2)) {
+            gridLineSet.addLine(x1, y1, x2, y2, Color.GREEN);
+        } else {
+            gridLineSet.addLine(x1, y1, x2, y2, Color.RED);
+        }
+    }
+    
+    /**
+     * Generates a truly random map for the gridGraph.
+     * No longer used as this does not generate very good or realistic grids.
+     */
     private static void generateRandomMap(GridGraph gridGraph, int frequency) {
         for (int x = 0; x < sizeX; x++) {
             for (int y = 0; y < sizeY; y++) {
@@ -418,6 +405,16 @@ public class AnyAnglePathfinding {
         }
     }
 
+    /**
+     * Post-processing step to remove situations like this:
+     * <pre>
+     *   ___ ___
+     *  |   |||||
+     *  |...X'''|
+     *  |||||___|</pre>
+     * An unblocked path can pass through x from the top left to the bottom right.<br>
+     * We fix this by filling up the gaps with additional blocks.
+     */
     private static void fillCorners(GridGraph gridGraph) {
         boolean didSomething = true;;
         while (didSomething) {
@@ -450,7 +447,11 @@ public class AnyAnglePathfinding {
         }
     }
 
-
+    /**
+     * Generates a random "block" map for the gridGraph.<br>
+     * This generates more realistic grids by spawning clusters of blocks
+     * instead of simply spawning random blocks.
+     */
     private static void generateRandomBlockMap(GridGraph gridGraph, int frequency) {
         for (int x = 0; x < sizeX; x++) {
             for (int y = 0; y < sizeY; y++) {
@@ -478,57 +479,69 @@ public class AnyAnglePathfinding {
         }
     }
 
-    private static void testAndAddLine(int x1, int y1, int x2, int y2,
-            GridGraph gridGraph, GridLineSet gridLineSet) {
-        
-        if (gridGraph.lineOfSight(x1, y1, x2, y2)) {
-            gridLineSet.addLine(x1, y1, x2, y2, Color.GREEN);
-        } else {
-            gridLineSet.addLine(x1, y1, x2, y2, Color.RED);
-        }
-        
-    }
-    
+    /**
+     * Run tests for all the algorithms, and outputs them to the file.<br>
+     * Please look into this method for more information.<br>
+     * Comment out the algorithms you don't want to test.
+     */
     private static void runTestAllAlgos() {
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
-//        runTests("AStar_TI");
-//        
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
-//        runTests("BFS");
-//        
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
-//        runTests("BFS-PS");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
+        runTests("AStar_TI");
         
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
-//        runTests("AStar-PS_TI");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+        runTests("BFS");
         
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
-//        runTests("Dijkstra");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
+        runTests("BFS-PS");
         
-        //algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
-        //runTests("Anya");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
+        runTests("AStar-PS_TI");
+        
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
+        runTests("Dijkstra");
+        
+        // Warning: Anya is unstable
+//        algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
+//        runTests("Anya");
 
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);  
-//        runTests("BasicThetaStar_TI");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);  
+        runTests("BasicThetaStar_TI");
 
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
-//        runTests("BasicThetaStar-PS_TI");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
+        runTests("BasicThetaStar-PS_TI");
         
+        // Warning: VisibilityGraph is slow
 //        algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
 //        runTests("VisibilityGraph");
         
         algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
         runTests("VisibilityGraph_REUSE");
         
+//        algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
+//        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
+        
     }
     
+
+    /**
+     * Runs tests for the specified algorithm. Uses the runTest method, which
+     * will output the test results to the file.
+     * @param algoName The name of the algorithm to be used in the file.
+     */
     private static void runTests(String algoName) {
-        runTest(algoName, 4, PathLengthClass.LONGEST);
-//        for (int i=1; i<=8; i++) {
-//            runTest(algoName, i, PathLengthClass.ALL);
-//        }
+        //runTest(algoName, 4, PathLengthClass.LONGEST);
+        for (int i=1; i<=8; i++) {
+            runTest(algoName, i, PathLengthClass.ALL);
+        }
     }
     
+    /**
+     * Runs a test stated in the TestDataLibrary, and outputs the test result to a file.
+     * @param algoName The name of the algorithm to be used in the file.
+     * @param index The index of the test to use (which maze)
+     * @param pathLengthClass The category of path lengths to use in the test.
+     * Refer to TestDataLibrary for more information.
+     */
     private static void runTest(String algoName, int index, PathLengthClass pathLengthClass) {
         String filename = algoName + "_Maze" + index + "_" + pathLengthClass.name();
         System.out.println("RUNNING TEST: " +  filename);
@@ -537,9 +550,10 @@ public class AnyAnglePathfinding {
         GraphInfo graphInfo = library.getGraphInfo();
         GridGraph gridGraph = generateSeededRandomGraph(graphInfo.seed,
                 graphInfo.sizeX, graphInfo.sizeY, graphInfo.ratio, 0,0,0,0);
-
-        //FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + filename + ".txt");
-        FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + "test.txt");
+        System.out.println("Percentage Blocked:" + gridGraph.getPercentageBlocked());
+        
+        FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + filename + ".txt");
+        //FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + "test.txt");
         fileIO.writeLine("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
         /*double sumTime = 0;
         double totalRatio = 1;
@@ -607,8 +621,160 @@ public class AnyAnglePathfinding {
         fileIO.close();
     }
     
+    /**
+     * Conducts a running time / path length test on the current algorithm on
+     * a specified gridGraph. The algorithm used is the algorithm stored in
+     * algoFunction.
+     * 
+     * @param gridGraph the grid to run the algorithm on.
+     * @param startX x-coordinate of start point
+     * @param startY y-coordinate of start point
+     * @param endX x-coordinate of goal point
+     * @param endY y-coordinate of goal point
+     * @param sampleSize The size of the sample to use. Used in computing
+     * Standard Deviation.
+     * @param nTrials The number of times the algorithm is run per test. For
+     * example, if sampleSize is 10 and nTrials is 50, the algorithm is run 50
+     * times for each of the 10 tests to get 10 results. This is used for test
+     * cases which possbly last shorter than a millisecond, making it hard to
+     * record the running time of we only ran the algorithm once per record.
+     * @return
+     */
+    private static TestResult testAlgorithm(GridGraph gridGraph,
+            int startX, int startY, int endX, int endY, int sampleSize, int nTrials) {
+
+        int[] data = new int[sampleSize];
+        
+        int sum = 0;
+        long sumSquare = 0;
+        
+        for (int s = 0; s < sampleSize; s++) {
+            long start = System.currentTimeMillis();
+            for (int i=0;i<nTrials;i++) {
+                testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
+            }
+            long end = System.currentTimeMillis();
+            System.gc();
+            
+            data[s] = (int)(end-start);
+            
+            sum += data[s];
+            sumSquare += data[s]*data[s];
+        }
+        
+        double mean = (double)sum / nTrials / sampleSize;
+        double secondMomentTimesN = (double)sumSquare / nTrials / nTrials;
+        double sampleVariance = (secondMomentTimesN - sampleSize*(mean*mean)) / (sampleSize - 1);
+        double standardDeviation = Math.sqrt(sampleVariance);
+
+        int[][] path = generatePath(gridGraph, startX, startY, endX, endY);
+        float pathLength = computePathLength(gridGraph, path);
+        
+        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, pathLength);
+        return testResult;
+    }
     
+    /**
+     * Tests random generated maps of various sizes and obstacle densities for
+     * the size of the visibility graphs.<br>
+     * The results are output to the file VisibilityGraphSizes.txt.
+     */
+    private static void testVisibilityGraphSize() {
+        FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + "VisibilityGraphSizes.txt");
+        Random seedGenerator = new Random();
+        
+        fileIO.writeLine("Seed", "Size", "%Blocked", "Vertices", "Edges (Directed)");
+        for (int i=0; i<30; i++) {
+            for (int r=0; r<3; r++) {
+                int currentRatio = (r == 0 ? 7 : (r == 1 ? 15 : 50));
+                        
+                int currentSize = 10 + i*10;
+                int currentSeed = seedGenerator.nextInt();
+                
+                GridGraph gridGraph = generateSeededRandomGraph(currentSeed, currentSize, currentSize, currentRatio, 0, 0, currentSize, currentSize);
+                VisibilityGraph vGraph = new VisibilityGraph(gridGraph, 0, 0, currentSize, currentSize);
+                vGraph.initialise();
+                
+                String seedString = currentSeed + "";
+                String sizeString = currentSize + "";
+                String ratioString = gridGraph.getPercentageBlocked()*100f + "";
+                String verticesString = vGraph.size() + "";
+                String edgesString = vGraph.computeSumDegrees() + "";
+                
+                fileIO.writeLine(seedString, sizeString, ratioString, verticesString, edgesString);
+                fileIO.flush();
+            }
+        }
+        fileIO.close();
+    }
     
+
+    /**
+     * Records a trace of the current algorithm into a LinkedList of GridObjects.
+     */
+    private static LinkedList<GridObjects> recordAlgorithmOperation (
+            GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.startRecording();
+        try {
+            algo.computePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        algo.stopRecording();
+        algo.printStatistics();
+        LinkedList<List<SnapshotItem>> snapshotList = algo.retrieveSnapshotList();
+        LinkedList<GridObjects> gridObjectsList = new LinkedList<>();
+        for (List<SnapshotItem> snapshot : snapshotList) {
+            gridObjectsList.add(createGridObjects(snapshot));
+        }
+        return gridObjectsList;
+    }
+    
+    private static Color or(Color color, Color original) {
+        return (original==null?color:original);
+    }
+    
+    /**
+     * Convert a snapshot of an algorithm into a GridObjects instance.
+     */
+    private static GridObjects createGridObjects(List<SnapshotItem> snapshot) {
+        GridLineSet gridLineSet = new GridLineSet();
+        GridPointSet gridPointSet = new GridPointSet();
+        
+        for (SnapshotItem item : snapshot) {
+            Integer[] path = item.path;
+            Color color = item.color;
+            if (path.length == 4) {
+                gridLineSet.addLine(path[0], path[1], path[2], path[3], or(Color.RED,color));
+            } else if (path.length == 2) {
+                gridPointSet.addPoint(path[0], path[1], or(Color.BLUE,color));
+            } else if (path.length == 7) {
+                // y, xLn, xLd, xRn, xRd, px, py
+                Fraction y = new Fraction (path[0]);
+                Fraction xL = new Fraction(path[1], path[2]);
+                Fraction xR = new Fraction(path[3], path[4]);
+                Fraction xMid = xR.minus(xL).multiplyDivide(1, 2).plus(xL);
+                Fraction px = new Fraction (path[5]);
+                Fraction py = new Fraction (path[6]);
+                gridLineSet.addLine(px, py, xL, y, or(Color.CYAN,color));
+                gridLineSet.addLine(px, py, xMid, y, or(Color.CYAN,color));
+                gridLineSet.addLine(px, py, xR, y, or(Color.CYAN,color));
+                gridLineSet.addLine(xL, y, xR, y, or(Color.RED,color));
+                gridPointSet.addPoint(path[5], path[6], or(Color.BLUE,color));
+            } else if (path.length == 5) {
+                Fraction y = new Fraction (path[0]);
+                Fraction xL = new Fraction(path[1], path[2]);
+                Fraction xR = new Fraction(path[3], path[4]);
+                gridLineSet.addLine(xL, y, xR, y, or(Color.GREEN,color));
+            }
+        }
+        return new GridObjects(gridLineSet,gridPointSet);
+    }
+    
+    /**
+     * Spawns the visualisation window for the algorithm.
+     */
     private static void setupMainFrame(DrawCanvas drawCanvas, LinkedList<GridObjects> gridObjectsList) {
         KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
         

@@ -1,7 +1,10 @@
 package grid;
 
-import grid.anya.Point;
+import algorithms.datatypes.Point;
 
+/**
+ * Represents the Grid of blocked/unblocked tiles.
+ */
 public class GridGraph {
 
     private boolean[][] tiles;
@@ -46,10 +49,10 @@ public class GridGraph {
     
     /**
      * x1,y1,x2,y2 refer to the top left corner of the tile.
-     * @param x1 0 <= x1 <= sizeX
-     * @param y1 0 <= y1 <= sizeY
-     * @param x2 0 <= x2 <= sizeX
-     * @param y2 0 <= y2 <= sizeY
+     * @param x1 Condition: 0 <= x1 <= sizeX
+     * @param y1 Condition: 0 <= y1 <= sizeY
+     * @param x2 Condition: 0 <= x2 <= sizeX
+     * @param y2 Condition: 0 <= y2 <= sizeY
      * @return distance.
      */
     public float distance(int x1, int y1, int x2, int y2) {
@@ -72,7 +75,9 @@ public class GridGraph {
     }
     
     
-    
+    /**
+     * @return true iff there is line-of-sight from (x1,y1) to (x2,y2).
+     */
     public boolean lineOfSight(int x1, int y1, int x2, int y2) {
         int dy = y2 - y1;
         int dx = x2 - x1;
@@ -187,5 +192,20 @@ public class GridGraph {
             }
         }
         //return null;
+    }
+    
+    /**
+     * @return the percentage of blocked tiles as compared to the total grid size.
+     */
+    public float getPercentageBlocked() {
+        int nBlocked = 0;
+        for (int y=0; y<sizeY; y++) {
+            for (int x=0; x<sizeX; x++) {
+                if (isBlocked(x, y)) {
+                    nBlocked++;
+                }
+            }
+        }
+        return (float)nBlocked / (sizeX*sizeY);
     }
 }

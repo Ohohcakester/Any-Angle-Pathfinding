@@ -1,10 +1,10 @@
 package draw;
 
-import grid.anya.Fraction;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import algorithms.anya.Fraction;
 
 public class GridLineSet {
 

@@ -1,26 +1,38 @@
-import grid.anya.Point;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import algorithms.datatypes.Point;
+
 
 /**
- * Problens: maze 5 and 6 corrupted data.
- * 
- * Test Plan:
- * Each of them has : near / far
- * 1) 30x30, ratio 7
- * 2) 30x30, ratio 15
- * 3) 30x30, ratio 50
- * 4) 100x100, ratio 7
- * 5) 100x100, ratio 15
- * 6) 100x100, ratio 50
- * 7) 500x500, ratio 7
- * 8) 500x500, ratio 50
- * 
+ * Test Mazes:                  <br>
+ * 1) 30x30, ratio 7            <br>
+ * 2) 30x30, ratio 15           <br>
+ * 3) 30x30, ratio 50           <br>
+ * 4) 100x100, ratio 7          <br>
+ * 5) 100x100, ratio 15         <br>
+ * 6) 100x100, ratio 50         <br>
+ * 7) 500x500, ratio 7          <br>
+ * 8) 500x500, ratio 50         <br>
+ *                                                              <br>
+ * Each maze has 100 test cases as shown in the constructor.    <br>
+ * Each test case has:                                          <br>
+ * - A start point                                              <br>
+ * - A goal point                                               <br>
+ * - Length of the optimal path form start to goal.             <br>
+ *                                                                  <br>
+ * These test cases were auto-generated from the function:          <br>
+ * AnyAnglePathfinding.generateRandomTestDataAndPrint(gridGraph);   <br>
+ * <br>
+ * Instructions for use:
+ * <br> (1) Initialise a TestDataLibrary, specify the maze (testIndex) and the PathLengthClass you wish to use.
+ * <br> (2) Obtain the graph information using getGraphInfo() and initialise the gridGraph.
+ * <br> (3) use the hasNextData() and getNextData() methods to retrieve the test cases one-by-one and test them.
+ * <br> (4) use the other "get" methods in this class to obtain statistics about the test cases you used.
+ * <br>
+ * Note: The AnyAnglePathfinding.runTest() method does the above steps automatically.
  */
 public class TestDataLibrary {
-    
     
     private GraphInfo graphInfo;
     private LinkedList<StartEndPointData> dataList;
@@ -201,6 +213,9 @@ public class TestDataLibrary {
         return minMax;
     }
 
+    /**
+     * Print statistics regarding the lengths array that has been input.
+     */
     public static void analyseArray(double[] lengths) {
         Arrays.sort(lengths);
         System.out.println("Length: " + lengths.length);
@@ -227,15 +242,23 @@ public class TestDataLibrary {
         System.out.println("Upper: " + lengths[pH]); 
     }
     
-
+    /**
+     * Get information for the current graph used.
+     */
     public GraphInfo getGraphInfo() {
         return graphInfo;
     }
     
+    /**
+     * @return true iff there are still remaining test cases.
+     */
     public boolean hasNextData() {
         return !dataList.isEmpty();
     }
     
+    /**
+     * @return Get the data for the next test case.
+     */
     public StartEndPointData getNextData() {
         return dataList.poll();
     }
@@ -244,21 +267,17 @@ public class TestDataLibrary {
         return lowestComputedLength;
     }
 
-
     public float getHighestComputedLength() {
         return highestComputedLength;
     }
-
 
     public float getMeanComputedLength() {
         return meanComputedLength;
     }
 
-
     public float getOverallMeanLength() {
         return overallMeanLength;
     }
-
 
     public int getNData() {
         return nData;
@@ -295,6 +314,18 @@ class StartEndPointData {
     }
 }
 
+
+
+/**
+ * <pre>
+ *  SHORTEST, // 0-25th percentile
+ *  LOWER,    // 0-60th percentile
+ *  MIDDLE,   // 25-75th percentile
+ *  HIGHER,   // 40-100th percentile
+ *  LONGEST,  // 75th-100th percentile
+ *  ALL
+ *  </pre>
+ */
 enum PathLengthClass {
     SHORTEST, // 0-25th percentile
     LOWER,    // 0-60th percentile

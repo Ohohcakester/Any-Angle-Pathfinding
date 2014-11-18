@@ -22,3 +22,13 @@ Adding the Post-Smoothing step makes little difference in the overall runtime. T
 
 
 BFS is the fastest.
+
+
+Maze 1: 30x30, 37.5% blocked
+Maze 2: 30x30, 20.7% blocked
+Maze 3: 30x30, 6.5% blocked
+Maze 4: 100x100, 40.5% blocked
+Maze 5: 100x100, 20.6% blocked
+Maze 6: 100x100, 6.4% blocked
+Maze 7: 500x500, 41% blocked
+Maze 8: 500x500, 6.5% blocked
