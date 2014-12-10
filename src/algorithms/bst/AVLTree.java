@@ -168,6 +168,11 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
             ((AVLNode<E>)root).balance = 0;
     }
     
+    /*private void printCurrent(Node<E> current) { // DEBUGGING TOOL
+        if (current == null)return;
+        System.out.println(current +": >> " + current.left + " " + current.right + " | " + current.prev + " " + current.next);
+    }*/
+    
     private Node<E> insert(Node<E> current, E data, Node<E> parent, boolean wentRight) {
         if (current == null) {
             AVLNode<E> newNode = new AVLNode<E>(data);
@@ -275,14 +280,14 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
         
         if (current == null)
             throw new NullPointerException("Item not found!");
-
-        linkedListRemove(current);
         
         if (current.left == null) {
+            linkedListRemove(current);
             linkFromParent(current, current.right, nodeStack); // set parent to point to right.
             current = current.right;
         }
         else if (current.right == null) {
+            linkedListRemove(current);
             linkFromParent(current, current.left, nodeStack); // set parent to point to right.
             current = current.left;
         }
@@ -299,8 +304,7 @@ public class AVLTree<E extends Comparable<? super E>> extends BinarySearchTree<E
                 nodeStack.peek().left = newCurrent.right;
             }
             current.data = newCurrent.data; // replace target data, search for new target.
-            current.next = newCurrent.next;
-            current.prev = newCurrent.prev;
+            linkedListRemove(newCurrent);
             current = newCurrent.right;
         }
         

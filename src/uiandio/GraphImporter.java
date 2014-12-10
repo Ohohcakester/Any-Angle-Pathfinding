@@ -6,7 +6,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
-
+/**
+ * How to create a grid file.<br>
+ * The grid is stored in a .txt file in the following format:<br>
+ * <pre>
+ * 6 3
+ * 0 1 0 0 1 0
+ * 0 1 1 1 1 0
+ * 0 1 0 0 1 0</pre>
+ * 
+ * The first number specifies the number of columns of the grid.<br>
+ * The second number specifies the number of rows of the grid.<br>
+ * The rest of the numbers specify the status of the tiles. 1 means a blocked
+ * tile, 0 means an unblocked tile.
+ */
 public class GraphImporter {
     private GridGraph gridGraph;
     

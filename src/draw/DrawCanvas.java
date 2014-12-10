@@ -12,13 +12,14 @@ import javax.swing.JPanel;
 
 public class DrawCanvas extends JPanel implements MouseListener{
 
-    private static final int MAX_RES = 600;
+    private static final int MAX_RES = 700;
     private final int resY;
     private final int resX;
     
     private final Drawer gridGraphDrawer;
     private Drawer gridLineDrawer;
     private Drawer gridPointDrawer;
+    private Drawer startEndPointDrawer;
     private final GridGraph gridGraph;
     
     public DrawCanvas(GridGraph gridGraph, GridLineSet gridLineSet) {
@@ -39,6 +40,14 @@ public class DrawCanvas extends JPanel implements MouseListener{
         gridGraphDrawer = new GridGraphDrawer(gridGraph, resX, resY);
         gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, resX, resY);
     }
+
+    public void setStartAndEnd(int sx, int sy, int ex, int ey) {
+        GridPointSet gridPointSet = new GridPointSet();
+        gridPointSet.addPoint(sx,  sy, Color.ORANGE);
+        gridPointSet.addPoint(ex,  ey, Color.YELLOW);
+        startEndPointDrawer = new VariableSizePointDrawer(gridGraph,
+                gridPointSet, resX, resY, 1.3f);
+    }
     
     @Override
     public void paintComponent(Graphics g) {
@@ -51,6 +60,9 @@ public class DrawCanvas extends JPanel implements MouseListener{
         }
         if (gridPointDrawer != null) {
             gridPointDrawer.draw(g);
+        }
+        if (startEndPointDrawer != null) {
+            startEndPointDrawer.draw(g);
         }
     }
     
@@ -75,4 +87,5 @@ public class DrawCanvas extends JPanel implements MouseListener{
 
     @Override
     public void mouseExited(MouseEvent e) {}
+
 }

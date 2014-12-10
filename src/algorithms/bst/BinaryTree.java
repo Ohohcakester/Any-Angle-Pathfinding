@@ -6,7 +6,7 @@ import java.util.Queue;
 import java.util.Stack;
 
 /**
- * Class for a binary tree that stores type E objects.
+ * Base class for a binary tree that stores type E objects.
  * Node is a public class.
  */
 public class BinaryTree<E> implements Iterable<E>{
@@ -266,6 +266,8 @@ public class BinaryTree<E> implements Iterable<E>{
      * @return An inorder string representation of the tree
      */
     public String inorderToString() {
+        if (root == null) return "null";
+        
         StringBuilder stb = new StringBuilder();
         inorderToString(stb, root);
         return stb.toString();

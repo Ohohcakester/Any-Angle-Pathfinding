@@ -7,6 +7,34 @@ import org.junit.Test;
 public class AVLTreeTest {
 
     @Test
+    public void test2() {
+        AVLTree<Integer> avlTree = new AVLTree<>();
+        avlTree.insert(10);
+        printTreeLinkedList(avlTree);System.out.println();
+        avlTree.insert(5);
+        printTreeLinkedList(avlTree);System.out.println();
+        avlTree.insert(15);
+        printTreeLinkedList(avlTree);System.out.println();
+        avlTree.insert(3);
+        printTreeLinkedList(avlTree);System.out.println();
+        avlTree.insert(8);
+        System.out.println(avlTree.inorderToString());
+        printTreeLinkedList(avlTree);System.out.println();
+        
+        avlTree.delete(8);
+        System.out.println(avlTree.inorderToString());
+        printTreeLinkedList(avlTree);System.out.println();
+
+        avlTree.insert(8);
+        System.out.println(avlTree.inorderToString());
+        printTreeLinkedList(avlTree);System.out.println();
+        
+        avlTree.insert(7);
+        System.out.println(avlTree.inorderToString());
+        printTreeLinkedList(avlTree);System.out.println();
+        
+    }
+    
     public void test() {
         AVLTree<Integer> avlTree = new AVLTree<>();
         for (int i=0;i<15;i++) {

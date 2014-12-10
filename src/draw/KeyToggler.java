@@ -13,6 +13,7 @@ public class KeyToggler implements KeyListener {
         this.gridObjectsList = gridObjectsList;
         gridObjectsList.addFirst(null);
         System.out.println(gridObjectsList.size());
+        goRight(1, false);
     }
     
     /*public void addGridLineSet(GridLineSet gridLineSet) {
@@ -88,6 +89,18 @@ public class KeyToggler implements KeyListener {
                 break;
             case KeyEvent.VK_PAGE_DOWN :
                 goLeft(10, false);
+                break;
+            case KeyEvent.VK_D :
+                goRight(3, true);
+                break;
+            case KeyEvent.VK_A :
+                goLeft(3, true);
+                break;
+            case KeyEvent.VK_W :
+                goRight(5, true);
+                break;
+            case KeyEvent.VK_S :
+                goLeft(5, true);
                 break;
         }
     }

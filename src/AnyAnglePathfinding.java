@@ -30,19 +30,14 @@ import draw.GridPointSet;
 import draw.KeyToggler;
 
 /**
- * Test Plan:
- * Each of them has : near / far
- * 1) 30x30, ratio 7
- * 2) 30x30, ratio 15
- * 3) 30x30, ratio 50
- * 4) 100x100, ratio 7
- * 5) 100x100, ratio 15
- * 6) 100x100, ratio 50
- * 7) 500x500, ratio 7
- * 8) 500x500, ratio 50
+ * Instructions: Look for the main method.
+ * We can either run tests or trace the algorithm.
  * 
- * @author Oh
- *
+ * When tracing algorithms,
+ * Choose the maze in loadMaze();
+ * Choose the algorithm in setDefaultAlgoFunction();
+ * 
+ * The tracing / experimentation functions are detailed in the traceAlgorithm() method.
  */
 public class AnyAnglePathfinding {
     public static Random rand = new Random();
@@ -50,33 +45,56 @@ public class AnyAnglePathfinding {
     private static String PATH_TESTDATA_NAME = "testdata/";
 
     // GRAPH PROPERTIES - START
-    private static int unblockedRatio = 20;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+    private static int unblockedRatio = 10;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
     private static boolean seededRandom = true; // set to true to use the seed. false to generate a new graph every time.
-    private static int seed = 1320146292;       // seed for the random. does nothing if seededRandom == false.
+    private static int seed = -524446332;       // seed for the random. does nothing if seededRandom == false.
     
-    private static int sizeX = 10;              // x-axis size of grid
-    private static int sizeY = 10;              // y-axis size of grid
+    private static int sizeX = 20;              // x-axis size of grid
+    private static int sizeY = 20;              // y-axis size of grid
 
-    private static int sx = 6;                  // x-coordinate of start point
-    private static int sy = 6;                  // y-coordinate of start point
-    private static int ex = 8;                  // x-coordinate of goal point
-    private static int ey = 7;                  // y-coordinate of goal point
+    private static int sx = 2;                  // x-coordinate of start point
+    private static int sy = 19;                  // y-coordinate of start point
+    private static int ex = 17;                  // x-coordinate of goal point
+    private static int ey = 2;                  // y-coordinate of goal point
     // GRAPH PROPERTIES - END
     
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     
-    public static void main(String[] args) {
+    public static void main(String[] args) { // uncomment the one you need to use.
 //        runTestAllAlgos();
 //        testVisibilityGraphSize();
         traceAlgorithm();
     }
 
     /**
+     * Conducts a trace of the current algorithm
+     */
+    private static void traceAlgorithm() {
+        setDefaultAlgoFunction();           // choose an algorithm (go into this method to choose)
+        GridGraph gridGraph = loadMaze();   // choose a grid (go into this method to choose)
+
+        // This is how to generate test data for the grid. (Use the VisibilityGraph algorithm to generate optimal path lengths)
+//        ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
+//        System.out.println(points.size());
+//
+//        generateRandomTestDataAndPrint(gridGraph);
+
+        // This is how to conduct a running time / path length test for tha algorithm:
+//        TestResult test1 = testAlgorithm(gridGraph, sx, sy, ex, ey, 1, 1);
+//        System.out.println(test1);
+//        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 10, 1);
+//        System.out.println(test2);
+        
+        // Call this to record and display the algorithm in operation.
+        displayAlgorithmOperation(gridGraph);
+    }
+
+    /**
      * Choose a maze. (a gridGraph setting)
      */
     private static GridGraph loadMaze() {
-        int choice = 0; // Adjust this to choose a maze.
+        int choice = 11; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 :
@@ -90,7 +108,7 @@ public class AnyAnglePathfinding {
             case 4 :
                 return generateSeededRandomGraph(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
             case 5 :
-                return generateSeededRandomGraph(-159182402, 15, 15, 9, 1, 1, 13, 12); // contradict anya
+                return generateSeededRandomGraph(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
             case 6 :
                 return importGraphFromFile("maze14x11.txt", 0, 0, 10, 10); // Maze to contradict Theta* / A*
             case 7 :
@@ -101,6 +119,10 @@ public class AnyAnglePathfinding {
                 return importGraphFromFile("mazeThetaWCS.txt", 0, 0, 28, 13); // Worst Case Scenario for Theta*
             case 10 :
                 return importGraphFromFile("mazeReuseWCS.txt", 1, 28, 0, 27); // Worst Case Scenario for Visibility Graph reuse.
+            case 11 :
+                return importGraphFromFile("anyaCont2.txt", 1, 6, 9, 1); // anya gives incorrect path
+            case 12 :
+                return generateSeededRandomGraph(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
             default :
                 return null;
         }
@@ -110,7 +132,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     private static void setDefaultAlgoFunction() {
-        int choice = 7; // adjust this to choose an algorithm
+        int choice = 6; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -144,29 +166,6 @@ public class AnyAnglePathfinding {
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);
                 break;
         }
-    }
-
-    /**
-     * Conducts a trace of the current algorithm
-     */
-    private static void traceAlgorithm() {
-        setDefaultAlgoFunction(); // choose an algorithm (go into this method to choose)
-        GridGraph gridGraph = loadMaze(); // choose a grid (go into this method to choose)
-
-        // This is how to generate test data for the grid. (Use the VisibilityGraph algorithm to generate optimal path lengths)
-//        ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
-//        System.out.println(points.size());
-//
-//        generateRandomTestDataAndPrint(gridGraph);
-
-        // This is how to conduct a running time / path length test for tha algorithm:
-//        TestResult test1 = testAlgorithm(gridGraph, sx, sy, ex, ey, 1, 1);
-//        System.out.println(test1);
-//        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 10, 1);
-//        System.out.println(test2);
-        
-        // Call this to record and display the algorithm in operation.
-        displayAlgorithmOperation(gridGraph);
     }
 
     /**
@@ -244,8 +243,9 @@ public class AnyAnglePathfinding {
         System.out.println(Arrays.deepToString(path));
 
         LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, sx, sy, ex, ey);
-        lineSetList.addLast(new GridObjects(gridLineSet, null));
+        lineSetList.addFirst(new GridObjects(gridLineSet, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
+        drawCanvas.setStartAndEnd(sx, sy, ex, ey);
         
         setupMainFrame(drawCanvas, lineSetList);
     }
@@ -276,6 +276,7 @@ public class AnyAnglePathfinding {
 
     /**
      * Import a graph from a file in the AnyAnglePathFinding directory.
+     * Look into the GraphImporter documentation for details on how to create a grid file.
      */
     private static GridGraph importGraphFromFile(String filename) {
         GridGraph gridGraph;

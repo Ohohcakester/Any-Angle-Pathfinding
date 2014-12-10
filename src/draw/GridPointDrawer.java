@@ -12,8 +12,8 @@ public class GridPointDrawer implements Drawer {
     private final int resX;
     private final int resY;
 
-    private final int circleSize;
-    private final int halfCircleSize;
+    protected int circleSize;
+    protected int halfCircleSize;
     private final float width;
     private final float height;
     

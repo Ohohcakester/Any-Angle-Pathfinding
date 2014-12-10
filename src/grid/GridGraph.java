@@ -49,10 +49,10 @@ public class GridGraph {
     
     /**
      * x1,y1,x2,y2 refer to the top left corner of the tile.
-     * @param x1 Condition: 0 <= x1 <= sizeX
-     * @param y1 Condition: 0 <= y1 <= sizeY
-     * @param x2 Condition: 0 <= x2 <= sizeX
-     * @param y2 Condition: 0 <= y2 <= sizeY
+     * @param x1 Condition: x1 between 0 and sizeX inclusive.
+     * @param y1 Condition: y1 between 0 and sizeY inclusive.
+     * @param x2 Condition: x2 between 0 and sizeX inclusive.
+     * @param y2 Condition: y2 between 0 and sizeY inclusive.
      * @return distance.
      */
     public float distance(int x1, int y1, int x2, int y2) {

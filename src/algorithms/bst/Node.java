@@ -1,30 +1,20 @@
 package algorithms.bst;
 
 
-
-/**
- * Class for a Node<E>  that stores type E objects.
- * Easier to use as compare to when Node is an inner class of BinaryTree
- **/
 public class Node<E> {
+    /*private static int counter = 0; // DEBUGGING TOOL
+    private int index;
+    private void setIndex() {
+        index = counter; counter++;
+    }*/
   
-  // Data Fields
-  
-  /** The information stored in this node. */
   E data;
-  /** Reference to the left child. */
   Node<E> left;
-  /** Reference to the right child. */
   Node<E> right;
   
   Node<E> next;
   Node<E> prev;
   
-  // Constructors
-  /**
-   * Construct a node with given data and no children.
-   * @param data The data to store in this node
-   */
   public Node() {
       
   }
@@ -41,7 +31,6 @@ public class Node<E> {
     this.right = right;
   }
   
-  // Methods
   /**
    * Returns a string representation of the node.
    * @return A string representation of the data fields
