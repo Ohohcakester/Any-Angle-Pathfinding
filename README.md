@@ -3,7 +3,11 @@ Any-Angle Pathfinding
 
 A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 
-http://en.wikipedia.org/wiki/Any-angle_path_planning
+[My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/OhAAPSlides.pdf)
+
+[Algorithm Videos](http://ohoh.byethost7.com/?page=anyanglepathfinding#media)
+
+[Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
 Features
 =====================
@@ -15,12 +19,13 @@ Features
       * http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf
     * Visibility Graph Algorithm
       * gives optimal solutions, but very slow
-    * Anya (experimental, unstable implementation)
+    * Anya
+      * implementation still a bit buggy. Not giving optimal solutions.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
 
 2.	Testing functions that test computed path lengths and running times.
 
-3.	Ability to generate pseudo-random graphs from a seed and graph specifications, as well as load graphs from a file. Refer to the GraphImporter documentation for details on how to create a grid file.
+3.	Ability to generate pseudo-random graphs from a seed and graph specifications, as well as load graphs from a file. Refer to the GraphImporter.java comments for details on how to create a grid file.
 
 
 Information
