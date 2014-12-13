@@ -14,6 +14,7 @@ import uiandio.CloseOnExitWindowListener;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
+import algorithms.AcceleratedAStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
@@ -45,17 +46,17 @@ public class AnyAnglePathfinding {
     private static String PATH_TESTDATA_NAME = "testdata/";
 
     // GRAPH PROPERTIES - START
-    private static int unblockedRatio = 11;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+    private static int unblockedRatio = 17;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
     private static boolean seededRandom = false; // set to true to use the seed. false to generate a new graph every time.
-    private static int seed = -524446332;       // seed for the random. does nothing if seededRandom == false.
+    private static int seed = 18207538;       // seed for the random. does nothing if seededRandom == false.
     
-    private static int sizeX = 20;              // x-axis size of grid
-    private static int sizeY = 20;              // y-axis size of grid
+    private static int sizeX = 50;              // x-axis size of grid
+    private static int sizeY = 50;              // y-axis size of grid
 
-    private static int sx = 7;                  // x-coordinate of start point
-    private static int sy = 16;                  // y-coordinate of start point
-    private static int ex = 17;                  // x-coordinate of goal point
-    private static int ey = 4;                  // y-coordinate of goal point
+    private static int sx = 13;                  // x-coordinate of start point
+    private static int sy = 7;                  // y-coordinate of start point
+    private static int ex = 43;                  // x-coordinate of goal point
+    private static int ey = 39;                  // y-coordinate of goal point
     // GRAPH PROPERTIES - END
     
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
@@ -80,10 +81,10 @@ public class AnyAnglePathfinding {
 //
 //        generateRandomTestDataAndPrint(gridGraph);
 
-        // This is how to conduct a running time / path length test for tha algorithm:
+        //This is how to conduct a running time / path length test for tha algorithm:
 //        TestResult test1 = testAlgorithm(gridGraph, sx, sy, ex, ey, 1, 1);
 //        System.out.println(test1);
-//        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 10, 1);
+//        TestResult test2 = testAlgorithm(gridGraph, sx, sy, ex, ey, 30, 25);
 //        System.out.println(test2);
         
         // Call this to record and display the algorithm in operation.
@@ -132,7 +133,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     private static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 11; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -164,6 +165,12 @@ public class AnyAnglePathfinding {
                 break;
             case 10 :
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                break;
+            case 11 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AcceleratedAStar(gridGraph, sx, sy, ex, ey);
+                break;
+            case 12 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
                 break;
         }
     }

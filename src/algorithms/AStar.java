@@ -52,7 +52,7 @@ public class AStar extends PathFindingAlgorithm {
         
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
-            if (current == finish) {
+            if (current == finish || distance[current] == Float.POSITIVE_INFINITY) {
                 maybeSaveSearchSnapshot();
                 break;
             }
@@ -96,13 +96,13 @@ public class AStar extends PathFindingAlgorithm {
         }
     }
 
-    private float heuristic(int x, int y) {
+    protected float heuristic(int x, int y) {
         //return 0;
         return heuristicWeight*graph.distance(x, y, ex, ey);
     }
 
 
-    private float weight(int x1, int y1, int x2, int y2) {
+    protected float weight(int x1, int y1, int x2, int y2) {
         return graph.distance(x1, y1, x2, y2);
     }
     

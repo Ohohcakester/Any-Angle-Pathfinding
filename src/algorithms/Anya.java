@@ -79,7 +79,7 @@ public class Anya extends PathFindingAlgorithm {
     }
     
     private void explore(Interval interval) {
-        System.out.println("EXPLORE "+interval + " PARENT = " + interval.parent);
+        //System.out.println("EXPLORE "+interval + " PARENT = " + interval.parent);
         tryRecordExploredInterval(interval.y, interval.xL, interval.xR, interval.parent);
         assert !interval.visited;
         assert interval.fValue != Float.POSITIVE_INFINITY;
