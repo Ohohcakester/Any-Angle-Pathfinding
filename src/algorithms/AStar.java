@@ -85,8 +85,6 @@ public class AStar extends PathFindingAlgorithm {
         int destination = toOneDimIndex(x,y);
         if (visited[destination])
             return;
-        if (parent[current] != -1 && parent[current] == parent[destination]) // OPTIMISATION: [TI]
-            return; // Idea: don't bother trying to relax if parents are equal. using triangle inequality.
         if (!graph.lineOfSight(currentX, currentY, x, y))
             return;
         
@@ -154,6 +152,12 @@ public class AStar extends PathFindingAlgorithm {
     protected float physicalDistance(int node1, int node2) {
         int x1 = toTwoDimX(node1);
         int y1 = toTwoDimY(node1);
+        int x2 = toTwoDimX(node2);
+        int y2 = toTwoDimY(node2);
+        return graph.distance(x1, y1, x2, y2);
+    }
+
+    protected float physicalDistance(int x1, int y1, int node2) {
         int x2 = toTwoDimX(node2);
         int y2 = toTwoDimY(node2);
         return graph.distance(x1, y1, x2, y2);

@@ -28,3 +28,5 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+testdata/

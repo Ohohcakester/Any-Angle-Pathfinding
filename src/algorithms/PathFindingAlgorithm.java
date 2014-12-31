@@ -127,10 +127,16 @@ public abstract class PathFindingAlgorithm {
     protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
         int startIndex = parent[endIndex];
-        edge[0] = toTwoDimX(startIndex);
-        edge[1] = toTwoDimY(startIndex);
         edge[2] = toTwoDimX(endIndex);
         edge[3] = toTwoDimY(endIndex);
+        if (startIndex < 0) {
+            edge[0] = edge[2];
+            edge[1] = edge[3];
+        } else {
+            edge[0] = toTwoDimX(startIndex);
+            edge[1] = toTwoDimY(startIndex);
+        }
+        
         return edge;
     }
     
