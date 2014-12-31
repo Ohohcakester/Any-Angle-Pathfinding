@@ -15,10 +15,12 @@ import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AcceleratedAStar;
+import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.PathFindingAlgorithm;
+import algorithms.StrictThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.anya.Fraction;
 import algorithms.datatypes.Point;
@@ -46,17 +48,17 @@ public class AnyAnglePathfinding {
     private static String PATH_TESTDATA_NAME = "testdata/";
 
     // GRAPH PROPERTIES - START
-    private static int unblockedRatio = 9;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+    private static int unblockedRatio = 40;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
     private static boolean seededRandom = true; // set to true to use the seed. false to generate a new graph every time.
-    private static int seed = 567069235;       // seed for the random. does nothing if seededRandom == false.
+    private static int seed = -1155849806;       // seed for the random. does nothing if seededRandom == false.
     
-    private static int sizeX = 20;              // x-axis size of grid
-    private static int sizeY = 20;              // y-axis size of grid
+    private static int sizeX = 11;              // x-axis size of grid
+    private static int sizeY = 13;              // y-axis size of grid
 
-    private static int sx = 2;                  // x-coordinate of start point
-    private static int sy = 14;                  // y-coordinate of start point
-    private static int ex = 13;                  // x-coordinate of goal point
-    private static int ey = 4;                  // y-coordinate of goal point
+    private static int sx = 7;                  // x-coordinate of start point
+    private static int sy = 12;                  // y-coordinate of start point
+    private static int ex = 9;                  // x-coordinate of goal point
+    private static int ey = 0;                  // y-coordinate of goal point
     // GRAPH PROPERTIES - END
 
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
@@ -66,6 +68,7 @@ public class AnyAnglePathfinding {
 //        runTestAllAlgos();
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
+//        findStrictThetaStarIssues();
         traceAlgorithm();
     }
 
@@ -136,7 +139,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     private static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 14; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -190,7 +193,7 @@ public class AnyAnglePathfinding {
         }
     }
 
-    /**
+    /**O
      * Generates and prints out random test data for the gridGraph in question. <br>
      * Note: the algorithm used is the one specified in the algoFunction.
      * Use setDefaultAlgoFunction to choose the algorithm.
@@ -704,6 +707,64 @@ public class AnyAnglePathfinding {
         
         TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, pathLength);
         return testResult;
+    }
+    
+    private static void findStrictThetaStarIssues() {
+        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
+        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+
+        int wins = 0;
+        int ties = 0;
+        Random seedRand = new Random(1);
+        int initial = seedRand.nextInt();
+        for (int i=0; i<500000; i++) {
+            int sizeX = seedRand.nextInt(5) + 10;
+            int sizeY = seedRand.nextInt(5) + 10;
+            int seed = i+initial;
+            int ratio = seedRand.nextInt(40) + 5;
+            
+            int max = (sizeX+1)*(sizeY+1);
+            int p1 = seedRand.nextInt(max);
+            int p2 = seedRand.nextInt(max-1);
+            if (p2 == p1) {
+                p2 = max-1;
+            }
+            
+            int sx = p1%(sizeX+1);
+            int sy = p1/(sizeX+1);
+            int ex = p2%(sizeX+1);
+            int ey = p2/(sizeX+1);
+
+            GridGraph gridGraph = generateSeededRandomGraph(seed, sizeX, sizeY, ratio, 0, 0, 0, 0);
+            algoFunction = basicThetaStar;
+            int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
+            float basicPathLength = computePathLength(gridGraph, path);
+
+            algoFunction = strictThetaStar;
+            path = generatePath(gridGraph, sx, sy, ex, ey);
+            float strictPathLength = computePathLength(gridGraph, path);
+            
+            if (basicPathLength < strictPathLength-0.01f) {
+                System.out.println("============");
+                System.out.println("Discrepancy Discovered!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                System.out.println("Basic: " + basicPathLength + " , Strict: " + strictPathLength);
+                System.out.println("============");
+                System.out.println("WINS: " + wins + ", TIES: " + ties);
+                throw new UnsupportedOperationException("DISCREPANCY!!");
+            } else {
+                System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                if (strictPathLength < basicPathLength - 0.01f) {
+                    wins += 1;
+                } else {
+                    ties += 1;
+                }
+            }
+        }
+        
+        
+        
     }
     
     private static void testAbilityToFindGoal() {

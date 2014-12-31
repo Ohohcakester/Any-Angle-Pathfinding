@@ -58,6 +58,7 @@ public class StrictThetaStar extends BasicThetaStar {
 
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
+            
 
             tryRelax(current, x, y, x-1, y-1);
             tryRelax(current, x, y, x, y-1);
@@ -77,11 +78,11 @@ public class StrictThetaStar extends BasicThetaStar {
     }
     
     protected float heuristic(int x, int y) {
-        //if (x == ex && y == ey) {
-        //    return 1.1f;
-        //} else { 
+        if (x == ex && y == ey) {
+            return 1.1f;
+        } else { 
             return heuristicWeight*graph.distance(x, y, ex, ey);
-        //}
+        }
     }
 
     private void tryFixBufferValue(int current) {
