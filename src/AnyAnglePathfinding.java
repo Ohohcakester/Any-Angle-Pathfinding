@@ -176,16 +176,16 @@ public class AnyAnglePathfinding {
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
                 break;
             case 13 :
-                algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> new AdjustmentThetaStar(gridGraph, sx, sy, ex, ey);
+                //algoFunction = null; // reserved
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AdjustmentThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
             case 14 :
-                algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+                //algoFunction = null; // reserved
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
             case 15 :
-                algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                //algoFunction = null; // reserved
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
                 break;
         }
     }
