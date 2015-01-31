@@ -20,6 +20,7 @@ import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.PathFindingAlgorithm;
+import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.anya.Fraction;
@@ -46,19 +47,20 @@ public class AnyAnglePathfinding {
     public static Random rand = new Random();
     
     private static String PATH_TESTDATA_NAME = "testdata/";
+    private static boolean printSeed = true;       // Don't set this to false. it's quite useful.
 
     // GRAPH PROPERTIES - START
-    private static int unblockedRatio = 40;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-    private static boolean seededRandom = true; // set to true to use the seed. false to generate a new graph every time.
-    private static int seed = -1155849806;       // seed for the random. does nothing if seededRandom == false.
+    private static int unblockedRatio = 9;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+    private static boolean seededRandom = false; // set to true to use the seed. false to generate a new graph every time.
+    private static int seed = -1155869319;       // seed for the random. does nothing if seededRandom == false.
     
-    private static int sizeX = 11;              // x-axis size of grid
-    private static int sizeY = 13;              // y-axis size of grid
+    private static int sizeX = 50;              // x-axis size of grid
+    private static int sizeY = 50;              // y-axis size of grid
 
-    private static int sx = 7;                  // x-coordinate of start point
-    private static int sy = 12;                  // y-coordinate of start point
-    private static int ex = 9;                  // x-coordinate of goal point
-    private static int ey = 0;                  // y-coordinate of goal point
+    private static int sx = 8;                  // x-coordinate of start point
+    private static int sy = 39;                  // y-coordinate of start point
+    private static int ex = 46;                  // x-coordinate of goal point
+    private static int ey = 14;                  // y-coordinate of goal point
     // GRAPH PROPERTIES - END
 
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
@@ -69,7 +71,8 @@ public class AnyAnglePathfinding {
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
-        traceAlgorithm();
+        findRestrictedVisibilityGraphIssues();
+//        traceAlgorithm();
     }
 
     /**
@@ -130,6 +133,8 @@ public class AnyAnglePathfinding {
                 return generateSeededRandomGraph(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
             case 13 :
                 return generateSeededRandomGraph(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
+            case 14 :
+                return generateSeededRandomGraph(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
             default :
                 return null;
         }
@@ -139,7 +144,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     private static void setDefaultAlgoFunction() {
-        int choice = 14; // adjust this to choose an algorithm
+        int choice = 16; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -189,6 +194,10 @@ public class AnyAnglePathfinding {
             case 15 :
                 //algoFunction = null; // reserved
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                break;
+            case 16 :
+                //algoFunction = null; // reserved
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
                 break;
         }
     }
@@ -343,9 +352,11 @@ public class AnyAnglePathfinding {
 
         if (!seededRandom) {
             seed = rand.nextInt();
-            System.out.println("Starting random with random seed = " + seed);
+            if (printSeed)
+                System.out.println("Starting random with random seed = " + seed);
         } else {
-            System.out.println("Starting random with predefined seed = " + seed);
+            if (printSeed)
+                System.out.println("Starting random with predefined seed = " + seed);
         }
         rand = new Random(seed);
         
@@ -536,12 +547,15 @@ public class AnyAnglePathfinding {
 //        algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
 //        runTests("BasicThetaStar-PS_TI");
         
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
+        runTests("VisibilityGraph_REUSE");
+        
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        runTests("RestrictedVisibilityGraph");
+        
         // Warning: VisibilityGraph is slow
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-//        runTests("VisibilityGraph");
-//        
-//        algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
-//        runTests("VisibilityGraph_REUSE");
+        algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        runTests("VisibilityGraph");
         
 //        algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
 //        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
@@ -564,7 +578,7 @@ public class AnyAnglePathfinding {
      */
     private static void runTests(String algoName) {
         //runTest(algoName, 4, PathLengthClass.LONGEST);
-        for (int i=1; i<=8; i++) {
+        for (int i=1; i<=6; i++) {
             runTest(algoName, i, PathLengthClass.ALL);
         }
     }
@@ -682,7 +696,7 @@ public class AnyAnglePathfinding {
         int sum = 0;
         long sumSquare = 0;
         
-        sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
+        //sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
         for (int s = 0; s < sampleSize; s++) {
             long start = System.currentTimeMillis();
             for (int i=0;i<nTrials;i++) {
@@ -762,9 +776,67 @@ public class AnyAnglePathfinding {
                 }
             }
         }
+    }
+    
+    private static void findRestrictedVisibilityGraphIssues() {
+        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);;
+        AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         
-        
-        
+        printSeed = false; // keep this commented out.
+        Random seedRand = new Random(-3);
+        int initial = seedRand.nextInt();
+        for (int i=0; i<50000000; i++) {
+            int sizeX = seedRand.nextInt(30) + 10;
+            int sizeY = seedRand.nextInt(30) + 10;
+            int seed = i+initial;
+            int ratio = seedRand.nextInt(30) + 5;
+            
+            int max = (sizeX+1)*(sizeY+1);
+            int p1 = seedRand.nextInt(max);
+            int p2 = seedRand.nextInt(max-1);
+            if (p2 == p1) {
+                p2 = max-1;
+            }
+            
+            int sx = p1%(sizeX+1);
+            int sy = p1/(sizeX+1);
+            int ex = p2%(sizeX+1);
+            int ey = p2/(sizeX+1);
+
+            float restPathLength = 0, normalPathLength = 0;
+            try {
+            GridGraph gridGraph = generateSeededRandomGraph(seed, sizeX, sizeY, ratio, 0, 0, 0, 0);
+            algoFunction = rVGA;
+            int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
+            restPathLength = computePathLength(gridGraph, path);
+
+            algoFunction = VGA;
+            path = generatePath(gridGraph, sx, sy, ex, ey);
+            normalPathLength = computePathLength(gridGraph, path);
+            }catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("EXCEPTION OCCURRED!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                break;
+            }
+            
+            if (restPathLength != normalPathLength) {
+                System.out.println("============");
+                System.out.println("Discrepancy Discovered!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
+                System.out.println("============");
+                throw new UnsupportedOperationException("DISCREPANCY!!");
+            } else {
+                if (i%10000 == 9999) {
+                    System.out.println("Count: " + (i+1));
+                    System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                    System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
+                }
+            }
+        }
     }
     
     private static void testAbilityToFindGoal() {

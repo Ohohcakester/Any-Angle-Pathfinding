@@ -12,13 +12,13 @@ public class VisibilityGraph {
     private static VisibilityGraph storedVisibilityGraph;
     private static GridGraph storedGridGraph;
     
-    private final GridGraph graph;
-    private int[][] nodeIndex;
-    private int startIndex;
-    private boolean startIsNewNode;
-    private int endIndex;
-    private boolean endIsNewNode;
-    private final int sx, sy, ex, ey;
+    protected final GridGraph graph;
+    protected int[][] nodeIndex;
+    protected int startIndex;
+    protected boolean startIsNewNode;
+    protected int endIndex;
+    protected boolean endIsNewNode;
+    protected final int sx, sy, ex, ey;
     
     private Runnable saveSnapshot;
     
@@ -51,7 +51,7 @@ public class VisibilityGraph {
         addStartAndEnd(sx, sy, ex, ey);
     }
 
-    private void addNodes() {
+    protected void addNodes() {
         nodeIndex = new int[graph.sizeY+1][];
         for (int y=0;y<nodeIndex.length;y++) {
             nodeIndex[y] = new int[graph.sizeX+1];
@@ -65,14 +65,14 @@ public class VisibilityGraph {
         }
     }
 
-    private int assignNode(int x, int y) {
+    protected final int assignNode(int x, int y) {
         int index = nodeList.size();
         nodeList.add(new Point(x,y));
         outgoingEdgeList.add(new LinkedList<Edge>());
         return index;
     }
 
-    private int assignNodeAndConnect(int x, int y) {
+    protected int assignNodeAndConnect(int x, int y) {
         int index = nodeList.size();
         nodeList.add(new Point(x,y));
         outgoingEdgeList.add(new LinkedList<Edge>());
@@ -92,7 +92,7 @@ public class VisibilityGraph {
     /**
      * Assumption: start and end are the last two nodes, if they exist.
      */
-    private void removeStartAndEnd() {
+    protected void removeStartAndEnd() {
         if (startIsNewNode) {
             int index = nodeList.size()-1;
             nodeIndex[sy][sx] = -1;
@@ -113,14 +113,14 @@ public class VisibilityGraph {
         }
     }
     
-    private void removeInstancesOf(int index) {
+    protected final void removeInstancesOf(int index) {
         for (LinkedList<Edge> edgeList : outgoingEdgeList) {
             Edge edge = new Edge(0, index, 0);
             edgeList.remove(edge);
         }
     }
     
-    private void addStartAndEnd(int sx, int sy, int ex, int ey) {
+    protected void addStartAndEnd(int sx, int sy, int ex, int ey) {
         if (isNode(sx, sy)) {
             startIndex = indexOf(sx, sy);
             startIsNewNode = false;
@@ -138,7 +138,7 @@ public class VisibilityGraph {
         }
     }
     
-    private void addAllEdges() {
+    protected void addAllEdges() {
         int saveFactor = nodeList.size()/10;
         if (saveFactor == 0) saveFactor = 1;
         
@@ -158,29 +158,29 @@ public class VisibilityGraph {
         }
     }
     
-    private float computeWeight(int x1, int y1, int x2, int y2) {
+    protected final float computeWeight(int x1, int y1, int x2, int y2) {
         int dx = x2-x1;
         int dy = y2-y1;
         return (float)Math.sqrt(dx*dx + dy*dy);
     }
     
     
-    private void addEdge(int fromI, int toI, float weight) {
+    protected final void addEdge(int fromI, int toI, float weight) {
         LinkedList<Edge> edgeList = outgoingEdgeList.get(fromI);
         edgeList.add(new Edge(fromI, toI, weight));
     }
     
     
-    private int indexOf(int x, int y) {
+    protected int indexOf(int x, int y) {
         return nodeIndex[y][x];
     }
     
-    private boolean isNode(int x, int y) {
+    protected boolean isNode(int x, int y) {
         return nodeIndex[y][x] != -1;
     }
     
 
-    private boolean isCorner(int x, int y) {
+    protected final boolean isCorner(int x, int y) {
         boolean a = graph.isBlocked(x-1, y-1);
         boolean b = graph.isBlocked(x, y-1);
         boolean c = graph.isBlocked(x, y);

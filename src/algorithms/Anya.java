@@ -1168,12 +1168,11 @@ public class Anya extends PathFindingAlgorithm {
         int[][] path = new int[pathList.size()][];
         return pathList.toArray(path);
     }
-    
-    
-    
-    
-    
 
+    protected float getPathLength() {
+        throw new UnsupportedOperationException("Not implemented yet...");
+    }
+    
     private void tryRecordInterval(int y, Fraction xL, Fraction xR, Point parent) {
         if (recordList != null) {
             recordList.add(new ExploredInterval(xR,xL,y, parent));

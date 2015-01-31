@@ -213,6 +213,30 @@ public class AStar extends PathFindingAlgorithm {
         return path;
     }
     
+    protected float getPathLength() {
+        int current = finish;
+        if (current == -1) return -1;
+        
+        float pathLength = 0;
+        
+        int prevX = toTwoDimX(current);
+        int prevY = toTwoDimY(current);
+        current = parent[current];
+        
+        while (current != -1) {
+            int x = toTwoDimX(current);
+            int y = toTwoDimY(current);
+            
+            pathLength += graph.distance(x, y, prevX, prevY);
+            
+            current = parent[current];
+            prevX = x;
+            prevY = y;
+        }
+        
+        return pathLength;
+    }
+    
     @Override
     protected boolean selected(int index) {
         return visited[index];

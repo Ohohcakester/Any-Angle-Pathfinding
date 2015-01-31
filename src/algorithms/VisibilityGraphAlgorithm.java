@@ -14,9 +14,9 @@ import algorithms.visibilitygraph.Edge;
 import algorithms.visibilitygraph.VisibilityGraph;
 
 public class VisibilityGraphAlgorithm extends AStar {
-    private VisibilityGraph visibilityGraph;
-    private boolean reuseGraph = false;
-    private boolean slowDijkstra = false;
+    protected VisibilityGraph visibilityGraph;
+    protected boolean reuseGraph = false;
+    protected boolean slowDijkstra = false;
     
     public VisibilityGraphAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -64,7 +64,7 @@ public class VisibilityGraphAlgorithm extends AStar {
         }
     }
     
-    private void slowDijkstra() {
+    protected void slowDijkstra() {
         int finish = visibilityGraph.endNode();
         while (true) {
             int current = findMinDistance();
@@ -101,7 +101,7 @@ public class VisibilityGraphAlgorithm extends AStar {
         return minIndex;
     }
 
-    private void pqDijkstra() {
+    protected void pqDijkstra() {
         pq = new IndirectHeap<Float>(distance, true);
         pq.heapify();
         
@@ -202,7 +202,7 @@ public class VisibilityGraphAlgorithm extends AStar {
         return null;
     }
     
-    private void saveVisibilityGraphSnapshot() {
+    protected void saveVisibilityGraphSnapshot() {
         /*if (!isRecording()) {
             return;
         }*/
