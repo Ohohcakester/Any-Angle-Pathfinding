@@ -1,3 +1,4 @@
+package main;
 /**
  * <pre>
  *  SHORTEST, // 0-25th percentile

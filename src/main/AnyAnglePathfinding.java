@@ -1,3 +1,4 @@
+package main;
 import grid.GridGraph;
 import grid.ReachableNodes;
 
