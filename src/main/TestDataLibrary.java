@@ -2,6 +2,7 @@ package main;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import main.graphgeneration.GraphInfo;
 import algorithms.datatypes.Point;
 
 
@@ -285,23 +286,6 @@ public class TestDataLibrary {
     }
 }
 
-
-class GraphInfo {
-    public final int seed;
-    public final int sizeX;
-    public final int sizeY;
-    public final int ratio;
-    public final int nTrials;
-    
-    public GraphInfo(int seed, int sizeX, int sizeY, int ratio, int nTrials) {
-        this.seed = seed;
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
-        this.ratio = ratio;
-        this.nTrials = nTrials;
-    }
-    
-}
 
 class StartEndPointData {
     public final Point start;

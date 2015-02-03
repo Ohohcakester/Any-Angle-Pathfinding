@@ -1,6 +1,8 @@
 package main;
+import grid.GridAndGoals;
 import grid.GridGraph;
 import grid.ReachableNodes;
+import grid.StartGoalPoints;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
+import main.graphgeneration.DefaultGenerator;
+import main.graphgeneration.GraphInfo;
 import uiandio.CloseOnExitWindowListener;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
@@ -41,24 +45,9 @@ import draw.KeyToggler;
  * 
  * The tracing / experimentation functions are detailed in the traceAlgorithm() method.
  */
-public class AnyAnglePathfinding {
-    public static Random rand = new Random();
-    
+public class AnyAnglePathfinding {    
     private static String PATH_TESTDATA_NAME = "testdata/";
 
-    // GRAPH PROPERTIES - START
-    private static int unblockedRatio = 9;     // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-    private static boolean seededRandom = true; // set to true to use the seed. false to generate a new graph every time.
-    private static int seed = 567069235;       // seed for the random. does nothing if seededRandom == false.
-    
-    private static int sizeX = 20;              // x-axis size of grid
-    private static int sizeY = 20;              // y-axis size of grid
-
-    private static int sx = 2;                  // x-coordinate of start point
-    private static int sy = 14;                  // y-coordinate of start point
-    private static int ex = 13;                  // x-coordinate of goal point
-    private static int ey = 4;                  // y-coordinate of goal point
-    // GRAPH PROPERTIES - END
 
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
@@ -75,7 +64,7 @@ public class AnyAnglePathfinding {
      */
     private static void traceAlgorithm() {
         setDefaultAlgoFunction();           // choose an algorithm (go into this method to choose)
-        GridGraph gridGraph = loadMaze();   // choose a grid (go into this method to choose)
+        GridAndGoals gridAndGoals = loadMaze();   // choose a grid (go into this method to choose)
 
         // This is how to generate test data for the grid. (Use the VisibilityGraph algorithm to generate optimal path lengths)
 //        ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
@@ -90,44 +79,66 @@ public class AnyAnglePathfinding {
 //        System.out.println(test2);
         
         // Call this to record and display the algorithm in operation.
-        displayAlgorithmOperation(gridGraph);
+        displayAlgorithmOperation(gridAndGoals.gridGraph, gridAndGoals.startGoalPoints);
     }
 
     /**
      * Choose a maze. (a gridGraph setting)
      */
-    private static GridGraph loadMaze() {
-        int choice = 0; // Adjust this to choose a maze.
+    private static GridAndGoals loadMaze() {
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
-            case 0 :
-                return generateSeededRandomGraph(); // Use the data given above to generate a graph
-            case 1 :
-                return importGraphFromFile("maze.txt", 25, 17, 2, 9);
+            case 0 : {// UNSEEDED
+                int unblockedRatio = 9;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int sizeX = 20;               // x-axis size of grid
+                int sizeY = 20;               // y-axis size of grid
+
+                int sx = 2;                   // x-coordinate of start point
+                int sy = 14;                  // y-coordinate of start point
+                int ex = 13;                  // x-coordinate of goal point
+                int ey = 4;                   // y-coordinate of goal point
+                return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
+            }
+            case 1 : { // SEEDED
+                int unblockedRatio = 9;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 567069235;        // seed for the random.
+                
+                int sizeX = 20;              // x-axis size of grid
+                int sizeY = 20;              // y-axis size of grid
+
+                int sx = 2;                  // x-coordinate of start point
+                int sy = 14;                 // y-coordinate of start point
+                int ex = 13;                 // x-coordinate of goal point
+                int ey = 4;                  // y-coordinate of goal point
+                return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
+            }
             case 2 :
-                return generateSeededRandomGraph(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
+                return importGraphFromFile("maze.txt", 25, 17, 2, 9);
             case 3 :
-                return generateSeededRandomGraph(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
+                return DefaultGenerator.generateSeeded(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
             case 4 :
-                return generateSeededRandomGraph(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
+                return DefaultGenerator.generateSeeded(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
             case 5 :
-                return generateSeededRandomGraph(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
+                return DefaultGenerator.generateSeeded(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
             case 6 :
-                return importGraphFromFile("maze14x11.txt", 0, 0, 10, 10); // Maze to contradict Theta* / A*
+                return DefaultGenerator.generateSeeded(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
             case 7 :
-                return importGraphFromFile("mazeWCS.txt", 2, 0, 28, 25); // Worst Case Scenario path length.
+                return importGraphFromFile("maze14x11.txt", 0, 0, 10, 10); // Maze to contradict Theta* / A*
             case 8 :
-                return generateSeededRandomGraph(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
+                return importGraphFromFile("mazeWCS.txt", 2, 0, 28, 25); // Worst Case Scenario path length.
             case 9 :
-                return importGraphFromFile("mazeThetaWCS.txt", 0, 0, 28, 13); // Worst Case Scenario for Theta*
+                return DefaultGenerator.generateSeeded(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
             case 10 :
-                return importGraphFromFile("mazeReuseWCS.txt", 1, 28, 0, 27); // Worst Case Scenario for Visibility Graph reuse.
+                return importGraphFromFile("mazeThetaWCS.txt", 0, 0, 28, 13); // Worst Case Scenario for Theta*
             case 11 :
-                return importGraphFromFile("anyaCont2.txt", 1, 6, 9, 1); // anya gives incorrect path
+                return importGraphFromFile("mazeReuseWCS.txt", 1, 28, 0, 27); // Worst Case Scenario for Visibility Graph reuse.
             case 12 :
-                return generateSeededRandomGraph(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
+                return importGraphFromFile("anyaCont2.txt", 1, 6, 9, 1); // anya gives incorrect path
             case 13 :
-                return generateSeededRandomGraph(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
+                return DefaultGenerator.generateSeeded(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
+            case 14 :
+                return DefaultGenerator.generateSeeded(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             default :
                 return null;
         }
@@ -240,8 +251,8 @@ public class AnyAnglePathfinding {
      * Note: the algorithm used is the one specified in the algoFunction.
      * Use setDefaultAlgoFunction to choose the algorithm.
      */
-    private static boolean hasSolution(GridGraph gridGraph) {
-        int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
+    private static boolean hasSolution(GridGraph gridGraph, StartGoalPoints p) {
+        int[][] path = generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
         return path.length > 1;
     }
 
@@ -251,10 +262,10 @@ public class AnyAnglePathfinding {
      * Use setDefaultAlgoFunction to choose the algorithm.
      * @param gridGraph the grid to operate on.
      */
-    private static void displayAlgorithmOperation(GridGraph gridGraph) {
+    private static void displayAlgorithmOperation(GridGraph gridGraph, StartGoalPoints p) {
         GridLineSet gridLineSet = new GridLineSet();
         
-        int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
+        int[][] path = generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
         
         for (int i=0; i<path.length-1; i++) {
             gridLineSet.addLine(path[i][0], path[i][1],
@@ -265,10 +276,10 @@ public class AnyAnglePathfinding {
 
         System.out.println(Arrays.deepToString(path));
 
-        LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, sx, sy, ex, ey);
+        LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, p.sx, p.sy, p.ex, p.ey);
         lineSetList.addFirst(new GridObjects(gridLineSet, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
-        drawCanvas.setStartAndEnd(sx, sy, ex, ey);
+        drawCanvas.setStartAndEnd(p.sx, p.sy, p.ex, p.ey);
         
         setupMainFrame(drawCanvas, lineSetList);
     }
@@ -289,12 +300,10 @@ public class AnyAnglePathfinding {
      * Import a graph from a file in the AnyAnglePathFinding directory,
      * and also set the start and goal points.
      */
-    private static GridGraph importGraphFromFile(String filename, int _sx, int _sy, int _ex, int _ey) {
-        sx = _sx;
-        sy = _sy;
-        ex = _ex;
-        ey = _ey;
-        return importGraphFromFile(filename);
+    private static GridAndGoals importGraphFromFile(String filename, int sx, int sy, int ex, int ey) {
+    	GridGraph gridGraph = importGraphFromFile(filename);
+        
+    	return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
     /**
@@ -305,53 +314,6 @@ public class AnyAnglePathfinding {
         GridGraph gridGraph;
         GraphImporter graphImporter = new GraphImporter(filename);
         gridGraph = graphImporter.retrieve();
-        return gridGraph;
-    }
-    
-    /**
-     * Generates a graph using the parameters specified in the arguments.
-     * @param _seed The random seed to be used
-     * @param _sizeX x-axis size
-     * @param _sizeY y-axis size
-     * @param _ratio chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-     * @param _sx x-coordinate of start point
-     * @param _sy y-coordinate of start point
-     * @param _ex x-coordinate of goal point
-     * @param _ey y-coordinate of goal point
-     * @return the generated gridGraph.
-     */
-    private static GridGraph generateSeededRandomGraph(int _seed, int _sizeX, int _sizeY, int _ratio, int _sx, int _sy, int _ex, int _ey) {
-        seededRandom = true;
-        seed =_seed;
-        sizeX = _sizeX;
-        sizeY = _sizeY;
-        unblockedRatio = _ratio;
-        sx = _sx;
-        sy = _sy;
-        ex = _ex;
-        ey = _ey;
-        return generateSeededRandomGraph();
-    }
-
-    /**
-     * Generates a graph using the static parameters defined at the beginning of the class.
-     */
-    private static GridGraph generateSeededRandomGraph() {
-        GridGraph gridGraph = new GridGraph(sizeX, sizeY);
-
-        if (!seededRandom) {
-            seed = rand.nextInt();
-            System.out.println("Starting random with random seed = " + seed);
-        } else {
-            System.out.println("Starting random with predefined seed = " + seed);
-        }
-        rand = new Random(seed);
-        
-        generateRandomBlockMap(gridGraph, unblockedRatio);
-        fillCorners(gridGraph);
-
-        gridGraph.trySetBlocked(sx, sy, false);
-        gridGraph.trySetBlocked(ex, ey, false);
         return gridGraph;
     }
 
@@ -390,11 +352,12 @@ public class AnyAnglePathfinding {
             int amount) {
         GridLineSet gridLineSet = new GridLineSet();
         
+        Random rand = new Random();
         for (int i=0; i<amount; i++) {
-            int x1 = rand.nextInt(sizeX);
-            int y1 = rand.nextInt(sizeY);
-            int x2 = rand.nextInt(sizeX);
-            int y2 = rand.nextInt(sizeY);
+            int x1 = rand.nextInt(gridGraph.sizeX);
+            int y1 = rand.nextInt(gridGraph.sizeY);
+            int x2 = rand.nextInt(gridGraph.sizeX);
+            int y2 = rand.nextInt(gridGraph.sizeY);
 
             testAndAddLine(x1,y1,x2,y2,gridGraph,gridLineSet);
         }
@@ -414,92 +377,6 @@ public class AnyAnglePathfinding {
             gridLineSet.addLine(x1, y1, x2, y2, Color.GREEN);
         } else {
             gridLineSet.addLine(x1, y1, x2, y2, Color.RED);
-        }
-    }
-    
-    /**
-     * Generates a truly random map for the gridGraph.
-     * No longer used as this does not generate very good or realistic grids.
-     */
-    private static void generateRandomMap(GridGraph gridGraph, int frequency) {
-        for (int x = 0; x < sizeX; x++) {
-            for (int y = 0; y < sizeY; y++) {
-                gridGraph.setBlocked(x, y, rand.nextInt()%frequency == 0);
-            }
-        }
-    }
-
-    /**
-     * Post-processing step to remove situations like this:
-     * <pre>
-     *   ___ ___
-     *  |   |||||
-     *  |...X'''|
-     *  |||||___|</pre>
-     * An unblocked path can pass through x from the top left to the bottom right.<br>
-     * We fix this by filling up the gaps with additional blocks.
-     */
-    private static void fillCorners(GridGraph gridGraph) {
-        boolean didSomething = true;;
-        while (didSomething) {
-            didSomething = false;
-            for (int x = 0; x < sizeX; x++) {
-                for (int y = 0; y < sizeY; y++) {
-                    if (gridGraph.isBlocked(x, y)) {
-                        if (gridGraph.isValidBlock(x+1, y+1) && gridGraph.isBlocked(x+1, y+1)) {
-                            if (!gridGraph.isBlocked(x+1, y) && !gridGraph.isBlocked(x, y+1)) {
-                                if (rand.nextBoolean())
-                                    gridGraph.setBlocked(x+1, y, true);
-                                else
-                                    gridGraph.setBlocked(x, y+1, true);
-                                didSomething = true;
-                            }
-                        }
-
-                        if (gridGraph.isValidBlock(x-1, y+1) && gridGraph.isBlocked(x-1, y+1)) {
-                            if (!gridGraph.isBlocked(x-1, y) && !gridGraph.isBlocked(x, y+1)) {
-                                if (rand.nextBoolean())
-                                    gridGraph.setBlocked(x-1, y, true);
-                                else
-                                    gridGraph.setBlocked(x, y+1, true);
-                                didSomething = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Generates a random "block" map for the gridGraph.<br>
-     * This generates more realistic grids by spawning clusters of blocks
-     * instead of simply spawning random blocks.
-     */
-    private static void generateRandomBlockMap(GridGraph gridGraph, int frequency) {
-        for (int x = 0; x < sizeX; x++) {
-            for (int y = 0; y < sizeY; y++) {
-                if (rand.nextInt(frequency) == 0) {
-                    switch(rand.nextInt(3)) {
-                        case 0:
-                            gridGraph.trySetBlocked(x, y, true);
-                            gridGraph.trySetBlocked(x, y+1, true);
-                            gridGraph.trySetBlocked(x+1, y, true);
-                            gridGraph.trySetBlocked(x+1, y+1, true);
-                            break;
-                        case 1:
-                            gridGraph.trySetBlocked(x, y-1, true);
-                            gridGraph.trySetBlocked(x, y, true);
-                            gridGraph.trySetBlocked(x, y+1, true);
-                            break;
-                        case 2:
-                            gridGraph.trySetBlocked(x-1, y, true);
-                            gridGraph.trySetBlocked(x, y, true);
-                            gridGraph.trySetBlocked(x+1, y, true);
-                            break;
-                    }
-                }
-            }
         }
     }
 
@@ -580,8 +457,8 @@ public class AnyAnglePathfinding {
         
         TestDataLibrary library = new TestDataLibrary(index, pathLengthClass);
         GraphInfo graphInfo = library.getGraphInfo();
-        GridGraph gridGraph = generateSeededRandomGraph(graphInfo.seed,
-                graphInfo.sizeX, graphInfo.sizeY, graphInfo.ratio, 0,0,0,0);
+        GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(
+                graphInfo.seed, graphInfo.sizeX, graphInfo.sizeY, graphInfo.ratio);
         System.out.println("Percentage Blocked:" + gridGraph.getPercentageBlocked());
         
         FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + filename + ".txt");
@@ -680,7 +557,7 @@ public class AnyAnglePathfinding {
         int sum = 0;
         long sumSquare = 0;
         
-        sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
+        //sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
         for (int s = 0; s < sampleSize; s++) {
             long start = System.currentTimeMillis();
             for (int i=0;i<nTrials;i++) {
@@ -733,7 +610,7 @@ public class AnyAnglePathfinding {
             int ex = p2%(sizeX+1);
             int ey = p2/(sizeX+1);
 
-            GridGraph gridGraph = generateSeededRandomGraph(seed, sizeX, sizeY, ratio, 0, 0, 0, 0);
+            GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
             algoFunction = bfs;
             int[][] path = generatePath(gridGraph, sx, sy, ex, ey);
             float pathLength = computePathLength(gridGraph, path);
@@ -776,7 +653,7 @@ public class AnyAnglePathfinding {
                 int currentSize = 10 + i*10;
                 int currentSeed = seedGenerator.nextInt();
                 
-                GridGraph gridGraph = generateSeededRandomGraph(currentSeed, currentSize, currentSize, currentRatio, 0, 0, currentSize, currentSize);
+                GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(currentSeed, currentSize, currentSize, currentRatio, 0, 0, currentSize, currentSize);
                 VisibilityGraph vGraph = new VisibilityGraph(gridGraph, 0, 0, currentSize, currentSize);
                 vGraph.initialise();
                 
