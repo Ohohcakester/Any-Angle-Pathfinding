@@ -31,10 +31,13 @@ public class AnyAnglePathfinding {
         switch(choice) {
             case 0:
                 Visualisation.run();
+                break;
             case 1:
                 AlgoTest.run();
+                break;
             case 2:
                 Experiment.run();
+                break;
         }
     }
     
