@@ -1,4 +1,5 @@
 package uiandio;
+import grid.GridAndGoals;
 import grid.GridGraph;
 
 import java.io.File;
@@ -69,5 +70,25 @@ public class GraphImporter {
     
     public GridGraph retrieve() {
         return gridGraph;
+    }
+
+    /**
+     * Import a graph from a file in the AnyAnglePathFinding directory.
+     * Look into the GraphImporter documentation for details on how to create a grid file.
+     */
+    public static GridGraph importGraphFromFile(String filename) {
+        GridGraph gridGraph;
+        GraphImporter graphImporter = new GraphImporter(filename);
+        gridGraph = graphImporter.retrieve();
+        return gridGraph;
+    }
+
+    /**
+     * Import a graph from a file in the AnyAnglePathFinding directory,
+     * and also set the start and goal points.
+     */
+    public static GridAndGoals importGraphFromFile(String filename, int sx, int sy, int ex, int ey) {
+    	GridGraph gridGraph = GraphImporter.importGraphFromFile(filename);
+    	return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 }
