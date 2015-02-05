@@ -2,9 +2,12 @@ package algorithms;
 
 import grid.GridGraph;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import algorithms.datatypes.SnapshotItem;
 
@@ -116,10 +119,23 @@ public abstract class PathFindingAlgorithm {
     
     protected List<SnapshotItem> computeSearchSnapshot() {
         List<SnapshotItem> list = new ArrayList<>();
+        int current = toOneDimIndex(ex, ey);
+        Set<Integer> finalPathSet = null;
+        if (parent[current] != -1) {
+            finalPathSet = new HashSet<Integer>();
+            while (current != -1) {
+                finalPathSet.add(current);
+                current = parent[current];
+            }
+        }
         
         for (int i=0; i<parent.length; i++) {
             if (parent[i] != -1) {
-                list.add(new SnapshotItem(snapshotEdge(i)));
+                if (finalPathSet != null && finalPathSet.contains(i)) {
+                    list.add(new SnapshotItem(snapshotEdge(i), Color.BLUE));
+                } else {
+                    list.add(new SnapshotItem(snapshotEdge(i)));
+                }
             }
             Integer[] vertexSnapshot = snapshotVertex(i);
             if (vertexSnapshot != null) {
