@@ -157,7 +157,7 @@ public class Experiment {
             int ex = p2%(sizeX+1);
             int ey = p2/(sizeX+1);
     
-            GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
+            GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnlyOld(seed, sizeX, sizeY, ratio);
             AnyAnglePathfinding.algoFunction = bfs;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
             float pathLength = Utility.computePathLength(gridGraph, path);
@@ -189,10 +189,10 @@ public class Experiment {
      * The results are output to the file VisibilityGraphSizes.txt.
      */
     private static void testVisibilityGraphSize() {
-        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA_NAME + "VisibilityGraphSizes.txt");
+        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA + "VisibilityGraphSizes.txt");
         Random seedGenerator = new Random();
         
-        fileIO.writeLine("Seed", "Size", "%Blocked", "Vertices", "Edges (Directed)");
+        fileIO.writeRow("Seed", "Size", "%Blocked", "Vertices", "Edges (Directed)");
         for (int i=0; i<30; i++) {
             for (int r=0; r<3; r++) {
                 int currentRatio = (r == 0 ? 7 : (r == 1 ? 15 : 50));
@@ -210,7 +210,7 @@ public class Experiment {
                 String verticesString = vGraph.size() + "";
                 String edgesString = vGraph.computeSumDegrees() + "";
                 
-                fileIO.writeLine(seedString, sizeString, ratioString, verticesString, edgesString);
+                fileIO.writeRow(seedString, sizeString, ratioString, verticesString, edgesString);
                 fileIO.flush();
             }
         }

@@ -25,7 +25,6 @@ public class Visualisation {
         traceAlgorithm();
     }
 
-
     /**
      * Conducts a trace of the current algorithm
      */
@@ -46,16 +45,21 @@ public class Visualisation {
     private static void displayAlgorithmOperation(GridGraph gridGraph, StartGoalPoints p) {
         GridLineSet gridLineSet = new GridLineSet();
         
-        int[][] path = Utility.generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
+        try {
+            int[][] path = Utility.generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
+            
+            for (int i=0; i<path.length-1; i++) {
+                gridLineSet.addLine(path[i][0], path[i][1],
+                        path[i+1][0], path[i+1][1], Color.BLUE);
+            }
+            float pathLength = Utility.computePathLength(gridGraph, path);
+            System.out.println("Path Length: " + pathLength);
         
-        for (int i=0; i<path.length-1; i++) {
-            gridLineSet.addLine(path[i][0], path[i][1],
-                    path[i+1][0], path[i+1][1], Color.BLUE);
+            System.out.println(Arrays.deepToString(path));
+        } catch (Exception e) {
+            System.out.println("Exception occurred during algorithm operation!");
+            e.printStackTrace();
         }
-        float pathLength = Utility.computePathLength(gridGraph, path);
-        System.out.println("Path Length: " + pathLength);
-    
-        System.out.println(Arrays.deepToString(path));
     
         LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, p.sx, p.sy, p.ex, p.ey);
         lineSetList.addFirst(new GridObjects(gridLineSet, null));

@@ -14,8 +14,8 @@ import algorithms.visibilitygraph.Edge;
 import algorithms.visibilitygraph.VisibilityGraph;
 
 public class VisibilityGraphAlgorithm extends AStar {
-    private VisibilityGraph visibilityGraph;
-    private boolean reuseGraph = false;
+    protected VisibilityGraph visibilityGraph;
+    protected boolean reuseGraph = false;
     private boolean slowDijkstra = false;
     
     public VisibilityGraphAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
@@ -35,8 +35,28 @@ public class VisibilityGraphAlgorithm extends AStar {
         return algo;
     }
 
+    public VisibilityGraph getVisibilityGraph() {
+        return visibilityGraph;
+    }
+    
     @Override
     public void computePath() {
+        setupVisibilityGraph();
+        
+        distance = new Float[visibilityGraph.size()];
+        parent = new int[visibilityGraph.size()];
+
+        initialise(visibilityGraph.startNode());
+        visited = new boolean[visibilityGraph.size()];
+        
+        if (slowDijkstra) {
+            slowDijkstra();
+        } else {
+            pqDijkstra();
+        }
+    }
+
+    protected void setupVisibilityGraph() {
         if (reuseGraph) {
             visibilityGraph = VisibilityGraph.getStoredGraph(graph, sx, sy, ex, ey);
         } else {
@@ -49,18 +69,6 @@ public class VisibilityGraphAlgorithm extends AStar {
             saveVisibilityGraphSnapshot();
         } else {
             visibilityGraph.initialise();
-        }
-        
-        distance = new Float[visibilityGraph.size()];
-        parent = new int[visibilityGraph.size()];
-
-        initialise(visibilityGraph.startNode());
-        visited = new boolean[visibilityGraph.size()];
-        
-        if (slowDijkstra) {
-            slowDijkstra();
-        } else {
-            pqDijkstra();
         }
     }
     
@@ -175,6 +183,11 @@ public class VisibilityGraphAlgorithm extends AStar {
         }
         
         return path;
+    }
+
+    @Override
+    protected int goalParentIndex() {
+        return visibilityGraph.endNode();
     }
 
     @Override

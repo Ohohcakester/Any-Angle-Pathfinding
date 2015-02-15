@@ -8,7 +8,7 @@ public class Utility {
     /**
      * Compute the length of a given path. (Using euclidean distance)
      */
-    static float computePathLength(GridGraph gridGraph, int[][] path) {
+    public static float computePathLength(GridGraph gridGraph, int[][] path) {
         float pathLength = 0;
         for (int i=0; i<path.length-1; i++) {
             pathLength += gridGraph.distance(path[i][0], path[i][1],
@@ -16,7 +16,7 @@ public class Utility {
         }
         return pathLength;
     }
-
+    
     /**
      * Generates a path between two points on a grid.
      * @return an array of int[2] indicating the coordinates of the path.

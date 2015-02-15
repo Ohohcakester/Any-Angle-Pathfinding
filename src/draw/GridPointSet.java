@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GridPointSet {
-    private ArrayList<Point> pointList;
+    private ArrayList<ColourPoint> pointList;
 
-    public class Point {
+    public class ColourPoint {
         public final Color color;
         public final int x;
         public final int y;
         
-        public Point(int x, int y, Color color) {
+        public ColourPoint(int x, int y, Color color) {
             this.color = color;
             this.x = x;
             this.y = y;
@@ -24,10 +24,10 @@ public class GridPointSet {
     }
     
     public void addPoint(int x, int y, Color color) {
-        pointList.add(new Point(x,y,color));
+        pointList.add(new ColourPoint(x,y,color));
     }
     
-    public Collection<Point> getPointList() {
+    public Collection<ColourPoint> getPointList() {
         return pointList;
     }
 }

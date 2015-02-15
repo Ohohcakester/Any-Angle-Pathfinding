@@ -1,4 +1,5 @@
 package uiandio;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
@@ -13,6 +14,10 @@ public class FileIO {
     private String SEPARATOR_COLUMN = "\t";
     private String SEPARATOR_ROW = System.lineSeparator();
     
+    public static boolean makeDirs(String path) {
+        return (new File(path)).mkdirs();
+    }
+    
     public FileIO(String filename) {
         try {
             printWriter = new PrintWriter(filename);
@@ -21,7 +26,12 @@ public class FileIO {
         }
     }
     
-    public void writeLine(String...strings) {
+    public void writeLine(String string) {
+        printWriter.write(string);
+        printWriter.write(SEPARATOR_ROW);
+    }
+    
+    public void writeRow(String...strings) {
         String separatorColumn = "";
         for (String string : strings) {
             printWriter.write(separatorColumn);

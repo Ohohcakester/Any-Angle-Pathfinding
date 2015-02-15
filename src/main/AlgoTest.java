@@ -98,8 +98,8 @@ public class AlgoTest {
         
         System.out.println("Percentage Blocked:" + gridGraph.getPercentageBlocked());
         
-        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA_NAME + filename + ".txt");
-        fileIO.writeLine("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
+        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA + filename + ".txt");
+        fileIO.writeRow("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
 
         TestResult tempRes = AlgoTest.testAlgorithm(gridGraph, 0, 0, 1, 0, 1, 1);
         System.out.println("Preprocess time: " + tempRes.time);
@@ -129,7 +129,7 @@ public class AlgoTest {
                 pathLengthRatio = "N/A";
             }
             
-            fileIO.writeLine(algorithm, maze, pathLength, shortestPathLength, pathLengthRatio, time, timeSD, start, end, nTrials);
+            fileIO.writeRow(algorithm, maze, pathLength, shortestPathLength, pathLengthRatio, time, timeSD, start, end, nTrials);
             fileIO.flush();
         }
         

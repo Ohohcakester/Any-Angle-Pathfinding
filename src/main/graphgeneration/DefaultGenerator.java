@@ -5,6 +5,11 @@ import grid.GridGraph;
 
 import java.util.Random;
 
+/**
+ * Generates a random "block map".
+ * A block map is made out of small 2x2 blocks and is guaranteed to have no squeezable corners.<br>
+ * Exception: the removed block at sx,sy and ex,ey.
+ */
 public class DefaultGenerator {
     
     /**
@@ -23,16 +28,29 @@ public class DefaultGenerator {
         GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
-
+    
     public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
         GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
-    public static GridGraph generateSeededGraphOnly(int seed, int sizeX, int sizeY, int unblockedRatio) {
+    /**
+     * For backwards compatibility. Removes the block at 0,0.
+     */
+    public static GridGraph generateSeededGraphOnlyOld(int seed, int sizeX, int sizeY, int unblockedRatio) {
         return generate(true, seed, sizeX, sizeY, unblockedRatio, 0,0,0,0);
     }
 
+    /**
+     * Does not remove the block at 0,0
+     */
+    public static GridGraph generateSeededGraphOnly(int seed, int sizeX, int sizeY, int unblockedRatio) {
+        return generate(true, seed, sizeX, sizeY, unblockedRatio, -1,-1,-1,-1);
+    }
+
+    /**
+     * Removes the blocks at sx,sy and ex,ey.
+     */
     public static GridGraph generateSeededGraphOnly(int seed, int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
         return generate(true, seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
     }

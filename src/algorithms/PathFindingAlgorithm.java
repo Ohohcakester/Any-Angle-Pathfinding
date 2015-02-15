@@ -82,15 +82,15 @@ public abstract class PathFindingAlgorithm {
     }
     
     protected int toOneDimIndex(int x, int y) {
-        return y*sizeXplusOne + x;
+        return graph.toOneDimIndex(x, y);
     }
     
     protected int toTwoDimX(int index) {
-        return index%sizeXplusOne;
+        return graph.toTwoDimX(index);
     }
     
     protected int toTwoDimY(int index) {
-        return index/sizeXplusOne;
+        return graph.toTwoDimY(index);
     }
     
     protected void maybeSaveSearchSnapshot() {
@@ -111,9 +111,13 @@ public abstract class PathFindingAlgorithm {
         snapshotList.addLast(snapshotItemList);
     }
     
+    protected int goalParentIndex() {
+        return toOneDimIndex(ex,ey);
+    }
+    
     protected List<SnapshotItem> computeSearchSnapshot() {
         List<SnapshotItem> list = new ArrayList<>();
-        int current = toOneDimIndex(ex, ey);
+        int current = goalParentIndex();
         Set<Integer> finalPathSet = null;
         if (parent[current] != -1) {
             finalPathSet = new HashSet<Integer>();
@@ -122,7 +126,7 @@ public abstract class PathFindingAlgorithm {
                 current = parent[current];
             }
         }
-        
+
         for (int i=0; i<parent.length; i++) {
             if (parent[i] != -1) {
                 if (finalPathSet != null && finalPathSet.contains(i)) {
