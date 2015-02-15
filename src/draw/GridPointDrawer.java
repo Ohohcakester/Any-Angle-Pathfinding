@@ -35,12 +35,12 @@ public class GridPointDrawer implements Drawer {
         if (gridPointSet == null) {
             return;
         }
-        for (GridPointSet.Point point : gridPointSet.getPointList()) {
+        for (GridPointSet.ColourPoint point : gridPointSet.getPointList()) {
             drawPoint(g, point);
         }
     }
     
-    private void drawPoint(Graphics g, GridPointSet.Point point) {
+    private void drawPoint(Graphics g, GridPointSet.ColourPoint point) {
         int x = (int)(width*point.x);
         int y = (int)(height*point.y);
         

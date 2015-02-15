@@ -1113,19 +1113,19 @@ public class Anya extends PathFindingAlgorithm {
     }
     
     private boolean topRightOfBlockedTile(int x, int y) {
-        return graph.isBlocked(x-1, y-1);
+        return graph.topRightOfBlockedTile(x, y);
     }
 
     private boolean topLeftOfBlockedTile(int x, int y) {
-        return graph.isBlocked(x, y-1);
+        return graph.topLeftOfBlockedTile(x, y);
     }
 
     private boolean bottomRightOfBlockedTile(int x, int y) {
-        return graph.isBlocked(x-1, y);
+        return graph.bottomRightOfBlockedTile(x, y);
     }
 
     private boolean bottomLeftOfBlockedTile(int x, int y) {
-        return graph.isBlocked(x, y);
+        return graph.bottomLeftOfBlockedTile(x, y);
     }
 
     private boolean rightOfBlockedTile(int x, int y) {

@@ -10,12 +10,15 @@ public class GridGraph {
     private boolean[][] tiles;
     public final int sizeX;
     public final int sizeY;
+    public final int sizeXplusOne;
     
     private final float SQRT_TWO = (float)Math.sqrt(2);
     
     public GridGraph(int sizeX, int sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+        this.sizeXplusOne = sizeX+1;
+        
         tiles = new boolean[sizeY][sizeX];
         for (int i = 0; i < sizeY; i++) {
             tiles[i] = new boolean[sizeX];
@@ -45,6 +48,35 @@ public class GridGraph {
     public boolean isValidBlock(int x, int y) {
         return (x < sizeX && y < sizeY &&
                 x >= 0 && y >= 0);
+    }
+
+    public int toOneDimIndex(int x, int y) {
+        return y*sizeXplusOne + x;
+    }
+    
+    public int toTwoDimX(int index) {
+        return index%sizeXplusOne;
+    }
+    
+    public int toTwoDimY(int index) {
+        return index/sizeXplusOne;
+    }
+
+    
+    public boolean topRightOfBlockedTile(int x, int y) {
+        return isBlocked(x-1, y-1);
+    }
+
+    public boolean topLeftOfBlockedTile(int x, int y) {
+        return isBlocked(x, y-1);
+    }
+
+    public boolean bottomRightOfBlockedTile(int x, int y) {
+        return isBlocked(x-1, y);
+    }
+
+    public boolean bottomLeftOfBlockedTile(int x, int y) {
+        return isBlocked(x, y);
     }
     
     /**
@@ -198,6 +230,13 @@ public class GridGraph {
      * @return the percentage of blocked tiles as compared to the total grid size.
      */
     public float getPercentageBlocked() {
+        return (float)getNumBlocked() / (sizeX*sizeY);
+    }
+    
+    /**
+     * @return the number of blocked tiles in the grid.
+     */
+    public int getNumBlocked() {
         int nBlocked = 0;
         for (int y=0; y<sizeY; y++) {
             for (int x=0; x<sizeX; x++) {
@@ -206,6 +245,6 @@ public class GridGraph {
                 }
             }
         }
-        return (float)nBlocked / (sizeX*sizeY);
+        return nBlocked;
     }
 }

@@ -3,6 +3,10 @@ package main;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
 import main.graphgeneration.GraphInfo;
+import main.testdata.PathLengthClass;
+import main.testdata.StandardMazes;
+import main.testdata.StartEndPointData;
+import main.testdata.TestDataLibrary;
 import uiandio.FileIO;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
@@ -55,7 +59,6 @@ public class AlgoTest {
         AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         runTests("VisibilityGraph");
         
-        
 //        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
 //        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
 
@@ -90,37 +93,25 @@ public class AlgoTest {
         String filename = algoName + "_Maze" + index + "_" + pathLengthClass.name();
         System.out.println("RUNNING TEST: " +  filename);
         
-        TestDataLibrary library = new TestDataLibrary(index, pathLengthClass);
-        GraphInfo graphInfo = library.getGraphInfo();
-        GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(
-                graphInfo.seed, graphInfo.sizeX, graphInfo.sizeY, graphInfo.ratio);
+        TestDataLibrary library = new StandardMazes(index, pathLengthClass);
+        GridGraph gridGraph = library.generateGraph();
+        
         System.out.println("Percentage Blocked:" + gridGraph.getPercentageBlocked());
         
-        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA_NAME + filename + ".txt");
-        //FileIO fileIO = new FileIO(PATH_TESTDATA_NAME + "test.txt");
-        fileIO.writeLine("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
-        /*double sumTime = 0;
-        double totalRatio = 1;
-        
-        int nDataTested = 0;*/
-    
-        TestResult tempRes = AlgoTest.testAlgorithm(gridGraph, 0,0,1,0, 1, 1);
+        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA + filename + ".txt");
+        fileIO.writeRow("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
+
+        TestResult tempRes = AlgoTest.testAlgorithm(gridGraph, 0, 0, 1, 0, 1, 1);
         System.out.println("Preprocess time: " + tempRes.time);
+        
         while (library.hasNextData()) {
             StartEndPointData data = library.getNextData();
             
             TestResult testResult = AlgoTest.testAlgorithm(gridGraph, data.start.x,
-                    data.start.y, data.end.x, data.end.y, 10, graphInfo.nTrials);
+                    data.start.y, data.end.x, data.end.y, 10, library.getNTrials());
             
             boolean valid = (testResult.pathLength > 0.00001f);
-            
             double ratio = testResult.pathLength/data.shortestPath;
-    
-            /*if (valid) {
-                nDataTested++;
-                sumTime += testResult.time;
-                totalRatio += ratio;
-            }*/
     
             String algorithm = algoName;
             String maze = index + "";
@@ -131,37 +122,17 @@ public class AlgoTest {
             String timeSD = testResult.timeSD + "";
             String start = data.start + "";
             String end = data.end + "";
-            String nTrials = graphInfo.nTrials + "";
+            String nTrials = library.getNTrials() + "";
             
             if (!valid) {
                 pathLength = "N/A";
                 pathLengthRatio = "N/A";
             }
             
-            fileIO.writeLine(algorithm, maze, pathLength, shortestPathLength, pathLengthRatio, time, timeSD, start, end, nTrials);
+            fileIO.writeRow(algorithm, maze, pathLength, shortestPathLength, pathLengthRatio, time, timeSD, start, end, nTrials);
             fileIO.flush();
         }
-        /*fileIO.writeLine("");
         
-        double averageTime = sumTime / nDataTested;
-        double averageRatio = totalRatio/nDataTested;
-        float lowestLength = library.getLowestComputedLength();
-        float highestLength = library.getHighestComputedLength();
-        float meanComputedLength = library.getMeanComputedLength();
-        float meanOverallLength = library.getOverallMeanLength();
-    
-        fileIO.writeLine("<<Overall Stats>>");
-        fileIO.writeLine("Average Time: ", averageTime+"");
-        fileIO.writeLine("Average Path Length Ratio: ", averageRatio+"");
-    
-        fileIO.writeLine("");
-        fileIO.writeLine("<<Dataset Stats>>");
-        fileIO.writeLine("Index " + index + ", Type " + pathLengthClass.name());
-        fileIO.writeLine("Shortest Length of Test Data: ", lowestLength+"");
-        fileIO.writeLine("Shortest Length of Test Data: ", highestLength+"");
-        fileIO.writeLine("Average Length of Test Data: ", meanComputedLength+"");
-        fileIO.writeLine("Average Length of all Test Data in maze " + index + ": ", meanOverallLength+"");
-        */
         fileIO.close();
     }
 

@@ -2,6 +2,7 @@ package main;
 import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
+import main.testdata.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AcceleratedAStar;
@@ -13,6 +14,7 @@ import algorithms.PathFindingAlgorithm;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
  * Instructions: Look for the main method.
@@ -25,7 +27,8 @@ import algorithms.VisibilityGraphAlgorithm;
  * The tracing / experimentation functions are detailed in the traceAlgorithm() method.
  */
 public class AnyAnglePathfinding {
-    static final String PATH_TESTDATA_NAME = "testdata/";
+    public static final String PATH_TESTDATA = "testdata/";
+    public static final String PATH_MAZEDATA = "mazedata/";
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
@@ -40,6 +43,9 @@ public class AnyAnglePathfinding {
                 break;
             case 2:
                 Experiment.run();
+                break;
+            case 3:
+                TestDataGenerator.run();
                 break;
         }
     }
@@ -110,7 +116,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 17; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -162,6 +168,9 @@ public class AnyAnglePathfinding {
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
                 break;
             case 16 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
+                break;
+            case 17 :
                 //algoFunction = null; // reserved
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
                 break;
