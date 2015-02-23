@@ -4,23 +4,21 @@ import grid.GridGraph;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
 
 
-public class DrawCanvas extends JPanel implements MouseListener{
+public class DrawCanvas extends JPanel {
 
     private static final int MAX_RES = 700;
-    private final int resY;
-    private final int resX;
+    public final int resY;
+    public final int resX;
     
     private final Drawer gridGraphDrawer;
     private Drawer gridLineDrawer;
     private Drawer gridPointDrawer;
     private Drawer startEndPointDrawer;
-    private final GridGraph gridGraph;
+    protected final GridGraph gridGraph;
     
     public DrawCanvas(GridGraph gridGraph, GridLineSet gridLineSet) {
         super();
@@ -38,7 +36,13 @@ public class DrawCanvas extends JPanel implements MouseListener{
         
         this.gridGraph = gridGraph;
         gridGraphDrawer = new GridGraphDrawer(gridGraph, resX, resY);
-        gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, resX, resY);
+        if (gridLineSet != null) {
+            gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, resX, resY);
+        }
+    }
+    
+    public DrawCanvas(GridGraph gridGraph) {
+        this(gridGraph, null);
     }
 
     public void setStartAndEnd(int sx, int sy, int ex, int ey) {
@@ -71,21 +75,10 @@ public class DrawCanvas extends JPanel implements MouseListener{
         gridPointDrawer = new GridPointDrawer(gridGraph, gridPointSet, resX, resY);
         repaint();
     }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
+    
+    public void changeSet(GridPointSet gridPointSet) {
+        gridPointDrawer = new GridPointDrawer(gridGraph, gridPointSet, resX, resY);
+        repaint();
     }
-    
-    @Override
-    public void mouseClicked(MouseEvent e) {}
-    
-    @Override
-    public void mousePressed(MouseEvent e) {}
-
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-
-    @Override
-    public void mouseExited(MouseEvent e) {}
 
 }

@@ -24,7 +24,7 @@ import java.util.Scanner;
 public class GraphImporter {
     private GridGraph gridGraph;
     
-    public GraphImporter(String fileName) {
+    private GraphImporter(String fileName) {
         boolean[][] result = null;
 
         File file = new File(fileName);
@@ -48,7 +48,7 @@ public class GraphImporter {
         create(result);          
     }
 
-    protected void create(boolean[][] result) {
+    private void create(boolean[][] result) {
         gridGraph = new GridGraph(result[0].length, result.length);
         for (int y=0;y<result.length;y++) {
             for (int x=0;x<result[0].length;x++) {
@@ -57,7 +57,7 @@ public class GraphImporter {
         }
     }
 
-    protected void createDoubleSize(boolean[][] result) {
+    private void createDoubleSize(boolean[][] result) {
         int size = 2;
         
         gridGraph = new GridGraph(result[0].length*size, result.length*size);
@@ -68,7 +68,7 @@ public class GraphImporter {
         }
     }
     
-    public GridGraph retrieve() {
+    private GridGraph retrieve() {
         return gridGraph;
     }
 

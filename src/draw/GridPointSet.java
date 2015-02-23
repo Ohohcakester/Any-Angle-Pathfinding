@@ -23,6 +23,10 @@ public class GridPointSet {
         pointList = new ArrayList<>();
     }
     
+    public void clear() {
+        pointList.clear();
+    }
+    
     public void addPoint(int x, int y, Color color) {
         pointList.add(new ColourPoint(x,y,color));
     }
