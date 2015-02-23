@@ -17,13 +17,14 @@ public class GridPointDrawer implements Drawer {
     private final float width;
     private final float height;
     
-    
     public GridPointDrawer(GridGraph gridGraph, GridPointSet gridPointSet, int resX, int resY) {
+        int minCircleSize = gridPointSet.minCircleSize();
+        
         this.resX = resX;
         this.resY = resY;
         width = (float)resX/gridGraph.sizeX;
         height = (float)resY/gridGraph.sizeY;
-        circleSize = (int)(width/4);
+        circleSize = Math.max((int)(width/4), minCircleSize);
         halfCircleSize = circleSize/2;
         
         this.gridGraph = gridGraph;

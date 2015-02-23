@@ -17,11 +17,25 @@ import draw.VisualiserMouseControls;
 public class GridGraphVisualiser {
 
     public static void run() {
-        loadMaze("maze14x11.txt");
+        loadMaze("mazeWCS.txt", "custom");
+        //loadExisting("def_iIRXXUKC_iUP_iUP_iSB");
     }
     
-    public static void loadMaze(String mazeName) {
-        GridGraph gridGraph = GraphImporter.importGraphFromFile(mazeName);
+    
+    public static void loadMaze(String mazeFileName, String classification) {
+        GridGraph gridGraph = GraphImporter.importGraphFromFile(mazeFileName);
+        
+        int dot = mazeFileName.lastIndexOf('.');
+        String mazeName = classification + "_" + mazeFileName.substring(0, dot);
+        
+        setupMainFrame(gridGraph, mazeName);
+    }
+
+    
+    public static void loadExisting(String mazeName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        
+        GridGraph gridGraph = GraphImporter.importGraphFromFile(path);
         setupMainFrame(gridGraph, mazeName);
     }
     

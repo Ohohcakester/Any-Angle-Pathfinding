@@ -6,6 +6,7 @@ import java.util.Collection;
 
 public class GridPointSet {
     private ArrayList<ColourPoint> pointList;
+    private int minCircleSize;
 
     public class ColourPoint {
         public final Color color;
@@ -23,6 +24,10 @@ public class GridPointSet {
         pointList = new ArrayList<>();
     }
     
+    public void setMinCircleSize() {
+        minCircleSize = 8;
+    }
+    
     public void clear() {
         pointList.clear();
     }
@@ -33,5 +38,12 @@ public class GridPointSet {
     
     public Collection<ColourPoint> getPointList() {
         return pointList;
+    }
+
+    public int minCircleSize() {
+        if (minCircleSize > 0) {
+            return minCircleSize;
+        }
+        return Integer.MIN_VALUE;
     }
 }

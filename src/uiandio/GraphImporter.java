@@ -3,6 +3,7 @@ import grid.GridAndGoals;
 import grid.GridGraph;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
@@ -41,6 +42,8 @@ public class GraphImporter {
                 }
             }
             sc.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File " + fileName + " not found!");
         } catch (IOException e) {
             e.printStackTrace();
         }

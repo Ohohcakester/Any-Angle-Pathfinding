@@ -23,6 +23,7 @@ public class EditorUI extends DrawCanvas {
         this.mazeName = mazeName;
         this.connectedSets = connectedSets;
         pointSet = new GridPointSet();
+        pointSet.setMinCircleSize();
         sx = sy = ex = ey = -1;
     }
     
