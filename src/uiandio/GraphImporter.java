@@ -93,6 +93,12 @@ public class GraphImporter {
         return gridGraph;
     }
     
+    public static GridAndGoals loadStoredMaze(String mazeName, String problemName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        TwoPoint tp = readProblem(problemName);
+        return importGraphFromFile(path, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+    }
+    
     public static GridGraph loadStoredMaze(String mazeName) {
         String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
         return importGraphFromFile(path);
@@ -114,10 +120,14 @@ public class GraphImporter {
     private static TwoPoint readProblem(File file) {
         String s = file.getName();
         s = s.substring(0, s.lastIndexOf('.')); // remove extension
-        String[] args = s.split("[-_]");
+        return readProblem(s);
+    }
+
+    private static TwoPoint readProblem(String problemName) {
+        String[] args = problemName.split("[-_]");
         
         if (args.length != 4)
-            throw new UnsupportedOperationException("Invalid problem name: " + s);
+            throw new UnsupportedOperationException("Invalid problem name: " + problemName);
         return new TwoPoint(
                 Integer.parseInt(args[0]),
                 Integer.parseInt(args[1]),

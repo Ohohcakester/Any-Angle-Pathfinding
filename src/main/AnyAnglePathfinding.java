@@ -69,16 +69,16 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 9;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int unblockedRatio = 1500;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
                 int seed = 567069235;        // seed for the random.
                 
-                int sizeX = 20;              // x-axis size of grid
-                int sizeY = 20;              // y-axis size of grid
+                int sizeX = 30;              // x-axis size of grid
+                int sizeY = 30;              // y-axis size of grid
 
-                int sx = 2;                  // x-coordinate of start point
-                int sy = 14;                 // y-coordinate of start point
-                int ex = 13;                 // x-coordinate of goal point
-                int ey = 4;                  // y-coordinate of goal point
+                int sx = 5;                  // x-coordinate of start point
+                int sy = 4;                 // y-coordinate of start point
+                int ex = 7;                 // x-coordinate of goal point
+                int ey = 29;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -107,6 +107,8 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
             case 14 :
                 return DefaultGenerator.generateSeeded(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
+            case 15 :
+                return GraphImporter.loadStoredMaze("def_iHHLNUOB_iMJ_iMJ_iSB", "23-102_149-107"); // issue for Strict Theta*
             default :
                 return null;
         }
@@ -116,7 +118,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 11; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
+import main.graphgeneration.DefaultGenerator;
 import main.testdata.PathLengthClass;
 import main.testdata.StandardMazes;
 import main.testdata.StartEndPointData;
@@ -26,12 +27,18 @@ public class AlgoTest {
         AlgoFunction thetaStar = (a,b,c,d,e) -> new BasicThetaStar(a,b,c,d,e);
         AlgoFunction accAStar = (a,b,c,d,e) -> new AcceleratedAStar(a,b,c,d,e);
         
-        AlgoFunction select = thetaStar;
+        AlgoFunction select = accAStar;
+
+        /*System.out.println("Low Density");
+        testOnMaze("def_iHHLNUOB_iMJ_iMJ_iSB", select, printAverage);*/
         
-        System.out.println("Low Density");
-        testOnMaze("def_iO2GZNB_iSB_iSB_iSB", select, printAverage);
-        System.out.println("High Density");
-        testOnMaze("def_i3GRHWMD_iSB_iSB_iH", select, printAverage);
+        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 50),
+                toTwoPointlist(15,14,37,79), select, printAverage);
+        
+//        System.out.println("Low Density");
+//        testOnMaze("def_iO2GZNB_iSB_iSB_iSB", select, printAverage);
+//        System.out.println("High Density");
+//        testOnMaze("def_i3GRHWMD_iSB_iSB_iH", select, printAverage);
     }
     
     public static ArrayList<TwoPoint> toTwoPointlist(int...points) {
@@ -48,9 +55,13 @@ public class AlgoTest {
         test.test(mazeName, gridGraph, problems, algoFunction);
     }
     
+    public static void testOnGraph(GridGraph gridGraph, ArrayList<TwoPoint> problems, AlgoFunction algoFunction, TestFunction test) {
+        test.test("undefined", gridGraph, problems, algoFunction);
+    }
+    
     
     private static final TestFunction printAverage = (mazeName, gridGraph, problems, algoFunction) -> {
-        int sampleSize = 20;
+        int sampleSize = 100;
         int nTrials = 10;
         
         TestResult[] testResults = new TestResult[problems.size()];
@@ -92,7 +103,7 @@ public class AlgoTest {
         for (int s = 0; s < sampleSize; s++) {
             long start = System.currentTimeMillis();
             for (int i=0;i<nTrials;i++) {
-                AlgoTest.testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
+                AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
             }
             long end = System.currentTimeMillis();
             System.gc();
@@ -311,6 +322,12 @@ public class AlgoTest {
     private static void testAlgorithmSpeed(GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         PathFindingAlgorithm algo = AnyAnglePathfinding.algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+    }
+
+    private static void testAlgorithmSpeed(AlgoFunction algoFunction, GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         algo.computePath();
     }
 

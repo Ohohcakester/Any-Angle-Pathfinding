@@ -18,7 +18,7 @@ public class GridPointDrawer implements Drawer {
     private final float height;
     
     public GridPointDrawer(GridGraph gridGraph, GridPointSet gridPointSet, int resX, int resY) {
-        int minCircleSize = gridPointSet.minCircleSize();
+        int minCircleSize = gridPointSet == null ? Integer.MIN_VALUE : gridPointSet.minCircleSize();
         
         this.resX = resX;
         this.resY = resY;
