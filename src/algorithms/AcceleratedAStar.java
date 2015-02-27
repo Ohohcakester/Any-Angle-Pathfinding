@@ -3,13 +3,18 @@ package algorithms;
 import grid.GridGraph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import algorithms.priorityqueue.IndirectHeap;
 
 public class AcceleratedAStar extends AStar {
+    public int nQueries=0;
+    public int totalSize=0;
+    public int calls=0;
     
     private List<Integer> closed;
+    private int[][] maxRange;
     
     public AcceleratedAStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -18,9 +23,6 @@ public class AcceleratedAStar extends AStar {
 
     @Override
     public void computePath() {
-    //    System.out.println(graph.isBlocked(6, 2));
-    //}
-    //public void a(){
         int totalSize = (graph.sizeX+1) * (graph.sizeY+1);
 
         int start = toOneDimIndex(sx, sy);
@@ -28,6 +30,7 @@ public class AcceleratedAStar extends AStar {
         
         distance = new Float[totalSize];
         parent = new int[totalSize];
+        setupDownLeftRanges();
         
         initialise(start);
         visited = new boolean[totalSize];
@@ -48,7 +51,8 @@ public class AcceleratedAStar extends AStar {
 
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
-            
+
+            calls++;
             int maxSquare = detectMaxSquare(x, y);
             
             if (maxSquare == 0) {
@@ -60,7 +64,76 @@ public class AcceleratedAStar extends AStar {
             maybeSaveSearchSnapshot();
         }
         
-        maybePostSmooth();    
+        maybePostSmooth();
+    }
+
+    /**
+     * leftRange is the number of blocks you can move left before hitting a blocked tile.
+     * downRange is the number of blocks you can move down before hitting a blocked tile.
+     * For blocked tiles, leftRange, downRange are both -1.
+     */
+    private void setupDownLeftRanges() {
+        int[][] downRange = new int[sizeY+1][sizeX+1];
+        int[][] leftRange = new int[sizeY+1][sizeX+1];
+
+        for (int y=0; y<sizeY; ++y) {
+            if (graph.isBlocked(0, y))
+                leftRange[y][0] = -1;
+            else 
+                leftRange[y][0] = 0;
+            
+            for (int x=1; x<sizeX; ++x) {
+                if (graph.isBlocked(x, y)) {
+                    leftRange[y][x] = -1;
+                } else {
+                    leftRange[y][x] = leftRange[y][x-1] + 1;
+                }
+            }
+        }
+
+        for (int x=0; x<sizeX; ++x) {
+            if (graph.isBlocked(x, 0))
+                downRange[0][x] = -1;
+            else 
+                downRange[0][x] = 0;
+            
+            for (int y=1; y<sizeY; ++y) {
+                if (graph.isBlocked(x, y)) {
+                    downRange[y][x] = -1;
+                } else {
+                    downRange[y][x] = downRange[y-1][x] + 1;
+                }
+            }
+        }
+        
+        for (int x=0; x<sizeX+1; ++x) {
+            downRange[sizeY][x] = -1;
+            leftRange[sizeY][x] = -1;
+        }
+        
+        for (int y=0; y<sizeY; ++y) {
+            downRange[y][sizeX] = -1;
+            leftRange[y][sizeX] = -1;
+        }
+        
+        maxRange = new int[sizeX+sizeY+1][];
+        int maxSize = Math.min(sizeX, sizeY) + 1;
+        for (int i=0; i<maxRange.length; ++i) {
+            int currSize = Math.min(i+1, maxRange.length-i);
+            if (maxSize < currSize)
+                currSize = maxSize;
+            maxRange[i] = new int[currSize];
+            
+            int currX = i - sizeY;
+            if (currX < 0) currX = 0;
+            int currY = currX - i + sizeY;
+            for (int j=0; j<maxRange[i].length; ++j) {
+                maxRange[i][j] = Math.min(downRange[currY][currX], leftRange[currY][currX]);
+                currY++;
+                currX++;
+            }
+            
+        }
     }
 
     private void relaxSuccessorsSizeZero(int current, int x, int y) {
@@ -138,6 +211,7 @@ public class AcceleratedAStar extends AStar {
     }
 
     /**
+     * <pre>
      * returns the size of the max square at (x,y). can possibly return 0.
      * 1: XX
      *    XX
@@ -145,8 +219,34 @@ public class AcceleratedAStar extends AStar {
      * 2: XXX
      *    XXX
      *    XXX
+     * </pre>
      */
     private int detectMaxSquare(int x, int y) {
+        // This is the newer, O(n) method.
+        int lower = 0;
+        int upper = getMaxSize(x,y);
+        int newUpper;
+        int i = x-y+sizeY;
+        int j = Math.min(x, y);
+        if (upper <= lower) return 0;
+
+        while (true) {
+            newUpper = checkUpperBoundNew(i,j,lower);
+            if (newUpper < upper) upper = newUpper;
+            if (upper <= lower) break;
+
+            newUpper = checkUpperBoundNew(i,j,-1-lower);
+            if (newUpper < upper) upper = newUpper;
+            if (upper <= lower) break;
+            
+            lower++;
+            if (upper <= lower) break;
+        }
+        return lower;
+    }
+    
+    private int detectMaxSquareOld(int x, int y) {
+        // This is the older, O(n^2) method.
         int size = 1;
         int maxSizePlusOne = getMaxSize(x, y) + 1;
         while (size < maxSizePlusOne && !hasBlockedTileOnPerimeter(x, y, size)) {
@@ -155,10 +255,39 @@ public class AcceleratedAStar extends AStar {
         return size-1;
     }
     
-    private int getMaxSize(int x, int y) {
-        return Math.min(Math.abs(x-ex), Math.abs(y-ey));
+    /**
+     * <pre>
+     *          _______  This function returns the upper bound detected by
+     *         |   |k=1| the a leftward and downward search.
+     *         |___|___| k is the number of steps moved in the up-right direction.
+     *         |k=0|   | k = 0 the the square directly top-right of grid point (x,y).
+     *  _______.___|___|
+     * |   |-1 |(x,y)    
+     * |___|___|  point of concern
+     * |-2 |   |
+     * |___|___|
+     * </pre>
+     */
+    private int checkUpperBoundNew(int i, int j, int k) {
+        return maxRange[i][j + k] - k;
     }
     
+    /**
+     * Compares the tile with the end point to set an upper bound on the size.
+     */
+    private int getMaxSize(int x, int y) {
+        return Math.max(Math.abs(x-ex), Math.abs(y-ey));
+    }
+    
+    /**
+     *  ___________
+     * |X|X|X|X|X|X| size = 3
+     * |X|_|_|_|_|X|
+     * |X|_|_|_|_|X| <-- checks the nodes in the perimeter of size = size
+     * |X|_|_|_|_|X|     returns true iff all of them are unblocked.
+     * |X|_|_|_|_|X|
+     * |X|X|X|X|X|X|
+     */
     private boolean hasBlockedTileOnPerimeter(int x, int y, int size) {
         int leftX = x-size;
         int rightX = x+size-1;

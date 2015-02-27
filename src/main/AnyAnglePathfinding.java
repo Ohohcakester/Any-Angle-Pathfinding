@@ -72,34 +72,34 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 9;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int unblockedRatio = 1500;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
                 int seed = 567069235;        // seed for the random.
                 
-                int sizeX = 20;              // x-axis size of grid
-                int sizeY = 20;              // y-axis size of grid
+                int sizeX = 30;              // x-axis size of grid
+                int sizeY = 30;              // y-axis size of grid
 
-                int sx = 2;                  // x-coordinate of start point
-                int sy = 14;                 // y-coordinate of start point
-                int ex = 13;                 // x-coordinate of goal point
-                int ey = 4;                  // y-coordinate of goal point
+                int sx = 5;                  // x-coordinate of start point
+                int sy = 4;                 // y-coordinate of start point
+                int ex = 7;                 // x-coordinate of goal point
+                int ey = 29;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
                 return GraphImporter.importGraphFromFile("maze.txt", 25, 17, 2, 9);
             case 3 :
-                return DefaultGenerator.generateSeeded(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
+                return DefaultGenerator.generateSeededOld(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
             case 4 :
-                return DefaultGenerator.generateSeeded(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
+                return DefaultGenerator.generateSeededOld(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
             case 5 :
-                return DefaultGenerator.generateSeeded(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
+                return DefaultGenerator.generateSeededOld(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
             case 6 :
-                return DefaultGenerator.generateSeeded(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
+                return DefaultGenerator.generateSeededOld(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
             case 7 :
                 return GraphImporter.importGraphFromFile("maze14x11.txt", 0, 0, 10, 10); // Maze to contradict Theta* / A*
             case 8 :
                 return GraphImporter.importGraphFromFile("mazeWCS.txt", 2, 0, 28, 25); // Worst Case Scenario path length.
             case 9 :
-                return DefaultGenerator.generateSeeded(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
+                return DefaultGenerator.generateSeededOld(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
             case 10 :
                 return GraphImporter.importGraphFromFile("mazeThetaWCS.txt", 0, 0, 28, 13); // Worst Case Scenario for Theta*
             case 11 :
@@ -110,6 +110,8 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             case 14 :
                 return DefaultGenerator.generateSeeded(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
+            case 15 :
+                return GraphImporter.loadStoredMaze("def_iHHLNUOB_iMJ_iMJ_iSB", "23-102_149-107");
             default :
                 return null;
         }
@@ -119,7 +121,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 17; // adjust this to choose an algorithm\
+        int choice = 17; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
