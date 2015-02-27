@@ -12,47 +12,42 @@ public class MazeAnalyser {
     public final ArrayList<ProblemAnalysis> problemList;
 
     public MazeAnalyser(GridGraph gridGraph, int nProblems) {
-        System.out.println("-Starting Maze Analysis");
+        System.out.println("-Starting Maze Analysis: " +gridGraph.sizeX+"x"+gridGraph.sizeY);
         mazeAnalysis = new MazeAnalysis(gridGraph);
 
         System.out.println("-Starting Problem Generation");
         ArrayList<TwoPoint> twoPointList = generateProblems(mazeAnalysis, nProblems);
+
+        problemList = conductProblemAnalysis(gridGraph, twoPointList);
         
-        System.out.println("-Starting Problem Analysis");
-        problemList = new ArrayList<>();
-        for (TwoPoint tp : twoPointList) {
-            ProblemAnalysis problem = new ProblemAnalysis(gridGraph,
-                    tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
-            problemList.add(problem);
-            System.out.print(tp + " | ");
-        }
         System.out.println();
         System.out.println("-Analysis Complete");
     }
-    
-    private class TwoPoint {
-        public final Point p1, p2;
-        public TwoPoint (Point p1, Point p2) {
-            this.p1 = p1; this.p2 = p2;
+
+    public MazeAnalyser(GridGraph gridGraph, ArrayList<TwoPoint> twoPointList, boolean analyseMaze) {
+        if (analyseMaze) {
+            System.out.println("-Starting Maze Analysis: " +gridGraph.sizeX+"x"+gridGraph.sizeY);
+            mazeAnalysis = new MazeAnalysis(gridGraph);
+        } else {
+            mazeAnalysis = null;
         }
         
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof TwoPoint)) return false;
-            TwoPoint other = (TwoPoint)obj;
-            if (p1.equals(other.p1) && p2.equals(other.p2)) {
-                return true;
-            }
-            if (p1.equals(other.p2) && p2.equals(other.p1)) {
-                return true;
-            }
-            return false;
-        }
+        problemList = conductProblemAnalysis(gridGraph, twoPointList);
         
-        @Override
-        public String toString() {
-            return p1.x + " " + p1.y + " " + p2.x + " " + p2.y;
+        System.out.println();
+        System.out.println("-Analysis Complete");
+    }
+
+    protected ArrayList<ProblemAnalysis> conductProblemAnalysis(GridGraph gridGraph, ArrayList<TwoPoint> twoPointList) {
+        System.out.println("-Starting Problem Analysis");
+        ArrayList<ProblemAnalysis> list = new ArrayList<>();
+        for (TwoPoint tp : twoPointList) {
+            ProblemAnalysis problem = new ProblemAnalysis(gridGraph,
+                    tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+            list.add(problem);
+            System.out.print(tp + " | ");
         }
+        return list;
     }
     
 

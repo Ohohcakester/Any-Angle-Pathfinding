@@ -1,0 +1,11 @@
+sx:	16
+sy:	5
+ex:	13
+ey:	4
+shortestPathLength:	3.4142137
+straightLineDistance:	3.1622777
+directness:	1.0796691
+distanceCoverage:	0.15144563
+minMapCoverage:	0.16351117
+shortestPathHeadingChanges:	3
+minHeadingChanges:	3
