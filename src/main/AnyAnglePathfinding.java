@@ -84,19 +84,19 @@ public class AnyAnglePathfinding {
             case 2 :
                 return GraphImporter.importGraphFromFile("maze.txt", 25, 17, 2, 9);
             case 3 :
-                return DefaultGenerator.generateSeeded(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
+                return DefaultGenerator.generateSeededOld(-98783479, 40, 40, 7, 1, 4, 18, 18); // maze 3
             case 4 :
-                return DefaultGenerator.generateSeeded(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
+                return DefaultGenerator.generateSeededOld(-565315494, 15, 15, 9, 1, 2, 1, 13); // maze 2
             case 5 :
-                return DefaultGenerator.generateSeeded(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
+                return DefaultGenerator.generateSeededOld(53, 15, 15, 9, 0, 0, 10, 14); // maze 1
             case 6 :
-                return DefaultGenerator.generateSeeded(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
+                return DefaultGenerator.generateSeededOld(-159182402, 15, 15, 9, 1, 1, 13, 12); // anya previously gave incorrect path
             case 7 :
                 return GraphImporter.importGraphFromFile("maze14x11.txt", 0, 0, 10, 10); // Maze to contradict Theta* / A*
             case 8 :
                 return GraphImporter.importGraphFromFile("mazeWCS.txt", 2, 0, 28, 25); // Worst Case Scenario path length.
             case 9 :
-                return DefaultGenerator.generateSeeded(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
+                return DefaultGenerator.generateSeededOld(-410889275, 15, 15, 7, 0, 1, 10, 12); // maze 4
             case 10 :
                 return GraphImporter.importGraphFromFile("mazeThetaWCS.txt", 0, 0, 28, 13); // Worst Case Scenario for Theta*
             case 11 :
@@ -104,9 +104,9 @@ public class AnyAnglePathfinding {
             case 12 :
                 return GraphImporter.importGraphFromFile("anyaCont2.txt", 1, 6, 9, 1); // anya gives incorrect path
             case 13 :
-                return DefaultGenerator.generateSeeded(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
+                return DefaultGenerator.generateSeededOld(-524446332, 20, 20, 10, 2, 19, 17, 2); // anya gives incorrect path.
             case 14 :
-                return DefaultGenerator.generateSeeded(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
+                return DefaultGenerator.generateSeededOld(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             case 15 :
                 return GraphImporter.loadStoredMaze("def_iHHLNUOB_iMJ_iMJ_iSB", "23-102_149-107"); // issue for Strict Theta*
             default :

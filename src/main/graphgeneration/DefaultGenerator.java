@@ -24,13 +24,29 @@ public class DefaultGenerator {
      * @param _ey y-coordinate of goal point
      * @return the generated gridGraph.
      */
-    public static GridAndGoals generateSeeded(int seed, int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
+    public static GridAndGoals generateSeededOld(int seed, int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
         GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
     
-    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
+    public static GridAndGoals generateUnseededOld(int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
         GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+    
+    /**
+     * Does not remove the block at 0,0
+     */
+    public static GridAndGoals generateSeeded(int seed, int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, -1,-1,-1,-1);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+
+    /**
+     * Does not remove the block at 0,0
+     */
+    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, -1,-1,-1,-1);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
