@@ -29,7 +29,7 @@ public class AnyAnglePathfinding {
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 4;
+        int choice = 1;
         
         switch(choice) {
             case 0:
@@ -116,7 +116,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 16; // adjust this to choose an algorithm
+        int choice = 8; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :

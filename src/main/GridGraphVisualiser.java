@@ -33,9 +33,7 @@ public class GridGraphVisualiser {
 
     
     public static void loadExisting(String mazeName) {
-        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
-        
-        GridGraph gridGraph = GraphImporter.importGraphFromFile(path);
+        GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
         setupMainFrame(gridGraph, mazeName);
     }
     
