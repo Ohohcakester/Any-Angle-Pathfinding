@@ -5,7 +5,9 @@ import grid.GridGraph;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import main.analysis.ProblemAnalysis;
 import main.analysis.TwoPoint;
+import main.testdata.Stringifier;
 import main.testdata.TestDataGenerator;
 import algorithms.datatypes.Point;
 
@@ -81,6 +83,15 @@ public class EditorUI extends DrawCanvas {
     public void generateMazeAnalysis() {
         ArrayList<TwoPoint> tpList = new ArrayList<>();
         TestDataGenerator.generateTestData(gridGraph, tpList, mazeName, true);
+    }
+
+    public void printPathAnalysis() {
+        if (sx == -1 || ex == -1) return;
+        ProblemAnalysis problemAnalysis = new ProblemAnalysis(gridGraph, sx, sy, ex, ey);
+        System.out.println("=Problem Analysis:=================");
+        System.out.println(problemAnalysis);
+        System.out.println("-Problem Name:---------------------");
+        System.out.println(Stringifier.makeProblemName(sx, sy, ex, ey));
     }
 
 }

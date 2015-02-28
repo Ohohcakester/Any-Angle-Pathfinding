@@ -3,16 +3,11 @@ package algorithms;
 import grid.GridGraph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import algorithms.priorityqueue.IndirectHeap;
 
 public class AcceleratedAStar extends AStar {
-    public int nQueries=0;
-    public int totalSize=0;
-    public int calls=0;
-    
     private List<Integer> closed;
     private int[][] maxRange;
     
@@ -52,7 +47,6 @@ public class AcceleratedAStar extends AStar {
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
 
-            calls++;
             int maxSquare = detectMaxSquare(x, y);
             
             if (maxSquare == 0) {

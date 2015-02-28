@@ -35,10 +35,12 @@ public class MazeAnalysis {
     public static boolean checkHasSqueezableCorners(GridGraph gridGraph) {
         for (int y=1; y<gridGraph.sizeY; y++) {
             for (int x=1; x<gridGraph.sizeX; x++) {
-                if (gridGraph.bottomLeftOfBlockedTile(x, y) && gridGraph.topRightOfBlockedTile(x, y)) {
+                if (gridGraph.bottomLeftOfBlockedTile(x, y) && gridGraph.topRightOfBlockedTile(x, y) &&
+                        !gridGraph.bottomRightOfBlockedTile(x, y) && !gridGraph.topLeftOfBlockedTile(x, y)) {
                     return true;
                 }
-                if (gridGraph.bottomRightOfBlockedTile(x, y) && gridGraph.topLeftOfBlockedTile(x, y)) {
+                if (gridGraph.bottomRightOfBlockedTile(x, y) && gridGraph.topLeftOfBlockedTile(x, y) &&
+                        !gridGraph.bottomLeftOfBlockedTile(x, y) && !gridGraph.topRightOfBlockedTile(x, y)) {
                     return true;
                 }
             }

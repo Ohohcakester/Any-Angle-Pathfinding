@@ -16,7 +16,7 @@ import algorithms.datatypes.SnapshotItem;
  * Template for all Path Finding Algorithms used.<br>
  */
 public abstract class PathFindingAlgorithm {
-    private LinkedList<List<SnapshotItem>> snapshotList;
+    private ArrayList<List<SnapshotItem>> snapshotList;
     protected GridGraph graph;
 
     protected int parent[];
@@ -41,7 +41,7 @@ public abstract class PathFindingAlgorithm {
         this.sy = sy;
         this.ex = ex;
         this.ey = ey;
-        snapshotList = new LinkedList<>();
+        snapshotList = new ArrayList<>();
     }
     
     /**
@@ -61,7 +61,7 @@ public abstract class PathFindingAlgorithm {
     /**
      * @return retrieve the trace of the algorithm that has been recorded.
      */
-    public LinkedList<List<SnapshotItem>> retrieveSnapshotList() {
+    public ArrayList<List<SnapshotItem>> retrieveSnapshotList() {
         return snapshotList;
     }
     
@@ -104,11 +104,11 @@ public abstract class PathFindingAlgorithm {
     }
 
     private void saveSearchSnapshot() {
-        snapshotList.addLast(computeSearchSnapshot());
+        snapshotList.add(computeSearchSnapshot());
     }
 
     protected final void addSnapshot(List<SnapshotItem> snapshotItemList) {
-        snapshotList.addLast(snapshotItemList);
+        snapshotList.add(snapshotItemList);
     }
     
     protected int goalParentIndex() {

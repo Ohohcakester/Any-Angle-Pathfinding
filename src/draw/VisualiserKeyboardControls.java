@@ -23,6 +23,8 @@ public class VisualiserKeyboardControls implements KeyListener {
                 () -> editorUI.generatePath());
         add(KeyEvent.VK_A, "A: Generates the maze analysis for the maze.",
                 () -> editorUI.generateMazeAnalysis());
+        add(KeyEvent.VK_P, "P: Prints the path analysis for the current selected.",
+                () -> editorUI.printPathAnalysis());
     }
     
     private void add(int keyCode, String description, Runnable function) {

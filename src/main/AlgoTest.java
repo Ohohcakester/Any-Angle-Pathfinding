@@ -32,7 +32,7 @@ public class AlgoTest {
         /*System.out.println("Low Density");
         testOnMaze("def_iHHLNUOB_iMJ_iMJ_iSB", select, printAverage);*/
         
-        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 50),
+        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 15),
                 toTwoPointlist(15,14,37,79), select, printAverage);
         
 //        System.out.println("Low Density");
