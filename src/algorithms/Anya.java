@@ -1209,7 +1209,7 @@ public class Anya extends PathFindingAlgorithm {
             line[4] = in.xR.d;
             line[5] = in.parent.x;
             line[6] = in.parent.y;
-            list.add(new SnapshotItem(line));
+            list.add(SnapshotItem.generate(line));
         }
         for (ExploredInterval in : exploredList) {
             // y, xLn, xLd, xRn, xRd, px, py
@@ -1219,7 +1219,7 @@ public class Anya extends PathFindingAlgorithm {
             line[2] = in.xL.d;
             line[3] = in.xR.n;
             line[4] = in.xR.d;
-            list.add(new SnapshotItem(line));
+            list.add(SnapshotItem.generate(line));
         }
         
         return list;

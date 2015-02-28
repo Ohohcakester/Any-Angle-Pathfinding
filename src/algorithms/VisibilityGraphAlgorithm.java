@@ -237,7 +237,7 @@ public class VisibilityGraphAlgorithm extends AStar {
                     path[2] = end.x;
                     path[3] = end.y;
                     
-                    SnapshotItem snapshotItem = new SnapshotItem(path, Color.GREEN);
+                    SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
                     snapshotItemList.add(snapshotItem);
                 }
             }

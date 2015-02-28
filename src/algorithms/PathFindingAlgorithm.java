@@ -93,13 +93,13 @@ public abstract class PathFindingAlgorithm {
         return graph.toTwoDimY(index);
     }
     
-    protected void maybeSaveSearchSnapshot() {
+    protected final void maybeSaveSearchSnapshot() {
         if (recordingMode) {
             saveSearchSnapshot();
         }
     }
     
-    protected boolean isRecording() {
+    protected final boolean isRecording() {
         return recordingMode;
     }
 
@@ -130,14 +130,14 @@ public abstract class PathFindingAlgorithm {
         for (int i=0; i<parent.length; i++) {
             if (parent[i] != -1) {
                 if (finalPathSet != null && finalPathSet.contains(i)) {
-                    list.add(new SnapshotItem(snapshotEdge(i), Color.BLUE));
+                    list.add(SnapshotItem.generate(snapshotEdge(i), Color.BLUE));
                 } else {
-                    list.add(new SnapshotItem(snapshotEdge(i)));
+                    list.add(SnapshotItem.generate(snapshotEdge(i)));
                 }
             }
             Integer[] vertexSnapshot = snapshotVertex(i);
             if (vertexSnapshot != null) {
-                list.add(new SnapshotItem(vertexSnapshot));
+                list.add(SnapshotItem.generate(vertexSnapshot));
             }
         }
 

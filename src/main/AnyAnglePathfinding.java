@@ -108,7 +108,7 @@ public class AnyAnglePathfinding {
             case 14 :
                 return DefaultGenerator.generateSeededOld(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             case 15 :
-                return GraphImporter.loadStoredMaze("sc2_losttemple", "82-16_55-41");
+                return GraphImporter.loadStoredMaze("sc2_losttemple", "82-16_55-111");
             default :
                 return null;
         }
