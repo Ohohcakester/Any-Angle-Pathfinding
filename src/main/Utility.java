@@ -1,7 +1,8 @@
 package main;
 
-import algorithms.PathFindingAlgorithm;
 import grid.GridGraph;
+import main.AnyAnglePathfinding.AlgoFunction;
+import algorithms.PathFindingAlgorithm;
 
 public class Utility {
 
@@ -16,14 +17,18 @@ public class Utility {
         }
         return pathLength;
     }
-    
+
+    static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        return generatePath(AnyAnglePathfinding.algoFunction, gridGraph, sx, sy, ex, ey);
+    }
     /**
      * Generates a path between two points on a grid.
      * @return an array of int[2] indicating the coordinates of the path.
      */
-    static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
-            int ex, int ey) {
-        PathFindingAlgorithm algo = AnyAnglePathfinding.algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+    static int[][] generatePath(AlgoFunction algoFunction, GridGraph gridGraph,
+            int sx, int sy, int ex, int ey) {
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         try {
             algo.computePath();
         } catch (Exception e) {

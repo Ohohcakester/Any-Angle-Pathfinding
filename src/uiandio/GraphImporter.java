@@ -2,11 +2,18 @@ package uiandio;
 import grid.GridAndGoals;
 import grid.GridGraph;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
+
+import main.AnyAnglePathfinding;
+import main.analysis.TwoPoint;
 
 /**
  * How to create a grid file.<br>
@@ -85,6 +92,73 @@ public class GraphImporter {
         gridGraph = graphImporter.retrieve();
         return gridGraph;
     }
+    
+    public static GridAndGoals loadStoredMaze(String mazeName, String problemName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        TwoPoint tp = readProblem(problemName);
+        return importGraphFromFile(path, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+    }
+    
+    public static GridGraph loadStoredMaze(String mazeName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        return importGraphFromFile(path);
+    }
+
+    public static ArrayList<TwoPoint> loadStoredMazeProblems(String mazeName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/";
+        File dir = new File(path);
+        File[] files = dir.listFiles((file, name) -> name.endsWith(".problem"));
+        
+        ArrayList<TwoPoint> list = new ArrayList<>(files.length);
+        for (File file : files) {
+            TwoPoint tp = readProblem(file);
+            list.add(tp);
+        }
+        return list;
+    }
+    
+    private static TwoPoint readProblem(File file) {
+        String s = file.getName();
+        s = s.substring(0, s.lastIndexOf('.')); // remove extension
+        return readProblem(s);
+    }
+
+    private static TwoPoint readProblem(String problemName) {
+        String[] args = problemName.split("[-_]");
+        
+        if (args.length != 4)
+            throw new UnsupportedOperationException("Invalid problem name: " + problemName);
+        return new TwoPoint(
+                Integer.parseInt(args[0]),
+                Integer.parseInt(args[1]),
+                Integer.parseInt(args[2]),
+                Integer.parseInt(args[3])
+                );
+    }
+    
+    private static HashMap<String, String> readFile(File file) {
+        HashMap<String,String> dict = new HashMap<>();
+        try {
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            while (s != null) {
+                put(dict, s);
+                s = br.readLine();
+            }
+    
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return dict;
+    }
+        
+    private static void put(HashMap<String,String> dict, String input) {
+        String[] args = input.split(":", 2);
+        dict.put(args[0].trim(), args[1].trim());
+    }
+       
 
     /**
      * Import a graph from a file in the AnyAnglePathFinding directory,

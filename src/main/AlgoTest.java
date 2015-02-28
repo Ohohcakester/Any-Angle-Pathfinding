@@ -1,25 +1,150 @@
 package main;
 
 import grid.GridGraph;
+
+import java.util.ArrayList;
+
+import main.AnyAnglePathfinding.AlgoFunction;
+import main.analysis.TwoPoint;
 import main.graphgeneration.DefaultGenerator;
-import main.graphgeneration.GraphInfo;
 import main.testdata.PathLengthClass;
 import main.testdata.StandardMazes;
 import main.testdata.StartEndPointData;
+import main.testdata.TestDataGenerator;
 import main.testdata.TestDataLibrary;
 import uiandio.FileIO;
+import uiandio.GraphImporter;
 import algorithms.AStar;
-import algorithms.Anya;
+import algorithms.AcceleratedAStar;
 import algorithms.BasicThetaStar;
-import algorithms.BreadthFirstSearch;
 import algorithms.PathFindingAlgorithm;
-import algorithms.VisibilityGraphAlgorithm;
 
 public class AlgoTest {
     
     public static void run() {
-        runTestAllAlgos();
+        //runTestAllAlgos();
+        
+        AlgoFunction thetaStar = (a,b,c,d,e) -> new BasicThetaStar(a,b,c,d,e);
+        AlgoFunction accAStar = (a,b,c,d,e) -> new AcceleratedAStar(a,b,c,d,e);
+        
+        AlgoFunction select = accAStar;
+
+        /*System.out.println("Low Density");
+        testOnMaze("def_iHHLNUOB_iMJ_iMJ_iSB", select, printAverage);*/
+        
+        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 50),
+                toTwoPointlist(15,14,37,79), select, printAverage);
+        
+//        System.out.println("Low Density");
+//        testOnMaze("def_iO2GZNB_iSB_iSB_iSB", select, printAverage);
+//        System.out.println("High Density");
+//        testOnMaze("def_i3GRHWMD_iSB_iSB_iH", select, printAverage);
     }
+    
+    public static ArrayList<TwoPoint> toTwoPointlist(int...points) {
+        return TestDataGenerator.generateTwoPointList(points);
+    }
+    
+    public static void testOnMaze(String mazeName, AlgoFunction algoFunction, TestFunction test) {
+        ArrayList<TwoPoint> problems = GraphImporter.loadStoredMazeProblems(mazeName);
+        testOnMaze(mazeName, problems, algoFunction, test);
+    }
+    
+    public static void testOnMaze(String mazeName, ArrayList<TwoPoint> problems, AlgoFunction algoFunction, TestFunction test) {
+        GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
+        test.test(mazeName, gridGraph, problems, algoFunction);
+    }
+    
+    public static void testOnGraph(GridGraph gridGraph, ArrayList<TwoPoint> problems, AlgoFunction algoFunction, TestFunction test) {
+        test.test("undefined", gridGraph, problems, algoFunction);
+    }
+    
+    
+    private static final TestFunction printAverage = (mazeName, gridGraph, problems, algoFunction) -> {
+        int sampleSize = 100;
+        int nTrials = 10;
+        
+        TestResult[] testResults = new TestResult[problems.size()];
+        int index = 0;
+        for (TwoPoint problem : problems) {
+            testResults[index] = testAlgorithm(gridGraph, algoFunction, problem, sampleSize, nTrials);
+            index++;
+        }
+        double totalMean = 0;
+        double totalSD = 0;
+        double totalPathLength = 0;
+        for (TestResult testResult : testResults) {
+            totalMean += testResult.time;
+            totalSD += testResult.timeSD;
+            totalPathLength += testResult.pathLength;
+        }
+        int nResults = testResults.length;
+
+        System.out.println("Sample Size: " + sampleSize);
+        System.out.println("Average Time: " + (totalMean/nResults));
+        System.out.println("Average SD: " + (totalSD/nResults));
+        System.out.println("Average Path Length: " + (totalPathLength/nResults));
+    };
+
+
+    private static TestResult testAlgorithmTime(GridGraph gridGraph,
+            AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
+    
+        int[] data = new int[sampleSize];
+        
+        int sum = 0;
+        long sumSquare = 0;
+
+        int startX = tp.p1.x;
+        int startY = tp.p1.y;
+        int endX = tp.p2.x;
+        int endY = tp.p2.y;
+        
+        for (int s = 0; s < sampleSize; s++) {
+            long start = System.currentTimeMillis();
+            for (int i=0;i<nTrials;i++) {
+                AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
+            }
+            long end = System.currentTimeMillis();
+            System.gc();
+            
+            data[s] = (int)(end-start);
+            
+            sum += data[s];
+            sumSquare += data[s]*data[s];
+        }
+        
+        double mean = (double)sum / nTrials / sampleSize;
+        double secondMomentTimesN = (double)sumSquare / nTrials / nTrials;
+        double sampleVariance = (secondMomentTimesN - sampleSize*(mean*mean)) / (sampleSize - 1);
+        double standardDeviation = Math.sqrt(sampleVariance);
+    
+        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, -1f);
+        return testResult;
+    }
+
+    private static TestResult testAlgorithmPathLength(GridGraph gridGraph,
+            AlgoFunction algoFunction, TwoPoint tp) {
+    
+        int[][] path = Utility.generatePath(algoFunction, gridGraph,
+                tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+        float pathLength = Utility.computePathLength(gridGraph, path);
+        
+        TestResult testResult = new TestResult(-1, -1, -1, pathLength);
+        return testResult;
+    }
+    
+    private static TestResult testAlgorithm(GridGraph gridGraph,
+            AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
+        TestResult time = testAlgorithmTime(gridGraph,algoFunction,tp,sampleSize,nTrials);
+        TestResult pathLength = testAlgorithmPathLength(gridGraph,algoFunction,tp);
+        return new TestResult(time.timesRan, time.time, time.timeSD, pathLength.pathLength);
+    }
+    
+    
+    
+    
+    
     
     /**
      * Run tests for all the algorithms, and outputs them to the file.<br>
@@ -200,6 +325,12 @@ public class AlgoTest {
         algo.computePath();
     }
 
+    private static void testAlgorithmSpeed(AlgoFunction algoFunction, GridGraph gridGraph, int sx, int sy,
+            int ex, int ey) {
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+    }
+
 }
 
 class TestResult {
@@ -224,4 +355,15 @@ class TestResult {
         
         return sb.toString();
     }
+}
+
+
+interface TestFunction {
+    public void test(String mazeName, GridGraph gridGraph,
+            ArrayList<TwoPoint> problemSet, AlgoFunction algoFunction);
+}
+
+interface TestFunctionData {
+    public void test(String mazeName, GridGraph gridGraph,
+            ArrayList<TwoPoint> problemSet, AlgoFunction algoFunction);
 }
