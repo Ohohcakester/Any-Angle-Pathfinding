@@ -236,7 +236,6 @@ def correlate(args):
         printOut(vector2)
 
 
-
 def parseAttrs(attrs, left, right):
     if left in attrs:
         left = attrs[left]

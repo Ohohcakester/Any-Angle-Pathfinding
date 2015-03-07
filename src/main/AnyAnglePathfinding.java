@@ -2,7 +2,7 @@ package main;
 import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
-import main.testdata.TestDataGenerator;
+import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AcceleratedAStar;
