@@ -11,6 +11,9 @@ local.properties
 .settings/
 .loadpath
 
+gamemaps/
+mazedata/
+
 # External tool builders
 .externalToolBuilders/
 
