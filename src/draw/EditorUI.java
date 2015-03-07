@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import main.analysis.ProblemAnalysis;
 import main.analysis.TwoPoint;
-import main.testdata.Stringifier;
-import main.testdata.TestDataGenerator;
+import main.testgen.Stringifier;
+import main.testgen.TestDataGenerator;
 import algorithms.datatypes.Point;
 
 public class EditorUI extends DrawCanvas {
