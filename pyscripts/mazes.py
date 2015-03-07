@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import numpy
 
 folderPath = '../mazedata'
 
@@ -17,7 +18,7 @@ class State:
         self.output = print
 
     def write(self, message):
-        self.f.write(message)
+        self.f.write(str(message))
         print(message)
 
     def toFile(self):
@@ -187,6 +188,55 @@ def viewMaze(args):
         printOut(s)
 
 
+def printCorrelation(vector1, vector2):
+    printOut("Number of data points: " + str(len(vector1)))
+
+    A = numpy.array([vector1, numpy.ones(len(vector1))])
+    y = vector2
+    w = numpy.linalg.lstsq(A.T,y)[0]
+
+    printOut('Line: y = ' + str(w[0]) + 'x + ' + str(w[1]))
+
+    r = numpy.corrcoef(vector1, vector2)
+    printOut('r = ' + str(r[0][1]))
+
+
+def retrieveDataVectors(var1, var2, conditionArgs):
+    conditions = parseConditions(conditionArgs)
+    matches, attrList = filterMazes(mazes, conditions)
+
+    vector1 = []
+    vector2 = []
+    try:
+        for attr in attrList:
+            if var1 in attr and var2 in attr:
+                vector1.append(float(attr[var1]))
+                vector2.append(float(attr[var2]))
+    except ValueError as e:
+        printOut(e)
+        return None, None
+
+    return vector1, vector2
+
+
+def correlate(args):
+    global mazes
+
+    var1 = args[0]
+    var2 = args[1]
+    conditionArgs = args[2:]
+
+    vector1, vector2 = retrieveDataVectors(var1, var2, conditionArgs)
+
+    try:
+        printCorrelation(vector1, vector2)
+    except ValueError as e:
+        printOut(e)
+        printOut(vector1)
+        printOut(vector2)
+
+
+
 def parseAttrs(attrs, left, right):
     if left in attrs:
         left = attrs[left]
@@ -204,7 +254,7 @@ def parseAttrsFloat(attrs, left, right):
         return None, None
 
 
-def makeCondition(left, right, symbol):
+def makeCondition(left=None, right=None, symbol=None):
     parse = None
     compare = None
 
@@ -243,10 +293,17 @@ def makeCondition(left, right, symbol):
 def parseCondition(s):
     #Accepted symbols: < = > <= >=
     args = re.split(r'[!<=>]*', s)
-    symbolS = re.search(r'[!<=>]', s).start()
-    symbolE = re.search(r'[^!<=>]', s[symbolS:]).start()
-    symbol = s[symbolS:symbolS+symbolE]
+    try:
+        symbolS = re.search(r'[!<=>]', s).start()
+        symbolE = re.search(r'[^!<=>]', s[symbolS:]).start()
+        symbol = s[symbolS:symbolS+symbolE]
+    except AttributeError as e:
+        printOut('Error parsing condition: ' + s)
+        printOut(e)
+        symbol = None
 
+    if len(args) <= 0 or symbol == None:
+        return makeCondition()
     return makeCondition(args[0].strip(), args[1].strip(), symbol)
 
 
@@ -273,20 +330,22 @@ def meetsConditions(attrs, conditions):
     return cond in attrs and attrs['hasSqueezableCorners'] == 'true'
 
 
+def filterMazes(mazeNames, conditions):
+    matches = []
+    matchAttrs = []
+    for maze in mazeNames:
+        attrs = getMazeAttributes(maze)
+        if meetsConditions(attrs, conditions):
+            matches.append(maze)
+            matchAttrs.append(attrs)
+    return matches, matchAttrs
+
+
 def findProperties(args):
     global mazes
-    mazeAttrs = {}
-    for maze in mazes:
-        mazeAttrs[maze] = getMazeAttributes(maze)
 
     conditions = parseConditions(args)
-
-    matches = []
-    for key in mazeAttrs.keys():
-        value = mazeAttrs[key]
-        if meetsConditions(value, conditions):
-            matches.append(key)
-
+    matches, attrs = filterMazes(mazes, conditions)
     matches.sort()
     printMazeList(matches)
 
@@ -306,6 +365,7 @@ def initCommands():
     commands['v'] = lambda args: viewMaze(args)
     commands['f'] = lambda args : findProperties(args)
     commands['write'] = lambda args : writeToFile(args)
+    commands['corr'] = lambda args : correlate(args)
 
 
 def execCommand(args):
