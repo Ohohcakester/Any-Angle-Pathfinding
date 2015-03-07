@@ -62,6 +62,12 @@ public class GridGraph {
         return index/sizeXplusOne;
     }
 
+    public boolean isUnblockedCoordinate(int x, int y) {
+        return !topRightOfBlockedTile(x,y) ||
+                !topLeftOfBlockedTile(x,y) ||
+                !bottomRightOfBlockedTile(x,y) ||
+                !bottomLeftOfBlockedTile(x,y);
+    }
     
     public boolean topRightOfBlockedTile(int x, int y) {
         return isBlocked(x-1, y-1);
@@ -224,6 +230,86 @@ public class GridGraph {
             }
         }
         //return null;
+    }
+    
+
+    /**
+     * Used by Accelerated A* and MazeAnalysis.
+     * leftRange is the number of blocks you can move left before hitting a blocked tile.
+     * downRange is the number of blocks you can move down before hitting a blocked tile.
+     * For blocked tiles, leftRange, downRange are both -1.
+     * 
+     * How to use the maxRange property:
+     * 
+     *  x,y is the starting point.
+     *  k is the number of tiles diagonally up-right of the starting point.
+     *  int i = x-y+sizeY;
+     *  int j = Math.min(x, y);
+     *  return maxRange[i][j + k] - k;
+     */
+    public int[][] computeMaxDownLeftRanges() {
+        int[][] downRange = new int[sizeY+1][sizeX+1];
+        int[][] leftRange = new int[sizeY+1][sizeX+1];
+
+        for (int y=0; y<sizeY; ++y) {
+            if (isBlocked(0, y))
+                leftRange[y][0] = -1;
+            else 
+                leftRange[y][0] = 0;
+            
+            for (int x=1; x<sizeX; ++x) {
+                if (isBlocked(x, y)) {
+                    leftRange[y][x] = -1;
+                } else {
+                    leftRange[y][x] = leftRange[y][x-1] + 1;
+                }
+            }
+        }
+
+        for (int x=0; x<sizeX; ++x) {
+            if (isBlocked(x, 0))
+                downRange[0][x] = -1;
+            else 
+                downRange[0][x] = 0;
+            
+            for (int y=1; y<sizeY; ++y) {
+                if (isBlocked(x, y)) {
+                    downRange[y][x] = -1;
+                } else {
+                    downRange[y][x] = downRange[y-1][x] + 1;
+                }
+            }
+        }
+        
+        for (int x=0; x<sizeX+1; ++x) {
+            downRange[sizeY][x] = -1;
+            leftRange[sizeY][x] = -1;
+        }
+        
+        for (int y=0; y<sizeY; ++y) {
+            downRange[y][sizeX] = -1;
+            leftRange[y][sizeX] = -1;
+        }
+        
+        int[][] maxRanges = new int[sizeX+sizeY+1][];
+        int maxSize = Math.min(sizeX, sizeY) + 1;
+        for (int i=0; i<maxRanges.length; ++i) {
+            int currSize = Math.min(i+1, maxRanges.length-i);
+            if (maxSize < currSize)
+                currSize = maxSize;
+            maxRanges[i] = new int[currSize];
+            
+            int currX = i - sizeY;
+            if (currX < 0) currX = 0;
+            int currY = currX - i + sizeY;
+            for (int j=0; j<maxRanges[i].length; ++j) {
+                maxRanges[i][j] = Math.min(downRange[currY][currX], leftRange[currY][currX]);
+                currY++;
+                currX++;
+            }
+            
+        }
+        return maxRanges;
     }
     
     /**

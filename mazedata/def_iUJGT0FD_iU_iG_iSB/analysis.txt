@@ -3,6 +3,7 @@ sizeY:	6
 nTiles:	120
 nBlocked:	11
 blockDensity:	0.09166667
+averageOpenSpaceSize:	0.81666666
 hasSqueezableCorners:	false
 largestConnectedSetSize:	144
 --connected sets--

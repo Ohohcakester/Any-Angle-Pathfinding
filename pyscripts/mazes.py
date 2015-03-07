@@ -67,18 +67,55 @@ def listMazes():
 def getPath(mazeName):
     return folderPath + '/' + mazeName + '/'
 
+def countPrefixMatch(s1, s2):
+    i = 0
+    maxMatch = min(len(s1),len(s2))
+    while i < maxMatch:
+        if s1[i] == s2[i]:
+            i += 1
+        else:
+            break
+    return i
 
-def selectMaze(mazeName):
+def findClosestMatch(mazeName):
+    global mazes
+    if mazeName in mazes:
+        return mazeName
+
+    longestMatch = 0
+    bestMatch = None
+    matches = 0
+    for maze in mazes:
+        match = countPrefixMatch(mazeName, maze)
+        if match > longestMatch:
+            longestMatch = match
+            bestMatch = maze
+            matches = 1
+        elif match == longestMatch:
+            matches += 1
+
+    if matches == 1:
+        return bestMatch
+    else:
+        return None
+
+
+
+
+def selectMaze(mazeName=None):
     global folderPath, state
+    if mazeName == None:
+        return state.currentMaze
+    mazeName = findClosestMatch(mazeName)
     state.currentMaze = mazeName
+    return mazeName
 
 
 def readFile(fileName, mazeName=None):
     global state
+    mazeName = selectMaze(mazeName)
     if mazeName == None:
-        if state.currentMaze == None:
-            return None
-        mazeName = state.currentMaze
+        return None
 
     path = getPath(mazeName) + fileName
     try:
@@ -93,17 +130,23 @@ def readFile(fileName, mazeName=None):
 
 def getMazeAttributes(mazeName=None):
     attrs = {}
+    mazeName = selectMaze(mazeName)
     s = readFile('analysis.txt', mazeName)
     if s == None:
         return None
 
     lines = s.split('\n')
     for line in lines:
+        if line[:2] == '--':
+            break
         pair = line.split(':')
         if (len(pair) == 2):
             key = pair[0].strip()
             value = pair[1].strip()
             attrs[key] = value
+
+    attrs['name'] = mazeName
+    attrs['type'] = mazeName[:mazeName.find('_')]
     return attrs
 
 def prettyPrint(attrs):
@@ -125,20 +168,21 @@ def jsonPrettyPrint(dictionary):
 
 
 def viewAttributes(args):
+    mazeName = None
     if (len(args) > 0):
         mazeName = args[0]
-        selectMaze(mazeName)
 
-    attrs = getMazeAttributes()
-    prettyPrint(attrs)
+    attrs = getMazeAttributes(mazeName)
+    if attrs != None:
+        prettyPrint(attrs)
 
 
 def viewMaze(args):
+    mazeName = None
     if (len(args) > 0):
         mazeName = args[0]
-        selectMaze(mazeName)
 
-    s = readFile('maze_pretty.txt')
+    s = readFile('maze_pretty.txt', mazeName)
     if s != None:
         printOut(s)
 
@@ -164,7 +208,7 @@ def makeCondition(left, right, symbol):
     parse = None
     compare = None
 
-    if symbol == '==':
+    if symbol == '==' or symbol == '=':
         parse = parseAttrs
         compare = lambda l, r: l == r
     elif symbol == '!=':
