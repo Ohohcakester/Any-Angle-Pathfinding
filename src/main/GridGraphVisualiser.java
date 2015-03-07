@@ -18,7 +18,7 @@ public class GridGraphVisualiser {
 
     public static void run() {
         //loadMaze("mazeWCS.txt", "custom");
-        loadExisting("sc2_losttemple");
+        loadExisting("sc2_scrapstation");
     }
     
     

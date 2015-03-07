@@ -29,8 +29,8 @@ public class AnyAnglePathfinding {
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 0;
-        
+        int choice = 3;
+
         switch(choice) {
             case 0:
                 Visualisation.run();
@@ -108,7 +108,7 @@ public class AnyAnglePathfinding {
             case 14 :
                 return DefaultGenerator.generateSeededOld(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             case 15 :
-                return GraphImporter.loadStoredMaze("sc2_losttemple", "82-16_55-111");
+                return GraphImporter.loadStoredMaze("sc2_scrapstation", "81-16_138-51");
             default :
                 return null;
         }
@@ -118,7 +118,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 11; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
