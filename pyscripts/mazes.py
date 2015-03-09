@@ -19,6 +19,7 @@ class State:
 
     def write(self, message):
         self.f.write(str(message))
+        self.f.write('\n')
         print(message)
 
     def toFile(self):
@@ -112,7 +113,7 @@ def selectMaze(mazeName=None):
     return mazeName
 
 
-def readFile(fileName, mazeName=None):
+def openFile(fileName, mazeName=None):
     global state
     mazeName = selectMaze(mazeName)
     if mazeName == None:
@@ -121,9 +122,7 @@ def readFile(fileName, mazeName=None):
     path = getPath(mazeName) + fileName
     try:
         f = open(path)
-        s = f.read()
-        f.close()
-        return s
+        return f
     except Exception as e:
         printOut(e)
         return None
@@ -132,12 +131,11 @@ def readFile(fileName, mazeName=None):
 def getMazeAttributes(mazeName=None):
     attrs = {}
     mazeName = selectMaze(mazeName)
-    s = readFile('analysis.txt', mazeName)
-    if s == None:
+    f = openFile('analysis.txt', mazeName)
+    if f == None:
         return None
 
-    lines = s.split('\n')
-    for line in lines:
+    for line in f:
         if line[:2] == '--':
             break
         pair = line.split(':')
@@ -145,7 +143,8 @@ def getMazeAttributes(mazeName=None):
             key = pair[0].strip()
             value = pair[1].strip()
             attrs[key] = value
-
+    f.close()
+            
     attrs['name'] = mazeName
     attrs['type'] = mazeName[:mazeName.find('_')]
     return attrs
@@ -183,9 +182,11 @@ def viewMaze(args):
     if (len(args) > 0):
         mazeName = args[0]
 
-    s = readFile('maze_pretty.txt', mazeName)
-    if s != None:
-        printOut(s)
+    f = openFile('maze_pretty.txt', mazeName)
+    if f != None:
+        for line in f:
+            printOut(line)
+    f.close()
 
 
 def printCorrelation(vector1, vector2):
@@ -201,7 +202,7 @@ def printCorrelation(vector1, vector2):
     printOut('r = ' + str(r[0][1]))
 
 
-def retrieveDataVectors(var1, var2, conditionArgs):
+def retrieveFloatVectors(var1, var2, conditionArgs):
     conditions = parseConditions(conditionArgs)
     matches, attrList = filterMazes(mazes, conditions)
 
@@ -218,6 +219,56 @@ def retrieveDataVectors(var1, var2, conditionArgs):
 
     return vector1, vector2
 
+def retrieveDataVector(var, conditionArgs):
+    conditions = parseConditions(conditionArgs)
+    matches, attrList = filterMazes(mazes, conditions)
+
+    vector = []
+    mazeNames = []
+    try:
+        for i in range(0,len(attrList)):
+            attr = attrList[i]
+            match = matches[i]
+            if var in attr:
+                vector.append(attr[var])
+                mazeNames.append(match)
+    except ValueError as e:
+        printOut(e)
+        return None, None
+
+    return vector, mazeNames
+    
+    
+def listData(args):
+    vector, mazeNames = retrieveDataVector(args[0], args[1:])
+    for i in range(0,len(mazeNames)):
+        s = mazeNames[i] + ': ' + vector[i]
+        printOut(s)
+        
+        
+def getMean(args):
+    vector, mazeNames = retrieveDataVector(args[0], args[1:])
+    
+    sum = 0
+    sumSquares = 0
+    for val in vector:
+        val = float(val)
+        sum += val
+        sumSquares += val*val
+    
+    n = len(vector)
+    mean = sum/n
+    meanSquare = sumSquares/n
+    variance = meanSquare - mean*mean
+    sd = variance**0.5
+    printOut(args[0])
+    printOut('Mean = ' + str(mean))
+    printOut('SD = ' + str(sd))
+    
+    
+
+    
+    
 
 def correlate(args):
     global mazes
@@ -226,7 +277,7 @@ def correlate(args):
     var2 = args[1]
     conditionArgs = args[2:]
 
-    vector1, vector2 = retrieveDataVectors(var1, var2, conditionArgs)
+    vector1, vector2 = retrieveFloatVectors(var1, var2, conditionArgs)
 
     try:
         printCorrelation(vector1, vector2)
@@ -365,6 +416,9 @@ def initCommands():
     commands['f'] = lambda args : findProperties(args)
     commands['write'] = lambda args : writeToFile(args)
     commands['corr'] = lambda args : correlate(args)
+    commands['data'] = lambda args : listData(args)
+    commands['mean'] = lambda args : getMean(args)
+    
 
 
 def execCommand(args):

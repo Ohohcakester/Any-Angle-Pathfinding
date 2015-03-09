@@ -4,7 +4,6 @@ import grid.GridGraph;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import main.AnyAnglePathfinding;
@@ -22,10 +21,11 @@ import algorithms.datatypes.Point;
 public class TestDataGenerator {
 
     public static void run() {
-        List<String> mazeNames = GraphImporter.getAllMazeNames();
-        for (String mazeName : mazeNames) {
-            regenerateAnalysis(mazeName);
-        }
+        generateFromFolder("gamemaps/room32/", "room32");
+        generateFromFolder("gamemaps/corr16/", "corr16");
+        generateFromFolder("gamemaps/obst40/", "obst40");
+        generateFromFolder("gamemaps/obst10/", "obst10");
+        generateFromFolder("gamemaps/corr2/", "corr2");
     }
     
     /**
@@ -41,7 +41,7 @@ public class TestDataGenerator {
             name = mazeNamePrefix + "_" + name;
 
             GridGraph gridGraph = GraphImporter.importGraphFromFile(filePath);
-            generateTestData(gridGraph, 50, name);
+            generateTestData(gridGraph, 20, name);
         }
     }
     
