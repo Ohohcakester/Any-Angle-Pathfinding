@@ -8,6 +8,7 @@ import algorithms.visibilitygraph.VisibilityGraph;
 
 public class ProblemAnalysis {
     
+
     public final int sx, sy, ex, ey;
     public final float shortestPathLength;
     public final float straightLineDistance;
@@ -63,5 +64,20 @@ public class ProblemAnalysis {
         BFSVisibilityGraph algo = BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         return algo.getPath().length;
+    }
+
+    @Override
+    public String toString() {
+        return "sx=" + sx + 
+                "\nsy=" + sy +
+                "\nex=" + ex +
+                "\ney=" + ey +
+                "\nshortestPathLength=" + shortestPathLength +
+                "\nstraightLineDistance=" + straightLineDistance +
+                "\ndirectness=" + directness +
+                "\ndistanceCoverage=" + distanceCoverage +
+                "\nminMapCoverage=" + minMapCoverage +
+                "\nshortestPathHeadingChanges=" + shortestPathHeadingChanges +
+                "\nminHeadingChanges=" + minHeadingChanges;
     }
 }

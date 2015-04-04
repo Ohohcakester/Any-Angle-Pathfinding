@@ -7,12 +7,25 @@ import algorithms.anya.Fraction;
 import algorithms.datatypes.SnapshotItem;
 
 public class GridObjects {
-    public GridLineSet gridLineSet;
-    public GridPointSet gridPointSet;
-    
+    public final GridLineSet gridLineSet;
+    public final GridPointSet gridPointSet;
+
     public GridObjects(GridLineSet gridLineSet, GridPointSet gridPointSet) {
         this.gridLineSet = gridLineSet;
         this.gridPointSet = gridPointSet;
+    }
+    
+    private GridObjects() {
+        this.gridLineSet = null;
+        this.gridPointSet = null;
+    }
+
+    public static GridObjects nullObject() {
+        return new GridObjects();
+    }
+    
+    public boolean isNull() {
+        return gridLineSet == null && gridPointSet == null;
     }
     
     /**

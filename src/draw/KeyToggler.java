@@ -2,16 +2,17 @@ package draw;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 public class KeyToggler implements KeyListener {
-    private final LinkedList<GridObjects> gridObjectsList;
+    private final ArrayDeque<GridObjects> gridObjectsList;
     private final DrawCanvas drawCanvas;
     
-    public KeyToggler(DrawCanvas drawCanvas, LinkedList<GridObjects> gridObjectsList) {
+    public KeyToggler(DrawCanvas drawCanvas, ArrayList<GridObjects> gridArrayList) {
         this.drawCanvas = drawCanvas;
-        this.gridObjectsList = gridObjectsList;
-        gridObjectsList.addFirst(null);
+        gridObjectsList = new ArrayDeque<GridObjects>(gridArrayList);
+        gridObjectsList.addLast(GridObjects.nullObject());
         System.out.println(gridObjectsList.size());
         goRight(1, false);
     }
@@ -29,7 +30,7 @@ public class KeyToggler implements KeyListener {
     }
 
     private void rotateLeft(boolean stopAtEnd) {
-        if (gridObjectsList.get(gridObjectsList.size()-2) == null) {
+        if (peekSecondLast(gridObjectsList).isNull()) {
             if (!stopAtEnd) {
                 gridObjectsList.addFirst(gridObjectsList.removeLast());
                 gridObjectsList.addFirst(gridObjectsList.removeLast());
@@ -37,6 +38,13 @@ public class KeyToggler implements KeyListener {
         } else {
             gridObjectsList.addFirst(gridObjectsList.removeLast());
         }
+    }
+    
+    private GridObjects peekSecondLast(ArrayDeque<GridObjects> list) {
+        GridObjects top = list.removeLast();
+        GridObjects peek = list.peekLast();
+        list.addLast(top);
+        return peek;
     }
     
     private void goRight(int amount, boolean stopAtEnd) {
@@ -47,7 +55,7 @@ public class KeyToggler implements KeyListener {
     }
 
     private void rotateRight(boolean stopAtEnd) {
-        if (gridObjectsList.getFirst() == null) {
+        if (gridObjectsList.getFirst().isNull()) {
             if (!stopAtEnd) {
                 gridObjectsList.addLast(gridObjectsList.removeFirst());
                 gridObjectsList.addLast(gridObjectsList.removeFirst());

@@ -2,7 +2,7 @@ package main;
 import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
-import main.testdata.TestDataGenerator;
+import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AcceleratedAStar;
@@ -32,8 +32,8 @@ public class AnyAnglePathfinding {
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.\
-        int choice = 1;
-        
+        int choice = 0;
+
         switch(choice) {
             case 0:
                 Visualisation.run();
@@ -57,7 +57,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 0; // Adjust this to choose a maze.
+        int choice = 15; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -111,7 +111,7 @@ public class AnyAnglePathfinding {
             case 14 :
                 return DefaultGenerator.generateSeeded(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
             case 15 :
-                return GraphImporter.loadStoredMaze("def_iHHLNUOB_iMJ_iMJ_iSB", "23-102_149-107");
+                return GraphImporter.loadStoredMaze("sc2_scrapstation", "81-16_138-51");
             default :
                 return null;
         }
@@ -121,7 +121,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 17; // adjust this to choose an algorithm
+        int choice = 14; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :

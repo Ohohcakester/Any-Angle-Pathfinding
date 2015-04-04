@@ -5,15 +5,15 @@ import grid.GridGraph;
 import grid.StartGoalPoints;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFrame;
 
+import uiandio.CloseOnExitWindowListener;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.SnapshotItem;
-import uiandio.CloseOnExitWindowListener;
 import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
@@ -60,9 +60,9 @@ public class Visualisation {
             System.out.println("Exception occurred during algorithm operation!");
             e.printStackTrace();
         }
-    
-        LinkedList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, p.sx, p.sy, p.ex, p.ey);
-        lineSetList.addFirst(new GridObjects(gridLineSet, null));
+        
+        ArrayList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, p.sx, p.sy, p.ex, p.ey);
+        lineSetList.add(new GridObjects(gridLineSet, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
         drawCanvas.setStartAndEnd(p.sx, p.sy, p.ex, p.ey);
         
@@ -72,7 +72,7 @@ public class Visualisation {
     /**
      * Records a trace of the current algorithm into a LinkedList of GridObjects.
      */
-    private static LinkedList<GridObjects> recordAlgorithmOperation (
+    private static ArrayList<GridObjects> recordAlgorithmOperation (
             GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         PathFindingAlgorithm algo = AnyAnglePathfinding.algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         algo.startRecording();
@@ -83,8 +83,8 @@ public class Visualisation {
         }
         algo.stopRecording();
         algo.printStatistics();
-        LinkedList<List<SnapshotItem>> snapshotList = algo.retrieveSnapshotList();
-        LinkedList<GridObjects> gridObjectsList = new LinkedList<>();
+        ArrayList<List<SnapshotItem>> snapshotList = algo.retrieveSnapshotList();
+        ArrayList<GridObjects> gridObjectsList = new ArrayList<>();
         for (List<SnapshotItem> snapshot : snapshotList) {
             gridObjectsList.add(GridObjects.create(snapshot));
         }
@@ -94,7 +94,7 @@ public class Visualisation {
     /**
      * Spawns the visualisation window for the algorithm.
      */
-    private static void setupMainFrame(DrawCanvas drawCanvas, LinkedList<GridObjects> gridObjectsList) {
+    private static void setupMainFrame(DrawCanvas drawCanvas, ArrayList<GridObjects> gridObjectsList) {
         KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
         
         JFrame mainFrame = new JFrame();

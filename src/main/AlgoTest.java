@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
 import main.graphgeneration.DefaultGenerator;
-import main.testdata.PathLengthClass;
-import main.testdata.StandardMazes;
-import main.testdata.StartEndPointData;
-import main.testdata.TestDataGenerator;
-import main.testdata.TestDataLibrary;
+import main.testgen.PathLengthClass;
+import main.testgen.StandardMazes;
+import main.testgen.StartEndPointData;
+import main.testgen.TestDataGenerator;
+import main.testgen.TestDataLibrary;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AcceleratedAStar;
@@ -33,7 +33,7 @@ public class AlgoTest {
         /*System.out.println("Low Density");
         testOnMaze("def_iHHLNUOB_iMJ_iMJ_iSB", select, printAverage);*/
         
-        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 50),
+        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 15),
                 toTwoPointlist(15,14,37,79), select, printAverage);
         
 //        System.out.println("Low Density");

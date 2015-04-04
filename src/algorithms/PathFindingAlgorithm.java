@@ -16,7 +16,7 @@ import algorithms.datatypes.SnapshotItem;
  * Template for all Path Finding Algorithms used.<br>
  */
 public abstract class PathFindingAlgorithm {
-    private LinkedList<List<SnapshotItem>> snapshotList;
+    private ArrayList<List<SnapshotItem>> snapshotList;
     protected GridGraph graph;
 
     protected int parent[];
@@ -41,7 +41,7 @@ public abstract class PathFindingAlgorithm {
         this.sy = sy;
         this.ex = ex;
         this.ey = ey;
-        snapshotList = new LinkedList<>();
+        snapshotList = new ArrayList<>();
     }
     
     /**
@@ -61,7 +61,7 @@ public abstract class PathFindingAlgorithm {
     /**
      * @return retrieve the trace of the algorithm that has been recorded.
      */
-    public LinkedList<List<SnapshotItem>> retrieveSnapshotList() {
+    public ArrayList<List<SnapshotItem>> retrieveSnapshotList() {
         return snapshotList;
     }
     
@@ -99,22 +99,22 @@ public abstract class PathFindingAlgorithm {
         return graph.toTwoDimY(index);
     }
     
-    protected void maybeSaveSearchSnapshot() {
+    protected final void maybeSaveSearchSnapshot() {
         if (recordingMode) {
             saveSearchSnapshot();
         }
     }
     
-    protected boolean isRecording() {
+    protected final boolean isRecording() {
         return recordingMode;
     }
 
     private void saveSearchSnapshot() {
-        snapshotList.addLast(computeSearchSnapshot());
+        snapshotList.add(computeSearchSnapshot());
     }
 
     protected final void addSnapshot(List<SnapshotItem> snapshotItemList) {
-        snapshotList.addLast(snapshotItemList);
+        snapshotList.add(snapshotItemList);
     }
     
     protected int goalParentIndex() {
@@ -136,14 +136,14 @@ public abstract class PathFindingAlgorithm {
         for (int i=0; i<parent.length; i++) {
             if (parent[i] != -1) {
                 if (finalPathSet != null && finalPathSet.contains(i)) {
-                    list.add(new SnapshotItem(snapshotEdge(i), Color.BLUE));
+                    list.add(SnapshotItem.generate(snapshotEdge(i), Color.BLUE));
                 } else {
-                    list.add(new SnapshotItem(snapshotEdge(i)));
+                    list.add(SnapshotItem.generate(snapshotEdge(i)));
                 }
             }
             Integer[] vertexSnapshot = snapshotVertex(i);
             if (vertexSnapshot != null) {
-                list.add(new SnapshotItem(vertexSnapshot));
+                list.add(SnapshotItem.generate(vertexSnapshot));
             }
         }
 

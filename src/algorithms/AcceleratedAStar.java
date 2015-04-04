@@ -3,18 +3,13 @@ package algorithms;
 import grid.GridGraph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import algorithms.priorityqueue.IndirectHeap;
 
 public class AcceleratedAStar extends AStar {
-    public int nQueries=0;
-    public int totalSize=0;
-    public int calls=0;
-    
     private List<Integer> closed;
-    private int[][] maxRange;
+    private int[][] maxRanges;
     
     public AcceleratedAStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -30,7 +25,7 @@ public class AcceleratedAStar extends AStar {
         
         distance = new Float[totalSize];
         parent = new int[totalSize];
-        setupDownLeftRanges();
+        maxRanges = graph.computeMaxDownLeftRanges(); // O(size of gridGraph) computation. See actual method.
         
         initialise(start);
         visited = new boolean[totalSize];
@@ -52,7 +47,6 @@ public class AcceleratedAStar extends AStar {
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
 
-            calls++;
             int maxSquare = detectMaxSquare(x, y);
             
             if (maxSquare == 0) {
@@ -65,75 +59,6 @@ public class AcceleratedAStar extends AStar {
         }
         
         maybePostSmooth();
-    }
-
-    /**
-     * leftRange is the number of blocks you can move left before hitting a blocked tile.
-     * downRange is the number of blocks you can move down before hitting a blocked tile.
-     * For blocked tiles, leftRange, downRange are both -1.
-     */
-    private void setupDownLeftRanges() {
-        int[][] downRange = new int[sizeY+1][sizeX+1];
-        int[][] leftRange = new int[sizeY+1][sizeX+1];
-
-        for (int y=0; y<sizeY; ++y) {
-            if (graph.isBlocked(0, y))
-                leftRange[y][0] = -1;
-            else 
-                leftRange[y][0] = 0;
-            
-            for (int x=1; x<sizeX; ++x) {
-                if (graph.isBlocked(x, y)) {
-                    leftRange[y][x] = -1;
-                } else {
-                    leftRange[y][x] = leftRange[y][x-1] + 1;
-                }
-            }
-        }
-
-        for (int x=0; x<sizeX; ++x) {
-            if (graph.isBlocked(x, 0))
-                downRange[0][x] = -1;
-            else 
-                downRange[0][x] = 0;
-            
-            for (int y=1; y<sizeY; ++y) {
-                if (graph.isBlocked(x, y)) {
-                    downRange[y][x] = -1;
-                } else {
-                    downRange[y][x] = downRange[y-1][x] + 1;
-                }
-            }
-        }
-        
-        for (int x=0; x<sizeX+1; ++x) {
-            downRange[sizeY][x] = -1;
-            leftRange[sizeY][x] = -1;
-        }
-        
-        for (int y=0; y<sizeY; ++y) {
-            downRange[y][sizeX] = -1;
-            leftRange[y][sizeX] = -1;
-        }
-        
-        maxRange = new int[sizeX+sizeY+1][];
-        int maxSize = Math.min(sizeX, sizeY) + 1;
-        for (int i=0; i<maxRange.length; ++i) {
-            int currSize = Math.min(i+1, maxRange.length-i);
-            if (maxSize < currSize)
-                currSize = maxSize;
-            maxRange[i] = new int[currSize];
-            
-            int currX = i - sizeY;
-            if (currX < 0) currX = 0;
-            int currY = currX - i + sizeY;
-            for (int j=0; j<maxRange[i].length; ++j) {
-                maxRange[i][j] = Math.min(downRange[currY][currX], leftRange[currY][currX]);
-                currY++;
-                currX++;
-            }
-            
-        }
     }
 
     private void relaxSuccessorsSizeZero(int current, int x, int y) {
@@ -269,7 +194,7 @@ public class AcceleratedAStar extends AStar {
      * </pre>
      */
     private int checkUpperBoundNew(int i, int j, int k) {
-        return maxRange[i][j + k] - k;
+        return maxRanges[i][j + k] - k;
     }
     
     /**

@@ -81,6 +81,19 @@ public class GraphImporter {
     private GridGraph retrieve() {
         return gridGraph;
     }
+    
+    public static ArrayList<String> getAllMazeNames() {
+        ArrayList<String> mazeNames = new ArrayList<>();
+        
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + "/";
+        File dir = new File(path);
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            mazeNames.add(file.getName());
+        }
+        
+        return mazeNames;
+    }
 
     /**
      * Import a graph from a file in the AnyAnglePathFinding directory.
