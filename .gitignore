@@ -33,4 +33,10 @@ mazedata/
 .texlipse
 
 testdata/
+pyscripts/output.txt
+
+*.class
+
 .idea/
+AnyAnglePathfinding.iml
+
