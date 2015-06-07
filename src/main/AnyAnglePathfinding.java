@@ -9,6 +9,7 @@ import algorithms.AcceleratedAStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
+import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
@@ -122,7 +123,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 19; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -175,6 +176,15 @@ public class AnyAnglePathfinding {
                 break;
             case 16 :
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
+                break;
+            case 17 :
+                algoFunction = null; // reserved
+                break;
+            case 18 :
+                algoFunction = null; // reserved
+                break;
+            case 19 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new LazyThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
         }
     }
