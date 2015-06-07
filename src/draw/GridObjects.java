@@ -7,6 +7,10 @@ import algorithms.anya.Fraction;
 import algorithms.datatypes.SnapshotItem;
 
 public class GridObjects {
+    private static final Color POINT_COLOR = new Color(0,64,255);
+    private static final Color LINE_COLOR = Color.RED;
+    
+    
     public final GridLineSet gridLineSet;
     public final GridPointSet gridPointSet;
 
@@ -39,9 +43,9 @@ public class GridObjects {
             Integer[] path = item.path;
             Color color = item.color;
             if (path.length == 4) {
-                gridLineSet.addLine(path[0], path[1], path[2], path[3], or(Color.RED,color));
+                gridLineSet.addLine(path[0], path[1], path[2], path[3], or(LINE_COLOR,color));
             } else if (path.length == 2) {
-                gridPointSet.addPoint(path[0], path[1], or(Color.BLUE,color));
+                gridPointSet.addPoint(path[0], path[1], or(POINT_COLOR,color));
             } else if (path.length == 7) {
                 // y, xLn, xLd, xRn, xRd, px, py
                 Fraction y = new Fraction (path[0]);
@@ -53,7 +57,7 @@ public class GridObjects {
                 gridLineSet.addLine(px, py, xL, y, or(Color.CYAN,color));
                 gridLineSet.addLine(px, py, xMid, y, or(Color.CYAN,color));
                 gridLineSet.addLine(px, py, xR, y, or(Color.CYAN,color));
-                gridLineSet.addLine(xL, y, xR, y, or(Color.RED,color));
+                gridLineSet.addLine(xL, y, xR, y, or(LINE_COLOR,color));
                 gridPointSet.addPoint(path[5], path[6], or(Color.BLUE,color));
             } else if (path.length == 5) {
                 Fraction y = new Fraction (path[0]);

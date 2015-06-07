@@ -1,10 +1,21 @@
 package main;
-import algorithms.*;
 import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
+import algorithms.AStar;
+import algorithms.AcceleratedAStar;
+import algorithms.AdjustmentThetaStar;
+import algorithms.Anya;
+import algorithms.BasicThetaStar;
+import algorithms.BreadthFirstSearch;
+import algorithms.LazyThetaStar;
+import algorithms.PathFindingAlgorithm;
+import algorithms.RestrictedVisibilityGraphAlgorithm;
+import algorithms.StrictThetaStar;
+import algorithms.StrictVisibilityGraphAlgorithm;
+import algorithms.VisibilityGraphAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -22,7 +33,8 @@ public class AnyAnglePathfinding {
     public static final String PATH_MAZEDATA = "mazedata/";
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
-    public static void main(String[] args) { // uncomment the one you need to use.\
+    
+    public static void main(String[] args) { // uncomment the one you need to use.
         int choice = 0;
 
         switch(choice) {
@@ -49,7 +61,7 @@ public class AnyAnglePathfinding {
      */
     static GridAndGoals loadMaze() {
         int choice = 1; // Adjust this to choose a maze.
-        
+
         switch(choice) {
             case 0 : {// UNSEEDED
                 int unblockedRatio = 12;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
@@ -102,7 +114,11 @@ public class AnyAnglePathfinding {
             case 14 :
                 return DefaultGenerator.generateSeeded(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
             case 15 :
-                return GraphImporter.loadStoredMaze("sc2_scrapstation", "81-16_138-51");
+                return GraphImporter.loadStoredMaze("sc2_losttemple", "56-90_117-43");
+            case 16 :
+                return GraphImporter.importGraphFromFile("custommaze.txt", 1, 1, 7, 4);
+            case 17 :
+                return GraphImporter.importGraphFromFile("custommaze3.txt", 1, 19, 29, 2);
             default :
                 return null;
         }
@@ -113,69 +129,69 @@ public class AnyAnglePathfinding {
      */
     static void setDefaultAlgoFunction() {
         int choice = 14; // adjust this to choose an algorithm
-        
+
         switch (choice) {
             case 1 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::new;
                 break;
             case 2 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+                algoFunction = BreadthFirstSearch::new;
                 break;
             case 3 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = BreadthFirstSearch::postSmooth;
                 break;
             case 4 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::postSmooth;
                 break;
             case 5 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::dijkstra;
                 break;
             case 6 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
+                algoFunction = Anya::new;
                 break;
             case 7 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                algoFunction = VisibilityGraphAlgorithm::new;
                 break;
             case 8 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::new;
                 break;
             case 9 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::noHeuristic;
                 break;
             case 10 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::postSmooth;
                 break;
             case 11 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AcceleratedAStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = AcceleratedAStar::new;
                 break;
             case 12 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
+                algoFunction = VisibilityGraphAlgorithm::graphReuseNoHeuristic;
                 break;
             case 13 :
                 //algoFunction = null; // reserved
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AdjustmentThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = AdjustmentThetaStar::new;
                 break;
             case 14 :
                 //algoFunction = null; // reserved
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = StrictThetaStar::new;
                 break;
             case 15 :
                 //algoFunction = null; // reserved
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                algoFunction = StrictThetaStar::noHeuristic;
                 break;
             case 16 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
+                algoFunction = BFSVisibilityGraph::graphReuse;
                 break;
             case 17 :
                 //algoFunction = null; // reserved
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                algoFunction = RestrictedVisibilityGraphAlgorithm::new;
                 break;
             case 18 :
                 //algoFunction = null; // reserved
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                algoFunction = StrictVisibilityGraphAlgorithm::new;
                 break;
             case 19 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new LazyThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = LazyThetaStar::new;
                 break;
         }
     }

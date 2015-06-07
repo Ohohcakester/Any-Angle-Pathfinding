@@ -17,8 +17,8 @@ import draw.VisualiserMouseControls;
 public class GridGraphVisualiser {
 
     public static void run() {
-        //loadMaze("mazeWCS.txt", "custom");
-        loadExisting("sc2_scrapstation");
+        //loadMaze("custommaze2.txt", "custom");
+        loadExisting("sc2_losttemple");
     }
     
     
