@@ -123,59 +123,56 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 19; // adjust this to choose an algorithm
+        int choice = 7; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::new;
                 break;
             case 2 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+                algoFunction = BreadthFirstSearch::new;
                 break;
             case 3 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = BreadthFirstSearch::postSmooth;
                 break;
             case 4 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::postSmooth;
                 break;
             case 5 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
+                algoFunction = AStar::dijkstra;
                 break;
             case 6 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
+                algoFunction = Anya::new;
                 break;
             case 7 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                algoFunction = VisibilityGraphAlgorithm::new;
                 break;
             case 8 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::new;
                 break;
             case 9 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::noHeuristic;
                 break;
             case 10 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);
+                algoFunction = BasicThetaStar::postSmooth;
                 break;
             case 11 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new AcceleratedAStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = AcceleratedAStar::new;
                 break;
             case 12 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
+                algoFunction = VisibilityGraphAlgorithm::graphReuse;
                 break;
             case 13 :
                 algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> new AdjustmentThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
             case 14 :
                 algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
             case 15 :
                 algoFunction = null; // reserved
-                //algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
                 break;
             case 16 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
+                algoFunction = BFSVisibilityGraph::graphReuse;
                 break;
             case 17 :
                 algoFunction = null; // reserved
@@ -184,7 +181,7 @@ public class AnyAnglePathfinding {
                 algoFunction = null; // reserved
                 break;
             case 19 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> new LazyThetaStar(gridGraph, sx, sy, ex, ey);
+                algoFunction = LazyThetaStar::new;
                 break;
         }
     }
