@@ -8,12 +8,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
 import main.AnyAnglePathfinding;
 import main.analysis.TwoPoint;
+import main.testgen.StartEndPointData;
 
 /**
  * How to create a grid file.<br>
@@ -126,6 +126,21 @@ public class GraphImporter {
         for (File file : files) {
             TwoPoint tp = readProblem(file);
             list.add(tp);
+        }
+        return list;
+    }
+
+    public static ArrayList<StartEndPointData> loadStoredMazeProblemData(String mazeName) {
+        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/";
+        File dir = new File(path);
+        File[] files = dir.listFiles((file, name) -> name.endsWith(".problem"));
+        
+        ArrayList<StartEndPointData> list = new ArrayList<>(files.length);
+        for (File file : files) {
+            TwoPoint tp = readProblem(file);
+            String sp = readFile(file).get("shortestPathLength");
+            float shortestPath = Float.parseFloat(sp);
+            list.add(new StartEndPointData(tp.p1, tp.p2, shortestPath));
         }
         return list;
     }

@@ -60,10 +60,24 @@ public class AlgoTest {
         test.test("undefined", gridGraph, problems, algoFunction);
     }
     
+    public static void testOnMazeData(String mazeName, AlgoFunction algoFunction, TestFunctionData test) {
+        ArrayList<StartEndPointData> problems = GraphImporter.loadStoredMazeProblemData(mazeName);
+        testOnMazeData(mazeName, problems, algoFunction, test);
+    }
+    
+    public static void testOnMazeData(String mazeName, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {
+        GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
+        test.test(mazeName, gridGraph, problems, algoFunction);
+    }
+    
+    public static void testOnGraphData(GridGraph gridGraph, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {
+        test.test("undefined", gridGraph, problems, algoFunction);
+    }
+    
     
     private static final TestFunction printAverage = (mazeName, gridGraph, problems, algoFunction) -> {
-        int sampleSize = 100;
-        int nTrials = 10;
+        int sampleSize = 10;
+        int nTrials = 5;
         
         TestResult[] testResults = new TestResult[problems.size()];
         int index = 0;
@@ -81,11 +95,46 @@ public class AlgoTest {
         }
         int nResults = testResults.length;
 
-        System.out.println("Sample Size: " + sampleSize);
+
+        System.out.println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
         System.out.println("Average Time: " + (totalMean/nResults));
         System.out.println("Average SD: " + (totalSD/nResults));
         System.out.println("Average Path Length: " + (totalPathLength/nResults));
     };
+    
+
+    
+    private static final TestFunctionData printAverageData(int sampleSize, int nTrials) {
+        return (mazeName, gridGraph, problems, algoFunction) -> {
+    
+            double sum = 0;
+            double sumSquare = 0;
+            double totalPathLength = 0;
+            
+            int nResults = 0;
+            for (StartEndPointData problem : problems) {
+                TwoPoint tp = new TwoPoint(problem.start, problem.end);
+                TestResult testResult = testAlgorithm(gridGraph, algoFunction, tp, sampleSize, nTrials);
+                
+                sum += testResult.time;
+                sumSquare += testResult.time*testResult.time;
+                totalPathLength += testResult.pathLength / problem.shortestPath;
+                
+                nResults++;
+            }
+            
+            double mean = (double)sum / nResults;
+            double secondMomentTimesN = (double)sumSquare;
+            double sampleVariance = (secondMomentTimesN - nResults*(mean*mean)) / (nResults - 1);
+            double standardDeviation = Math.sqrt(sampleVariance);
+
+            System.out.println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
+            System.out.println("Average Time: " + mean);
+            System.out.println("Standard Dev: " + standardDeviation);
+            System.out.println("Average Path Length: " + (totalPathLength/nResults));
+            System.out.println();
+        };
+    }
 
 
     private static TestResult testAlgorithmTime(GridGraph gridGraph,
@@ -137,8 +186,8 @@ public class AlgoTest {
     
     private static TestResult testAlgorithm(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
-        TestResult time = testAlgorithmTime(gridGraph,algoFunction,tp,sampleSize,nTrials);
         TestResult pathLength = testAlgorithmPathLength(gridGraph,algoFunction,tp);
+        TestResult time = testAlgorithmTime(gridGraph,algoFunction,tp,sampleSize,nTrials);
         return new TestResult(time.timesRan, time.time, time.timeSD, pathLength.pathLength);
     }
     
@@ -369,5 +418,5 @@ interface TestFunction {
 
 interface TestFunctionData {
     public void test(String mazeName, GridGraph gridGraph,
-            ArrayList<TwoPoint> problemSet, AlgoFunction algoFunction);
+            ArrayList<StartEndPointData> problemSet, AlgoFunction algoFunction);
 }

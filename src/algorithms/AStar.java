@@ -61,16 +61,16 @@ public class AStar extends PathFindingAlgorithm {
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
 
-            tryRelax(current, x, y, x-1, y-1);
-            tryRelax(current, x, y, x, y-1);
-            tryRelax(current, x, y, x+1, y-1);
+            tryRelaxNeighbour(current, x, y, x-1, y-1);
+            tryRelaxNeighbour(current, x, y, x, y-1);
+            tryRelaxNeighbour(current, x, y, x+1, y-1);
             
-            tryRelax(current, x, y, x-1, y);
-            tryRelax(current, x, y, x+1, y);
+            tryRelaxNeighbour(current, x, y, x-1, y);
+            tryRelaxNeighbour(current, x, y, x+1, y);
             
-            tryRelax(current, x, y, x-1, y+1);
-            tryRelax(current, x, y, x, y+1);
-            tryRelax(current, x, y, x+1, y+1);
+            tryRelaxNeighbour(current, x, y, x-1, y+1);
+            tryRelaxNeighbour(current, x, y, x, y+1);
+            tryRelaxNeighbour(current, x, y, x+1, y+1);
 
             maybeSaveSearchSnapshot();
         }
@@ -78,14 +78,14 @@ public class AStar extends PathFindingAlgorithm {
         maybePostSmooth();
     }
     
-    private void tryRelax(int current, int currentX, int currentY, int x, int y) {
+    protected void tryRelaxNeighbour(int current, int currentX, int currentY, int x, int y) {
         if (!graph.isValidCoordinate(x, y))
             return;
         
         int destination = toOneDimIndex(x,y);
         if (visited[destination])
             return;
-        if (!graph.lineOfSight(currentX, currentY, x, y))
+        if (!graph.neighbourLineOfSight(currentX, currentY, x, y))
             return;
         
         if (relax(current, destination, weight(currentX, currentY, x, y))) {

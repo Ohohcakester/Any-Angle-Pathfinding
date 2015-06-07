@@ -111,15 +111,45 @@ public class GridGraph {
         
         return (float)Math.sqrt(squareDistance);
     }
-    
-    
+
+    /**
+     * Same as lineOfSight, but only works with a vertex and its 8 immediate neighbours.
+     * Also (x1,y1) != (x2,y2)
+     */
+    public boolean neighbourLineOfSight(int x1, int y1, int x2, int y2) {
+        if (x1 == x2) {
+            if (y1 > y2) {
+                return !isBlocked(x1,y2) || !isBlocked(x1-1,y2);
+            } else { // y1 < y2
+                return !isBlocked(x1,y1) || !isBlocked(x1-1,y1);
+            }
+        } else if (x1 < x2) {
+            if (y1 == y2) {
+                return !isBlocked(x1,y1) || !isBlocked(x1,y1-1);
+            } else if (y1 < y2) {
+                return !isBlocked(x1,y1);
+            } else { // y2 < y1
+                return !isBlocked(x1,y2);
+            }
+        } else { // x2 < x1
+            if (y1 == y2) {
+                return !isBlocked(x2,y1) || !isBlocked(x2,y1-1);
+            } else if (y1 < y2) {
+                return !isBlocked(x2,y1);
+            } else { // y2 < y1
+                return !isBlocked(x2,y2);
+            }
+        }
+    }
+
+
     /**
      * @return true iff there is line-of-sight from (x1,y1) to (x2,y2).
      */
     public boolean lineOfSight(int x1, int y1, int x2, int y2) {
         int dy = y2 - y1;
         int dx = x2 - x1;
-        
+
         int f = 0;
 
         int signY = 1;

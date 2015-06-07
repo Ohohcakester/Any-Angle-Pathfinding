@@ -33,3 +33,4 @@ mazedata/
 .texlipse
 
 testdata/
+.idea/

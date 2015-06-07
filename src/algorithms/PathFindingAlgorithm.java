@@ -125,7 +125,7 @@ public abstract class PathFindingAlgorithm {
         List<SnapshotItem> list = new ArrayList<>();
         int current = goalParentIndex();
         Set<Integer> finalPathSet = null;
-        if (parent[current] != -1) {
+        if (parent[current] >= 0) {
             finalPathSet = new HashSet<Integer>();
             while (current != -1) {
                 finalPathSet.add(current);
