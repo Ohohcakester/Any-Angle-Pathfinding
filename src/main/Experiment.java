@@ -14,8 +14,8 @@ import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
-import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictThetaStar;
+import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.datatypes.Point;
 import algorithms.visibilitygraph.VisibilityGraph;
@@ -24,10 +24,10 @@ import draw.GridLineSet;
 public class Experiment {
     
     public static void run() {
-        testVisibilityGraphSize();
+//        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
-//        findRestrictedVisibilityGraphIssues();
+        findRestrictedVisibilityGraphIssues();
 //        other();
     }
     
@@ -280,15 +280,17 @@ public class Experiment {
     }
     
     private static void findRestrictedVisibilityGraphIssues() {
-        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);;
-        AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
         
         //printSeed = false; // keep this commented out.
-        Random seedRand = new Random(-3);
+        Random seedRand = new Random(4);
         int initial = seedRand.nextInt();
         for (int i=0; i<50000000; i++) {
-            int sizeX = seedRand.nextInt(30) + 10;
-            int sizeY = seedRand.nextInt(30) + 10;
+            int sizeX = seedRand.nextInt(40) + 10;
+            int sizeY = seedRand.nextInt(100) + 10;
             int seed = i+initial;
             int ratio = seedRand.nextInt(30) + 5;
             
@@ -309,10 +311,12 @@ public class Experiment {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
             AnyAnglePathfinding.algoFunction = rVGA;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
 
             AnyAnglePathfinding.algoFunction = VGA;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.removeDuplicatesInPath(path);
             normalPathLength = Utility.computePathLength(gridGraph, path);
             }catch (Exception e) {
                 e.printStackTrace();
@@ -328,8 +332,9 @@ public class Experiment {
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
                 System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
+                System.out.println(restPathLength / normalPathLength);
                 System.out.println("============");
-                throw new UnsupportedOperationException("DISCREPANCY!!");
+                //throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
                 if (i%10000 == 9999) {
                     System.out.println("Count: " + (i+1));

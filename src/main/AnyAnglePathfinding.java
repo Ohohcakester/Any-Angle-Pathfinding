@@ -1,19 +1,10 @@
 package main;
+import algorithms.*;
 import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
-import algorithms.AStar;
-import algorithms.AcceleratedAStar;
-import algorithms.AdjustmentThetaStar;
-import algorithms.Anya;
-import algorithms.BasicThetaStar;
-import algorithms.BreadthFirstSearch;
-import algorithms.PathFindingAlgorithm;
-import algorithms.RestrictedVisibilityGraphAlgorithm;
-import algorithms.StrictThetaStar;
-import algorithms.VisibilityGraphAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -57,31 +48,31 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 15; // Adjust this to choose a maze.
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
-                int unblockedRatio = 7;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int sizeX = 100;               // x-axis size of grid
-                int sizeY = 100;               // y-axis size of grid
+                int unblockedRatio = 12;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int sizeX = 300;               // x-axis size of grid
+                int sizeY = 300;               // y-axis size of grid
 
-                int sx = 12;                   // x-coordinate of start point
-                int sy = 84;                  // y-coordinate of start point
-                int ex = 73;                  // x-coordinate of goal point
-                int ey = 9;                   // y-coordinate of goal point
+                int sx = 9;                   // x-coordinate of start point
+                int sy = 217;                  // y-coordinate of start point
+                int ex = 213;                  // x-coordinate of goal point
+                int ey = 35;                   // y-coordinate of goal point
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 1500;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 567069235;        // seed for the random.
+                int unblockedRatio = 7;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 12311;        // seed for the random.
                 
-                int sizeX = 30;              // x-axis size of grid
-                int sizeY = 30;              // y-axis size of grid
+                int sizeX = 60;              // x-axis size of grid
+                int sizeY = 60;              // y-axis size of grid
 
-                int sx = 5;                  // x-coordinate of start point
-                int sy = 4;                 // y-coordinate of start point
-                int ex = 7;                 // x-coordinate of goal point
-                int ey = 29;                  // y-coordinate of goal point
+                int sx = 12;                   // x-coordinate of start point
+                int sy = 40;                  // y-coordinate of start point
+                int ex = 52;                  // x-coordinate of goal point
+                int ey = 34;                   // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -158,7 +149,7 @@ public class AnyAnglePathfinding {
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> new AcceleratedAStar(gridGraph, sx, sy, ex, ey);
                 break;
             case 12 :
-                algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
                 break;
             case 13 :
                 //algoFunction = null; // reserved
@@ -178,6 +169,13 @@ public class AnyAnglePathfinding {
             case 17 :
                 //algoFunction = null; // reserved
                 algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                break;
+            case 18 :
+                //algoFunction = null; // reserved
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+                break;
+            case 19 :
+                algoFunction = (gridGraph, sx, sy, ex, ey) -> new LazyThetaStar(gridGraph, sx, sy, ex, ey);
                 break;
         }
     }

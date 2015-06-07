@@ -60,16 +60,16 @@ public class StrictThetaStar extends BasicThetaStar {
             int y = toTwoDimY(current);
             
 
-            tryRelax(current, x, y, x-1, y-1);
-            tryRelax(current, x, y, x, y-1);
-            tryRelax(current, x, y, x+1, y-1);
+            tryRelaxNeighbour(current, x, y, x-1, y-1);
+            tryRelaxNeighbour(current, x, y, x, y-1);
+            tryRelaxNeighbour(current, x, y, x+1, y-1);
             
-            tryRelax(current, x, y, x-1, y);
-            tryRelax(current, x, y, x+1, y);
+            tryRelaxNeighbour(current, x, y, x-1, y);
+            tryRelaxNeighbour(current, x, y, x+1, y);
             
-            tryRelax(current, x, y, x-1, y+1);
-            tryRelax(current, x, y, x, y+1);
-            tryRelax(current, x, y, x+1, y+1);
+            tryRelaxNeighbour(current, x, y, x-1, y+1);
+            tryRelaxNeighbour(current, x, y, x, y+1);
+            tryRelaxNeighbour(current, x, y, x+1, y+1);
 
             maybeSaveSearchSnapshot();
         }
@@ -126,7 +126,7 @@ public class StrictThetaStar extends BasicThetaStar {
         return false;
     }
 
-    private void tryRelax(int current, int currentX, int currentY, int x, int y) {
+    protected void tryRelaxNeighbour(int current, int currentX, int currentY, int x, int y) {
         if (!graph.isValidCoordinate(x, y))
             return;
         
@@ -135,7 +135,7 @@ public class StrictThetaStar extends BasicThetaStar {
             return;
         if (parent[current] != -1 && parent[current] == parent[destination]) // OPTIMISATION: [TI]
             return; // Idea: don't bother trying to relax if parents are equal. using triangle inequality.
-        if (!graph.lineOfSight(currentX, currentY, x, y))
+        if (!graph.neighbourLineOfSight(currentX, currentY, x, y))
             return;
         
         if (relax(current, destination, weight(currentX, currentY, x, y))) {

@@ -26,7 +26,7 @@ public class RestrictedVisibilityGraphAlgorithm extends VisibilityGraphAlgorithm
     public void computePath() {
         PathFindingAlgorithm algo = new BasicThetaStar(graph, sx ,sy, ex, ey);
         
-        if (false && isRecording()) {
+        if (isRecording()) {
             algo.startRecording();
             algo.computePath();
             inheritSnapshotListFrom(algo);

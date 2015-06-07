@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
-import main.graphgeneration.DefaultGenerator;
 import main.testgen.PathLengthClass;
 import main.testgen.StandardMazes;
 import main.testgen.StartEndPointData;
@@ -14,32 +13,113 @@ import main.testgen.TestDataGenerator;
 import main.testgen.TestDataLibrary;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
+import algorithms.AStar;
 import algorithms.AcceleratedAStar;
 import algorithms.BasicThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
+import algorithms.StrictThetaStar;
+import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
 
 public class AlgoTest {
     
     public static void run() {
         //runTestAllAlgos();
-        
+
+        AlgoFunction aStar = (a,b,c,d,e) -> new AStar(a,b,c,d,e);
         AlgoFunction thetaStar = (a,b,c,d,e) -> new BasicThetaStar(a,b,c,d,e);
+        AlgoFunction strictThetaStar = (a,b,c,d,e) -> new StrictThetaStar(a,b,c,d,e);
+        AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
+        AlgoFunction rVGA = (a,b,c,d,e) -> new RestrictedVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction accAStar = (a,b,c,d,e) -> new AcceleratedAStar(a,b,c,d,e);
+        AlgoFunction vgReuse = (a,b,c,d,e) -> VisibilityGraphAlgorithm.graphReuse(a,b,c,d,e);
+        AlgoFunction vga = (a,b,c,d,e) -> new VisibilityGraphAlgorithm(a,b,c,d,e);
+
+//        testSequence(vgReuse, "Visibility Graphs - Graph Reuse");
+        testSequence(vga, "A* on Visibility Graphs");
+//      testSequence(aStar, "8-directional A*");
+//        testSequence(thetaStar, "Basic Theta*");
+//        testSequence(strictThetaStar, "Strict Theta*");
+//        testSequence(sVGA, "Strict Visibility Graphs");
+//        testSequence(rVGA, "Restricted Visibility Graphs");
+//        testSequence(accAStar, "Accelerated A*");
         
-        AlgoFunction select = accAStar;
+        //AlgoFunction select = accAStar;
 
         /*System.out.println("Low Density");
         testOnMaze("def_iHHLNUOB_iMJ_iMJ_iSB", select, printAverage);*/
         
-        testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 15),
-                toTwoPointlist(15,14,37,79), select, printAverage);
-        
+        //testOnGraph(DefaultGenerator.generateSeededGraphOnly(567069235, 100, 100, 15),
+        //        toTwoPointlist(15,14,37,79), select, printAverage);
+
 //        System.out.println("Low Density");
 //        testOnMaze("def_iO2GZNB_iSB_iSB_iSB", select, printAverage);
 //        System.out.println("High Density");
 //        testOnMaze("def_i3GRHWMD_iSB_iSB_iH", select, printAverage);
+
+        /*System.out.println("Low Density - 6% - 500x500");
+        testOnMaze("def_iIRXXUKC_iUP_iUP_iSB", select, printAverage);
+        System.out.println("Medium Density - 20% - 500x500");
+        testOnMaze("def_iOMJ14Z_iUP_iUP_iP", select, printAverage);
+        System.out.println("High Density - 40% - 500x500");
+        testOnMaze("def_iREPZHKB_iUP_iUP_iH", select, printAverage);*/
+    }
+    
+    public static void testSequence(AlgoFunction algo, String name) {
+        System.out.println("=== Testing " + name + " ===");
+
+        System.out.println("<< GAME MAPS >>");
+        
+//        System.out.println("sc2_steppesofwar - 164x164 - spacious");
+//        testOnMazeData("sc2_steppesofwar", algo, printAverageData(10, 5));
+//        System.out.println("sc2_losttemple - 132x131");
+//        testOnMazeData("sc2_losttemple", algo, printAverageData(10, 5));
+//        System.out.println("sc2_extinction - 164x164 - less spacious");
+//        testOnMazeData("sc2_extinction", algo, printAverageData(10, 5));
+//
+//        System.out.println("baldursgate_AR0070SR 124x134");
+//        testOnMazeData("baldursgate_AR0070SR", algo, printAverageData(10, 5));
+//        System.out.println("baldursgate_AR0705SR - 100x86 - less spacious");
+//        testOnMazeData("baldursgate_AR0705SR", algo, printAverageData(10, 5));
+//        System.out.println("baldursgate_AR0418SR - 84x75 - spacious");
+//        testOnMazeData("baldursgate_AR0418SR", algo, printAverageData(10, 5));
+//
+//        System.out.println("wc3_icecrown - 512x512 (spacious)");
+//        testOnMazeData("wc3_icecrown", algo, printAverageData(5, 4));
+//        System.out.println("wc3_dragonfire - 512x512 (less spacious)");
+//        testOnMazeData("wc3_dragonfire", algo, printAverageData(5, 4));
+//
+//        System.out.println("<< GENERATED MAPS >>");
+//        
+//        System.out.println("Low Density - 6% - 50x50");
+//        testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, printAverageData(20, 10));
+//        System.out.println("Medium Density - 20% - 50x50");
+//        testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, printAverageData(20, 10));
+//        System.out.println("High Density - 40% - 50x50");
+//        testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, printAverageData(20, 10));
+//
+//        System.out.println("Low Density - 6% - 300x300");
+//        testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, printAverageData(5, 4));
+//        System.out.println("Medium Density - 20% - 300x300");
+//        testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, printAverageData(5, 4));
+//        System.out.println("High Density - 40% - 300x300");
+//        testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, printAverageData(5, 4));
+//
+//        System.out.println("Low Density - 6% - 500x500");
+//        testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, printAverageData(3, 3));
+//        System.out.println("Medium Density - 20% - 500x500");
+//        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
+//        System.out.println("High Density - 40% - 500x500");
+//        testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, printAverageData(3, 3));
+
+        System.out.println("obst10_random512-10-7 - 10% - 512x512");
+        testOnMazeData("obst10_random512-10-7", algo, printAverageData(3, 3));
+        System.out.println("obst40_random512-40-7 - 67% - 512x512");
+        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
+
+        System.out.println("=== FINISHED TEST FOR " + name + " ===");
+        System.out.println();
     }
     
     public static ArrayList<TwoPoint> toTwoPointlist(int...points) {

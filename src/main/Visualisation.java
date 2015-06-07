@@ -79,6 +79,7 @@ public class Visualisation {
         try {
             algo.computePath();
         } catch (Exception e) {
+            System.out.println("Exception occurred during algorithm operation!");
             e.printStackTrace();
         }
         algo.stopRecording();

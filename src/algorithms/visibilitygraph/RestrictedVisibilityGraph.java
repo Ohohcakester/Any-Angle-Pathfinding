@@ -1,11 +1,8 @@
 package algorithms.visibilitygraph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-
-import algorithms.datatypes.Point;
 import grid.GridGraph;
+
+import java.util.ArrayList;
 
 /**
  * STEP 1: Use Theta* (or some other algo) to find an upper bound L for the
@@ -18,10 +15,10 @@ import grid.GridGraph;
  * STEP 4: Use Dijkstra's algorithm on the visibility graph.
  */
 public class RestrictedVisibilityGraph extends VisibilityGraph {
-    // nodeIndex[y][x] refers to grid point (x+xOffset, y+yOffset)
-    private int[] xOffsets;
-    private int yOffset;
-    private final float pathLength;
+    // nodeIndex[y][x] refers to grid point (x+xOffsets[y], y+yOffset)
+    protected int[] xOffsets;
+    protected int yOffset;
+    protected final float pathLength;
 
     public RestrictedVisibilityGraph(GridGraph graph, int sx, int sy, int ex,
             int ey, float pathLength) {
