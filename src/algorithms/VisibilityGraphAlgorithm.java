@@ -21,6 +21,19 @@ public class VisibilityGraphAlgorithm extends AStar {
     public VisibilityGraphAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }
+
+    public static VisibilityGraphAlgorithm noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
+        VisibilityGraphAlgorithm algo = new VisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
+        algo.heuristicWeight = 0;
+        return algo;
+    }
+
+    public static VisibilityGraphAlgorithm graphReuseNoHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
+        VisibilityGraphAlgorithm algo = new VisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
+        algo.reuseGraph = true;
+        algo.heuristicWeight = 0;
+        return algo;
+    }
     
     public static VisibilityGraphAlgorithm graphReuse(GridGraph graph, int sx, int sy, int ex, int ey) {
         VisibilityGraphAlgorithm algo = new VisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
@@ -127,7 +140,8 @@ public class VisibilityGraphAlgorithm extends AStar {
                 Edge edge = itr.next();
                 if (!visited[edge.dest] && relax(edge)) {
                     // If relaxation is done.
-                    pq.decreaseKey(edge.dest, distance[edge.dest]);
+                    Point dest = visibilityGraph.coordinateOf(edge.dest);
+                    pq.decreaseKey(edge.dest, distance[edge.dest] + heuristic(dest.x, dest.y));
                 }
             }
             

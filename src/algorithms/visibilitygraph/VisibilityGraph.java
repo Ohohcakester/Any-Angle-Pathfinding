@@ -23,7 +23,7 @@ public class VisibilityGraph {
     private Runnable saveSnapshot;
     
     ArrayList<Point> nodeList;
-    ArrayList<LinkedList<Edge>> outgoingEdgeList;
+    ArrayList<ArrayList<Edge>> outgoingEdgeList;
 
     public VisibilityGraph(GridGraph graph, int sx, int sy, int ex, int ey) {
         this.graph = graph;
@@ -68,14 +68,14 @@ public class VisibilityGraph {
     private int assignNode(int x, int y) {
         int index = nodeList.size();
         nodeList.add(new Point(x,y));
-        outgoingEdgeList.add(new LinkedList<Edge>());
+        outgoingEdgeList.add(new ArrayList<Edge>());
         return index;
     }
 
     private int assignNodeAndConnect(int x, int y) {
         int index = nodeList.size();
         nodeList.add(new Point(x,y));
-        outgoingEdgeList.add(new LinkedList<Edge>());
+        outgoingEdgeList.add(new ArrayList<Edge>());
 
         for (int i=0; i<nodeList.size()-1; i++) {
             Point toPoint = coordinateOf(i);
@@ -113,8 +113,8 @@ public class VisibilityGraph {
         }
     }
     
-    private void removeInstancesOf(int index) {
-        for (LinkedList<Edge> edgeList : outgoingEdgeList) {
+    protected final void removeInstancesOf(int index) {
+        for (ArrayList<Edge> edgeList : outgoingEdgeList) {
             Edge edge = new Edge(0, index, 0);
             edgeList.remove(edge);
         }
@@ -165,8 +165,8 @@ public class VisibilityGraph {
     }
     
     
-    private void addEdge(int fromI, int toI, float weight) {
-        LinkedList<Edge> edgeList = outgoingEdgeList.get(fromI);
+    protected final void addEdge(int fromI, int toI, float weight) {
+        ArrayList<Edge> edgeList = outgoingEdgeList.get(fromI);
         edgeList.add(new Edge(fromI, toI, weight));
     }
     
@@ -216,7 +216,7 @@ public class VisibilityGraph {
     
     public int computeSumDegrees() {
         int sum = 0;
-        for (LinkedList<Edge> list : outgoingEdgeList) {
+        for (ArrayList<Edge> list : outgoingEdgeList) {
             sum += list.size();
         }
         return sum;
@@ -228,7 +228,7 @@ public class VisibilityGraph {
 
     public Edge getEdge(int source, int dest) {
         
-        LinkedList<Edge> edges = outgoingEdgeList.get(source);
+        ArrayList<Edge> edges = outgoingEdgeList.get(source);
         for (Edge edge : edges) {
             if (edge.dest == dest) {
                 return edge;
