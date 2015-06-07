@@ -2,12 +2,18 @@ package draw;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 
 public class KeyToggler implements KeyListener {
     private final ArrayDeque<GridObjects> gridObjectsList;
     private final DrawCanvas drawCanvas;
+    private static int imgCount = 0;
     
     public KeyToggler(DrawCanvas drawCanvas, ArrayList<GridObjects> gridArrayList) {
         this.drawCanvas = drawCanvas;
@@ -28,6 +34,22 @@ public class KeyToggler implements KeyListener {
         }
         displayLast();
     }
+    
+    private void takeSnapShot() {
+        imgCount++;
+        JPanel panel = drawCanvas;
+        
+        BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+        panel.paint(bufImage.createGraphics());
+        File imageFile = new File("snapshots/"+imgCount+".png");
+        try {
+            imageFile.createNewFile();
+            ImageIO.write(bufImage, "png", imageFile);
+        } catch(Exception ex) {
+            
+        }
+        
+     }
 
     private void rotateLeft(boolean stopAtEnd) {
         if (peekSecondLast(gridObjectsList).isNull()) {
@@ -47,21 +69,26 @@ public class KeyToggler implements KeyListener {
         return peek;
     }
     
-    private void goRight(int amount, boolean stopAtEnd) {
+    private boolean goRight(int amount, boolean stopAtEnd) {
+        boolean moved = false;
         for (int i=0; i<amount; i++) {
-            rotateRight(stopAtEnd);
+            moved = rotateRight(stopAtEnd) ? true : moved;
         }
         displayLast();
+        return moved;
     }
 
-    private void rotateRight(boolean stopAtEnd) {
+    private boolean rotateRight(boolean stopAtEnd) {
         if (gridObjectsList.getFirst().isNull()) {
             if (!stopAtEnd) {
                 gridObjectsList.addLast(gridObjectsList.removeFirst());
                 gridObjectsList.addLast(gridObjectsList.removeFirst());
+                return true;
             }
+            return false;
         } else {
             gridObjectsList.addLast(gridObjectsList.removeFirst());
+            return true;
         }
     }
     
@@ -109,6 +136,28 @@ public class KeyToggler implements KeyListener {
                 break;
             case KeyEvent.VK_S :
                 goLeft(5, true);
+                break;
+                
+
+                // O: Go right one step + take screenshot, loops around
+            case KeyEvent.VK_O :
+                if (goRight(1, false))
+                    takeSnapShot();
+                System.out.println("Snapshot " + imgCount);
+                break;
+
+                // P: Go right one step + take screenshot, stop at end
+            case KeyEvent.VK_P :
+                if (goRight(1, true))
+                    takeSnapShot();
+                System.out.println("Snapshot " + imgCount);
+                break;
+
+                // L: Go right multiple steps + take screenshot, stop at end
+            case KeyEvent.VK_L :
+                if (goRight(15, true))
+                    takeSnapShot();
+                System.out.println("Snapshot " + imgCount);
                 break;
         }
     }

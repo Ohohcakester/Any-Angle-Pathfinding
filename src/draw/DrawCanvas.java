@@ -10,7 +10,16 @@ import javax.swing.JPanel;
 
 public class DrawCanvas extends JPanel {
 
+    // DRAWING CONFIGURATION
     private static final int MAX_RES = 700;
+    
+    private static final Color UNBLOCKEDTILE_COLOR = Color.WHITE;
+    private static final Color BLOCKEDTILE_COLOR = new Color(127,127,127);
+    
+    private static final Color STARTPOINT_COLOR = new Color(0,160,0);
+    private static final Color ENDPOINT_COLOR = Color.YELLOW;
+    // DRAWING CONFIGURATION - END
+    
     public final int resY;
     public final int resX;
     
@@ -47,8 +56,8 @@ public class DrawCanvas extends JPanel {
 
     public void setStartAndEnd(int sx, int sy, int ex, int ey) {
         GridPointSet gridPointSet = new GridPointSet();
-        gridPointSet.addPoint(sx,  sy, Color.ORANGE);
-        gridPointSet.addPoint(ex,  ey, Color.YELLOW);
+        gridPointSet.addPoint(sx,  sy, STARTPOINT_COLOR);
+        gridPointSet.addPoint(ex,  ey, ENDPOINT_COLOR);
         startEndPointDrawer = new VariableSizePointDrawer(gridGraph,
                 gridPointSet, resX, resY, 1.3f);
     }
@@ -57,8 +66,11 @@ public class DrawCanvas extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        g.setColor(Color.BLACK);
+        clearToColor(g);
+        
+        g.setColor(BLOCKEDTILE_COLOR);
         gridGraphDrawer.draw(g);
+        
         if (gridLineDrawer != null) {
             gridLineDrawer.draw(g);
         }
@@ -69,6 +81,12 @@ public class DrawCanvas extends JPanel {
             startEndPointDrawer.draw(g);
         }
     }
+    
+    private void clearToColor(Graphics g) {
+        g.setColor(UNBLOCKEDTILE_COLOR);
+        g.fillRect(0,0,resX,resY);
+    }
+    
     
     public void changeSet(GridLineSet gridLineSet, GridPointSet gridPointSet) {
         gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, resX, resY);

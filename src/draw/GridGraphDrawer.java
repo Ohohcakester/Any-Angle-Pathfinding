@@ -33,6 +33,6 @@ public class GridGraphDrawer implements Drawer {
         float xPos = width*x;
         float yPos = height*y;
         
-        g.fillRect((int)xPos,(int)yPos,(int)width,(int)height);
+        g.fillRect((int)xPos,(int)yPos,(int)width+1,(int)height+1);
     }
 }

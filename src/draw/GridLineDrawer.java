@@ -11,6 +11,8 @@ import draw.GridLineSet.FractionLine;
 
 public class GridLineDrawer implements Drawer {
     
+    private static final int LINE_THICKNESS = 3;
+    
     private final GridLineSet gridLineSet;
     private final GridGraph gridGraph;
     private final int resX;
@@ -34,7 +36,7 @@ public class GridLineDrawer implements Drawer {
         }
 
         Graphics2D g2 = (Graphics2D) g;
-        g2.setStroke(new BasicStroke(2));
+        g2.setStroke(new BasicStroke(LINE_THICKNESS));
 
         for (GridLineSet.Line line : gridLineSet.getLineList()) {
             drawLine(g, line);
