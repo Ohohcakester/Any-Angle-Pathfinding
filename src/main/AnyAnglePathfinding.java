@@ -5,6 +5,7 @@ import main.graphgeneration.DefaultGenerator;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
+import algorithms.AStarOctileHeuristic;
 import algorithms.AcceleratedAStar;
 import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
@@ -61,7 +62,7 @@ public class AnyAnglePathfinding {
      */
     static GridAndGoals loadMaze() {
         int choice = 1; // Adjust this to choose a maze.
-
+        
         switch(choice) {
             case 0 : {// UNSEEDED
                 int unblockedRatio = 12;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
@@ -75,16 +76,15 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 7;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 12311;        // seed for the random.
+                int unblockedRatio = 15;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 567063235;        // seed for the random.
                 
-                int sizeX = 60;              // x-axis size of grid
-                int sizeY = 60;              // y-axis size of grid
-
-                int sx = 12;                   // x-coordinate of start point
-                int sy = 40;                  // y-coordinate of start point
-                int ex = 52;                  // x-coordinate of goal point
-                int ey = 34;                   // y-coordinate of goal point
+                int sizeX = 30;              // x-axis size of grid
+                int sizeY = 30;              // y-axis size of grid
+                int sx = 5;                  // x-coordinate of start point
+                int sy = 4;                 // y-coordinate of start point
+                int ex = 27;                 // x-coordinate of goal point
+                int ey = 29;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -128,8 +128,8 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 14; // adjust this to choose an algorithm
-
+        int choice = 8; // adjust this to choose an algorithm
+        
         switch (choice) {
             case 1 :
                 algoFunction = AStar::new;
@@ -192,6 +192,9 @@ public class AnyAnglePathfinding {
                 break;
             case 19 :
                 algoFunction = LazyThetaStar::new;
+                break;
+            case 20 :
+                algoFunction = AStarOctileHeuristic::new;
                 break;
         }
     }
