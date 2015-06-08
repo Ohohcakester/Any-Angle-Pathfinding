@@ -5,6 +5,7 @@ import main.graphgeneration.DefaultGenerator;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
+import algorithms.AStarOctileHeuristic;
 import algorithms.AcceleratedAStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
@@ -55,7 +56,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 17; // Adjust this to choose a maze.
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -70,15 +71,15 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 1500;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 567069235;        // seed for the random.
+                int unblockedRatio = 15;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 567063235;        // seed for the random.
                 
                 int sizeX = 30;              // x-axis size of grid
                 int sizeY = 30;              // y-axis size of grid
 
                 int sx = 5;                  // x-coordinate of start point
                 int sy = 4;                 // y-coordinate of start point
-                int ex = 7;                 // x-coordinate of goal point
+                int ex = 27;                 // x-coordinate of goal point
                 int ey = 29;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
@@ -123,7 +124,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 7; // adjust this to choose an algorithm
+        int choice = 8; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -182,6 +183,9 @@ public class AnyAnglePathfinding {
                 break;
             case 19 :
                 algoFunction = LazyThetaStar::new;
+                break;
+            case 20 :
+                algoFunction = AStarOctileHeuristic::new;
                 break;
         }
     }
