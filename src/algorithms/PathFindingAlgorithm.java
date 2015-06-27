@@ -16,6 +16,9 @@ import algorithms.datatypes.SnapshotItem;
  * Template for all Path Finding Algorithms used.<br>
  */
 public abstract class PathFindingAlgorithm {
+    private static final int SNAPSHOT_INTERVAL = 15;
+    private int snapshotCountdown = 0;
+    
     private ArrayList<List<SnapshotItem>> snapshotList;
     protected GridGraph graph;
 
@@ -103,7 +106,14 @@ public abstract class PathFindingAlgorithm {
         return recordingMode;
     }
 
+    
     private void saveSearchSnapshot() {
+        if (snapshotCountdown > 0) {
+            snapshotCountdown--;
+            return;
+        }
+        snapshotCountdown = SNAPSHOT_INTERVAL;
+        
         snapshotList.add(computeSearchSnapshot());
     }
 
