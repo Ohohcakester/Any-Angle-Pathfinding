@@ -8,6 +8,7 @@ import grid.GridGraph;
 public class AStar extends PathFindingAlgorithm {
 
     protected boolean postSmoothingOn = false;
+    protected boolean repeatedPostSmooth = true;
     protected float heuristicWeight = 1f;
 
     protected Float[] distance;
@@ -165,11 +166,16 @@ public class AStar extends PathFindingAlgorithm {
     
     protected void maybePostSmooth() {
         if (postSmoothingOn) {
-            postSmooth();
+            if (repeatedPostSmooth) {
+                while(postSmooth());
+            } else {
+                postSmooth();
+            }
         }
     }
     
-    private void postSmooth() {
+    private boolean postSmooth() {
+        boolean didSomething = false;
 
         int current = finish;
         while (current != -1) {
@@ -180,6 +186,7 @@ public class AStar extends PathFindingAlgorithm {
                     if (lineOfSight(current,next)) {
                         parent[current] = next;
                         next = parent[next];
+                        didSomething = true;
                         maybeSaveSearchSnapshot();
                     } else {
                         next = -1;
@@ -189,6 +196,8 @@ public class AStar extends PathFindingAlgorithm {
             
             current = parent[current];
         }
+        
+        return didSomething;
     }
     
 

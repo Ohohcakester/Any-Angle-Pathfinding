@@ -11,6 +11,7 @@ import java.util.Random;
 
 import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
+import algorithms.AStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.datatypes.Point;
 import algorithms.visibilitygraph.VisibilityGraph;
@@ -19,8 +20,8 @@ import draw.GridLineSet;
 public class Experiment {
     
     public static void run() {
-        testVisibilityGraphSize();
-//        testAbilityToFindGoal();
+//        testVisibilityGraphSize();
+        testAgainstReferenceAlgorithm();
 //        other();
     }
     
@@ -131,13 +132,13 @@ public class Experiment {
         }
     }
 
-    private static void testAbilityToFindGoal() {
+    private static void testAgainstReferenceAlgorithm() {
         AnyAnglePathfinding.setDefaultAlgoFunction();
         
         AnyAnglePathfinding.AlgoFunction currentAlgo = AnyAnglePathfinding.algoFunction;
-        AnyAnglePathfinding.AlgoFunction bfs = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+        AnyAnglePathfinding.AlgoFunction referenceAlgo = AStar::new;
     
-        Random seedRand = new Random(2);
+        Random seedRand = new Random(3);
         int initial = seedRand.nextInt();
         for (int i=0; i<500000; i++) {
             int sizeX = seedRand.nextInt(70) + 10;
@@ -158,26 +159,36 @@ public class Experiment {
             int ey = p2/(sizeX+1);
     
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnlyOld(seed, sizeX, sizeY, ratio);
-            AnyAnglePathfinding.algoFunction = bfs;
+            AnyAnglePathfinding.algoFunction = referenceAlgo;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float pathLength = Utility.computePathLength(gridGraph, path);
-            boolean bfsValid = (pathLength > 0.00001f);
+            float referencePathLength = Utility.computePathLength(gridGraph, path);
+            boolean referenceValid = (referencePathLength > 0.00001f);
     
             AnyAnglePathfinding.algoFunction = currentAlgo;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            pathLength = Utility.computePathLength(gridGraph, path);
-            boolean algoValid = (pathLength > 0.00001f);
+            float algoPathLength = Utility.computePathLength(gridGraph, path);
+            boolean algoValid = (referencePathLength > 0.00001f);
             
-            if (bfsValid != algoValid) {
+            if (referenceValid != algoValid) {
                 System.out.println("============");
-                System.out.println("Discrepancy Discovered!");
+                System.out.println("Validity Discrepancy Discovered!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
-                System.out.println("BFSValid: " + bfsValid + " , AlgoValid: " + algoValid);
+                System.out.println("Reference: " + referenceValid + " , Current: " + algoValid);
                 System.out.println("============");
                 throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
-                System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                if (Math.abs(algoPathLength - referencePathLength) > 0.0001f) {
+                    System.out.println("============");
+                    System.out.println("Path Length Discrepancy Discovered!");
+                    System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                    System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                    System.out.println("Reference: " + referencePathLength + " , Current: " + algoPathLength);
+                    System.out.println("============");
+                    throw new UnsupportedOperationException("DISCREPANCY!!");
+                }
+                if (i%1000 == 0)
+                    System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
             }
         }
         

@@ -147,6 +147,9 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         bubbleUp(inIndex);
     }
     
+    public E getMinValue() {
+        return keyList.get(0);
+    }
 
     /**
      * Runtime: O(lgn)

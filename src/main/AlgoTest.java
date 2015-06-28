@@ -16,6 +16,7 @@ import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.BasicThetaStar;
+import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
@@ -28,6 +29,9 @@ public class AlgoTest {
 
         AlgoFunction aStar = AStar::new;
         AlgoFunction aStarOctile = AStarOctileHeuristic::new;
+        AlgoFunction aStarOctilePS = AStarOctileHeuristic::postSmooth;
+        AlgoFunction jumpPointSearch = JumpPointSearch::new;
+        AlgoFunction jpsPS = JumpPointSearch::postSmooth;
         AlgoFunction lazyThetaStar = LazyThetaStar::new;
         AlgoFunction basicThetaStar = BasicThetaStar::new;
         AlgoFunction aStarPS = AStar::postSmooth;
@@ -37,31 +41,33 @@ public class AlgoTest {
 
         FileIO.makeDirs("blk71testdata/");
         
-//        testSequence(aStar, "AStar SLD");
-//        testSequence(aStarOctile, "AStar Octile");
+        testSequence(aStar, "AStar SLD");
+        testSequence(aStarOctile, "AStar Octile");
+        testSequence(jumpPointSearch, "JumpPointSearch");
 //        testSequence(lazyThetaStar, "LazyThetaStar");
 //        testSequence(basicThetaStar, "BasicThetaStar");
-//        testSequence(aStarPS, "AStar PostSmooth");
+        testSequence(aStarOctilePS, "AStarOctile PostSmooth");
+        testSequence(jpsPS, "JPS PostSmooth");
 //        testSequence(dijkstra, "Dijkstra");
-        testSequence(vgaReuse, "VisibilityGraph Reuse");
+//        testSequence(vgaReuse, "VisibilityGraph Reuse");
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
     }
     
     public static void testSequence(AlgoFunction algo, String name) {
-        String path = "blk71testdata/" + name.replace(" ",  "_") + ".txt";
-        io = new FileIO(path);
+        //String path = "blk71testdata/" + name.replace(" ",  "_") + ".txt";
+        //io = new FileIO(path);
         
         println("=== Testing " + name + " ===");
 
         println("<< GAME MAPS >>");
         
-//        println("sc2_steppesofwar - 164x164 - spacious");
-//        testOnMazeData("sc2_steppesofwar", algo, printAverageData(10, 5));
+        println("sc2_steppesofwar - 164x164 - spacious");
+        testOnMazeData("sc2_steppesofwar", algo, printAverageData(10, 5));
 //        println("sc2_losttemple - 132x131");
 //        testOnMazeData("sc2_losttemple", algo, printAverageData(10, 5));
-//        println("sc2_extinction - 164x164 - less spacious");
-//        testOnMazeData("sc2_extinction", algo, printAverageData(10, 5));
+        println("sc2_extinction - 164x164 - less spacious");
+        testOnMazeData("sc2_extinction", algo, printAverageData(10, 5));
 //
 //        println("baldursgate_AR0070SR 124x134");
 //        testOnMazeData("baldursgate_AR0070SR", algo, printAverageData(10, 5));
@@ -98,20 +104,20 @@ public class AlgoTest {
 //        println("High Density - 40% - 500x500");
 //        testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, printAverageData(3, 3));*/
 
-        println("obst10_random512-10-7 - 10% - 512x512");
-        testOnMazeData("obst10_random512-10-7", algo, printAverageData(3, 3));
-        println("obst40_random512-40-7 - 67% - 512x512");
-        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
+//        println("obst10_random512-10-7 - 10% - 512x512");
+//        testOnMazeData("obst10_random512-10-7", algo, printAverageData(3, 3));
+//        println("obst40_random512-40-7 - 67% - 512x512");
+//        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
 
         println("=== FINISHED TEST FOR " + name + " ===");
         println();
         
-        io.close();
+        //io.close();
     }
 
     private static void println(Object line) {
-        io.writeLine(line.toString());
-        io.flush();
+        //io.writeLine(line.toString());
+        //io.flush();
         System.out.println(line);
     }
     private static void println() {

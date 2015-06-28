@@ -10,6 +10,7 @@ import algorithms.AcceleratedAStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
+import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
@@ -186,6 +187,12 @@ public class AnyAnglePathfinding {
                 break;
             case 20 :
                 algoFunction = AStarOctileHeuristic::new;
+                break;
+            case 21 :
+                algoFunction = JumpPointSearch::new;
+                break;
+            case 22 :
+                algoFunction = JumpPointSearch::postSmooth;
                 break;
         }
     }
