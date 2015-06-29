@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import algorithms.datatypes.Memory;
 import algorithms.datatypes.SnapshotItem;
 
 /**
@@ -32,7 +33,10 @@ public abstract class PathFindingAlgorithm {
     protected final int ex;
     protected final int ey;
     
+    private int ticketNumber = -1;
+    
     private boolean recordingMode;
+    private boolean usingStaticMemory = false;
 
     public PathFindingAlgorithm(GridGraph graph, int sizeX, int sizeY,
             int sx, int sy, int ex, int ey) {
@@ -45,6 +49,11 @@ public abstract class PathFindingAlgorithm {
         this.ex = ex;
         this.ey = ey;
         snapshotList = new ArrayList<>();
+    }
+    
+    protected void initialiseMemory(int size, float defaultDistance, int defaultParent, boolean defaultVisited) {
+        usingStaticMemory = true;
+        ticketNumber = Memory.initialise(size, defaultDistance, defaultParent, defaultVisited);
     }
     
     /**
@@ -98,6 +107,9 @@ public abstract class PathFindingAlgorithm {
     
     protected final void maybeSaveSearchSnapshot() {
         if (recordingMode) {
+            if (usingStaticMemory && ticketNumber != Memory.currentTicket())
+                throw new UnsupportedOperationException("Ticket does not match!");
+            
             saveSearchSnapshot();
         }
     }
@@ -125,20 +137,36 @@ public abstract class PathFindingAlgorithm {
         return toOneDimIndex(ex,ey);
     }
     
+    private int getParent(int index) {
+        if (usingStaticMemory) return Memory.parent(index);
+        else return parent[index];
+    }
+    
+    private void setParent(int index, int value) {
+        if (usingStaticMemory) Memory.setParent(index, value);
+        else parent[index] = value;
+    }
+    
+    protected int getSize() {
+        if (usingStaticMemory) return Memory.size();
+        else return parent.length;
+    }
+    
     protected List<SnapshotItem> computeSearchSnapshot() {
         List<SnapshotItem> list = new ArrayList<>();
         int current = goalParentIndex();
         Set<Integer> finalPathSet = null;
-        if (parent[current] >= 0) {
+        if (getParent(current) >= 0) {
             finalPathSet = new HashSet<Integer>();
             while (current != -1) {
                 finalPathSet.add(current);
-                current = parent[current];
+                current = getParent(current);
             }
         }
 
-        for (int i=0; i<parent.length; i++) {
-            if (parent[i] != -1) {
+        int size = getSize();
+        for (int i=0; i<size; i++) {
+            if (getParent(i) != -1) {
                 if (finalPathSet != null && finalPathSet.contains(i)) {
                     list.add(SnapshotItem.generate(snapshotEdge(i), Color.BLUE));
                 } else {
@@ -156,7 +184,7 @@ public abstract class PathFindingAlgorithm {
     
     protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
-        int startIndex = parent[endIndex];
+        int startIndex = getParent(endIndex);
         edge[2] = toTwoDimX(endIndex);
         edge[3] = toTwoDimY(endIndex);
         if (startIndex < 0) {

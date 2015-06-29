@@ -2,7 +2,7 @@ package algorithms;
 
 import grid.GridGraph;
 
-public class AStarOctileHeuristic extends AStar {
+public class AStarOctileHeuristic extends AStarStaticMemory {
     public AStarOctileHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }

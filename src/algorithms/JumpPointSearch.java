@@ -1,8 +1,8 @@
 package algorithms;
 import grid.GridGraph;
-import algorithms.priorityqueue.IndirectHeap;
+import algorithms.priorityqueue.ReusableIndirectHeap;
 
-public class JumpPointSearch extends AStar {
+public class JumpPointSearch extends AStarStaticMemory {
     private int[] neighboursdX;
     private int[] neighboursdY;
     private int neighbourCount;
@@ -28,22 +28,18 @@ public class JumpPointSearch extends AStar {
         int start = toOneDimIndex(sx, sy);
         finish = toOneDimIndex(ex, ey);
         
-        distance = new Float[totalSize];
-        parent = new int[totalSize];
+        pq = new ReusableIndirectHeap(totalSize);
+        this.initialiseMemory(totalSize, Float.POSITIVE_INFINITY, -1, false);
         
         initialise(start);
-        visited = new boolean[totalSize];
-        
-        pq = new IndirectHeap<Float>(distance, true);
-        pq.heapify();
         
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
-            if (current == finish || distance[current] == Float.POSITIVE_INFINITY) {
+            if (current == finish || distance(current) == Float.POSITIVE_INFINITY) {
                 maybeSaveSearchSnapshot();
                 break;
             }
-            visited[current] = true;
+            setVisited(current, true);
 
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
@@ -211,8 +207,8 @@ public class JumpPointSearch extends AStar {
 
     private void computeNeighbours(int currentIndex, int cx, int cy) {
         neighbourCount = 0;
-        
-        int parentIndex = parent[currentIndex];
+
+        int parentIndex = parent(currentIndex);
         if (parentIndex == -1) {
             // is start node.
             for (int y=-1;y<=1;++y) {
@@ -376,14 +372,14 @@ public class JumpPointSearch extends AStar {
     }
 
     protected void tryRelax(int current, int currX, int currY, int destination) {
-        if (visited[destination]) return;
+        if (visited(destination)) return;
         
         int destX = toTwoDimX(destination);
         int destY = toTwoDimY(destination);
         
         if (relax(current, destination, graph.octileDistance(currX, currY, destX, destY))) {
             // If relaxation is done.
-            pq.decreaseKey(destination, distance[destination] + heuristic(destX,destY));
+            pq.decreaseKey(destination, distance(destination) + heuristic(destX,destY));
         }
     }
 }
