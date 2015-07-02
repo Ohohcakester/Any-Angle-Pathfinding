@@ -33,7 +33,7 @@ public class AnyAnglePathfinding {
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 1;
+        int choice = 0;
 
         switch(choice) {
             case 0:
@@ -58,7 +58,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 18; // Adjust this to choose a maze.
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -128,7 +128,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 19; // adjust this to choose an algorithm
+        int choice = 8; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
