@@ -56,9 +56,8 @@ Setting the choice variable in main() chooses which function of the program is t
 * GridGraphVisualiser: Generates a visualisation of the graph. A handy tool for choosing start and end point coordinates.
 
 In general, the maze to be used is configured in loadMaze(), and the algorithm to be run is configured in setDefaultAlgoFunction(), by setting the choice variable.
-
-choice = 0 for loadMaze generates a random maze. The parameters are configured in case 0 of the switch.
-choice = 1 for loadMaze generates a seeded random maze. The seed can also be configured for seeded random mazes.
+- choice = 0 for loadMaze generates a random maze. The parameters are configured in case 0 of the switch.
+- choice = 1 for loadMaze generates a seeded random maze. The seed can also be configured for seeded random mazes.
 
 
 Visualisation Controls
