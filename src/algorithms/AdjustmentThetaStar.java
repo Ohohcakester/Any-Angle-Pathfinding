@@ -20,17 +20,17 @@ public class AdjustmentThetaStar extends BasicThetaStar {
         if (lineOfSight(parent[u], v)) {
             u = parent[u];
             
-            float newWeight = distance[u] + physicalDistance(u, v);
-            if (newWeight < distance[v]) {
-                distance[v] = newWeight;
-                parent[v] = u;
+            float newWeight = distance(u) + physicalDistance(u, v);
+            if (newWeight < distance(v)) {
+                setDistance(v, newWeight);
+                setParent(v, u);
                 updated = true;
             }
         } else {
-            float newWeight = distance[u] + weightUV;
-            if (newWeight < distance[v]) {
-                distance[v] = newWeight;
-                parent[v] = u;
+            float newWeight = distance(u) + weightUV;
+            if (newWeight < distance(v)) {
+                setDistance(v, newWeight);
+                setParent(v, u);
                 updated = true;
             }
         }
@@ -58,11 +58,11 @@ public class AdjustmentThetaStar extends BasicThetaStar {
     
     private boolean tryUpdateWithNode(int ux, int uy, int v) {
         int u = toOneDimIndex(ux, uy);
-        float newWeight = distance[u] + physicalDistance(ux, uy, v);
-        if (newWeight < distance[v]) {
+        float newWeight = distance(u) + physicalDistance(ux, uy, v);
+        if (newWeight < distance(v)) {
             if (lineOfSight(u, v)) {
-                distance[v] = newWeight;
-                parent[v] = u;
+                setDistance(v, newWeight);
+                setParent(v, u);
                 return true;
             }
         }

@@ -6,11 +6,13 @@ import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
+import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
+import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
@@ -36,7 +38,7 @@ public class AnyAnglePathfinding {
 
     
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 0;
+        int choice = 1;
 
         switch(choice) {
             case 0:
@@ -61,7 +63,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 1; // Adjust this to choose a maze.
+        int choice = 18; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -76,8 +78,8 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 15;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 567063235;        // seed for the random.
+                int unblockedRatio = 26;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = -1389697;        // seed for the random.
                 
                 int sizeX = 30;              // x-axis size of grid
                 int sizeY = 30;              // y-axis size of grid
@@ -114,11 +116,13 @@ public class AnyAnglePathfinding {
             case 14 :
                 return DefaultGenerator.generateSeeded(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
             case 15 :
-                return GraphImporter.loadStoredMaze("sc2_losttemple", "56-90_117-43");
+                return GraphImporter.loadStoredMaze("sc2_losttemple", "66-83_117-53");
             case 16 :
                 return GraphImporter.importGraphFromFile("custommaze.txt", 1, 1, 7, 4);
             case 17 :
                 return GraphImporter.importGraphFromFile("custommaze3.txt", 1, 19, 29, 2);
+            case 18 :
+                return GraphImporter.loadStoredMaze("baldursgate_AR0402SR", "9-45_44-22");
             default :
                 return null;
         }
@@ -128,7 +132,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 19; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -195,6 +199,18 @@ public class AnyAnglePathfinding {
                 break;
             case 20 :
                 algoFunction = AStarOctileHeuristic::new;
+                break;
+            case 21 :
+                algoFunction = AStarOctileHeuristic::postSmooth;
+                break;
+            case 22 :
+                algoFunction = JumpPointSearch::new;
+                break;
+            case 23 :
+                algoFunction = JumpPointSearch::postSmooth;
+                break;
+            case 24 :
+                algoFunction = AStarStaticMemory::new;
                 break;
         }
     }

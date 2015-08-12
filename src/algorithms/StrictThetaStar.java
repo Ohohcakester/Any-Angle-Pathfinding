@@ -1,7 +1,7 @@
 package algorithms;
 
-import algorithms.priorityqueue.IndirectHeap;
 import grid.GridGraph;
+import algorithms.priorityqueue.ReusableIndirectHeap;
 
 /**
  * An modification of Theta* that I am experimenting with. -Oh
@@ -36,25 +36,21 @@ public class StrictThetaStar extends BasicThetaStar {
 
         int start = toOneDimIndex(sx, sy);
         finish = toOneDimIndex(ex, ey);
-        
-        distance = new Float[totalSize];
-        parent = new int[totalSize];
+
+        pq = new ReusableIndirectHeap(totalSize);
+        this.initialiseMemory(totalSize, Float.POSITIVE_INFINITY, -1, false);
         
         initialise(start);
-        visited = new boolean[totalSize];
-        
-        pq = new IndirectHeap<Float>(distance, true);
-        pq.heapify();
         
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             tryFixBufferValue(current);
             
-            if (current == finish || distance[current] == Float.POSITIVE_INFINITY) {
+            if (current == finish || distance(current) == Float.POSITIVE_INFINITY) {
                 maybeSaveSearchSnapshot();
                 break;
             }
-            visited[current] = true;
+            setVisited(current, true);
 
             int x = toTwoDimX(current);
             int y = toTwoDimY(current);
@@ -86,40 +82,40 @@ public class StrictThetaStar extends BasicThetaStar {
     }
 
     private void tryFixBufferValue(int current) {
-        if (parent[current] < 0 && parent[current] != -1) {
+        if (parent(current) < 0 && parent(current) != -1) {
             //System.out.println("FIXCOUNT " + fixCount + " OUT OF " + outOf);
 
-            parent[current] -= Integer.MIN_VALUE;
-            distance[current] = distance[parent[current]] + physicalDistance(current, parent[current]);
+            setParent(current, parent(current) - Integer.MIN_VALUE);
+            setDistance(current, distance(parent(current)) + physicalDistance(current, parent(current)));
             
-            //parent[current] = wrap(current);
+            //parent(current) = wrap(current);
             
-            /*int target = parent[current];
+            /*int target = parent(current);
             while (target != -1) {
                 if (isTaut(current, target) && lineOfSight(current, target)) {
-                    distance[current] = distance[target] + physicalDistance(current, target);
-                    parent[current] = target;
+                    setDistance(current, distance(target) + physicalDistance(current, target));
+                    parent(current) = target;
                     return;
                 }
-                target = parent[target];
+                target = parent(target);
             }*/
         }
     }
     
     private int wrap(int v) {
-        int u = parent[v];
-        int p = parent[u];
+        int u = parent(v);
+        int p = parent(u);
         // We can assume that v has no line of sight to p.
         
         return u;
     }
     
     private boolean tryLocateTautParent(int current, int from) {
-        int u = parent[from];
+        int u = parent(from);
         if (isTaut(current, u)) {
             if (lineOfSight(current, u)) {
-                parent[current] = u;
-                distance[current] = distance[u] + physicalDistance(current, u);
+                setParent(current, u);
+                setDistance(current, distance(u) + physicalDistance(current, u));
                 return true;
             }
         }
@@ -131,16 +127,16 @@ public class StrictThetaStar extends BasicThetaStar {
             return;
         
         int destination = toOneDimIndex(x,y);
-        if (visited[destination])
+        if (visited(destination))
             return;
-        if (parent[current] != -1 && parent[current] == parent[destination]) // OPTIMISATION: [TI]
+        if (parent(current) != -1 && parent(current) == parent(destination)) // OPTIMISATION: [TI]
             return; // Idea: don't bother trying to relax if parents are equal. using triangle inequality.
         if (!graph.neighbourLineOfSight(currentX, currentY, x, y))
             return;
         
         if (relax(current, destination, weight(currentX, currentY, x, y))) {
             // If relaxation is done.
-            pq.decreaseKey(destination, distance[destination] + heuristic(x,y));
+            pq.decreaseKey(destination, distance(destination) + heuristic(x,y));
         }
     }
     
@@ -150,20 +146,20 @@ public class StrictThetaStar extends BasicThetaStar {
         float tempWeight = Float.POSITIVE_INFINITY;
         int tempParent = -1;
         
-        if (lineOfSight(parent[u], v)) {
-            int u2 = parent[u];
+        if (lineOfSight(parent(u), v)) {
+            int u2 = parent(u);
             
-            float newWeight = distance[u2] + physicalDistance(u2, v);
-            if (newWeight < distance[v]) {
+            float newWeight = distance(u2) + physicalDistance(u2, v);
+            if (newWeight < distance(v)) {
                 if (isTaut(v, u2)) {
-                    distance[v] = newWeight;
-                    parent[v] = u2;
+                    setDistance(v, newWeight);
+                    setParent(v, u2);
                     return true;
                 } else if (tryLocateTautParent(v, u2)) {
                     return true;
                 } else {
                     newWeight += BUFFER_VALUE;
-                    if (newWeight < distance[v]) {
+                    if (newWeight < distance(v)) {
                         tempWeight = newWeight;
                         tempParent = u2;
                     }
@@ -174,26 +170,26 @@ public class StrictThetaStar extends BasicThetaStar {
             }
         } 
         { // if haven't returned,
-            float newWeight = distance[u] + weightUV;
-            if (newWeight < distance[v]) {
+            float newWeight = distance(u) + weightUV;
+            if (newWeight < distance(v)) {
                 if (isTaut(v, u)) {
-                    distance[v] = newWeight;
-                    parent[v] = u;
+                    setDistance(v, newWeight);
+                    setParent(v, u);
                     return true;
                 } else if (tryLocateTautParent(v, u)) {
                     return true;
                 } else {
                     newWeight += BUFFER_VALUE;
-                    if (newWeight < tempWeight && newWeight < distance[v]) {
+                    if (newWeight < tempWeight && newWeight < distance(v)) {
                         tempWeight = newWeight;
                         //tempWeight = newWeight;
                         tempParent = u;
                     }
-                    /*distance[v] = newWeight * BUFFER_VALUE;
-                    parent[v] = Integer.MIN_VALUE+u;
+                    /*setDistance(v, newWeight * BUFFER_VALUE);
+                    setParent(v, Integer.MIN_VALUE+u);
                     return true;*/
-                    /*distance[v] = newWeight*2;
-                    parent[v] = Integer.MIN_VALUE+u;
+                    /*setDistance(v, newWeight*2);
+                    setParent(v, Integer.MIN_VALUE+u);
                     return true;*/
                     //return false;
                 }
@@ -201,9 +197,9 @@ public class StrictThetaStar extends BasicThetaStar {
         }
         
         if (tempParent != -1) {
-            //distance[v] = distance[tempParent] + physicalDistance(u, v);
-            distance[v] = tempWeight;
-            parent[v] = Integer.MIN_VALUE+tempParent;
+            //setDistance(v, distance[tempParent] + physicalDistance(u, v));
+            setDistance(v, tempWeight);
+            setParent(v, Integer.MIN_VALUE+tempParent);
             return true;
         }
         
@@ -211,10 +207,10 @@ public class StrictThetaStar extends BasicThetaStar {
     }
 
     /**
-     * Checks whether the path v, u, p=parent[u] is taut.
+     * Checks whether the path v, u, p=parent(u) is taut.
      */
     private boolean isTaut(int v, int u) {
-        int p = parent[u]; // assert u != -1
+        int p = parent(u); // assert u != -1
         if (p == -1) return true;
         int x1 = toTwoDimX(v);
         int y1 = toTwoDimY(v);

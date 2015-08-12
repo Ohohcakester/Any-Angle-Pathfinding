@@ -18,7 +18,8 @@ public class GridGraphVisualiser {
 
     public static void run() {
         //loadMaze("custommaze2.txt", "custom");
-        loadExisting("sc2_losttemple");
+        //loadExisting("sc2_losttemple");
+        loadExisting("baldursgate_AR0402SR");
     }
     
     
