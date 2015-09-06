@@ -170,7 +170,23 @@ public class AlgoTest {
     public static void testOnGraphData(GridGraph gridGraph, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {
         test.test("undefined", gridGraph, problems, algoFunction);
     }
+
     
+    private static final TestFunctionData testPathLengthOnly = (mazeName, gridGraph, problems, algoFunction) -> {
+
+        TestResult[] testResults = new TestResult[problems.size()];
+        int index = 0;
+        double totalPathLength = 0;
+        for (StartEndPointData problem : problems) {
+            TwoPoint tp = new TwoPoint(problem.start, problem.end);
+            testResults[index] = testAlgorithmPathLength(gridGraph, algoFunction, tp);
+            totalPathLength += testResults[index].pathLength / problem.shortestPath;
+            index++;
+        }
+        int nResults = testResults.length;
+
+        println("Average Path Length: " + (totalPathLength/nResults));
+    };
     
     private static final TestFunction printAverage = (mazeName, gridGraph, problems, algoFunction) -> {
         int sampleSize = 10;
