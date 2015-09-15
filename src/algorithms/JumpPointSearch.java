@@ -3,9 +3,9 @@ import grid.GridGraph;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 
 public class JumpPointSearch extends AStarStaticMemory {
-    private int[] neighboursdX;
-    private int[] neighboursdY;
-    private int neighbourCount;
+    protected int[] neighboursdX;
+    protected int[] neighboursdY;
+    protected int neighbourCount;
 
     public JumpPointSearch(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -62,7 +62,7 @@ public class JumpPointSearch extends AStarStaticMemory {
         maybePostSmooth();
     }
     
-    private int jump(int x, int y, int dx, int dy) {
+    protected int jump(int x, int y, int dx, int dy) {
         if (dx < 0) {
             if (dy < 0) {
                 return jumpDL(x,y);
@@ -205,7 +205,7 @@ public class JumpPointSearch extends AStarStaticMemory {
         }
     }
 
-    private void computeNeighbours(int currentIndex, int cx, int cy) {
+    protected void computeNeighbours(int currentIndex, int cx, int cy) {
         neighbourCount = 0;
 
         int parentIndex = parent(currentIndex);
@@ -373,7 +373,7 @@ public class JumpPointSearch extends AStarStaticMemory {
 
     protected void tryRelax(int current, int currX, int currY, int destination) {
         if (visited(destination)) return;
-        
+
         int destX = toTwoDimX(destination);
         int destY = toTwoDimY(destination);
         

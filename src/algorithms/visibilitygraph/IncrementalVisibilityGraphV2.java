@@ -9,10 +9,10 @@ import algorithms.datatypes.Point;
 public class IncrementalVisibilityGraphV2 extends IncrementalVisibilityGraph {
     
     private ArrayList<Float> heuristicList;
-    private LowerBoundPathLengthSearch lowerBoundSearch;
+    private LowerBoundJumpPointSearch lowerBoundSearch;
 
     public IncrementalVisibilityGraphV2(GridGraph graph, int sx, int sy,
-            int ex, int ey, float pathLength, LowerBoundPathLengthSearch lowerBoundSearch) {
+            int ex, int ey, float pathLength, LowerBoundJumpPointSearch lowerBoundSearch) {
         super(graph, sx, sy, ex, ey, pathLength);
         this.lowerBoundSearch = lowerBoundSearch;
     }

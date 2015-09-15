@@ -8,7 +8,7 @@ import algorithms.datatypes.Point;
 import algorithms.priorityqueue.IndirectHeap;
 import algorithms.visibilitygraph.IncrementalVisibilityGraph;
 import algorithms.visibilitygraph.IncrementalVisibilityGraphV2;
-import algorithms.visibilitygraph.LowerBoundPathLengthSearch;
+import algorithms.visibilitygraph.LowerBoundJumpPointSearch;
 
 public class StrictVisibilityGraphAlgorithmV2 extends AStar {
     
@@ -38,7 +38,7 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
             return;
         }
         
-        LowerBoundPathLengthSearch lowerBoundSearch = new LowerBoundPathLengthSearch(graph, ex ,ey, sx, sy, pathLength);
+        LowerBoundJumpPointSearch lowerBoundSearch = new LowerBoundJumpPointSearch(graph, ex ,ey, sx, sy, pathLength);
 
         if (isRecording()) {
             lowerBoundSearch.startRecording();
