@@ -12,13 +12,13 @@ public class IncrementalVisibilityGraph extends RestrictedVisibilityGraph {
     int xMin, xMax, yMin, yMax;
 
     // Top left and bottom right.
-    private ArrayList<ArrayList<int[]>> lineHashX_tlbr; // stores index, y pairs. Hashed by X coordinate. i.e. VERTICAL
-    private ArrayList<ArrayList<int[]>> lineHashY_tlbr; // stores index, x pairs. Hashed by Y coordinate. i.e. HORIZONTAL
+    protected ArrayList<ArrayList<int[]>> lineHashX_tlbr; // stores index, y pairs. Hashed by X coordinate. i.e. VERTICAL
+    protected ArrayList<ArrayList<int[]>> lineHashY_tlbr; // stores index, x pairs. Hashed by Y coordinate. i.e. HORIZONTAL
     // Bottom left and top right.
-    private ArrayList<ArrayList<int[]>> lineHashX_trbl; // stores index, y pairs. Hashed by X coordinate. i.e. VERTICAL
-    private ArrayList<ArrayList<int[]>> lineHashY_trbl; // stores index, x pairs. Hashed by Y coordinate. i.e. HORIZONTAL
-    private int lineHashXOffset;
-    private int lineHashYOffset;
+    protected ArrayList<ArrayList<int[]>> lineHashX_trbl; // stores index, y pairs. Hashed by X coordinate. i.e. VERTICAL
+    protected ArrayList<ArrayList<int[]>> lineHashY_trbl; // stores index, x pairs. Hashed by Y coordinate. i.e. HORIZONTAL
+    protected int lineHashXOffset;
+    protected int lineHashYOffset;
 
     public IncrementalVisibilityGraph(GridGraph graph, int sx, int sy, int ex,
             int ey, float pathLength) {
