@@ -159,6 +159,10 @@ public class KeyToggler implements KeyListener {
                     takeSnapShot();
                 System.out.println("Snapshot " + imgCount);
                 break;
+                // Esc: Close Window
+            case KeyEvent.VK_ESCAPE :
+                System.exit(0);
+                break;
         }
     }
 
