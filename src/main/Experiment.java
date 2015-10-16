@@ -14,10 +14,11 @@ import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
 import algorithms.AStar;
 import algorithms.BasicThetaStar;
-import algorithms.StrictThetaStar;
 import algorithms.StrictVisibilityGraphAlgorithm;
-import algorithms.VisibilityGraphAlgorithm;
+import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
+import algorithms.strictthetastar.StrictThetaStarV2c;
+import algorithms.strictthetastar.StrictThetaStarV2e;
 import algorithms.visibilitygraph.VisibilityGraph;
 import draw.GridLineSet;
 
@@ -27,6 +28,7 @@ public class Experiment {
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
+//        findUpperBound();
         findRestrictedVisibilityGraphIssues();
         //testAgainstReferenceAlgorithm();
 //        other();
@@ -235,13 +237,88 @@ public class Experiment {
         fileIO.close();
     }
 
+    private static void findUpperBound() {
+        System.out.println("Strict Theta Star");
+        AlgoFunction testAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV2e(gridGraph, sx, sy, ex, ey);
+        AlgoFunction optimalAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+
+        float upperBound = 1.5f;
+        float maxRatio = 1;
+        
+        int wins = 0;
+        int ties = 0;
+        Random seedRand = new Random(-2814121L);
+        long initial = seedRand.nextLong();
+        for (int i=0; i>=0; i++) {
+            int sizeX = seedRand.nextInt(30 + (int)(Math.sqrt(i))) + 1;
+            int sizeY = seedRand.nextInt(10 + (int)(Math.sqrt(i))) + 1;
+            sizeX = seedRand.nextInt(50) + 1;
+            sizeY = seedRand.nextInt(30) + 1;
+            long seed = i+initial;
+            int ratio = seedRand.nextInt(60) + 1;
+            
+            int max = (sizeX+1)*(sizeY+1);
+            int p1 = seedRand.nextInt(max);
+            int p2 = seedRand.nextInt(max-1);
+            if (p2 == p1) {
+                p2 = max-1;
+            }
+            
+            int sx = p1%(sizeX+1);
+            int sy = p1/(sizeX+1);
+            int ex = p2%(sizeX+1);
+            int ey = p2/(sizeX+1);
+
+            //GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
+            GridGraph gridGraph = DefaultGenerator.generateSeededTrueRandomGraphOnly(seed, sizeX, sizeY, ratio);
+            
+            //gridGraph = GraphImporter.importGraphFromFile("custommaze4.txt");
+            //sx = 0; sy=0;ex=10+i;ey=2;
+            //if (ex > 22) break;
+            
+            
+            AnyAnglePathfinding.algoFunction = testAlgo;
+            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            float testPathLength = Utility.computePathLength(gridGraph, path);
+
+            AnyAnglePathfinding.algoFunction = optimalAlgo;
+            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            float optimalPathLength = Utility.computePathLength(gridGraph, path);
+            
+            if (testPathLength > optimalPathLength*upperBound) {
+                System.out.println("============");
+                System.out.println("Discrepancy Discovered!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                System.out.println("Test: " + testPathLength + " , Optimal: " + optimalPathLength);
+                System.out.println("Ratio: " + (testPathLength/optimalPathLength));
+                System.out.println("============");
+                System.out.println("WINS: " + wins + ", TIES: " + ties);
+                throw new UnsupportedOperationException("DISCREPANCY!!");
+            } else {
+                //System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                float lengthRatio = (float)testPathLength/optimalPathLength;
+                if (lengthRatio > maxRatio) {
+                    //System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                    System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                    System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                    System.out.println("Test: " + testPathLength + " , Optimal: " + optimalPathLength);
+                    System.out.println("Ratio: " + (testPathLength/optimalPathLength));
+                    maxRatio = lengthRatio;
+                    System.out.println(maxRatio);
+                }
+            }
+        }
+        //System.out.println(maxRatio);
+    }
+
     private static void findStrictThetaStarIssues() {
         AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
-        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV2c(gridGraph, sx, sy, ex, ey);
 
         int wins = 0;
         int ties = 0;
-        Random seedRand = new Random(1);
+        Random seedRand = new Random(193);
         int initial = seedRand.nextInt();
         for (int i=0; i<500000; i++) {
             int sizeX = seedRand.nextInt(5) + 10;
@@ -293,17 +370,19 @@ public class Experiment {
     private static void findRestrictedVisibilityGraphIssues() {
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
+//        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        AlgoFunction rVGA = StrictVisibilityGraphAlgorithmV2::new;
+        AlgoFunction VGA = StrictVisibilityGraphAlgorithm::new;
+        //AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
         
         //printSeed = false; // keep this commented out.
-        Random seedRand = new Random(4);
+        Random seedRand = new Random(-14);
         int initial = seedRand.nextInt();
         for (int i=0; i<50000000; i++) {
-            int sizeX = seedRand.nextInt(40) + 10;
-            int sizeY = seedRand.nextInt(100) + 10;
+            int sizeX = seedRand.nextInt(60) + 10;
+            int sizeY = seedRand.nextInt(30) + 10;
             int seed = i+initial;
-            int ratio = seedRand.nextInt(30) + 5;
+            int ratio = seedRand.nextInt(30) + 10;
             
             int max = (sizeX+1)*(sizeY+1);
             int p1 = seedRand.nextInt(max);
@@ -334,10 +413,10 @@ public class Experiment {
                 System.out.println("EXCEPTION OCCURRED!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
-                break;
+                throw new UnsupportedOperationException("DISCREPANCY!!");
             }
             
-            if (restPathLength != normalPathLength) {
+            if (restPathLength > normalPathLength + 0.000001f) {
                 System.out.println("============");
                 System.out.println("Discrepancy Discovered!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
@@ -345,7 +424,7 @@ public class Experiment {
                 System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
                 System.out.println(restPathLength / normalPathLength);
                 System.out.println("============");
-                //throw new UnsupportedOperationException("DISCREPANCY!!");
+                throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
                 if (i%10000 == 9999) {
                     System.out.println("Count: " + (i+1));
