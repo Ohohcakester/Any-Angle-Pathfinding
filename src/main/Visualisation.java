@@ -54,6 +54,9 @@ public class Visualisation {
             }
             float pathLength = Utility.computePathLength(gridGraph, path);
             System.out.println("Path Length: " + pathLength);
+            
+            boolean isTaut = Utility.isPathTaut(gridGraph, path);
+            System.out.println("Is Taut: " + (isTaut ? "YES" : "NO"));
         
             System.out.println(Arrays.deepToString(path));
         } catch (Exception e) {
