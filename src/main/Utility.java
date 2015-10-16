@@ -55,11 +55,8 @@ public class Utility {
     static int[][] generatePath(AlgoFunction algoFunction, GridGraph gridGraph,
             int sx, int sy, int ex, int ey) {
         PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
-        try {
-            algo.computePath();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        algo.computePath();
+        
         int[][] path = algo.getPath();
         return path;
     }
