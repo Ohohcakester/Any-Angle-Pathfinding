@@ -7,7 +7,7 @@ import java.awt.Graphics;
 
 public class GridPointDrawer implements Drawer {
     
-    private static final int CIRCLE_SCALE_FACTOR = 2;
+    private static final int CIRCLE_SCALE_FACTOR = 1;
     private static final float OUTLINE_SCALE_FACTOR = 0.3f;
 
     private static final Color OUTLINE_COLOR = new Color(64,64,64);
