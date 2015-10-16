@@ -49,7 +49,7 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
                 int dx = neighboursdX[i];
                 int dy = neighboursdY[i];
                 
-                int successor = jump(x, y, dx, dy);
+                int successor = jump(distance(current), x, y, dx, dy);
                 if (successor != -1) {
                     tryRelax(current, x, y, successor);
                 }
@@ -74,18 +74,22 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
         }
     }
     
+    /**
+     * Returns true iff the point x,y is outside of the generated octile ellipse.
+     */
+    protected boolean outsideEllipse(float parentDistance, int parX, int parY, int x, int y) {
+        return parentDistance + graph.octileDistance(x, y, parX, parY) + graph.octileDistance(x, y, ex, ey) > upperBound*APPROXIMATION_RATIO + BUFFER;
+    }
+    
     protected boolean relax(int u, int v, float weightUV, int currX, int currY) {
         // return true iff relaxation is done.
         
         float newWeight = distance(u) + weightUV;
         //System.out.println("Relax " + s(u) + "->" + s(v) + " = " + newWeight);
-        //if (newWeight / APPROXIMATION_RATIO + graph.distance(currX, currY, ex, ey) > upperBound + BUFFER) return false;
-        if (newWeight + graph.distance(currX, currY, ex, ey) > upperBound*APPROXIMATION_RATIO + BUFFER) return false;
         
-        if (newWeight <= distance(v)) {
+        if (newWeight < distance(v)) {
             setDistance(v, newWeight);
             setParent(v, u);
-            //maybeSaveSearchSnapshot();
             return true;
         }
         return false;
@@ -96,29 +100,29 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
         return distance(index)/APPROXIMATION_RATIO;
     }
 
-    @Override
-    protected int jump(int x, int y, int dx, int dy) {
+    
+    protected int jump(float parentDistance, int x, int y, int dx, int dy) {
         if (dx < 0) {
             if (dy < 0) {
-                return jumpDL(x,y,x,y);
+                return jumpDL(parentDistance,x,y,x,y);
             } else if (dy > 0) {
-                return jumpUL(x,y,x,y);
+                return jumpUL(parentDistance,x,y,x,y);
             } else {
-                return jumpL(x,y,x,y);
+                return jumpL(parentDistance,x,y,x,y);
             }
         } else if (dx > 0) {
             if (dy < 0) {
-                return jumpDR(x,y,x,y);
+                return jumpDR(parentDistance,x,y,x,y);
             } else if (dy > 0) {
-                return jumpUR(x,y,x,y);
+                return jumpUR(parentDistance,x,y,x,y);
             } else {
-                return jumpR(x,y,x,y);
+                return jumpR(parentDistance,x,y,x,y);
             }
         } else {
             if (dy < 0) {
-                return jumpD(x,y,x,y);
+                return jumpD(parentDistance,x,y,x,y);
             } else {
-                return jumpU(x,y,x,y);
+                return jumpU(parentDistance,x,y,x,y);
             }
         }
         
@@ -136,19 +140,17 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
          *   ___ ___
          *  |   |||||
          *  |...X'''| <-- this is considered a corner in the above definition
-         *  |||||___|
+         *  |||||___|7
          *  
          *  The definition below excludes the above case.
          */
     }
     
-    private void maybeUpdateDistance(int parX, int parY, int x, int y) {
-        if (!isOuterCorner(x,y)) return;
-        //if (isOuterCorner(x,y)) return;
+    private void maybeUpdateDistance(float parentDistance, int parX, int parY, int x, int y) {
+        if (!isOuterCorner(x,y) && !(x == ex && y == ey)) return;
 
-        int u = graph.toOneDimIndex(parX, parY);
         int v = graph.toOneDimIndex(x, y);
-        float newWeight = graph.octileDistance(parX, parY, x, y) + distance(u);
+        float newWeight = graph.octileDistance(parX, parY, x, y) + parentDistance;
         
         if (newWeight < distance(v)) {
             setDistance(v, newWeight);
@@ -157,57 +159,62 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
     }
 
     
-    private int jumpDL(int parX, int parY, int x, int y) {
+    private int jumpDL(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x -= 1;
             y -= 1;
             if (graph.isBlocked(x, y)) return -1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             // diagonal cannot be forced on vertices.
-            if (jumpL(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            if (jumpD(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            maybeUpdateDistance(parX, parY, x, y);
+            if (jumpL(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            if (jumpD(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpDR(int parX, int parY, int x, int y) {
+    private int jumpDR(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x += 1;
             y -= 1;
             if (graph.isBlocked(x-1, y)) return -1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             // diagonal cannot be forced on vertices.
-            if (jumpD(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            if (jumpR(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            maybeUpdateDistance(parX, parY, x, y);
+            if (jumpD(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            if (jumpR(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpUL(int parX, int parY, int x, int y) {
+    private int jumpUL(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x -= 1;
             y += 1;
             if (graph.isBlocked(x, y-1)) return -1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             // diagonal cannot be forced on vertices.
-            if (jumpL(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            if (jumpU(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            maybeUpdateDistance(parX, parY, x, y);
+            if (jumpL(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            if (jumpU(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpUR(int parX, int parY, int x, int y) {
+    private int jumpUR(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x += 1;
             y += 1;
             if (graph.isBlocked(x-1, y-1)) return -1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             // diagonal cannot be forced on vertices.
-            if (jumpU(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            if (jumpR(parX,parY,x,y) != -1) return toOneDimIndex(x,y);
-            maybeUpdateDistance(parX, parY, x, y);
+            if (jumpU(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            if (jumpR(parentDistance,parX,parY,x,y) != -1) return toOneDimIndex(x,y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpL(int parX, int parY, int x, int y) {
+    private int jumpL(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x -= 1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             if (graph.isBlocked(x, y)) {
                 if (graph.isBlocked(x, y-1)) {
                     return -1;
@@ -218,13 +225,14 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
             if (graph.isBlocked(x, y-1)) {
                 if (!graph.isBlocked(x-1, y-1)) return toOneDimIndex(x,y);
             }
-            maybeUpdateDistance(parX, parY, x, y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpR(int parX, int parY, int x, int y) {
+    private int jumpR(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             x += 1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             if (graph.isBlocked(x-1, y)) {
                 if (graph.isBlocked(x-1, y-1)) {
                     return -1;
@@ -235,13 +243,14 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
             if (graph.isBlocked(x-1, y-1)) {
                 if (!graph.isBlocked(x, y-1)) return toOneDimIndex(x,y);
             }
-            maybeUpdateDistance(parX, parY, x, y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpD(int parX, int parY, int x, int y) {
+    private int jumpD(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             y -= 1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             if (graph.isBlocked(x, y)) {
                 if (graph.isBlocked(x-1, y)) {
                     return -1;
@@ -252,13 +261,14 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
             if (graph.isBlocked(x-1, y)) {
                 if (!graph.isBlocked(x-1, y-1)) return toOneDimIndex(x,y);
             }
-            maybeUpdateDistance(parX, parY, x, y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
     
-    private int jumpU(int parX, int parY, int x, int y) {
+    private int jumpU(float parentDistance, int parX, int parY, int x, int y) {
         while(true) {
             y += 1;
+            if (outsideEllipse(parentDistance,parX,parY,x,y)) return -1;
             if (graph.isBlocked(x, y-1)) {
                 if (graph.isBlocked(x-1, y-1)) {
                     return -1;
@@ -269,7 +279,7 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
             if (graph.isBlocked(x-1, y-1)) {
                 if (!graph.isBlocked(x-1, y)) return toOneDimIndex(x,y);
             }
-            maybeUpdateDistance(parX, parY, x, y);
+            maybeUpdateDistance(parentDistance, parX, parY, x, y);
         }
     }
 
