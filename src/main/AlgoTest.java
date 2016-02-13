@@ -3,6 +3,7 @@ package main;
 import grid.GridGraph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
@@ -58,15 +59,17 @@ public class AlgoTest {
         AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction sVGAv2 = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithmV2(a,b,c,d,e);
 
-        AlgoFunction strictThetaStarV1 = StrictThetaStar::new;
-        AlgoFunction strictThetaStarV1PS = StrictThetaStar::postSmooth;
-        AlgoFunction strictThetaStarV2e = RecursiveStrictThetaStar::new;
-        AlgoFunction strictThetaStarV2ePS = RecursiveStrictThetaStar::postSmooth;
-        AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
+        AlgoFunction strictThetaStar = StrictThetaStar::new;
+        AlgoFunction strictThetaStarPS = StrictThetaStar::postSmooth;
+        AlgoFunction recStrictThetaStar = RecursiveStrictThetaStar::new;
+        AlgoFunction recStrictThetaStarPS = RecursiveStrictThetaStar::postSmooth;
+        AlgoFunction recStrictThetaStar_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
+
 
         AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
 
         FileIO.makeDirs("testResults/");
+        System.gc(); System.gc();
 //        
 //        float[] buffers = new float[]{0f, 0.01f,0.1f,0.2f,0.4f,0.6f,0.8f,1f,1.2f,1.5f,2f,3f,5f,8f,10f,20f,30f,50f};
 //        for (float buffer : buffers) {
@@ -83,7 +86,7 @@ public class AlgoTest {
 //        testSequence(jumpPointSearch, "JumpPointSearch");
         testSequence(basicThetaStar, "BasicThetaStar");
         testSequence(basicThetaStar, "BasicThetaStar");
-//        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
+        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
 //        testSequence(lazyThetaStar, "LazyThetaStar");
 //        testSequence(accAStar, "AcceleratedAStar");
 //        testSequence(aStarOctilePS, "AStarOctile PostSmooth");
@@ -93,18 +96,12 @@ public class AlgoTest {
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
 
-//        testSequence(recursiveThetaStar, "RecursiveThetaStar");
-//        testSequence(strictThetaStar, "StrictThetaStar");
-//        testSequence(strictThetaStarV1, "StrictThetaStarV1");
-//        testSequence(strictThetaStarV1PS, "StrictThetaStarV1_PS");
-//        testSequence(strictThetaStarV2, "StrictThetaStarV2");
-//        testSequence(strictThetaStarV2b, "StrictThetaStarV2b");
-//        testSequence(strictThetaStarV2c, "StrictThetaStarV2c");
-//        testSequence(strictThetaStarV2d, "StrictThetaStarV2d");
-//        testSequence(strictThetaStarV2e, "StrictThetaStarV2e");
-//        testSequence(strictThetaStarV2ePS, "StrictThetaStarV2e_PS");
-//      testSequence(strictThetaStarV2e_2, "StrictThetaStarV2e_2");
-//        testSequence(strictThetaStarV3, "StrictThetaStarV3");
+        testSequence(recursiveThetaStar, "RecursiveThetaStar");
+        testSequence(strictThetaStar, "StrictThetaStar");
+        testSequence(strictThetaStarPS, "StrictThetaStarPS");
+        testSequence(recStrictThetaStar, "RecStrictThetaStar");
+        testSequence(recStrictThetaStarPS, "RecStrictThetaStarPS");
+      testSequence(recStrictThetaStar_2, "RecStrictThetaStar_2");
 //      testSequence(sVGA, "StrictVisibilityGraphs");
 //      testSequence(sVGAv2, "StrictVisibilityGraphsV2");
 //        testSequence(rVGA, "RestrictedVisibilityGraphs");
@@ -116,14 +113,19 @@ public class AlgoTest {
         if (writeToFile) io = new FileIO(path);
 
         boolean pathLengthOnly = false;
+        boolean runningTimeOnly = true;
 
-        TestFunctionData testFunction_slow = printAverageData(20,10);
+        TestFunctionData testFunction_slow = printAverageData(20,20);
         TestFunctionData testFunction_fast = printAverageData(50,30);
         if (pathLengthOnly) {
             //testFunction_slow = testPathLengthOnly;
             //testFunction_fast = testPathLengthOnly;
             testFunction_slow = analyseIndividualPaths;
             testFunction_fast = analyseIndividualPaths;
+        }
+        if (runningTimeOnly) {
+            testFunction_slow = testIndividualRunningTimes(10,500);
+            testFunction_fast = testIndividualRunningTimes(10,500);   
         }
         
         println("=== Testing " + name + " ===");
@@ -203,8 +205,8 @@ public class AlgoTest {
 //      println("HighDensity3 - 40% - 300x300");
 //      testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
         
-//      println("6%Density - 500x500");
-//      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+      println("6%Density - 500x500");
+      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
 //      println("20%Density - 500x500");
 //      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
 //      println("40%Density - 500x500");
@@ -243,8 +245,8 @@ public class AlgoTest {
 //        testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
 //        println("corr2_maze512-2-7 - 512x512");
 //        testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
-        println("corr2_maze512-2-3 - 512x512");
-        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
+//        println("corr2_maze512-2-3 - 512x512");
+//        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
 //        println("corr2_maze512-2-9 - 512x512");
 //        testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
 
@@ -258,6 +260,7 @@ public class AlgoTest {
         if (writeToFile) {
             io.writeLine(line.toString());
             io.flush();
+            System.out.println(line);
         } else {
             System.out.println(line);
         }
@@ -375,7 +378,7 @@ public class AlgoTest {
     };
     
 
-    
+
     private static final TestFunctionData printAverageData(int sampleSize, int nTrials) {
         return (mazeName, gridGraph, problems, algoFunction) -> {
     
@@ -415,6 +418,58 @@ public class AlgoTest {
         };
     }
 
+    private static final TestFunctionData testIndividualRunningTimes(int sampleSize, int nTrials) {
+        return (mazeName, gridGraph, problems, algoFunction) -> {
+
+            ArrayList<TwoPoint> twoPointList = new ArrayList<>();
+            ArrayList<long[]> runningTimesList = new ArrayList<>();
+            
+            for (StartEndPointData problem : problems) {
+                TwoPoint tp = new TwoPoint(problem.start, problem.end);
+                long[] runningTimes = new long[sampleSize];
+                
+                for (int i=0;i<sampleSize;++i) {
+                    runningTimes[i] = testAlgorithmTimeOnce(gridGraph, algoFunction, tp, nTrials);
+                }
+
+                twoPointList.add(tp);
+                runningTimesList.add(runningTimes);
+                //println(tp + " " + Arrays.toString(runningTimes));
+            }
+            
+            println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
+            for (int i=0;i<twoPointList.size();++i) {
+                TwoPoint tp = twoPointList.get(i);
+                long[] runningTimes = runningTimesList.get(i);
+                
+                StringBuilder sb = new StringBuilder();
+                sb.append(tp.p1.x + "-" + tp.p1.y + "_" + tp.p2.x + "-" + tp.p2.y);
+                sb.append(" ");
+                sb.append(Arrays.toString(runningTimes));
+                
+                println(sb);
+            }
+            println();
+        };
+    }
+
+    private static long testAlgorithmTimeOnce(GridGraph gridGraph,
+            AlgoFunction algoFunction, TwoPoint tp, int nTrials) {
+    
+        int startX = tp.p1.x;
+        int startY = tp.p1.y;
+        int endX = tp.p2.x;
+        int endY = tp.p2.y;
+        
+        long start = System.nanoTime();
+        for (int i=0;i<nTrials;i++) {
+            AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
+        }
+        long end = System.nanoTime();
+
+        long timeTakenNanosecs = end - start;
+        return timeTakenNanosecs;
+    }
 
     private static TestResult testAlgorithmTime(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
@@ -430,11 +485,11 @@ public class AlgoTest {
         int endY = tp.p2.y;
         
         for (int s = 0; s < sampleSize; s++) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int i=0;i<nTrials;i++) {
                 AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
             }
-            long end = System.currentTimeMillis();
+            long end = System.nanoTime();
             //System.gc();
             
             data[s] = (int)(end-start);
@@ -623,11 +678,11 @@ public class AlgoTest {
         
         //sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
         for (int s = 0; s < sampleSize; s++) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int i=0;i<nTrials;i++) {
                 AlgoTest.testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
             }
-            long end = System.currentTimeMillis();
+            long end = System.nanoTime();
             System.gc();
             
             data[s] = (int)(end-start);

@@ -21,6 +21,7 @@ import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
+import algorithms.VisibilityGraphAlgorithm;
 import algorithms.visibilitygraph.VisibilityGraph;
 import draw.GridLineSet;
 
