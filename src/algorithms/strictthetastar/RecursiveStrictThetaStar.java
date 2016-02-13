@@ -29,34 +29,34 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  *    to explore a little more first.
  *
  */
-public class StrictThetaStarV2e extends BasicThetaStar {
+public class RecursiveStrictThetaStar extends BasicThetaStar {
     private int DEPTH_LIMIT = -1;
     private float BUFFER_VALUE = 0.42f;
 
-    public StrictThetaStarV2e(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public RecursiveStrictThetaStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }
 
-    public static StrictThetaStarV2e setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
-        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+    public static RecursiveStrictThetaStar setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
+        RecursiveStrictThetaStar algo = new RecursiveStrictThetaStar(graph, sx, sy, ex, ey);
         algo.BUFFER_VALUE = bufferValue;
         return algo;
     }
     
-    public static StrictThetaStarV2e noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
-        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+    public static RecursiveStrictThetaStar noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
+        RecursiveStrictThetaStar algo = new RecursiveStrictThetaStar(graph, sx, sy, ex, ey);
         algo.heuristicWeight = 0f;
         return algo;
     }
     
-    public static StrictThetaStarV2e depthLimit(GridGraph graph, int sx, int sy, int ex, int ey, int depthLimit) {
-        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+    public static RecursiveStrictThetaStar depthLimit(GridGraph graph, int sx, int sy, int ex, int ey, int depthLimit) {
+        RecursiveStrictThetaStar algo = new RecursiveStrictThetaStar(graph, sx, sy, ex, ey);
         algo.DEPTH_LIMIT = depthLimit;
         return algo;
     }
     
-    public static StrictThetaStarV2e postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
-        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+    public static RecursiveStrictThetaStar postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        RecursiveStrictThetaStar algo = new RecursiveStrictThetaStar(graph, sx, sy, ex, ey);
         algo.postSmoothingOn = true;
         return algo;
     }

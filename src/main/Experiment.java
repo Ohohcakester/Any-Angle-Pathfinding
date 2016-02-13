@@ -19,8 +19,8 @@ import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
-import algorithms.strictthetastar.StrictThetaStarV1;
-import algorithms.strictthetastar.StrictThetaStarV2e;
+import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.visibilitygraph.VisibilityGraph;
 import draw.GridLineSet;
 
@@ -242,7 +242,7 @@ public class Experiment {
 
     private static void findUpperBound() {
         System.out.println("Strict Theta Star");
-        AlgoFunction testAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV2e(gridGraph, sx, sy, ex, ey);
+        AlgoFunction testAlgo = (gridGraph, sx, sy, ex, ey) -> new RecursiveStrictThetaStar(gridGraph, sx, sy, ex, ey);
         AlgoFunction optimalAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
 
         double upperBound = 1.5;
@@ -318,8 +318,8 @@ public class Experiment {
     private static void findStrictThetaStarIssues() {
 //        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
 //        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV1(gridGraph, sx, sy, ex, ey);
-        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> StrictThetaStarV2e.setBuffer(gridGraph, sx, sy, ex, ey, 0.4f);
-        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> StrictThetaStarV2e.setBuffer(gridGraph, sx, sy, ex, ey, 0.2f);
+        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.4f);
+        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.2f);
 
         int wins = 0;
         int ties = 0;
@@ -457,8 +457,8 @@ public class Experiment {
         int nTaut1=0;int nTaut2=0; int nTaut3=0;
         AlgoFunction hasPathChecker = JumpPointSearch::new;
         AlgoFunction algo3 = BasicThetaStar::new;
-        AlgoFunction algo2 = StrictThetaStarV1::new;
-        AlgoFunction algo1 = StrictThetaStarV2e::new;
+        AlgoFunction algo2 = StrictThetaStar::new;
+        AlgoFunction algo1 = RecursiveStrictThetaStar::new;
 
         //printSeed = false; // keep this commented out.
         int pathsPerGraph = 100;

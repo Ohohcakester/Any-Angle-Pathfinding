@@ -27,8 +27,8 @@ import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.strictthetastar.StrictThetaStarV1;
-import algorithms.strictthetastar.StrictThetaStarV2e;
+import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.strictthetastar.RecursiveStrictThetaStar;
 
 public class AlgoTest {
     private static FileIO io;
@@ -58,11 +58,11 @@ public class AlgoTest {
         AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction sVGAv2 = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithmV2(a,b,c,d,e);
 
-        AlgoFunction strictThetaStarV1 = StrictThetaStarV1::new;
-        AlgoFunction strictThetaStarV1PS = StrictThetaStarV1::postSmooth;
-        AlgoFunction strictThetaStarV2e = StrictThetaStarV2e::new;
-        AlgoFunction strictThetaStarV2ePS = StrictThetaStarV2e::postSmooth;
-        AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> StrictThetaStarV2e.depthLimit(a,b,c,d,e,2);
+        AlgoFunction strictThetaStarV1 = StrictThetaStar::new;
+        AlgoFunction strictThetaStarV1PS = StrictThetaStar::postSmooth;
+        AlgoFunction strictThetaStarV2e = RecursiveStrictThetaStar::new;
+        AlgoFunction strictThetaStarV2ePS = RecursiveStrictThetaStar::postSmooth;
+        AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
 
         AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
 
