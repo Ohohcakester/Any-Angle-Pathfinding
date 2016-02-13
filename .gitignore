@@ -15,6 +15,7 @@ gamemaps/
 mazedata/
 snapshots/
 testresults/
+pyscripts/output.txt
 
 # External tool builders
 .externalToolBuilders/
