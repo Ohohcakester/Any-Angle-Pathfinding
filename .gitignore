@@ -13,6 +13,8 @@ local.properties
 
 gamemaps/
 mazedata/
+snapshots/
+testresults/
 
 # External tool builders
 .externalToolBuilders/
