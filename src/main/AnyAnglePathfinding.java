@@ -8,6 +8,7 @@ import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
+import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
@@ -200,13 +201,14 @@ public class AnyAnglePathfinding {
                 algoFunction = VisibilityGraphAlgorithm::graphReuse;
                 break;
             case 13 :
-                algoFunction = null; // reserved
+                algoFunction = AdjustmentThetaStar::new;
                 break;
             case 14 :
-                algoFunction = null; // reserved
+                algoFunction = StrictThetaStarV1::new;
                 break;
             case 15 :
-                algoFunction = null; // reserved
+                algoFunction = StrictThetaStarV2e::new;
+                //algoFunction = StrictThetaStarV2e::postSmooth;
                 break;
             case 16 :
                 algoFunction = BFSVisibilityGraph::graphReuse;
@@ -236,14 +238,11 @@ public class AnyAnglePathfinding {
                 algoFunction = AStarStaticMemory::new;
                 break;
             case 25 :
-                algoFunction = StrictThetaStarV2e::new;
-                //algoFunction = StrictThetaStarV2e::postSmooth;
                 break;
             case 26 :
-                algoFunction = StrictThetaStarV1::new;
                 break;
             case 27 :
-                // reserved
+                algoFunction = null; // reserved
                 break;
             case 28 :
                 algoFunction = RecursiveThetaStar::new;

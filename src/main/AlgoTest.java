@@ -23,15 +23,9 @@ import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
-import algorithms.StrictThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.strictthetastar.StrictThetaStarV1;
-import algorithms.strictthetastar.StrictThetaStarV2;
-import algorithms.strictthetastar.StrictThetaStarV2b;
-import algorithms.strictthetastar.StrictThetaStarV2c;
-import algorithms.strictthetastar.StrictThetaStarV2d;
 import algorithms.strictthetastar.StrictThetaStarV2e;
-import algorithms.strictthetastar.StrictThetaStarV3;
 
 public class AlgoTest {
     private static FileIO io;
@@ -56,7 +50,6 @@ public class AlgoTest {
         AlgoFunction vga = VisibilityGraphAlgorithm::new;
         AlgoFunction accAStar = AcceleratedAStar::new;
 
-        AlgoFunction strictThetaStar = (a,b,c,d,e) -> new StrictThetaStar(a,b,c,d,e);
         //AlgoFunction rVGA = (a,b,c,d,e) -> new RestrictedVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction vgReuse = (a,b,c,d,e) -> VisibilityGraphAlgorithm.graphReuse(a,b,c,d,e);
         //AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
@@ -64,16 +57,10 @@ public class AlgoTest {
 
         AlgoFunction strictThetaStarV1 = StrictThetaStarV1::new;
         AlgoFunction strictThetaStarV1PS = StrictThetaStarV1::postSmooth;
-        AlgoFunction strictThetaStarV2 = StrictThetaStarV2::new;
-        AlgoFunction strictThetaStarV2b = StrictThetaStarV2b::new;
-        AlgoFunction strictThetaStarV2c = StrictThetaStarV2c::new;
-        AlgoFunction strictThetaStarV2d = StrictThetaStarV2d::new;
         AlgoFunction strictThetaStarV2e = StrictThetaStarV2e::new;
         AlgoFunction strictThetaStarV2ePS = StrictThetaStarV2e::postSmooth;
         AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> StrictThetaStarV2e.depthLimit(a,b,c,d,e,2);
 
-        AlgoFunction strictThetaStarV3 = StrictThetaStarV3::new;
-        
         AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
 
         FileIO.makeDirs("testResults/");

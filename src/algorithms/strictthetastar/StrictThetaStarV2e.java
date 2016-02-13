@@ -6,16 +6,23 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 
 /**
  * An modification of Theta* that I am experimenting with. -Oh
+ * 
+ * ||| Experimental Versions: These versions can be found in source control |||
+ * V1: Add buffer value to basic Theta*. that's all. [CURRENT - Strict Theta*]
+ * V1b: An attempt to improve V1 using tryLocateTautParent. Not useful.
+ * 
  * V2: With recursive taut-parent finding.
  * V2b: With collinear point merging to reduce depth of taut-parent searches.
- * [V2c NOT INCLUDED]
+ * [V2c NOT INCLUDED] <-- change the way distance comparison worked during relaxation to not include the buffer value.
+ *                          '-> Did not perform well. Change was reversed.
  * V2d: Identify when buffer value has been added, and removes the buffer value on dequeue from PQ.
- * V2e: Add heuristic and change buffer value.
+ * V2e: Add heuristic and change buffer value. [CURRENT - Recursive Strict Theta*]
  *   '-> Amend: Remove Heuristic Trap (described below) 
- * @author Oh
+ *   
+ * V3: Lazy ver <-- did not perform well. Discarded.
  * 
  * Ideas:
- * Heuristic trap:
+ * Heuristic trap (No longer used):
  *  - The heuristic value of the final node is 1.1f instead of 0.
  *  - A lot of inoptimality comes because the algorithm is too eager to relax
  *    the final vertex. The slightly higher heuristic encourages the algorithm
@@ -24,7 +31,6 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  */
 public class StrictThetaStarV2e extends BasicThetaStar {
     private int DEPTH_LIMIT = -1;
-    //private static final float BUFFER_VALUE = 0.36f; // 0.33f is enough.
     private float BUFFER_VALUE = 0.42f;
 
     public StrictThetaStarV2e(GridGraph graph, int sx, int sy, int ex, int ey) {
@@ -100,7 +106,8 @@ public class StrictThetaStarV2e extends BasicThetaStar {
     
     protected float heuristic(int x, int y) {
         return heuristicWeight*graph.distance(x, y, ex, ey);
-        // MOD 2 :: Increased Goal Heuristic
+        
+        // MOD 2 :: Increased Goal Heuristic - Not needed when a Penalty value of 0.42 is used.
         /*if (x == ex && y == ey) {
             return 0.18f; // 0.18f
         } else { 
