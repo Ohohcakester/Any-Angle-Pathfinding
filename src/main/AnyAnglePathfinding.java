@@ -17,7 +17,6 @@ import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
-import algorithms.StrictThetaStar;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
@@ -42,7 +41,7 @@ public class AnyAnglePathfinding {
 
     
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 1;
+        int choice = 0;
 
         switch(choice) {
             case 0:
@@ -206,26 +205,22 @@ public class AnyAnglePathfinding {
                 algoFunction = VisibilityGraphAlgorithm::graphReuseNoHeuristic;
                 break;
             case 13 :
-                //algoFunction = null; // reserved
                 algoFunction = AdjustmentThetaStar::new;
                 break;
             case 14 :
-                //algoFunction = null; // reserved
-                algoFunction = StrictThetaStar::new;
+                algoFunction = StrictThetaStarV1::new;
                 break;
             case 15 :
-                //algoFunction = null; // reserved
-                algoFunction = StrictThetaStar::noHeuristic;
+                algoFunction = StrictThetaStarV2e::new;
+                //algoFunction = StrictThetaStarV2e::postSmooth;
                 break;
             case 16 :
                 algoFunction = BFSVisibilityGraph::graphReuse;
                 break;
             case 17 :
-                //algoFunction = null; // reserved
                 algoFunction = RestrictedVisibilityGraphAlgorithm::new;
                 break;
             case 18 :
-                //algoFunction = null; // reserved
                 algoFunction = StrictVisibilityGraphAlgorithm::new;
                 break;
             case 19 :
@@ -247,11 +242,8 @@ public class AnyAnglePathfinding {
                 algoFunction = AStarStaticMemory::new;
                 break;
             case 25 :
-                algoFunction = StrictThetaStarV2e::new;
-                //algoFunction = StrictThetaStarV2e::postSmooth;
                 break;
             case 26 :
-                algoFunction = StrictThetaStarV1::new;
                 break;
             case 27 :
                 algoFunction = StrictVisibilityGraphAlgorithmV2::new;

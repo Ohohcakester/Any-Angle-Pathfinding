@@ -17,8 +17,6 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  *
  */
 public class StrictThetaStarV1 extends BasicThetaStar {
-
-    //private static final float BUFFER_VALUE = 0.7f;
     private float BUFFER_VALUE = 0.42f;
 
     public StrictThetaStarV1(GridGraph graph, int sx, int sy, int ex, int ey) {
@@ -88,7 +86,8 @@ public class StrictThetaStarV1 extends BasicThetaStar {
     
     protected float heuristic(int x, int y) {
         return heuristicWeight*graph.distance(x, y, ex, ey);
-        // MOD 2 :: Increased Goal Heuristic
+
+        // MOD 2 :: Increased Goal Heuristic - Not needed when a Penalty value of 0.42 is used.
         /*if (x == ex && y == ey) {
             return 1.1f;
         } else { 
