@@ -11,8 +11,9 @@ public class GridGraph {
     public final int sizeX;
     public final int sizeY;
     public final int sizeXplusOne;
-    
+
     private static final float SQRT_TWO = (float)Math.sqrt(2);
+    private static final double SQRT_TWO_DOUBLE = Math.sqrt(2);
     private static final float SQRT_TWO_MINUS_ONE = (float)(Math.sqrt(2) - 1);
     
     public GridGraph(int sizeX, int sizeY) {
@@ -111,6 +112,25 @@ public class GridGraph {
         int squareDistance = xDiff*xDiff + yDiff*yDiff;
         
         return (float)Math.sqrt(squareDistance);
+    }
+    
+    public double distance_double(int x1, int y1, int x2, int y2) {
+        int xDiff = x2 - x1;
+        int yDiff = y2 - y1;
+        
+        if (xDiff == 0) {
+            return Math.abs(yDiff);
+        }
+        if (yDiff == 0) {
+            return Math.abs(xDiff);
+        }
+        if (xDiff == yDiff || xDiff == -yDiff) {
+            return SQRT_TWO_DOUBLE*Math.abs(xDiff);
+        }
+        
+        int squareDistance = xDiff*xDiff + yDiff*yDiff;
+        
+        return Math.sqrt(squareDistance);
     }
     
     /**

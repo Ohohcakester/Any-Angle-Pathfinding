@@ -1,23 +1,50 @@
 package main;
 
+import grid.GridGraph;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
-import grid.GridGraph;
+import uiandio.GraphImporter;
 import main.AnyAnglePathfinding.AlgoFunction;
+import main.testgen.StartEndPointData;
 import algorithms.PathFindingAlgorithm;
+import algorithms.StrictVisibilityGraphAlgorithmV2;
+import algorithms.datatypes.Point;
 
 public class Utility {
 
     /**
      * Compute the length of a given path. (Using euclidean distance)
      */
-    public static float computePathLength(GridGraph gridGraph, int[][] path) {
-        float pathLength = 0;
+    public static double computePathLength(GridGraph gridGraph, int[][] path) {
+        path = removeDuplicatesInPath(path);
+        double pathLength = 0;
         for (int i=0; i<path.length-1; i++) {
-            pathLength += gridGraph.distance(path[i][0], path[i][1],
+            pathLength += gridGraph.distance_double(path[i][0], path[i][1],
                             path[i+1][0], path[i+1][1]);
         }
         return pathLength;
+    }
+    
+    public static double computeOptimalPathLength(GridGraph gridGraph, Point start, Point end) {
+        // Optimal algorithm.
+        PathFindingAlgorithm algo = new StrictVisibilityGraphAlgorithmV2(gridGraph, start.x, start.y, end.x, end.y);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        path = removeDuplicatesInPath(path);
+        return computePathLength(gridGraph, path);
+    }
+    
+    public static ArrayList<StartEndPointData> fixProblemPathLength(GridGraph gridGraph, ArrayList<StartEndPointData> problems) {
+        ArrayList<StartEndPointData> fixedProblems = new ArrayList<>();
+        for (StartEndPointData problem : problems) {
+            //System.out.println(problem.start + " | " + problem.end);
+            double shortestPathLength = computeOptimalPathLength(gridGraph, problem.start, problem.end);
+            fixedProblems.add(new StartEndPointData(problem.start, problem.end, shortestPathLength));
+            if (shortestPathLength > problem.shortestPath + 0.0001) System.out.println("REPAIRING: " + problem.shortestPath + " -> " + shortestPathLength);
+        }
+        return fixedProblems;
     }
 
     static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
@@ -70,5 +97,10 @@ public class Utility {
             ++v2;
         }
         return true;
+    }
+
+    public static boolean isOptimal(double length, double optimalLength) {
+        //System.out.println(length + " | " + optimalLength + " | " + ((length - optimalLength) < 0.0001)); 
+        return (length - optimalLength) < 0.0001;
     }
 }

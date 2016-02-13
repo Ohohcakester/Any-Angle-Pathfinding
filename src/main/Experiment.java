@@ -12,11 +12,14 @@ import java.util.Random;
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
+import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.BasicThetaStar;
+import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
+import algorithms.strictthetastar.StrictThetaStarV1;
 import algorithms.strictthetastar.StrictThetaStarV2c;
 import algorithms.strictthetastar.StrictThetaStarV2e;
 import algorithms.visibilitygraph.VisibilityGraph;
@@ -27,10 +30,11 @@ public class Experiment {
     public static void run() {
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
-//        findStrictThetaStarIssues();
+        findStrictThetaStarIssues();
 //        findUpperBound();
-        findRestrictedVisibilityGraphIssues();
+//        findRestrictedVisibilityGraphIssues();
         //testAgainstReferenceAlgorithm();
+        //countTautPaths();
 //        other();
     }
     
@@ -64,7 +68,7 @@ public class Experiment {
         LinkedList<Integer> startY = new LinkedList<>();
         LinkedList<Integer> endX = new LinkedList<>();
         LinkedList<Integer> endY = new LinkedList<>();
-        LinkedList<Float> length = new LinkedList<>();
+        LinkedList<Double> length = new LinkedList<>();
         
         int size = points.size();
         System.out.println("Points: " + size);
@@ -79,7 +83,7 @@ public class Experiment {
             Point f = points.get(last);
             int[][] path = Utility.generatePath(gridGraph, s.x, s.y, f.x, f.y);
             if (path.length >= 2) {
-                float len = Utility.computePathLength(gridGraph, path);
+                double len = Utility.computePathLength(gridGraph, path);
                 startX.offer(s.x);
                 startY.offer(s.y);
                 endX.offer(f.x);
@@ -170,12 +174,12 @@ public class Experiment {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnlyOld(seed, sizeX, sizeY, ratio);
             AnyAnglePathfinding.algoFunction = referenceAlgo;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float referencePathLength = Utility.computePathLength(gridGraph, path);
+            double referencePathLength = Utility.computePathLength(gridGraph, path);
             boolean referenceValid = (referencePathLength > 0.00001f);
     
             AnyAnglePathfinding.algoFunction = currentAlgo;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float algoPathLength = Utility.computePathLength(gridGraph, path);
+            double algoPathLength = Utility.computePathLength(gridGraph, path);
             boolean algoValid = (referencePathLength > 0.00001f);
             
             if (referenceValid != algoValid) {
@@ -187,7 +191,7 @@ public class Experiment {
                 System.out.println("============");
                 throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
-                if (Math.abs(algoPathLength - referencePathLength) > 0.0001f) {
+                if (Math.abs(algoPathLength - referencePathLength) > 0.0001) {
                     System.out.println("============");
                     System.out.println("Path Length Discrepancy Discovered!");
                     System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
@@ -242,8 +246,8 @@ public class Experiment {
         AlgoFunction testAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV2e(gridGraph, sx, sy, ex, ey);
         AlgoFunction optimalAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
 
-        float upperBound = 1.5f;
-        float maxRatio = 1;
+        double upperBound = 1.5;
+        double maxRatio = 1;
         
         int wins = 0;
         int ties = 0;
@@ -279,11 +283,11 @@ public class Experiment {
             
             AnyAnglePathfinding.algoFunction = testAlgo;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float testPathLength = Utility.computePathLength(gridGraph, path);
+            double testPathLength = Utility.computePathLength(gridGraph, path);
 
             AnyAnglePathfinding.algoFunction = optimalAlgo;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float optimalPathLength = Utility.computePathLength(gridGraph, path);
+            double optimalPathLength = Utility.computePathLength(gridGraph, path);
             
             if (testPathLength > optimalPathLength*upperBound) {
                 System.out.println("============");
@@ -297,7 +301,7 @@ public class Experiment {
                 throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
                 //System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
-                float lengthRatio = (float)testPathLength/optimalPathLength;
+                double lengthRatio = (double)testPathLength/optimalPathLength;
                 if (lengthRatio > maxRatio) {
                     //System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                     System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
@@ -313,16 +317,18 @@ public class Experiment {
     }
 
     private static void findStrictThetaStarIssues() {
-        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
-        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV2c(gridGraph, sx, sy, ex, ey);
+//        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
+//        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV1(gridGraph, sx, sy, ex, ey);
+        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> StrictThetaStarV2e.setBuffer(gridGraph, sx, sy, ex, ey, 0.4f);
+        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> StrictThetaStarV2e.setBuffer(gridGraph, sx, sy, ex, ey, 0.2f);
 
         int wins = 0;
         int ties = 0;
-        Random seedRand = new Random(193);
+        Random seedRand = new Random(192213);
         int initial = seedRand.nextInt();
         for (int i=0; i<500000; i++) {
-            int sizeX = seedRand.nextInt(5) + 10;
-            int sizeY = seedRand.nextInt(5) + 10;
+            int sizeX = seedRand.nextInt(5) + 8;
+            int sizeY = seedRand.nextInt(5) + 8;
             int seed = i+initial;
             int ratio = seedRand.nextInt(40) + 5;
             
@@ -341,11 +347,11 @@ public class Experiment {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
             AnyAnglePathfinding.algoFunction = basicThetaStar;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float basicPathLength = Utility.computePathLength(gridGraph, path);
+            double basicPathLength = Utility.computePathLength(gridGraph, path);
 
             AnyAnglePathfinding.algoFunction = strictThetaStar;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
-            float strictPathLength = Utility.computePathLength(gridGraph, path);
+            double strictPathLength = Utility.computePathLength(gridGraph, path);
             
             if (basicPathLength < strictPathLength-0.01f) {
                 System.out.println("============");
@@ -396,7 +402,7 @@ public class Experiment {
             int ex = p2%(sizeX+1);
             int ey = p2/(sizeX+1);
 
-            float restPathLength = 0, normalPathLength = 0;
+            double restPathLength = 0, normalPathLength = 0;
             try {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
             AnyAnglePathfinding.algoFunction = rVGA;
@@ -432,6 +438,105 @@ public class Experiment {
                     System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
                 }
             }
+        }
+    }
+    
+    private static boolean testTautness(GridGraph gridGraph, AlgoFunction algo, int sx, int sy, int ex, int ey) {
+        AnyAnglePathfinding.algoFunction = algo;
+        int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+        path = Utility.removeDuplicatesInPath(path);
+        return Utility.isPathTaut(gridGraph, path);
+    }
+    
+    private static boolean hasSolution(GridGraph gridGraph, AlgoFunction algo, int sx, int sy, int ex, int ey) {
+        AnyAnglePathfinding.algoFunction = algo;
+        int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+        return path.length > 1;
+    }
+    
+    private static void countTautPaths() {
+        int nTaut1=0;int nTaut2=0; int nTaut3=0;
+        AlgoFunction hasPathChecker = JumpPointSearch::new;
+        AlgoFunction algo3 = BasicThetaStar::new;
+        AlgoFunction algo2 = StrictThetaStarV1::new;
+        AlgoFunction algo1 = StrictThetaStarV2e::new;
+
+        //printSeed = false; // keep this commented out.
+        int pathsPerGraph = 100;
+        int nIterations = 100000;
+        
+        int nPaths = 0;
+
+        String[] maps = {
+                "obst10_random512-10-0",
+                "obst10_random512-10-1",              
+                "obst10_random512-10-2",
+                "obst10_random512-10-3",              
+                "obst10_random512-10-4",
+                "obst10_random512-10-5",              
+                "obst10_random512-10-6",
+                "obst10_random512-10-7",              
+                "obst10_random512-10-8",
+                "obst10_random512-10-9",             
+                "obst40_random512-40-0",
+                "obst40_random512-40-1",             
+                "obst40_random512-40-2",
+                "obst40_random512-40-3",             
+                "obst40_random512-40-4",
+                "obst40_random512-40-5",             
+                "obst40_random512-40-6",
+                "obst40_random512-40-7",             
+                "obst40_random512-40-8",
+                "obst40_random512-40-9"
+                };
+        nIterations = maps.length;
+        System.out.println(maps.length);
+        
+        
+        Random seedRand = new Random(-14);
+        int initial = seedRand.nextInt();
+        for (int i=0;i<nIterations;++i) {
+            String map = maps[i];
+            System.out.println("Map: " + map);
+            GridGraph gridGraph = GraphImporter.loadStoredMaze(map);
+            int sizeX = gridGraph.sizeX;
+            int sizeY = gridGraph.sizeY;
+            
+            /*int sizeX = seedRand.nextInt(20) + 300;
+            int sizeY = seedRand.nextInt(20) + 300;
+            int seed = i+initial;
+            int ratio = seedRand.nextInt(30) + 5;
+            
+            GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
+            System.out.println("Ratio: " + ratio);*/
+            
+            for (int j=0;j<pathsPerGraph;++j) {
+
+                int max = (sizeX+1)*(sizeY+1);
+                int p1 = seedRand.nextInt(max);
+                int p2 = seedRand.nextInt(max-1);
+                if (p2 == p1) {
+                    p2 = max-1;
+                }
+                
+                int sx = p1%(sizeX+1);
+                int sy = p1/(sizeX+1);
+                int ex = p2%(sizeX+1);
+                int ey = p2/(sizeX+1);
+
+                if (hasSolution(gridGraph, hasPathChecker, sx, sy, ex, ey)) {
+                    if (testTautness(gridGraph, algo1, sx,sy,ex,ey)) nTaut1++;
+                    if (testTautness(gridGraph, algo2, sx,sy,ex,ey)) nTaut2++;
+                    if (testTautness(gridGraph, algo3, sx,sy,ex,ey)) nTaut3++;
+                    nPaths++;
+                } else {
+                    j--;
+                }
+            }
+            System.out.println("Total = " + nPaths);
+            System.out.println("1: " + ((float)nTaut1/nPaths));
+            System.out.println("2: " + ((float)nTaut2/nPaths));
+            System.out.println("3: " + ((float)nTaut3/nPaths));
         }
     }
     

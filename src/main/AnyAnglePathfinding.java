@@ -15,10 +15,14 @@ import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
+import algorithms.RecursiveThetaStar;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictThetaStar;
 import algorithms.StrictVisibilityGraphAlgorithm;
+import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.strictthetastar.StrictThetaStarV1;
+import algorithms.strictthetastar.StrictThetaStarV2e;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -63,30 +67,30 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 18; // Adjust this to choose a maze.
+        int choice = 15; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
-                int unblockedRatio = 12;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int sizeX = 300;               // x-axis size of grid
-                int sizeY = 300;               // y-axis size of grid
+                int unblockedRatio = 10;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int sizeX = 20;               // x-axis size of grid
+                int sizeY = 20;               // y-axis size of grid
 
-                int sx = 9;                   // x-coordinate of start point
-                int sy = 217;                  // y-coordinate of start point
-                int ex = 213;                  // x-coordinate of goal point
-                int ey = 35;                   // y-coordinate of goal point
+                int sx = 10;                   // x-coordinate of start point
+                int sy = 13;                  // y-coordinate of start point
+                int ex = 6;                  // x-coordinate of goal point
+                int ey = 8;                   // y-coordinate of goal point
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 26;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = -1389697;        // seed for the random.
+                int unblockedRatio = 17;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 1667327427;        // seed for the random.
                 
-                int sizeX = 30;              // x-axis size of grid
-                int sizeY = 30;              // y-axis size of grid
-                int sx = 5;                  // x-coordinate of start point
-                int sy = 4;                 // y-coordinate of start point
-                int ex = 27;                 // x-coordinate of goal point
-                int ey = 29;                  // y-coordinate of goal point
+                int sizeX = 40;              // x-axis size of grid
+                int sizeY = 40;              // y-axis size of grid
+                int sx = 6;                  // x-coordinate of start point
+                int sy = 10;                 // y-coordinate of start point
+                int ex = 39;                 // x-coordinate of goal point
+                int ey = 32;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -123,6 +127,36 @@ public class AnyAnglePathfinding {
                 return GraphImporter.importGraphFromFile("custommaze3.txt", 1, 19, 29, 2);
             case 18 :
                 return GraphImporter.loadStoredMaze("baldursgate_AR0402SR", "9-45_44-22");
+            case 19 :
+                return DefaultGenerator.generateSeeded(-1131220420, 12, 13, 37, 5, 13, 2, 3); // Issue for Strict Theta* at goal
+            case 20 :
+                return GraphImporter.importGraphFromFile("custommaze4.txt", 2, 4, 10, 2);
+            case 21 :
+                return DefaultGenerator.generateSeededTrueRandomGraph(-1186265305, 15, 9, 12, 7,8, 4,2);
+            case 22 :
+                //return DefaultGenerator.generateSeededTrueRandomGraph(-1186644456, 6,5, 14, 0,2, 5,0);
+                return DefaultGenerator.generateSeededTrueRandomGraph(-1185836518, 30,9, 3, 1,0, 7,9);
+            case 23 :
+                return DefaultGenerator.generateSeeded(138863256, 200, 200, 7, 59, 179, 160, 35); // Good large dense graph with indirect path
+            case 24 :
+                return DefaultGenerator.generateSeeded(138863256, 200, 200, 7, 160, 35, 59, 179); // Same graph, opposite direction
+            case 25 :
+                return DefaultGenerator.generateSeeded(-1878652012, 200, 200, 7, 59, 179, 160, 35); // Good large dense graph with indirect path
+            case 26:
+                return GraphImporter.loadStoredMaze("corr2_maze512-2-5", "171-149_313-324");
+            case 27 :
+                return DefaultGenerator.generateSeeded(-1270138724, 17, 16, 26, 12, 16, 8, 0); // Edge case for Incremental VG upper bound check
+            case 28 :
+                return DefaultGenerator.generateSeeded(250342248, 67, 33, 17, 3, 28, 47, 32); // Difficult case for Incremental VG lower bound check
+            case 29 :
+                return DefaultGenerator.generateSeeded(-13991511, 80, 80, 7, 26, 37, 52, 54); // Restricted VG Inefficient
+            case 30:
+                return GraphImporter.loadStoredMaze("def_iQCWUDHB_iED_iED_iP", "1-42_75-81");
+            case 31:
+                //return DefaultGenerator.generateSeeded(-1131088503, 8, 11, 27, 4, 11, 7, 4); // Strict Theta* with high buffer finds a much longer path.
+                return GraphImporter.importGraphFromFile("mazehighbufferbad.txt", 4, 8, 7, 1); // Strict Theta* with high buffer finds a much longer path.
+            case 32:
+                return GraphImporter.loadStoredMaze("corr2_maze512-2-1", "219-187_186-334");
             default :
                 return null;
         }
@@ -132,7 +166,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static void setDefaultAlgoFunction() {
-        int choice = 19; // adjust this to choose an algorithm
+        int choice = 27; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -211,6 +245,19 @@ public class AnyAnglePathfinding {
                 break;
             case 24 :
                 algoFunction = AStarStaticMemory::new;
+                break;
+            case 25 :
+                algoFunction = StrictThetaStarV2e::new;
+                //algoFunction = StrictThetaStarV2e::postSmooth;
+                break;
+            case 26 :
+                algoFunction = StrictThetaStarV1::new;
+                break;
+            case 27 :
+                algoFunction = StrictVisibilityGraphAlgorithmV2::new;
+                break;
+            case 28 :
+                algoFunction = RecursiveThetaStar::new;
                 break;
         }
     }

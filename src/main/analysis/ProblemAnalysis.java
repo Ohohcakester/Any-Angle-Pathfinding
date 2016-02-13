@@ -10,11 +10,11 @@ public class ProblemAnalysis {
     
 
     public final int sx, sy, ex, ey;
-    public final float shortestPathLength;
-    public final float straightLineDistance;
-    public final float directness;
-    public final float distanceCoverage;
-    public final float minMapCoverage;
+    public final double shortestPathLength;
+    public final double straightLineDistance;
+    public final double directness;
+    public final double distanceCoverage;
+    public final double minMapCoverage;
     
     public final int shortestPathHeadingChanges;
     public final int minHeadingChanges;
@@ -43,20 +43,20 @@ public class ProblemAnalysis {
         minHeadingChanges = computeMinHeadingChanges(gridGraph);
     }
 
-    public static float computerMinMapCoverage(float shortestPathLength, int sizeX,
+    public static double computerMinMapCoverage(double shortestPathLength, int sizeX,
             int sizeY) {
-        return shortestPathLength/(float)Math.sqrt(sizeX*sizeX + sizeY*sizeY);
+        return shortestPathLength/Math.sqrt(sizeX*sizeX + sizeY*sizeY);
     }
 
 
-    public static float computeDistanceCoverage(float straightLineDistance,
+    public static double computeDistanceCoverage(double straightLineDistance,
             int sizeX, int sizeY) {
-        return straightLineDistance/(float)Math.sqrt(sizeX*sizeX + sizeY*sizeY);
+        return straightLineDistance/Math.sqrt(sizeX*sizeX + sizeY*sizeY);
     }
 
 
-    public static float computeDirectness(float shortestPathLength,
-            float straightLineDistance) {
+    public static double computeDirectness(double shortestPathLength,
+            double straightLineDistance) {
         return shortestPathLength / straightLineDistance;
     }
 

@@ -18,16 +18,27 @@ import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.BasicThetaStar;
+import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
+import algorithms.RecursiveThetaStar;
 import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictThetaStar;
 import algorithms.StrictVisibilityGraphAlgorithm;
+import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.strictthetastar.StrictThetaStarV1;
+import algorithms.strictthetastar.StrictThetaStarV2;
+import algorithms.strictthetastar.StrictThetaStarV2b;
+import algorithms.strictthetastar.StrictThetaStarV2c;
+import algorithms.strictthetastar.StrictThetaStarV2d;
+import algorithms.strictthetastar.StrictThetaStarV2e;
+import algorithms.strictthetastar.StrictThetaStarV3;
 
 public class AlgoTest {
     private static FileIO io;
+    private static boolean writeToFile = true;
 
     public static void run() {
         //runTestAllAlgos();
@@ -36,28 +47,58 @@ public class AlgoTest {
         AlgoFunction aStarStatic = AStarStaticMemory::new;
         AlgoFunction aStarOctile = AStarOctileHeuristic::new;
         AlgoFunction aStarOctilePS = AStarOctileHeuristic::postSmooth;
+        AlgoFunction bfs = BreadthFirstSearch::new;
         AlgoFunction jumpPointSearch = JumpPointSearch::new;
         AlgoFunction jpsPS = JumpPointSearch::postSmooth;
         AlgoFunction lazyThetaStar = LazyThetaStar::new;
         AlgoFunction basicThetaStar = BasicThetaStar::new;
+        AlgoFunction basicThetaStarPS = BasicThetaStar::postSmooth;
         AlgoFunction aStarPS = AStar::postSmooth;
         AlgoFunction dijkstra = AStar::dijkstra;
         AlgoFunction vgaReuse = VisibilityGraphAlgorithm::graphReuse;
         AlgoFunction vga = VisibilityGraphAlgorithm::new;
-        AlgoFunction accAStar = (a,b,c,d,e) -> new AcceleratedAStar(a,b,c,d,e);
+        AlgoFunction accAStar = AcceleratedAStar::new;
 
         AlgoFunction strictThetaStar = (a,b,c,d,e) -> new StrictThetaStar(a,b,c,d,e);
-        AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction rVGA = (a,b,c,d,e) -> new RestrictedVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction vgReuse = (a,b,c,d,e) -> VisibilityGraphAlgorithm.graphReuse(a,b,c,d,e);
+        AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
+        AlgoFunction sVGAv2 = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithmV2(a,b,c,d,e);
 
-        FileIO.makeDirs("blk71testdata/");
+        AlgoFunction strictThetaStarV1 = StrictThetaStarV1::new;
+        AlgoFunction strictThetaStarV1PS = StrictThetaStarV1::postSmooth;
+        AlgoFunction strictThetaStarV2 = StrictThetaStarV2::new;
+        AlgoFunction strictThetaStarV2b = StrictThetaStarV2b::new;
+        AlgoFunction strictThetaStarV2c = StrictThetaStarV2c::new;
+        AlgoFunction strictThetaStarV2d = StrictThetaStarV2d::new;
+        AlgoFunction strictThetaStarV2e = StrictThetaStarV2e::new;
+        AlgoFunction strictThetaStarV2ePS = StrictThetaStarV2e::postSmooth;
+        AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> StrictThetaStarV2e.depthLimit(a,b,c,d,e,2);
+
+        AlgoFunction strictThetaStarV3 = StrictThetaStarV3::new;
         
+        AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
+
+        FileIO.makeDirs("testResults/");
+//        
+//        float[] buffers = new float[]{0f, 0.01f,0.1f,0.2f,0.4f,0.6f,0.8f,1f,1.2f,1.5f,2f,3f,5f,8f,10f,20f,30f,50f};
+//        for (float buffer : buffers) {
+//            AlgoFunction algo = (a,b,c,d,e) -> StrictThetaStarV2e.setBuffer(a,b,c,d,e,buffer);
+//            testSequence(algo, "StrictThetaStarV2e_"+buffer);
+//        }
+//        for (float buffer : buffers) {
+//            AlgoFunction algo = (a,b,c,d,e) -> StrictThetaStarV1.setBuffer(a,b,c,d,e,buffer);
+//            testSequence(algo, "StrictThetaStarV1_"+buffer);
+//        }
 //        testSequence(aStarStatic, "AStar SLD");
 //        testSequence(aStarOctile, "AStar Octile");
+//        testSequence(bfs, "BreadthFirstSearch");
 //        testSequence(jumpPointSearch, "JumpPointSearch");
-        testSequence(lazyThetaStar, "LazyThetaStar");
         testSequence(basicThetaStar, "BasicThetaStar");
+        testSequence(basicThetaStar, "BasicThetaStar");
+//        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
+//        testSequence(lazyThetaStar, "LazyThetaStar");
+//        testSequence(accAStar, "AcceleratedAStar");
 //        testSequence(aStarOctilePS, "AStarOctile PostSmooth");
 //        testSequence(jpsPS, "JPS PostSmooth");
 //        testSequence(dijkstra, "Dijkstra");
@@ -65,75 +106,174 @@ public class AlgoTest {
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
 
-//      testSequence(strictThetaStar, "Strict Theta*");
-//      testSequence(sVGA, "Strict Visibility Graphs");
-//      testSequence(rVGA, "Restricted Visibility Graphs");
+//        testSequence(recursiveThetaStar, "RecursiveThetaStar");
+//        testSequence(strictThetaStar, "StrictThetaStar");
+//        testSequence(strictThetaStarV1, "StrictThetaStarV1");
+//        testSequence(strictThetaStarV1PS, "StrictThetaStarV1_PS");
+//        testSequence(strictThetaStarV2, "StrictThetaStarV2");
+//        testSequence(strictThetaStarV2b, "StrictThetaStarV2b");
+//        testSequence(strictThetaStarV2c, "StrictThetaStarV2c");
+//        testSequence(strictThetaStarV2d, "StrictThetaStarV2d");
+//        testSequence(strictThetaStarV2e, "StrictThetaStarV2e");
+//        testSequence(strictThetaStarV2ePS, "StrictThetaStarV2e_PS");
+//      testSequence(strictThetaStarV2e_2, "StrictThetaStarV2e_2");
+//        testSequence(strictThetaStarV3, "StrictThetaStarV3");
+//      testSequence(sVGA, "StrictVisibilityGraphs");
+//      testSequence(sVGAv2, "StrictVisibilityGraphsV2");
+//        testSequence(rVGA, "RestrictedVisibilityGraphs");
+//        testSequence(vga, "VisibilityGraphs");
     }
     
     public static void testSequence(AlgoFunction algo, String name) {
-        String path = "blk71testdata/" + name.replace(" ",  "_") + ".txt";
-        io = new FileIO(path);
+        String path = "testResults/" + name.replace(" ",  "_") + ".txt";
+        if (writeToFile) io = new FileIO(path);
+
+        boolean pathLengthOnly = false;
+
+        TestFunctionData testFunction_slow = printAverageData(20,10);
+        TestFunctionData testFunction_fast = printAverageData(50,30);
+        if (pathLengthOnly) {
+            //testFunction_slow = testPathLengthOnly;
+            //testFunction_fast = testPathLengthOnly;
+            testFunction_slow = analyseIndividualPaths;
+            testFunction_fast = analyseIndividualPaths;
+        }
         
         println("=== Testing " + name + " ===");
         println("<< GAME MAPS >>");
-        
-        println("sc2_steppesofwar - 164x164 - spacious");
-        testOnMazeData("sc2_steppesofwar", algo, printAverageData(10, 5));
-        println("sc2_losttemple - 132x131");
-        testOnMazeData("sc2_losttemple", algo, printAverageData(10, 5));
-        println("sc2_extinction - 164x164 - less spacious");
-        testOnMazeData("sc2_extinction", algo, printAverageData(10, 5));
 
-        println("baldursgate_AR0070SR 124x134");
-        testOnMazeData("baldursgate_AR0070SR", algo, printAverageData(10, 5));
-        println("baldursgate_AR0705SR - 100x86 - less spacious");
-        testOnMazeData("baldursgate_AR0705SR", algo, printAverageData(10, 5));
-        println("baldursgate_AR0418SR - 84x75 - spacious");
-        testOnMazeData("baldursgate_AR0418SR", algo, printAverageData(10, 5));
-
-        println("wc3_icecrown - 512x512 (spacious)");
-        testOnMazeData("wc3_icecrown", algo, printAverageData(5, 4));
-        println("wc3_dragonfire - 512x512 (less spacious)");
-        testOnMazeData("wc3_dragonfire", algo, printAverageData(5, 4));
-
+//        println("sc2_steppesofwar - 164x164");// - spacious");
+//        testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
+//        println("sc2_losttemple - 132x131");
+//        testOnMazeData("sc2_losttemple", algo, testFunction_slow);
+//        println("sc2_extinction - 164x164");// - less spacious");
+//        testOnMazeData("sc2_extinction", algo, testFunction_slow);
+//
+//        println("baldursgate_AR0070SR - 124x134");
+//        testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
+//        println("baldursgate_AR0705SR - 100x86");// - less spacious");
+//        testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
+//        println("baldursgate_AR0418SR - 84x75");// - spacious");
+//        testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
+//
+//        println("sc1_TheFrozenSea - 1024x1024");
+//        testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
+//        println("sc1_SpaceDebris - 512x512");
+//        testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
+//
+//        println("wc3_icecrown - 512x512");// (spacious)");
+//        testOnMazeData("wc3_icecrown", algo, testFunction_slow);
+//        println("wc3_dragonfire - 512x512");// (less spacious)");
+//        testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
+//
+//        println("sc1_Legacy - 512x512");
+//        testOnMazeData("sc1_Legacy", algo, testFunction_slow);
+//
+//        println("sc1_GreenerPastures - 768x512");
+//        testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
+//
+//        println("baldursgate_AR0603SR - 512x512");
+//        testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
+//
+//        println("wc3_mysticisles - 512x512");
+//        testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
+//
+//        println("wc3_petrifiedforest - 512x512");
+//        testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
+//
         println("<< GENERATED MAPS >>");
+//        
+//        println("Low Density - 6% - 50x50");
+//        testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, testFunction_fast);
+//        println("Medium Density - 20% - 50x50");
+//        testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, testFunction_fast);
+//        println("High Density - 40% - 50x50");
+//        testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, testFunction_fast);
+//
+//        println("Low Density - 6% - 300x300");
+//        testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, testFunction_slow);
+//        println("Medium Density - 20% - 300x300");
+//        testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, testFunction_slow);
+//        println("High Density - 40% - 300x300");
+//        testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, testFunction_slow);
+//
+//      println("Low Density - 6% - 500x500");
+//      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+//      println("Medium Density - 20% - 500x500");
+//      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
+//
+//      println("LowDensity2 - 6% - 300x300");
+//      testOnMazeData("def_iMJWB0QC_iMJ_iMJ_iSB", algo, testFunction_slow);
+//      println("MediumDensity2 - 20% - 300x300");
+//      testOnMazeData("def_iBCA5SS_iMJ_iMJ_iP", algo, testFunction_slow);
+//      println("HighDensity2 - 40% - 300x300");
+//      testOnMazeData("def_i11AHREB_iMJ_iMJ_iH", algo, testFunction_slow);
+//
+//      println("LowDensity3 - 6% - 300x300");
+//      testOnMazeData("def_iOH1TZ0D_iMJ_iMJ_iSB", algo, testFunction_slow);
+//      println("MediumDensity3 - 20% - 300x300");
+//      testOnMazeData("def_iAN3IE0C_iMJ_iMJ_iP", algo, testFunction_slow);
+//      println("HighDensity3 - 40% - 300x300");
+//      testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
         
-        println("Low Density - 6% - 50x50");
-        testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, printAverageData(20, 10));
-        println("Medium Density - 20% - 50x50");
-        testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, printAverageData(20, 10));
-        println("High Density - 40% - 50x50");
-        testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, printAverageData(20, 10));
+//      println("6%Density - 500x500");
+//      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+//      println("20%Density - 500x500");
+//      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
+//      println("40%Density - 500x500");
+//      testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
+//
+//      println("6%Density2 - 500x500");
+//      testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
+//      println("20%Density2 - 500x500");
+//      testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
+//      println("40%Density2 - 500x500");
+//      testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
+//
+//      println("6%Density3 - 500x500");
+//      testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
+//      println("20%Density3 - 500x500");
+//      testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
+//      println("40%Density3 - 500x500");
+//      testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
 
-        println("Low Density - 6% - 300x300");
-        testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, printAverageData(5, 4));
-        println("Medium Density - 20% - 300x300");
-        testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, printAverageData(5, 4));
-        println("High Density - 40% - 300x300");
-        testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, printAverageData(5, 4));
-
-        println("Low Density - 6% - 500x500");
-        testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, printAverageData(3, 3));
-        println("Medium Density - 20% - 500x500");
-        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
-        println("High Density - 40% - 500x500");
-        testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, printAverageData(3, 3));
-
-        println("obst10_random512-10-7 - 10% - 512x512");
-        testOnMazeData("obst10_random512-10-7", algo, printAverageData(3, 3));
-        println("obst40_random512-40-7 - 67% - 512x512");
-        testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, printAverageData(3, 3));
+//
+//        println("obst10_random512-10-7 - 10% - 512x512");
+//        println("obst10_random512-10-7 - 512x512");
+//        testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
+////        println("obst40_random512-40-0 - 60% - 512x512");
+//        println("obst40_random512-40-0 - 512x512");
+//        testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
+////        println("obst40_random512-40-7 - 67% - 512x512");
+//        println("obst40_random512-40-7 - 512x512");
+//        testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
+////
+        //println("corr2_maze512-2-5 - 33% - 512x512");
+//        println("corr2_maze512-2-5 - 512x512");
+//        testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
+        
+//        println("corr2_maze512-2-1 - 512x512");
+//        testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
+//        println("corr2_maze512-2-7 - 512x512");
+//        testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
+        println("corr2_maze512-2-3 - 512x512");
+        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
+//        println("corr2_maze512-2-9 - 512x512");
+//        testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
 
         println("=== FINISHED TEST FOR " + name + " ===");
         println();
         
-        io.close();
+        if (writeToFile) io.close();
     }
 
     private static void println(Object line) {
-        io.writeLine(line.toString());
-        io.flush();
-        System.out.println(line);
+        if (writeToFile) {
+            io.writeLine(line.toString());
+            io.flush();
+        } else {
+            System.out.println(line);
+        }
     }
     private static void println() {
         println("");
@@ -164,6 +304,7 @@ public class AlgoTest {
     
     public static void testOnMazeData(String mazeName, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
+        problems = Utility.fixProblemPathLength(gridGraph, problems);
         test.test(mazeName, gridGraph, problems, algoFunction);
     }
     
@@ -171,21 +312,49 @@ public class AlgoTest {
         test.test("undefined", gridGraph, problems, algoFunction);
     }
 
-    
     private static final TestFunctionData testPathLengthOnly = (mazeName, gridGraph, problems, algoFunction) -> {
 
         TestResult[] testResults = new TestResult[problems.size()];
         int index = 0;
         double totalPathLength = 0;
+        int totalTautPaths = 0;
+        int totalOptimalPaths = 0;
+        
         for (StartEndPointData problem : problems) {
             TwoPoint tp = new TwoPoint(problem.start, problem.end);
             testResults[index] = testAlgorithmPathLength(gridGraph, algoFunction, tp);
             totalPathLength += testResults[index].pathLength / problem.shortestPath;
+            totalTautPaths += (testResults[index].isTaut?1:0);
+            totalOptimalPaths += (Utility.isOptimal(testResults[index].pathLength, problem.shortestPath)?1:0);
             index++;
         }
         int nResults = testResults.length;
 
         println("Average Path Length: " + (totalPathLength/nResults));
+        println("Percentage Taut: " + (totalTautPaths/(float)nResults));
+        println("Percentage Optimal: " + (totalOptimalPaths/(float)nResults));
+    };
+
+    private static final TestFunctionData analyseIndividualPaths = (mazeName, gridGraph, problems, algoFunction) -> {
+        println("|||||mazeName,start,end,optimalLength,actualLength,isTaut,isOptimal");
+        for (StartEndPointData problem : problems) {
+            TwoPoint tp = new TwoPoint(problem.start, problem.end);
+            TestResult testResult = testAlgorithmPathLength(gridGraph, algoFunction, tp);
+            
+            //double pathLengthRatio = testResult.pathLength / problem.shortestPath;
+            int isTaut = (testResult.isTaut?1:0);
+            int isOptimal = (Utility.isOptimal(testResult.pathLength, problem.shortestPath)?1:0);
+
+            StringBuilder sb = new StringBuilder(">>>>>");
+            sb.append(mazeName).append(",");
+            sb.append(problem.start).append(",");
+            sb.append(problem.end).append(",");
+            sb.append(problem.shortestPath).append(",");
+            sb.append(testResult.pathLength).append(",");
+            sb.append(isTaut).append(",");
+            sb.append(isOptimal);
+            println(sb.toString());
+        }
     };
     
     private static final TestFunction printAverage = (mazeName, gridGraph, problems, algoFunction) -> {
@@ -201,10 +370,12 @@ public class AlgoTest {
         double totalMean = 0;
         double totalSD = 0;
         double totalPathLength = 0;
+        int totalTautPaths = 0;
         for (TestResult testResult : testResults) {
             totalMean += testResult.time;
             totalSD += testResult.timeSD;
             totalPathLength += testResult.pathLength;
+            totalTautPaths += (testResult.isTaut?1:0);
         }
         int nResults = testResults.length;
 
@@ -213,6 +384,7 @@ public class AlgoTest {
         println("Average Time: " + (totalMean/nResults));
         println("Average SD: " + (totalSD/nResults));
         println("Average Path Length: " + (totalPathLength/nResults));
+        println("Percentage Taut: " + (totalTautPaths/(float)nResults));
     };
     
 
@@ -223,6 +395,8 @@ public class AlgoTest {
             double sum = 0;
             double sumSquare = 0;
             double totalPathLength = 0;
+            int totalTautPaths = 0;
+            int totalOptimalPaths = 0;
             
             int nResults = 0;
             for (StartEndPointData problem : problems) {
@@ -232,6 +406,8 @@ public class AlgoTest {
                 sum += testResult.time;
                 sumSquare += testResult.time*testResult.time;
                 totalPathLength += testResult.pathLength / problem.shortestPath;
+                totalTautPaths += (testResult.isTaut?1:0);
+                totalOptimalPaths += (Utility.isOptimal(testResult.pathLength, problem.shortestPath)?1:0);
                 
                 nResults++;
             }
@@ -245,6 +421,9 @@ public class AlgoTest {
             println("Average Time: " + mean);
             println("Standard Dev: " + standardDeviation);
             println("Average Path Length: " + (totalPathLength/nResults));
+            println("Percentage Taut: " + (totalTautPaths/(float)nResults));
+            println("Percentage Optimal: " + (totalOptimalPaths/(float)nResults));
+            //StrictVisibilityGraphAlgorithmV2.printTimes();a=true;
             println();
         };
     }
@@ -269,7 +448,7 @@ public class AlgoTest {
                 AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
             }
             long end = System.currentTimeMillis();
-            System.gc();
+            //System.gc();
             
             data[s] = (int)(end-start);
             
@@ -282,7 +461,7 @@ public class AlgoTest {
         double sampleVariance = (secondMomentTimesN - sampleSize*(mean*mean)) / (sampleSize - 1);
         double standardDeviation = Math.sqrt(sampleVariance);
     
-        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, -1f);
+        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, -1f, false);
         return testResult;
     }
 
@@ -291,17 +470,18 @@ public class AlgoTest {
     
         int[][] path = Utility.generatePath(algoFunction, gridGraph,
                 tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
-        float pathLength = Utility.computePathLength(gridGraph, path);
+        double pathLength = Utility.computePathLength(gridGraph, path);
+        boolean isTaut = Utility.isPathTaut(gridGraph, path);
         
-        TestResult testResult = new TestResult(-1, -1, -1, pathLength);
+        TestResult testResult = new TestResult(-1, -1, -1, pathLength, isTaut);
         return testResult;
     }
-    
+
     private static TestResult testAlgorithm(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
         TestResult pathLength = testAlgorithmPathLength(gridGraph,algoFunction,tp);
         TestResult time = testAlgorithmTime(gridGraph,algoFunction,tp,sampleSize,nTrials);
-        return new TestResult(time.timesRan, time.time, time.timeSD, pathLength.pathLength);
+        return new TestResult(time.timesRan, time.time, time.timeSD, pathLength.pathLength, pathLength.isTaut);
     }
     
     
@@ -475,9 +655,10 @@ public class AlgoTest {
         double standardDeviation = Math.sqrt(sampleVariance);
     
         int[][] path = Utility.generatePath(gridGraph, startX, startY, endX, endY);
-        float pathLength = Utility.computePathLength(gridGraph, path);
+        double pathLength = Utility.computePathLength(gridGraph, path);
+        boolean isTaut = Utility.isPathTaut(gridGraph, path);
         
-        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, pathLength);
+        TestResult testResult = new TestResult(sampleSize, mean, standardDeviation, pathLength, isTaut);
         return testResult;
     }
 
@@ -503,13 +684,15 @@ class TestResult {
     public final int timesRan;
     public final double time;
     public final double timeSD;
-    public final float pathLength;
+    public final double pathLength;
+    public final boolean isTaut;
     
-    public TestResult(int timesRan, double time, double timeSD, float pathLength) {
+    public TestResult(int timesRan, double time, double timeSD, double pathLength, boolean isTaut) {
         this.timesRan = timesRan;
         this.time = time;
         this.timeSD = timeSD;
         this.pathLength = pathLength;
+        this.isTaut = isTaut;
     }
     
     @Override
@@ -518,6 +701,7 @@ class TestResult {
         sb.append("Times ran: " + timesRan).append("\n");
         sb.append("Mean Time (ms): " + time + " (+/-" + timeSD + ")").append("\n");
         sb.append("Path length: " + pathLength).append("\n");
+        sb.append("Is Taut: " + (isTaut?"YES":"NO")).append("\n");
         
         return sb.toString();
     }
