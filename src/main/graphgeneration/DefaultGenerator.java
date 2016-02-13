@@ -70,6 +70,18 @@ public class DefaultGenerator {
     public static GridGraph generateSeededGraphOnly(int seed, int sizeX, int sizeY, int unblockedRatio, int sx, int sy, int ex, int ey) {
         return generate(true, seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
     }
+
+    public static GridAndGoals generateSeededTrueRandomGraph(long seed, int sizeX, int sizeY, int frequency, int sx, int sy, int ex, int ey) {
+        return new GridAndGoals(generateSeededTrueRandomGraphOnly(seed, sizeX, sizeY, frequency), sx, sy, ex, ey);
+    }
+    
+    public static GridGraph generateSeededTrueRandomGraphOnly(long seed, int sizeX, int sizeY, int frequency) {
+        GridGraph gridGraph = new GridGraph(sizeX, sizeY);
+        //System.out.println("True Random Graph with predefined seed = " + seed);
+        Random rand = new Random(seed);
+        generateRandomMap(rand, gridGraph, frequency);
+        return gridGraph;
+    }
     
     /**
      * Generates a graph using the static parameters defined at the beginning of the class.
