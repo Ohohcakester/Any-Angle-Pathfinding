@@ -55,15 +55,16 @@ public class AlgoTest {
         //AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
         //AlgoFunction sVGAv2 = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithmV2(a,b,c,d,e);
 
-        AlgoFunction strictThetaStarV1 = StrictThetaStar::new;
-        AlgoFunction strictThetaStarV1PS = StrictThetaStar::postSmooth;
-        AlgoFunction strictThetaStarV2e = RecursiveStrictThetaStar::new;
-        AlgoFunction strictThetaStarV2ePS = RecursiveStrictThetaStar::postSmooth;
-        AlgoFunction strictThetaStarV2e_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
+        AlgoFunction strictThetaStar = StrictThetaStar::new;
+        AlgoFunction strictThetaStarPS = StrictThetaStar::postSmooth;
+        AlgoFunction recStrictThetaStar = RecursiveStrictThetaStar::new;
+        AlgoFunction recStrictThetaStarPS = RecursiveStrictThetaStar::postSmooth;
+        AlgoFunction recStrictThetaStar_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
 
         AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
 
         FileIO.makeDirs("testResults/");
+        System.gc(); System.gc();
 //        
 //        float[] buffers = new float[]{0f, 0.01f,0.1f,0.2f,0.4f,0.6f,0.8f,1f,1.2f,1.5f,2f,3f,5f,8f,10f,20f,30f,50f};
 //        for (float buffer : buffers) {
@@ -80,7 +81,7 @@ public class AlgoTest {
 //        testSequence(jumpPointSearch, "JumpPointSearch");
         testSequence(basicThetaStar, "BasicThetaStar");
         testSequence(basicThetaStar, "BasicThetaStar");
-//        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
+        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
 //        testSequence(lazyThetaStar, "LazyThetaStar");
 //        testSequence(accAStar, "AcceleratedAStar");
 //        testSequence(aStarOctilePS, "AStarOctile PostSmooth");
@@ -90,18 +91,12 @@ public class AlgoTest {
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
 
-//        testSequence(recursiveThetaStar, "RecursiveThetaStar");
-//        testSequence(strictThetaStar, "StrictThetaStar");
-//        testSequence(strictThetaStarV1, "StrictThetaStarV1");
-//        testSequence(strictThetaStarV1PS, "StrictThetaStarV1_PS");
-//        testSequence(strictThetaStarV2, "StrictThetaStarV2");
-//        testSequence(strictThetaStarV2b, "StrictThetaStarV2b");
-//        testSequence(strictThetaStarV2c, "StrictThetaStarV2c");
-//        testSequence(strictThetaStarV2d, "StrictThetaStarV2d");
-//        testSequence(strictThetaStarV2e, "StrictThetaStarV2e");
-//        testSequence(strictThetaStarV2ePS, "StrictThetaStarV2e_PS");
-//      testSequence(strictThetaStarV2e_2, "StrictThetaStarV2e_2");
-//        testSequence(strictThetaStarV3, "StrictThetaStarV3");
+        testSequence(recursiveThetaStar, "RecursiveThetaStar");
+        testSequence(strictThetaStar, "StrictThetaStar");
+        testSequence(strictThetaStarPS, "StrictThetaStarPS");
+        testSequence(recStrictThetaStar, "RecStrictThetaStar");
+        testSequence(recStrictThetaStarPS, "RecStrictThetaStarPS");
+      testSequence(recStrictThetaStar_2, "RecStrictThetaStar_2");
 //      testSequence(sVGA, "StrictVisibilityGraphs");
 //      testSequence(sVGAv2, "StrictVisibilityGraphsV2");
 //        testSequence(rVGA, "RestrictedVisibilityGraphs");
