@@ -11,6 +11,7 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  * [V2c NOT INCLUDED]
  * V2d: Identify when buffer value has been added, and removes the buffer value on dequeue from PQ.
  * V2e: Add heuristic and change buffer value.
+ *   '-> Amend: Remove Heuristic Trap (described below) 
  * @author Oh
  * 
  * Ideas:
@@ -23,10 +24,17 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  */
 public class StrictThetaStarV2e extends BasicThetaStar {
     private int DEPTH_LIMIT = -1;
-    private static final float BUFFER_VALUE = 0.36f; // 0.33f is enough.
+    //private static final float BUFFER_VALUE = 0.36f; // 0.33f is enough.
+    private float BUFFER_VALUE = 0.42f;
 
     public StrictThetaStarV2e(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
+    }
+
+    public static StrictThetaStarV2e setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
+        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+        algo.BUFFER_VALUE = bufferValue;
+        return algo;
     }
     
     public static StrictThetaStarV2e noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
@@ -38,6 +46,12 @@ public class StrictThetaStarV2e extends BasicThetaStar {
     public static StrictThetaStarV2e depthLimit(GridGraph graph, int sx, int sy, int ex, int ey, int depthLimit) {
         StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
         algo.DEPTH_LIMIT = depthLimit;
+        return algo;
+    }
+    
+    public static StrictThetaStarV2e postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        StrictThetaStarV2e algo = new StrictThetaStarV2e(graph, sx, sy, ex, ey);
+        algo.postSmoothingOn = true;
         return algo;
     }
 
@@ -85,13 +99,13 @@ public class StrictThetaStarV2e extends BasicThetaStar {
     }
     
     protected float heuristic(int x, int y) {
-        //return heuristicWeight*graph.distance(x, y, ex, ey);
+        return heuristicWeight*graph.distance(x, y, ex, ey);
         // MOD 2 :: Increased Goal Heuristic
-        if (x == ex && y == ey) {
+        /*if (x == ex && y == ey) {
             return 0.18f; // 0.18f
         } else { 
             return heuristicWeight*graph.distance(x, y, ex, ey);
-        }
+        }*/
     }
 
     private void tryFixBufferValue(int current) {

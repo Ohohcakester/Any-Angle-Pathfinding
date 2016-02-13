@@ -18,15 +18,28 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  */
 public class StrictThetaStarV1 extends BasicThetaStar {
 
-    private static final float BUFFER_VALUE = 1;
+    //private static final float BUFFER_VALUE = 0.7f;
+    private float BUFFER_VALUE = 0.42f;
 
     public StrictThetaStarV1(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }
     
+    public static StrictThetaStarV1 setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
+        StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
+        algo.BUFFER_VALUE = bufferValue;
+        return algo;
+    }
+    
     public static StrictThetaStarV1 noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
         StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
         algo.heuristicWeight = 0f;
+        return algo;
+    }
+    
+    public static StrictThetaStarV1 postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
+        algo.postSmoothingOn = true;
         return algo;
     }
 
