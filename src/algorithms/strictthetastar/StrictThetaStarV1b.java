@@ -7,6 +7,7 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 /**
  * An modification of Theta* that I am experimenting with. -Oh
  * @author Oh
+ * V1b: An attempt to improve V1 using tryLocateTautParent. Not useful.
  * 
  * Ideas:
  * Heuristic trap:
