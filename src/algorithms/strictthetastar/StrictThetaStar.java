@@ -16,27 +16,27 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  *    to explore a little more first.
  *
  */
-public class StrictThetaStarV1 extends BasicThetaStar {
+public class StrictThetaStar extends BasicThetaStar {
     private float BUFFER_VALUE = 0.42f;
 
-    public StrictThetaStarV1(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public StrictThetaStar(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
     }
     
-    public static StrictThetaStarV1 setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
-        StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
+    public static StrictThetaStar setBuffer(GridGraph graph, int sx, int sy, int ex, int ey, float bufferValue) {
+        StrictThetaStar algo = new StrictThetaStar(graph, sx, sy, ex, ey);
         algo.BUFFER_VALUE = bufferValue;
         return algo;
     }
     
-    public static StrictThetaStarV1 noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
-        StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
+    public static StrictThetaStar noHeuristic(GridGraph graph, int sx, int sy, int ex, int ey) {
+        StrictThetaStar algo = new StrictThetaStar(graph, sx, sy, ex, ey);
         algo.heuristicWeight = 0f;
         return algo;
     }
     
-    public static StrictThetaStarV1 postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
-        StrictThetaStarV1 algo = new StrictThetaStarV1(graph, sx, sy, ex, ey);
+    public static StrictThetaStar postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        StrictThetaStar algo = new StrictThetaStar(graph, sx, sy, ex, ey);
         algo.postSmoothingOn = true;
         return algo;
     }

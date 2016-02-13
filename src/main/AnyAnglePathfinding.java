@@ -17,8 +17,8 @@ import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.strictthetastar.StrictThetaStarV1;
-import algorithms.strictthetastar.StrictThetaStarV2e;
+import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -204,10 +204,10 @@ public class AnyAnglePathfinding {
                 algoFunction = AdjustmentThetaStar::new;
                 break;
             case 14 :
-                algoFunction = StrictThetaStarV1::new;
+                algoFunction = StrictThetaStar::new;
                 break;
             case 15 :
-                algoFunction = StrictThetaStarV2e::new;
+                algoFunction = RecursiveStrictThetaStar::new;
                 //algoFunction = StrictThetaStarV2e::postSmooth;
                 break;
             case 16 :
