@@ -39,14 +39,16 @@ public class KeyToggler implements KeyListener {
         imgCount++;
         JPanel panel = drawCanvas;
         
+        (new File("snapshots/")).mkdirs();
         BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
         panel.paint(bufImage.createGraphics());
         File imageFile = new File("snapshots/"+imgCount+".png");
         try {
             imageFile.createNewFile();
             ImageIO.write(bufImage, "png", imageFile);
+            System.out.println("Snapshot " + imgCount);
         } catch(Exception ex) {
-            
+            System.out.println("Unable to take snapshot: " + ex.getMessage());
         }
         
      }
@@ -143,21 +145,18 @@ public class KeyToggler implements KeyListener {
             case KeyEvent.VK_O :
                 if (goRight(1, false))
                     takeSnapShot();
-                System.out.println("Snapshot " + imgCount);
                 break;
 
                 // P: Go right one step + take screenshot, stop at end
             case KeyEvent.VK_P :
-                if (goRight(1, true))
+                if (goRight(3, true))
                     takeSnapShot();
-                System.out.println("Snapshot " + imgCount);
                 break;
 
                 // L: Go right multiple steps + take screenshot, stop at end
             case KeyEvent.VK_L :
-                if (goRight(15, true))
+                if (goRight(13, true))
                     takeSnapShot();
-                System.out.println("Snapshot " + imgCount);
                 break;
                 // Esc: Close Window
             case KeyEvent.VK_ESCAPE :
