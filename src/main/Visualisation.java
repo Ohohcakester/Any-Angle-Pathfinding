@@ -52,7 +52,7 @@ public class Visualisation {
                 gridLineSet.addLine(path[i][0], path[i][1],
                         path[i+1][0], path[i+1][1], Color.BLUE);
             }
-            float pathLength = Utility.computePathLength(gridGraph, path);
+            double pathLength = Utility.computePathLength(gridGraph, path);
             System.out.println("Path Length: " + pathLength);
             
             boolean isTaut = Utility.isPathTaut(gridGraph, path);
