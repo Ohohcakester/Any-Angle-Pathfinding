@@ -412,8 +412,8 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
         return (n+d-1)/d;
     }
     
-    
-    private static final float BUFFER = 0.0001f;
+
+    private static final float BUFFER = 0.001f;
     /**
      * Tries to relax.
      * Returns false iff it fails the "withinDistanceBuffer" check.
@@ -423,16 +423,23 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
         float remainingDistance = pathLength - distance[curr];
         Point pDest = visibilityGraph.coordinateOf(dest);
         float pathLengthCurrDest = graph.distance(currX, currY, pDest.x, pDest.y);
-        float pathLengthDestGoal = visibilityGraph.lowerBoundRemainingDistance(pDest.x, pDest.y);//graph.distance(pDest.x, pDest.y, ex, ey);
-        if (pathLengthCurrDest + pathLengthDestGoal > remainingDistance + BUFFER) {
-            return pathLengthCurrDest + graph.distance(pDest.x, pDest.y, ex, ey) <= remainingDistance + BUFFER;
-        }
+        float pathLengthDestGoal = visibilityGraph.lowerBoundRemainingDistance(pDest.x, pDest.y);
+        boolean isEdgeOfEllipse = pathLengthCurrDest + graph.distance(pDest.x, pDest.y, ex, ey) <= remainingDistance + BUFFER;
+        
+        // Check 1a - Lower bound distance
+        if (pathLengthCurrDest + pathLengthDestGoal > remainingDistance + BUFFER) return isEdgeOfEllipse;
+        
+        // Check 1b - Upper bound distance
+        float pathLengthCurrGoal = visibilityGraph.lowerBoundRemainingDistance(currX, currY);
+        if (pathLengthCurrGoal == Float.POSITIVE_INFINITY) pathLengthCurrGoal = pathLengthDestGoal;
+        //System.out.println(pathLengthCurrDest + " | " + (Math.abs(pathLengthDestGoal - pathLengthCurrGoal)));
+        if (pathLengthCurrDest + BUFFER < Math.abs(pathLengthDestGoal - pathLengthCurrGoal)) return isEdgeOfEllipse;
         
         // Check 2 - visited
-        if (visited[dest]) return true;
+        if (visited[dest]) return isEdgeOfEllipse;
         
         // Check 3 - line of sight. (slowest?)
-        if (!graph.lineOfSight(currX, currY, pDest.x, pDest.y)) return true;
+        if (!graph.lineOfSight(currX, currY, pDest.x, pDest.y)) return isEdgeOfEllipse;
         
         if (relax(curr, dest, pathLengthCurrDest)) {
             //System.out.println("Relax " + ns(curr) + " -> " + ns(dest));
@@ -440,7 +447,7 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
             //pq.decreaseKey(dest, distance[dest] + heuristic(pDest.x, pDest.y)); // I doubt the heuristic makes a difference.
             pq.decreaseKey(dest, distance[dest]);
         }
-        return true;
+        return isEdgeOfEllipse;
     }
 
     private int pathLength() {
