@@ -18,7 +18,7 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
  */
 public class StrictThetaStarV1 extends BasicThetaStar {
 
-    private static final float BUFFER_VALUE = 1f;
+    private static final float BUFFER_VALUE = 1;
 
     public StrictThetaStarV1(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -85,22 +85,8 @@ public class StrictThetaStarV1 extends BasicThetaStar {
 
     private void tryFixBufferValue(int current) {
         if (parent(current) < 0 && parent(current) != -1) {
-            //System.out.println("FIXCOUNT " + fixCount + " OUT OF " + outOf);
-
             setParent(current, parent(current) - Integer.MIN_VALUE);
             setDistance(current, distance(parent(current)) + physicalDistance(current, parent(current)));
-            
-            //parent(current) = wrap(current);
-            
-            /*int target = parent(current);
-            while (target != -1) {
-                if (isTaut(current, target) && lineOfSight(current, target)) {
-                    setDistance(current, distance(target) + physicalDistance(current, target));
-                    parent(current) = target;
-                    return;
-                }
-                target = parent(target);
-            }*/
         }
     }
     
@@ -126,26 +112,21 @@ public class StrictThetaStarV1 extends BasicThetaStar {
     @Override
     protected boolean relax(int u, int v, float weightUV) {
         // return true iff relaxation is done.
-        float tempWeight = Float.POSITIVE_INFINITY;
-        int tempParent = -1;
-        
         int par = parent(u);
         if (lineOfSight(parent(u), v)) {
             float newWeight = distance(par) + physicalDistance(par, v);
-            return relaxTarget(v, par, newWeight, true);
+            return relaxTarget(v, par, newWeight);
         } else {
             float newWeight = distance(u) + physicalDistance(u, v);
-            return relaxTarget(v, u, newWeight, false);
+            return relaxTarget(v, u, newWeight);
         }
     }
 
-    private boolean relaxTarget(int v, int par, float newWeight, boolean EEE) {
+    private boolean relaxTarget(int v, int par, float newWeight) {
         if (newWeight < distance(v)) {
             if (!isTaut(v, par)) {
-                /*if (EEE && tryLocateTautParent(v, par)) {
-                    return true;
-                }*/
                 newWeight += BUFFER_VALUE;
+                par += Integer.MIN_VALUE;
             }
             setDistance(v, newWeight);
             setParent(v, par);
@@ -155,20 +136,6 @@ public class StrictThetaStarV1 extends BasicThetaStar {
     }
 
     
-    private boolean tryLocateTautParent(int current, int from) {
-        int u = parent(from);
-        while (!isTaut(current, u)) {
-            u = parent(u);
-        }
-        //if (isTaut(current, u)) {
-            if (lineOfSight(current, u)) {
-                setParent(current, u);
-                setDistance(current, distance(u) + physicalDistance(current, u));
-                return true;
-            }
-        //}
-        return false;
-    }
     /**
      * Checks whether the path v, u, p=parent(u) is taut.
      */
