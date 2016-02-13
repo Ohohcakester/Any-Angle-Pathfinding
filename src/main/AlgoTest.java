@@ -3,6 +3,7 @@ package main;
 import grid.GridGraph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
@@ -108,14 +109,19 @@ public class AlgoTest {
         if (writeToFile) io = new FileIO(path);
 
         boolean pathLengthOnly = false;
+        boolean runningTimeOnly = true;
 
-        TestFunctionData testFunction_slow = printAverageData(20,10);
+        TestFunctionData testFunction_slow = printAverageData(20,20);
         TestFunctionData testFunction_fast = printAverageData(50,30);
         if (pathLengthOnly) {
             //testFunction_slow = testPathLengthOnly;
             //testFunction_fast = testPathLengthOnly;
             testFunction_slow = analyseIndividualPaths;
             testFunction_fast = analyseIndividualPaths;
+        }
+        if (runningTimeOnly) {
+            testFunction_slow = testIndividualRunningTimes(10,500);
+            testFunction_fast = testIndividualRunningTimes(10,500);   
         }
         
         println("=== Testing " + name + " ===");
@@ -196,8 +202,8 @@ public class AlgoTest {
 //      println("HighDensity3 - 40% - 300x300");
 //      testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
         
-//      println("6%Density - 500x500");
-//      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+      println("6%Density - 500x500");
+      testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
 //      println("20%Density - 500x500");
 //      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
 //      println("40%Density - 500x500");
@@ -236,8 +242,8 @@ public class AlgoTest {
 //        testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
 //        println("corr2_maze512-2-7 - 512x512");
 //        testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
-        println("corr2_maze512-2-3 - 512x512");
-        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
+//        println("corr2_maze512-2-3 - 512x512");
+//        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
 //        println("corr2_maze512-2-9 - 512x512");
 //        testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
 
@@ -251,6 +257,7 @@ public class AlgoTest {
         if (writeToFile) {
             io.writeLine(line.toString());
             io.flush();
+            System.out.println(line);
         } else {
             System.out.println(line);
         }
@@ -368,7 +375,7 @@ public class AlgoTest {
     };
     
 
-    
+
     private static final TestFunctionData printAverageData(int sampleSize, int nTrials) {
         return (mazeName, gridGraph, problems, algoFunction) -> {
     
@@ -408,6 +415,58 @@ public class AlgoTest {
         };
     }
 
+    private static final TestFunctionData testIndividualRunningTimes(int sampleSize, int nTrials) {
+        return (mazeName, gridGraph, problems, algoFunction) -> {
+
+            ArrayList<TwoPoint> twoPointList = new ArrayList<>();
+            ArrayList<long[]> runningTimesList = new ArrayList<>();
+            
+            for (StartEndPointData problem : problems) {
+                TwoPoint tp = new TwoPoint(problem.start, problem.end);
+                long[] runningTimes = new long[sampleSize];
+                
+                for (int i=0;i<sampleSize;++i) {
+                    runningTimes[i] = testAlgorithmTimeOnce(gridGraph, algoFunction, tp, nTrials);
+                }
+
+                twoPointList.add(tp);
+                runningTimesList.add(runningTimes);
+                //println(tp + " " + Arrays.toString(runningTimes));
+            }
+            
+            println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
+            for (int i=0;i<twoPointList.size();++i) {
+                TwoPoint tp = twoPointList.get(i);
+                long[] runningTimes = runningTimesList.get(i);
+                
+                StringBuilder sb = new StringBuilder();
+                sb.append(tp.p1.x + "-" + tp.p1.y + "_" + tp.p2.x + "-" + tp.p2.y);
+                sb.append(" ");
+                sb.append(Arrays.toString(runningTimes));
+                
+                println(sb);
+            }
+            println();
+        };
+    }
+
+    private static long testAlgorithmTimeOnce(GridGraph gridGraph,
+            AlgoFunction algoFunction, TwoPoint tp, int nTrials) {
+    
+        int startX = tp.p1.x;
+        int startY = tp.p1.y;
+        int endX = tp.p2.x;
+        int endY = tp.p2.y;
+        
+        long start = System.nanoTime();
+        for (int i=0;i<nTrials;i++) {
+            AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
+        }
+        long end = System.nanoTime();
+
+        long timeTakenNanosecs = end - start;
+        return timeTakenNanosecs;
+    }
 
     private static TestResult testAlgorithmTime(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
@@ -423,11 +482,11 @@ public class AlgoTest {
         int endY = tp.p2.y;
         
         for (int s = 0; s < sampleSize; s++) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int i=0;i<nTrials;i++) {
                 AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
             }
-            long end = System.currentTimeMillis();
+            long end = System.nanoTime();
             //System.gc();
             
             data[s] = (int)(end-start);
@@ -613,11 +672,11 @@ public class AlgoTest {
         
         //sampleSize = 0;// UNCOMMENT TO TEST PATH LENGTH ONLY
         for (int s = 0; s < sampleSize; s++) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             for (int i=0;i<nTrials;i++) {
                 AlgoTest.testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
             }
-            long end = System.currentTimeMillis();
+            long end = System.nanoTime();
             System.gc();
             
             data[s] = (int)(end-start);

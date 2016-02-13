@@ -37,7 +37,7 @@ public class AnyAnglePathfinding {
     static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 0;
+        int choice = 1;
 
         switch(choice) {
             case 0:
