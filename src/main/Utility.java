@@ -60,5 +60,15 @@ public class Utility {
         int[][] path = algo.getPath();
         return path;
     }
-
+    
+    public static boolean isPathTaut(GridGraph gridGraph, int[][] path) {
+        int v1 = 0;
+        int v2 = 1;
+        for (int v3=2; v3<path.length; ++v3) {
+            if (!gridGraph.isTaut(path[v1][0], path[v1][1], path[v2][0], path[v2][1], path[v3][0], path[v3][1])) return false;
+            ++v1;
+            ++v2;
+        }
+        return true;
+    }
 }
