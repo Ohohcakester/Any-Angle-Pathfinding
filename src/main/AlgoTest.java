@@ -131,45 +131,45 @@ public class AlgoTest {
         println("=== Testing " + name + " ===");
         println("<< GAME MAPS >>");
 
-//        println("sc2_steppesofwar - 164x164");// - spacious");
-//        testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
-//        println("sc2_losttemple - 132x131");
-//        testOnMazeData("sc2_losttemple", algo, testFunction_slow);
-//        println("sc2_extinction - 164x164");// - less spacious");
-//        testOnMazeData("sc2_extinction", algo, testFunction_slow);
-//
-//        println("baldursgate_AR0070SR - 124x134");
-//        testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
-//        println("baldursgate_AR0705SR - 100x86");// - less spacious");
-//        testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
-//        println("baldursgate_AR0418SR - 84x75");// - spacious");
-//        testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
-//
-//        println("sc1_TheFrozenSea - 1024x1024");
-//        testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
-//        println("sc1_SpaceDebris - 512x512");
-//        testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
-//
-//        println("wc3_icecrown - 512x512");// (spacious)");
-//        testOnMazeData("wc3_icecrown", algo, testFunction_slow);
-//        println("wc3_dragonfire - 512x512");// (less spacious)");
-//        testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
-//
-//        println("sc1_Legacy - 512x512");
-//        testOnMazeData("sc1_Legacy", algo, testFunction_slow);
-//
-//        println("sc1_GreenerPastures - 768x512");
-//        testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
-//
-//        println("baldursgate_AR0603SR - 512x512");
-//        testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
-//
-//        println("wc3_mysticisles - 512x512");
-//        testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
-//
-//        println("wc3_petrifiedforest - 512x512");
-//        testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
-//
+        println("sc2_steppesofwar - 164x164");// - spacious");
+        testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
+        println("sc2_losttemple - 132x131");
+        testOnMazeData("sc2_losttemple", algo, testFunction_slow);
+        println("sc2_extinction - 164x164");// - less spacious");
+        testOnMazeData("sc2_extinction", algo, testFunction_slow);
+
+        println("baldursgate_AR0070SR - 124x134");
+        testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
+        println("baldursgate_AR0705SR - 100x86");// - less spacious");
+        testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
+        println("baldursgate_AR0418SR - 84x75");// - spacious");
+        testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
+
+        println("sc1_TheFrozenSea - 1024x1024");
+        testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
+        println("sc1_SpaceDebris - 512x512");
+        testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
+
+        println("wc3_icecrown - 512x512");// (spacious)");
+        testOnMazeData("wc3_icecrown", algo, testFunction_slow);
+        println("wc3_dragonfire - 512x512");// (less spacious)");
+        testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
+
+        println("sc1_Legacy - 512x512");
+        testOnMazeData("sc1_Legacy", algo, testFunction_slow);
+
+        println("sc1_GreenerPastures - 768x512");
+        testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
+
+        println("baldursgate_AR0603SR - 512x512");
+        testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
+
+        println("wc3_mysticisles - 512x512");
+        testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
+
+        println("wc3_petrifiedforest - 512x512");
+        testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
+
         println("<< GENERATED MAPS >>");
 //        
 //        println("Low Density - 6% - 50x50");
@@ -207,48 +207,48 @@ public class AlgoTest {
         
       println("6%Density - 500x500");
       testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
-//      println("20%Density - 500x500");
-//      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
-//      println("40%Density - 500x500");
-//      testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
-//
-//      println("6%Density2 - 500x500");
-//      testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
-//      println("20%Density2 - 500x500");
-//      testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
-//      println("40%Density2 - 500x500");
-//      testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
-//
-//      println("6%Density3 - 500x500");
-//      testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
-//      println("20%Density3 - 500x500");
-//      testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
-//      println("40%Density3 - 500x500");
-//      testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
+      println("20%Density - 500x500");
+      testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
+      println("40%Density - 500x500");
+      testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
 
-//
+      println("6%Density2 - 500x500");
+      testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
+      println("20%Density2 - 500x500");
+      testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
+      println("40%Density2 - 500x500");
+      testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
+
+      println("6%Density3 - 500x500");
+      testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
+      println("20%Density3 - 500x500");
+      testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
+      println("40%Density3 - 500x500");
+      testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
+
+
 //        println("obst10_random512-10-7 - 10% - 512x512");
-//        println("obst10_random512-10-7 - 512x512");
-//        testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
-////        println("obst40_random512-40-0 - 60% - 512x512");
-//        println("obst40_random512-40-0 - 512x512");
-//        testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
-////        println("obst40_random512-40-7 - 67% - 512x512");
-//        println("obst40_random512-40-7 - 512x512");
-//        testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
-////
+        println("obst10_random512-10-7 - 512x512");
+        testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
+//        println("obst40_random512-40-0 - 60% - 512x512");
+        println("obst40_random512-40-0 - 512x512");
+        testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
+//        println("obst40_random512-40-7 - 67% - 512x512");
+        println("obst40_random512-40-7 - 512x512");
+        testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
+//
         //println("corr2_maze512-2-5 - 33% - 512x512");
-//        println("corr2_maze512-2-5 - 512x512");
-//        testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
+        println("corr2_maze512-2-5 - 512x512");
+        testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
         
-//        println("corr2_maze512-2-1 - 512x512");
-//        testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
-//        println("corr2_maze512-2-7 - 512x512");
-//        testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
-//        println("corr2_maze512-2-3 - 512x512");
-//        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
-//        println("corr2_maze512-2-9 - 512x512");
-//        testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
+        println("corr2_maze512-2-1 - 512x512");
+        testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
+        println("corr2_maze512-2-7 - 512x512");
+        testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
+        println("corr2_maze512-2-3 - 512x512");
+        testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
+        println("corr2_maze512-2-9 - 512x512");
+        testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
 
         println("=== FINISHED TEST FOR " + name + " ===");
         println();
@@ -428,6 +428,9 @@ public class AlgoTest {
                 TwoPoint tp = new TwoPoint(problem.start, problem.end);
                 long[] runningTimes = new long[sampleSize];
                 
+                // Do two blank runs first to increase consistency of results.
+                testAlgorithmTimeOnce(gridGraph, algoFunction, tp, 2);
+                
                 for (int i=0;i<sampleSize;++i) {
                     runningTimes[i] = testAlgorithmTimeOnce(gridGraph, algoFunction, tp, nTrials);
                 }
@@ -436,7 +439,8 @@ public class AlgoTest {
                 runningTimesList.add(runningTimes);
                 //println(tp + " " + Arrays.toString(runningTimes));
             }
-            
+
+            println("Maze Name: " + mazeName);
             println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
             for (int i=0;i<twoPointList.size();++i) {
                 TwoPoint tp = twoPointList.get(i);
