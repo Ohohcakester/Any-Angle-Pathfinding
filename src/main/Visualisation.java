@@ -98,7 +98,7 @@ public class Visualisation {
     /**
      * Spawns the visualisation window for the algorithm.
      */
-    private static void setupMainFrame(DrawCanvas drawCanvas, ArrayList<GridObjects> gridObjectsList) {
+    protected static void setupMainFrame(DrawCanvas drawCanvas, ArrayList<GridObjects> gridObjectsList) {
         KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
         
         JFrame mainFrame = new JFrame();
