@@ -48,6 +48,31 @@ public class IndirectHeap<E extends Comparable<? super E>> implements Serializab
         }
     }
     
+    /**
+     * Increases the capacity of the indirect heap, so that it can hold at
+     * least the number of elements specified by capacity without having to
+     * reallocate the heap.
+     */
+    public void reserve(int capacity) {
+        keyList.ensureCapacity(capacity);
+        inList.ensureCapacity(capacity);
+        outList.ensureCapacity(capacity);
+    }
+    
+    /**
+     * Returns the handle to the value.
+     */
+    public int insert(E value) {
+        int index = keyList.size();
+        
+        keyList.add(value);
+        inList.add(index);
+        outList.add(index);
+        bubbleUp(index);
+        
+        return index;
+    }
+    
     public void setComparator(Comparator<E> comparator) {
         this.comparator = comparator;
     }
