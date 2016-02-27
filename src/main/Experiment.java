@@ -14,14 +14,14 @@ import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
+import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
-import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
-import algorithms.VisibilityGraphAlgorithm;
+import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.visibilitygraph.VisibilityGraph;
 import draw.GridLineSet;
 
@@ -30,9 +30,9 @@ public class Experiment {
     public static void run() {
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
-        findStrictThetaStarIssues();
+//        findStrictThetaStarIssues();
 //        findUpperBound();
-//        findRestrictedVisibilityGraphIssues();
+        findRestrictedVisibilityGraphIssues();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
@@ -377,18 +377,18 @@ public class Experiment {
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
 //        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        AlgoFunction rVGA = StrictVisibilityGraphAlgorithmV2::new;
-        AlgoFunction VGA = StrictVisibilityGraphAlgorithm::new;
+        AlgoFunction testAlgo = Anya::new;
+        AlgoFunction refAlgo = StrictVisibilityGraphAlgorithmV2::new;
         //AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
         
         //printSeed = false; // keep this commented out.
-        Random seedRand = new Random(-14);
+        Random seedRand = new Random(-2059321351);
         int initial = seedRand.nextInt();
         for (int i=0; i<50000000; i++) {
-            int sizeX = seedRand.nextInt(60) + 10;
-            int sizeY = seedRand.nextInt(30) + 10;
+            int sizeX = seedRand.nextInt(300) + 10;
+            int sizeY = seedRand.nextInt(300) + 10;
             int seed = i+initial;
-            int ratio = seedRand.nextInt(30) + 10;
+            int ratio = seedRand.nextInt(50) + 10;
             
             int max = (sizeX+1)*(sizeY+1);
             int p1 = seedRand.nextInt(max);
@@ -405,12 +405,12 @@ public class Experiment {
             double restPathLength = 0, normalPathLength = 0;
             try {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
-            AnyAnglePathfinding.algoFunction = rVGA;
+            AnyAnglePathfinding.algoFunction = testAlgo;
             int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
 
-            AnyAnglePathfinding.algoFunction = VGA;
+            AnyAnglePathfinding.algoFunction = refAlgo;
             path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             normalPathLength = Utility.computePathLength(gridGraph, path);
@@ -422,12 +422,12 @@ public class Experiment {
                 throw new UnsupportedOperationException("DISCREPANCY!!");
             }
             
-            if (restPathLength > normalPathLength + 0.000001f) {
+            if (Math.abs(restPathLength - normalPathLength) > 0.000001f) {
                 System.out.println("============");
                 System.out.println("Discrepancy Discovered!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
-                System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
+                System.out.println("Actual: " + restPathLength + " , Expected: " + normalPathLength);
                 System.out.println(restPathLength / normalPathLength);
                 System.out.println("============");
                 throw new UnsupportedOperationException("DISCREPANCY!!");
@@ -435,7 +435,7 @@ public class Experiment {
                 if (i%10000 == 9999) {
                     System.out.println("Count: " + (i+1));
                     System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
-                    System.out.println("Restricted: " + restPathLength + " , Normal: " + normalPathLength);
+                    System.out.println("Actual: " + restPathLength + " , Expected: " + normalPathLength);
                 }
             }
         }
