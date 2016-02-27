@@ -55,7 +55,7 @@ public class GridObjects {
                 Fraction px = new Fraction (path[5]);
                 Fraction py = new Fraction (path[6]);
                 gridLineSet.addLine(px, py, xL, y, or(Color.CYAN,color));
-                gridLineSet.addLine(px, py, xMid, y, or(Color.CYAN,color));
+                //gridLineSet.addLine(px, py, xMid, y, or(Color.CYAN,color));
                 gridLineSet.addLine(px, py, xR, y, or(Color.CYAN,color));
                 gridLineSet.addLine(xL, y, xR, y, or(LINE_COLOR,color));
                 gridPointSet.addPoint(path[5], path[6], or(Color.BLUE,color));
