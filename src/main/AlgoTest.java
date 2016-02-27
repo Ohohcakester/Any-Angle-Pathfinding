@@ -35,7 +35,13 @@ public class AlgoTest {
     private static FileIO io;
     private static boolean writeToFile = true;
 
+    private static boolean pleaseTurnOffAssertions() {
+        System.out.println("Please turn off assertions during tests (Run -> Run Configurations -> Arguments -> remove -ea)");
+        return false;
+    }
+    
     public static void run() {
+        assert pleaseTurnOffAssertions();
         //runTestAllAlgos();
        
         AlgoFunction aStar = AStar::new;
