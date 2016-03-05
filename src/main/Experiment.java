@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-import main.AnyAnglePathfinding.AlgoFunction;
 import main.graphgeneration.DefaultGenerator;
+import main.utility.Utility;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
@@ -62,6 +62,7 @@ public class Experiment {
      * @param gridGraph the grid to test.
      */
     private static void generateRandomTestDataAndPrint(GridGraph gridGraph) {
+        AlgoFunction algo = AnyAnglePathfinding.setDefaultAlgoFunction();
         ArrayList<Point> points = ReachableNodes.computeReachable(gridGraph, 5, 5);
     
         LinkedList<Integer> startX = new LinkedList<>();
@@ -81,7 +82,7 @@ public class Experiment {
     
             Point s = points.get(first);
             Point f = points.get(last);
-            int[][] path = Utility.generatePath(gridGraph, s.x, s.y, f.x, f.y);
+            int[][] path = Utility.generatePath(algo, gridGraph, s.x, s.y, f.x, f.y);
             if (path.length >= 2) {
                 double len = Utility.computePathLength(gridGraph, path);
                 startX.offer(s.x);
@@ -101,11 +102,10 @@ public class Experiment {
 
     /**
      * Returns true iff there is a path from the start to the end. Uses the current algorithm to check.<br>
-     * Note: the algorithm used is the one specified in the algoFunction.
      * Use setDefaultAlgoFunction to choose the algorithm.
      */
-    private static boolean hasSolution(GridGraph gridGraph, StartGoalPoints p) {
-        int[][] path = Utility.generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
+    private static boolean hasSolution(AlgoFunction algo, GridGraph gridGraph, StartGoalPoints p) {
+        int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
         return path.length > 1;
     }
 
@@ -148,8 +148,8 @@ public class Experiment {
     private static void testAgainstReferenceAlgorithm() {
         AnyAnglePathfinding.setDefaultAlgoFunction();
         
-        AnyAnglePathfinding.AlgoFunction currentAlgo = AnyAnglePathfinding.algoFunction;
-        AnyAnglePathfinding.AlgoFunction referenceAlgo = AStar::new;
+        AlgoFunction currentAlgo = AnyAnglePathfinding.setDefaultAlgoFunction();
+        AlgoFunction referenceAlgo = AStar::new;
     
         Random seedRand = new Random(3);
         int initial = seedRand.nextInt();
@@ -172,13 +172,11 @@ public class Experiment {
             int ey = p2/(sizeX+1);
     
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnlyOld(seed, sizeX, sizeY, ratio);
-            AnyAnglePathfinding.algoFunction = referenceAlgo;
-            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            int[][] path = Utility.generatePath(referenceAlgo, gridGraph, sx, sy, ex, ey);
             double referencePathLength = Utility.computePathLength(gridGraph, path);
             boolean referenceValid = (referencePathLength > 0.00001f);
     
-            AnyAnglePathfinding.algoFunction = currentAlgo;
-            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.generatePath(currentAlgo, gridGraph, sx, sy, ex, ey);
             double algoPathLength = Utility.computePathLength(gridGraph, path);
             boolean algoValid = (referencePathLength > 0.00001f);
             
@@ -281,12 +279,10 @@ public class Experiment {
             //if (ex > 22) break;
             
             
-            AnyAnglePathfinding.algoFunction = testAlgo;
-            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            int[][] path = Utility.generatePath(testAlgo, gridGraph, sx, sy, ex, ey);
             double testPathLength = Utility.computePathLength(gridGraph, path);
 
-            AnyAnglePathfinding.algoFunction = optimalAlgo;
-            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.generatePath(optimalAlgo, gridGraph, sx, sy, ex, ey);
             double optimalPathLength = Utility.computePathLength(gridGraph, path);
             
             if (testPathLength > optimalPathLength*upperBound) {
@@ -345,12 +341,10 @@ public class Experiment {
             int ey = p2/(sizeX+1);
 
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
-            AnyAnglePathfinding.algoFunction = basicThetaStar;
-            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            int[][] path = Utility.generatePath(basicThetaStar, gridGraph, sx, sy, ex, ey);
             double basicPathLength = Utility.computePathLength(gridGraph, path);
 
-            AnyAnglePathfinding.algoFunction = strictThetaStar;
-            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.generatePath(strictThetaStar, gridGraph, sx, sy, ex, ey);
             double strictPathLength = Utility.computePathLength(gridGraph, path);
             
             if (basicPathLength < strictPathLength-0.01f) {
@@ -405,13 +399,11 @@ public class Experiment {
             double restPathLength = 0, normalPathLength = 0;
             try {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
-            AnyAnglePathfinding.algoFunction = testAlgo;
-            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            int[][] path = Utility.generatePath(testAlgo, gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
 
-            AnyAnglePathfinding.algoFunction = refAlgo;
-            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.generatePath(refAlgo, gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             normalPathLength = Utility.computePathLength(gridGraph, path);
             }catch (Exception e) {
@@ -442,15 +434,13 @@ public class Experiment {
     }
     
     private static boolean testTautness(GridGraph gridGraph, AlgoFunction algo, int sx, int sy, int ex, int ey) {
-        AnyAnglePathfinding.algoFunction = algo;
-        int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+        int[][] path = Utility.generatePath(algo, gridGraph, sx, sy, ex, ey);
         path = Utility.removeDuplicatesInPath(path);
         return Utility.isPathTaut(gridGraph, path);
     }
     
     private static boolean hasSolution(GridGraph gridGraph, AlgoFunction algo, int sx, int sy, int ex, int ey) {
-        AnyAnglePathfinding.algoFunction = algo;
-        int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+        int[][] path = Utility.generatePath(algo, gridGraph, sx, sy, ex, ey);
         return path.length > 1;
     }
     
