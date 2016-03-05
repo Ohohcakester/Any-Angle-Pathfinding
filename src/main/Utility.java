@@ -5,7 +5,6 @@ import grid.GridGraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import uiandio.GraphImporter;
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.testgen.StartEndPointData;
 import algorithms.PathFindingAlgorithm;
