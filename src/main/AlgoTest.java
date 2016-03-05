@@ -489,10 +489,10 @@ public class AlgoTest {
     private static TestResult testAlgorithmTime(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
     
-        int[] data = new int[sampleSize];
+        double[] data = new double[sampleSize];
         
-        int sum = 0;
-        long sumSquare = 0;
+        double sum = 0;
+        double sumSquare = 0;
 
         int startX = tp.p1.x;
         int startY = tp.p1.y;
@@ -507,7 +507,7 @@ public class AlgoTest {
             long end = System.nanoTime();
             //System.gc();
             
-            data[s] = (int)(end-start);
+            data[s] = (double)(end-start)/1000000.;
             
             sum += data[s];
             sumSquare += data[s]*data[s];
