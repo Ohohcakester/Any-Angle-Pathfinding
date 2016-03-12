@@ -14,6 +14,14 @@ public class JumpPointSearch extends AStarStaticMemory {
     public static JumpPointSearch postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
         JumpPointSearch algo = new JumpPointSearch(graph, sx, sy, ex, ey);
         algo.postSmoothingOn = true;
+        algo.repeatedPostSmooth = false;
+        return algo;
+    }
+    
+    public static JumpPointSearch repeatedPostSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        JumpPointSearch algo = new JumpPointSearch(graph, sx, sy, ex, ey);
+        algo.postSmoothingOn = true;
+        algo.repeatedPostSmooth = true;
         return algo;
     }
 

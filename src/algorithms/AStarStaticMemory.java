@@ -9,7 +9,7 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 public class AStarStaticMemory extends PathFindingAlgorithm {
 
     protected boolean postSmoothingOn = false;
-    protected boolean repeatedPostSmooth = true;
+    protected boolean repeatedPostSmooth = false;
     protected float heuristicWeight = 1f;
 
     protected ReusableIndirectHeap pq; 
@@ -24,6 +24,14 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
     public static AStarStaticMemory postSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
         AStarStaticMemory aStar = new AStarStaticMemory(graph, sx, sy, ex, ey);
         aStar.postSmoothingOn = true;
+        aStar.repeatedPostSmooth = false;
+        return aStar;
+    }
+
+    public static AStarStaticMemory repeatedPostSmooth(GridGraph graph, int sx, int sy, int ex, int ey) {
+        AStarStaticMemory aStar = new AStarStaticMemory(graph, sx, sy, ex, ey);
+        aStar.postSmoothingOn = true;
+        aStar.repeatedPostSmooth = true;
         return aStar;
     }
 
