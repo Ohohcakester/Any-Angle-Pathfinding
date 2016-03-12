@@ -67,7 +67,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 15; // Adjust this to choose a maze.
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -168,7 +168,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static AlgoFunction setDefaultAlgoFunction() {
-        int choice = 10; // adjust this to choose an algorithm
+        int choice = 8; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
