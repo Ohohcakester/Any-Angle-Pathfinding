@@ -5,7 +5,6 @@ import grid.StartGoalPoints;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,7 +17,7 @@ import draw.GridObjects;
 public class TextOutputVisualisation {
 
     public static void run() {
-        loadFromFile("currmap.txt");
+        loadFromFile("anyacont2b.txt");
     }
 
     private static void loadFromFile(String mazeFileName) {
@@ -56,11 +55,11 @@ public class TextOutputVisualisation {
         }
 
         ArrayList<GridObjects> lineSetList = new ArrayList<>();
-        for (int i=1;i<args.length;++i) {
+        for (int i=0;i<args.length;++i) {
             List<SnapshotItem> snapshot = new ArrayList<>();
-            for (int j=0;j<i;++j) {
+            for (int j=0;j<=i;++j) {
                 Color col = Color.red;
-                if (j == i-1) col = Color.green;
+                if (j == i) col = Color.green;
                 
                 SnapshotItem e = SnapshotItem.generate(paths[j], col);
                 snapshot.add(e);
