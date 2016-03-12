@@ -175,6 +175,10 @@ public class FastVariableSizeIndirectHeap {
     public float getMinValue() {
         return keyList[0];
     }
+    
+    public int getMinIndex() {
+        return outList[0];
+    }
 
     /**
      * Runtime: O(lgn)
@@ -187,7 +191,7 @@ public class FastVariableSizeIndirectHeap {
             int s = outList[0];
             inList[s] = -1;
             heapSize--;
-            return outList[0];
+            return s;
         }
         // nodeList.size() > 1
         

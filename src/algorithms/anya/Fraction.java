@@ -121,14 +121,7 @@ public class Fraction implements Comparable<Fraction> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        
-        Fraction o = (Fraction) obj;
+        Fraction o = (Fraction)obj;
         return (n*o.d == o.n*d);
     }
 
