@@ -116,9 +116,9 @@ public class AnyAnglePathfinding {
             case 12 :
                 return GraphImporter.importGraphFromFile("anyaCont2.txt", 1, 6, 9, 1); // difficult case for anya
             case 13 :
-                return DefaultGenerator.generateSeeded(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
+                return DefaultGenerator.generateSeededOld(-1155797147, 47, 32, 38, 46, 30, 20, 1); // issue for Strict Theta*
             case 14 :
-                return DefaultGenerator.generateSeeded(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
+                return DefaultGenerator.generateSeededOld(-1155849806, 11, 13, 40, 7, 12, 9, 0); // Strict Theta* longer than Basic Theta*
             case 15 :
                 return GraphImporter.loadStoredMaze("sc2_losttemple", "66-83_117-53");
             case 16 :
