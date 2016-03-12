@@ -145,7 +145,6 @@ public class Anya extends PathFindingAlgorithm {
         if (handle >= states.length) {
             states = Arrays.copyOf(states, states.length*2);
         }
-        successor.handle = handle;
         states[handle] = successor;
         existingStates.put(successor, handle);
 
@@ -904,7 +903,6 @@ class AnyaState {
     public float fValue;
     public float gValue;
     public AnyaState parent;
-    public int handle;
     public boolean visited;
 
     private AnyaState(Fraction xL, Fraction xR, int y, Point basePoint, float gValue, AnyaState parent) {
