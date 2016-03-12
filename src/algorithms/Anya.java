@@ -131,7 +131,7 @@ public class Anya extends PathFindingAlgorithm {
         if (existingHandle == null) {
             addToOpen(successor);
         } else {
-            relaxExisting(source, existingHandle);
+            relaxExisting(source, successor, existingHandle);
         }
         //maybeSaveSearchSnapshot();
     }
@@ -151,7 +151,7 @@ public class Anya extends PathFindingAlgorithm {
         //System.out.println("Generate " + successor + " -> " + handle);
     }
     
-    private void relaxExisting(AnyaState source, int existingHandle) {
+    private void relaxExisting(AnyaState source, AnyaState successorCopy, int existingHandle) {
         AnyaState successor = states[existingHandle];
         if (successor.visited) return;
         
@@ -162,7 +162,7 @@ public class Anya extends PathFindingAlgorithm {
         if (newgValue < successor.gValue) {
             successor.gValue = newgValue;
             successor.fValue = newgValue + successor.hValue;
-            successor.parent = source;
+            successor.parent = successorCopy.parent;
             pq.decreaseKey(existingHandle, successor.fValue);
             
             //System.out.println("Relax " + successor + " : " + successor.fValue);
