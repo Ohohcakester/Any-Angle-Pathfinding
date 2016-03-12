@@ -18,6 +18,7 @@ import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
+import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
@@ -56,6 +57,7 @@ public class AlgoTest {
         AlgoFunction vgaReuse = VisibilityGraphAlgorithm::graphReuse;
         AlgoFunction vga = VisibilityGraphAlgorithm::new;
         AlgoFunction accAStar = AcceleratedAStar::new;
+        AlgoFunction anya = Anya::new;
 
         //AlgoFunction rVGA = (a,b,c,d,e) -> new RestrictedVisibilityGraphAlgorithm(a,b,c,d,e);
         AlgoFunction vgReuse = (a,b,c,d,e) -> VisibilityGraphAlgorithm.graphReuse(a,b,c,d,e);
@@ -97,6 +99,7 @@ public class AlgoTest {
 //        testSequence(vgaReuse, "VisibilityGraph Reuse");
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
+        testSequence(anya, "Anya");
 
         testSequence(recursiveThetaStar, "RecursiveThetaStar");
         testSequence(strictThetaStar, "StrictThetaStar");
