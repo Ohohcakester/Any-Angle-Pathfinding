@@ -120,8 +120,8 @@ public class AlgoTest {
             testFunction_fast = analyseIndividualPaths;
         }
         if (runningTimeOnly) {
-            testFunction_slow = testIndividualRunningTimes(10,500);
-            testFunction_fast = testIndividualRunningTimes(10,500);   
+            testFunction_slow = testIndividualRunningTimes(3,150);
+            testFunction_fast = testIndividualRunningTimes(3,150);   
         }
         
         println("=== Testing " + name + " ===");
@@ -445,9 +445,10 @@ public class AlgoTest {
                 
                 StringBuilder sb = new StringBuilder();
                 sb.append(tp.p1.x + "-" + tp.p1.y + "_" + tp.p2.x + "-" + tp.p2.y);
-                sb.append(" ");
-                sb.append(Arrays.toString(runningTimes));
-                
+                for (long runningTime : runningTimes) {
+                    sb.append(" ");
+                    sb.append(runningTime);
+                }
                 println(sb);
             }
             println();
@@ -469,6 +470,7 @@ public class AlgoTest {
         long end = System.nanoTime();
 
         long timeTakenNanosecs = end - start;
+        //System.out.println(timeTakenNanosecs);
         return timeTakenNanosecs;
     }
 
