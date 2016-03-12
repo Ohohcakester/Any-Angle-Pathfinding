@@ -832,7 +832,7 @@ public class Anya extends PathFindingAlgorithm {
         return path;
     }
 
-    @Override
+    //@Override
     protected float getPathLength() {
         if (goalState == null) return -1; // Fail
 
