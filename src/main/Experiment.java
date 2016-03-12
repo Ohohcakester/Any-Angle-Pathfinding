@@ -32,7 +32,7 @@ public class Experiment {
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
 //        findUpperBound();
-        findRestrictedVisibilityGraphIssues();
+        testAlgorithmOptimality();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
@@ -367,10 +367,10 @@ public class Experiment {
         }
     }
     
-    private static void findRestrictedVisibilityGraphIssues() {
+private static void testAlgorithmOptimality() {
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-//        AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         AlgoFunction testAlgo = Anya::new;
         AlgoFunction refAlgo = StrictVisibilityGraphAlgorithmV2::new;
         //AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);

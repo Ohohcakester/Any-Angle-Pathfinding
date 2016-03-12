@@ -553,50 +553,47 @@ public class AlgoTest {
      */
     @Deprecated
     private static void runTestAllAlgos() {
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
-//        runTests("AStar_TI");
-//        
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
-//        runTests("BFS");
-//        
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
-//        runTests("BFS-PS");
-//        
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
-//        runTests("AStar-PS_TI");
-//        
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
-//        runTests("Dijkstra");
-//        
-//        // Warning: Anya is unstable
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
-//        runTests("Anya");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);  
-//        runTests("BasicThetaStar_TI");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
-//        runTests("BasicThetaStar-PS_TI");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
-//        runTests("VisibilityGraph_REUSE");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-//        runTests("RestrictedVisibilityGraph");
+        /*AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
+        runTests("AStar_TI");
         
-        // Warning: VisibilityGraph is slow
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-//        runTests("VisibilityGraph");
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+        runTests("BFS");
         
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
-//        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
+        runTests("BFS-PS");
+        
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.postSmooth(gridGraph, sx, sy, ex, ey);
+        runTests("AStar-PS_TI");
+        
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> AStar.dijkstra(gridGraph, sx, sy, ex, ey);
+        runTests("Dijkstra");
+        
+        // Warning: Anya is unstable
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new Anya(gridGraph, sx, sy, ex, ey);
+        runTests("Anya");
 
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
-//        runTests("StrictThetaStar_5b");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
-//        runTests("StrictThetaStar_NoHeuristic_5");
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);  
+        runTests("BasicThetaStar_TI");
+
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
+        runTests("BasicThetaStar-PS_TI");
         
+        Warning: VisibilityGraph is slow
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
+        runTests("VisibilityGraph");
+        
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
+        runTests("VisibilityGraph_REUSE");
+        
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
+        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
+
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+        runTests("StrictThetaStar_5b");
+
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+        runTests("StrictThetaStar_NoHeuristic_5");
+        */
     }
 
     /**
