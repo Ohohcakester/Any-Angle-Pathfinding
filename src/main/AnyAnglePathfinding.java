@@ -55,6 +55,9 @@ public class AnyAnglePathfinding {
             case 4:
                 GridGraphVisualiser.run();
                 break;
+            case 5:
+                TextOutputVisualisation.run();
+                break;
         }
     }
     

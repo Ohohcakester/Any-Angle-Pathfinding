@@ -73,22 +73,6 @@ public class Visualisation {
     }
 
     /**
-     * Spawns the visualisation window for the algorithm.
-     */
-    private static void setupMainFrame(DrawCanvas drawCanvas, ArrayList<GridObjects> gridObjectsList) {
-        KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
-        
-        JFrame mainFrame = new JFrame();
-        mainFrame.add(drawCanvas);
-        mainFrame.addKeyListener(keyToggler);
-        mainFrame.addWindowListener(new CloseOnExitWindowListener());
-        mainFrame.setResizable(false);
-        mainFrame.pack();
-        mainFrame.setLocationRelativeTo(null);
-        mainFrame.setVisible(true);
-    }
-
-    /**
      * Records a trace of the current algorithm into a LinkedList of GridObjects.
      */
     private static ArrayList<GridObjects> recordAlgorithmOperation (
@@ -108,5 +92,21 @@ public class Visualisation {
             gridObjectsList.add(GridObjects.create(snapshot));
         }
         return gridObjectsList;
+    }
+
+    /**
+     * Spawns the visualisation window for the algorithm.
+     */
+    protected static void setupMainFrame(DrawCanvas drawCanvas, ArrayList<GridObjects> gridObjectsList) {
+        KeyToggler keyToggler = new KeyToggler(drawCanvas, gridObjectsList);
+        
+        JFrame mainFrame = new JFrame();
+        mainFrame.add(drawCanvas);
+        mainFrame.addKeyListener(keyToggler);
+        mainFrame.addWindowListener(new CloseOnExitWindowListener());
+        mainFrame.setResizable(false);
+        mainFrame.pack();
+        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setVisible(true);
     }
 }
