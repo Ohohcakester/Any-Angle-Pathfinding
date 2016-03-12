@@ -155,6 +155,8 @@ public class AnyAnglePathfinding {
                 return GraphImporter.importGraphFromFile("mazehighbufferbad.txt", 4, 8, 7, 1); // Strict Theta* with high buffer finds a much longer path.
             case 32:
                 return GraphImporter.loadStoredMaze("corr2_maze512-2-1", "219-187_186-334");
+            case 33 :
+                return GraphImporter.importGraphFromFile("anyaCont2b.txt", 9, 9, 9, 1); // anya gives incorrect path
             default :
                 return null;
         }
