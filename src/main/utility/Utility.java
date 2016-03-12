@@ -1,11 +1,11 @@
-package main;
+package main.utility;
 
 import grid.GridGraph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import main.AnyAnglePathfinding.AlgoFunction;
+import main.AlgoFunction;
 import main.testgen.StartEndPointData;
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
@@ -46,12 +46,7 @@ public class Utility {
         return fixedProblems;
     }
 
-    static int[][] generatePath(GridGraph gridGraph, int sx, int sy,
-            int ex, int ey) {
-        return generatePath(AnyAnglePathfinding.algoFunction, gridGraph, sx, sy, ex, ey);
-    }
-
-    static int[][] removeDuplicatesInPath(int[][] path) {
+    public static int[][] removeDuplicatesInPath(int[][] path) {
         if (path.length <= 2) return path;
         
         int[][] newPath = new int[path.length][];
@@ -78,7 +73,7 @@ public class Utility {
      * Generates a path between two points on a grid.
      * @return an array of int[2] indicating the coordinates of the path.
      */
-    static int[][] generatePath(AlgoFunction algoFunction, GridGraph gridGraph,
+    public static int[][] generatePath(AlgoFunction algoFunction, GridGraph gridGraph,
             int sx, int sy, int ex, int ey) {
         PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         algo.computePath();

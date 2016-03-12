@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import main.utility.Utility;
 import uiandio.CloseOnExitWindowListener;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.SnapshotItem;
@@ -29,11 +30,11 @@ public class Visualisation {
      * Conducts a trace of the current algorithm
      */
     private static void traceAlgorithm() {
-        AnyAnglePathfinding.setDefaultAlgoFunction();           // choose an algorithm (go into this method to choose)
+        AlgoFunction algo = AnyAnglePathfinding.setDefaultAlgoFunction();           // choose an algorithm (go into this method to choose)
         GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();   // choose a grid (go into this method to choose)
         
         // Call this to record and display the algorithm in operation.
-        displayAlgorithmOperation(gridAndGoals.gridGraph, gridAndGoals.startGoalPoints);
+        displayAlgorithmOperation(algo, gridAndGoals.gridGraph, gridAndGoals.startGoalPoints);
     }
     
     /**
@@ -42,11 +43,11 @@ public class Visualisation {
      * Use setDefaultAlgoFunction to choose the algorithm.
      * @param gridGraph the grid to operate on.
      */
-    private static void displayAlgorithmOperation(GridGraph gridGraph, StartGoalPoints p) {
+    private static void displayAlgorithmOperation(AlgoFunction algo, GridGraph gridGraph, StartGoalPoints p) {
         GridLineSet gridLineSet = new GridLineSet();
         
         try {
-            int[][] path = Utility.generatePath(gridGraph, p.sx, p.sy, p.ex, p.ey);
+            int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
             
             for (int i=0; i<path.length-1; i++) {
                 gridLineSet.addLine(path[i][0], path[i][1],
@@ -64,7 +65,7 @@ public class Visualisation {
             e.printStackTrace();
         }
         
-        ArrayList<GridObjects> lineSetList = recordAlgorithmOperation(gridGraph, p.sx, p.sy, p.ex, p.ey);
+        ArrayList<GridObjects> lineSetList = recordAlgorithmOperation(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
         lineSetList.add(new GridObjects(gridLineSet, null));
         DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
         drawCanvas.setStartAndEnd(p.sx, p.sy, p.ex, p.ey);
@@ -75,9 +76,9 @@ public class Visualisation {
     /**
      * Records a trace of the current algorithm into a LinkedList of GridObjects.
      */
-    private static ArrayList<GridObjects> recordAlgorithmOperation (
+    private static ArrayList<GridObjects> recordAlgorithmOperation (AlgoFunction algoFunction, 
             GridGraph gridGraph, int sx, int sy, int ex, int ey) {
-        PathFindingAlgorithm algo = AnyAnglePathfinding.algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
         algo.startRecording();
         try {
             algo.computePath();

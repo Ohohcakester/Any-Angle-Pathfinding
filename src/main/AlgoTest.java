@@ -4,13 +4,13 @@ import grid.GridGraph;
 
 import java.util.ArrayList;
 
-import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
 import main.testgen.PathLengthClass;
 import main.testgen.StandardMazes;
 import main.testgen.StartEndPointData;
 import main.testgen.TestDataGenerator;
 import main.testgen.TestDataLibrary;
+import main.utility.Utility;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
@@ -546,12 +546,14 @@ public class AlgoTest {
      * Run tests for all the algorithms, and outputs them to the file.<br>
      * Please look into this method for more information.<br>
      * Comment out the algorithms you don't want to test.
+     * EDIT: No longer used. Replaced by run() as the main testing method.
      */
+    @Deprecated
     private static void runTestAllAlgos() {
-        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
+        /*AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new AStar(gridGraph, sx, sy, ex, ey);
         runTests("AStar_TI");
         
-        /*AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new BreadthFirstSearch(gridGraph, sx, sy, ex, ey);
         runTests("BFS");
         
         AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BreadthFirstSearch.postSmooth(gridGraph, sx, sy, ex, ey);
@@ -573,7 +575,7 @@ public class AlgoTest {
         AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> BasicThetaStar.postSmooth(gridGraph, sx, sy, ex, ey);  
         runTests("BasicThetaStar-PS_TI");
         
-        // Warning: VisibilityGraph is slow
+        Warning: VisibilityGraph is slow
         AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
         runTests("VisibilityGraph");
         
@@ -581,25 +583,27 @@ public class AlgoTest {
         runTests("VisibilityGraph_REUSE");
         
         AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseSlowDijkstra(gridGraph, sx, sy, ex, ey);
-        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");*/
+        runTests("VisibilityGraph_REUSE_SLOWDIJKSTRA");
 
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
-//        runTests("StrictThetaStar_5b");
-//
-//        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
-//        runTests("StrictThetaStar_NoHeuristic_5");
-        
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+        runTests("StrictThetaStar_5b");
+
+        AnyAnglePathfinding.algoFunction = (gridGraph, sx, sy, ex, ey) -> StrictThetaStar.noHeuristic(gridGraph, sx, sy, ex, ey);
+        runTests("StrictThetaStar_NoHeuristic_5");
+        */
     }
 
     /**
      * Runs tests for the specified algorithm. Uses the runTest method, which
      * will output the test results to the file.
+     * EDIT: No longer used. Replaced by run() as the main testing method.
      * @param algoName The name of the algorithm to be used in the file.
      */
-    private static void runTests(String algoName) {
+    @Deprecated
+    private static void runTests(AlgoFunction algo, String algoName) {
         //runTest(algoName, 4, PathLengthClass.LONGEST);
-        for (int i=1; i<=8; i++) {
-            AlgoTest.runTest(algoName, i, PathLengthClass.ALL);
+        for (int i=1; i<=6; i++) {
+            AlgoTest.runTest(algo, algoName, i, PathLengthClass.ALL);
         }
     }
 
@@ -609,8 +613,10 @@ public class AlgoTest {
      * @param index The index of the test to use (which maze)
      * @param pathLengthClass The category of path lengths to use in the test.
      * Refer to TestDataLibrary for more information.
+     * EDIT: No longer used. Replaced by run() as the main testing method.
      */
-    private static void runTest(String algoName, int index, PathLengthClass pathLengthClass) {
+    @Deprecated
+    private static void runTest(AlgoFunction algo, String algoName, int index, PathLengthClass pathLengthClass) {
         String filename = algoName + "_Maze" + index + "_" + pathLengthClass.name();
         System.out.println("RUNNING TEST: " +  filename);
         
@@ -622,13 +628,13 @@ public class AlgoTest {
         FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA + filename + ".txt");
         fileIO.writeRow("Algorithm", "Maze", "ComputedPath", "OptimalPath", "PathLengthRatio", "Time", "TimeSD", "Start", "End", "Trails");
 
-        TestResult tempRes = AlgoTest.testAlgorithm(gridGraph, 0, 0, 1, 0, 1, 1);
+        TestResult tempRes = AlgoTest.testAlgorithm(algo, gridGraph, 0, 0, 1, 0, 1, 1);
         System.out.println("Preprocess time: " + tempRes.time);
         
         while (library.hasNextData()) {
             StartEndPointData data = library.getNextData();
             
-            TestResult testResult = AlgoTest.testAlgorithm(gridGraph, data.start.x,
+            TestResult testResult = AlgoTest.testAlgorithm(algo, gridGraph, data.start.x,
                     data.start.y, data.end.x, data.end.y, 10, library.getNTrials());
             
             boolean valid = (testResult.pathLength > 0.00001f);
@@ -676,7 +682,7 @@ public class AlgoTest {
      * record the running time of we only ran the algorithm once per record.
      * @return
      */
-    private static TestResult testAlgorithm(GridGraph gridGraph,
+    private static TestResult testAlgorithm(AlgoFunction algoFunction, GridGraph gridGraph,
             int startX, int startY, int endX, int endY, int sampleSize, int nTrials) {
     
         int[] data = new int[sampleSize];
@@ -688,7 +694,7 @@ public class AlgoTest {
         for (int s = 0; s < sampleSize; s++) {
             long start = System.nanoTime();
             for (int i=0;i<nTrials;i++) {
-                AlgoTest.testAlgorithmSpeed(gridGraph, startX, startY, endX, endY);
+                AlgoTest.testAlgorithmSpeed(algoFunction, gridGraph, startX, startY, endX, endY);
             }
             long end = System.nanoTime();
             System.gc();
@@ -704,7 +710,7 @@ public class AlgoTest {
         double sampleVariance = (secondMomentTimesN - sampleSize*(mean*mean)) / (sampleSize - 1);
         double standardDeviation = Math.sqrt(sampleVariance);
     
-        int[][] path = Utility.generatePath(gridGraph, startX, startY, endX, endY);
+        int[][] path = Utility.generatePath(algoFunction, gridGraph, startX, startY, endX, endY);
         double pathLength = Utility.computePathLength(gridGraph, path);
         boolean isTaut = Utility.isPathTaut(gridGraph, path);
         
@@ -716,12 +722,6 @@ public class AlgoTest {
      * Tells the algorithm to compute a path. returns nothing.
      * Used to test how long the algorithm takes to complete the computation.
      */
-    private static void testAlgorithmSpeed(GridGraph gridGraph, int sx, int sy,
-            int ex, int ey) {
-        PathFindingAlgorithm algo = AnyAnglePathfinding.algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
-        algo.computePath();
-    }
-
     private static void testAlgorithmSpeed(AlgoFunction algoFunction, GridGraph gridGraph, int sx, int sy,
             int ex, int ey) {
         PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);

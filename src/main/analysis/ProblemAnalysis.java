@@ -1,7 +1,7 @@
 package main.analysis;
 
 import grid.GridGraph;
-import main.Utility;
+import main.utility.Utility;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import algorithms.visibilitygraph.VisibilityGraph;

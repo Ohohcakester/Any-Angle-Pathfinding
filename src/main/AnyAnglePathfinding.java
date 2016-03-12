@@ -1,6 +1,5 @@
 package main;
 import grid.GridAndGoals;
-import grid.GridGraph;
 import main.graphgeneration.DefaultGenerator;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
@@ -14,11 +13,10 @@ import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
-import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
+import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -34,10 +32,10 @@ import algorithms.visibilitygraph.BFSVisibilityGraph;
 public class AnyAnglePathfinding {
     public static final String PATH_TESTDATA = "testdata/";
     public static final String PATH_MAZEDATA = "mazedata/";
-    static AlgoFunction algoFunction; // The algorithm is stored in this function.
+    private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) { // uncomment the one you need to use.
-        int choice = 1;
+        int choice = 0;
 
         switch(choice) {
             case 0:
@@ -165,7 +163,7 @@ public class AnyAnglePathfinding {
     /**
      * Choose an algorithm.
      */
-    static void setDefaultAlgoFunction() {
+    static AlgoFunction setDefaultAlgoFunction() {
         int choice = 10; // adjust this to choose an algorithm
         
         switch (choice) {
@@ -253,9 +251,7 @@ public class AnyAnglePathfinding {
                 algoFunction = RecursiveThetaStar::new;
                 break;
         }
-    }
-
-    interface AlgoFunction {
-        public abstract PathFindingAlgorithm getAlgo(GridGraph gridGraph, int sx, int sy, int ex, int ey);
+        
+        return algoFunction;
     }
 }
