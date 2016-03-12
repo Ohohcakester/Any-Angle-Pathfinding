@@ -12,6 +12,7 @@ public class FastVariableSizeIndirectHeap {
     private int[] inList;
     private int[] outList;
     private int heapSize;
+    private int nextIndex;
     
     /**
      * Runtime: O(1)
@@ -22,16 +23,11 @@ public class FastVariableSizeIndirectHeap {
         outList = new int[capacity];
         
         heapSize = 0;
+        nextIndex = 0;
     }
 
     public FastVariableSizeIndirectHeap() {
-        int capacity = 11;
-        
-        keyList = new float[capacity];
-        inList = new int[capacity];
-        outList = new int[capacity];
-        
-        heapSize = 0;
+        this(11);
     }
 
     /**
@@ -60,9 +56,7 @@ public class FastVariableSizeIndirectHeap {
      * Returns the handle to the value.
      */
     public int insert(float value) {
-        int index = heapSize;
-        
-        if (keyList.length < index) {
+        if (nextIndex >= keyList.length) {
             int newLength = keyList.length*2;
             // Too small.
             keyList = Arrays.copyOf(keyList, newLength);
@@ -70,14 +64,18 @@ public class FastVariableSizeIndirectHeap {
             outList = Arrays.copyOf(outList, newLength);
         }
         
-        keyList[index] = value;
-        inList[index] = index;
-        outList[index] = index;
+        int inIndex = heapSize;
+        int outIndex = nextIndex;
+        
+        keyList[heapSize] = value;
+        inList[nextIndex] = heapSize;
+        outList[heapSize] = nextIndex;
         heapSize++;
+        nextIndex++;
         
-        bubbleUp(index);
+        bubbleUp(inIndex);
         
-        return index;
+        return outIndex;
     }
     
     private void bubbleUp(int index) {
@@ -244,5 +242,9 @@ public class FastVariableSizeIndirectHeap {
     
     public boolean isEmpty() {
         return heapSize <= 0;
+    }
+    
+    public int size() {
+        return heapSize;
     }
 }
