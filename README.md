@@ -27,7 +27,7 @@ Features
       * gives optimal solutions, but very slow
       * included is an option to reuse an existing visibility graph instead of regenerating it.
     * Anya
-      * implementation still a bit buggy. Not giving optimal solutions.
+      * gives optimal solutions. Much faster than Visibility Graphs.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
 
 2.	Testing functions that test computed path lengths and running times.
