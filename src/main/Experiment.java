@@ -14,6 +14,7 @@ import main.graphgeneration.DefaultGenerator;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 import algorithms.AStar;
+import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.JumpPointSearch;
 import algorithms.VisibilityGraphAlgorithm;
@@ -28,8 +29,9 @@ public class Experiment {
     public static void run() {
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
-        findStrictThetaStarIssues();
+//        findStrictThetaStarIssues();
 //        findUpperBound();
+        testAlgorithmOptimality();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
@@ -371,6 +373,69 @@ public class Experiment {
         }
     }
     
+    private static void testAlgorithmOptimality() {
+        AlgoFunction testAlgo = Anya::new;
+        AlgoFunction refAlgo = VisibilityGraphAlgorithm::graphReuse;
+        
+        //printSeed = false; // keep this commented out.
+        Random seedRand = new Random(-2059321351);
+        int initial = seedRand.nextInt();
+        for (int i=0; i<50000000; i++) {
+            int sizeX = seedRand.nextInt(300) + 10;
+            int sizeY = seedRand.nextInt(300) + 10;
+            int seed = i+initial;
+            int ratio = seedRand.nextInt(50) + 10;
+            
+            int max = (sizeX+1)*(sizeY+1);
+            int p1 = seedRand.nextInt(max);
+            int p2 = seedRand.nextInt(max-1);
+            if (p2 == p1) {
+                p2 = max-1;
+            }
+            
+            int sx = p1%(sizeX+1);
+            int sy = p1/(sizeX+1);
+            int ex = p2%(sizeX+1);
+            int ey = p2/(sizeX+1);
+
+            double restPathLength = 0, normalPathLength = 0;
+            try {
+            GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
+            AnyAnglePathfinding.algoFunction = testAlgo;
+            int[][] path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.removeDuplicatesInPath(path);
+            restPathLength = Utility.computePathLength(gridGraph, path);
+
+            AnyAnglePathfinding.algoFunction = refAlgo;
+            path = Utility.generatePath(gridGraph, sx, sy, ex, ey);
+            path = Utility.removeDuplicatesInPath(path);
+            normalPathLength = Utility.computePathLength(gridGraph, path);
+            }catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("EXCEPTION OCCURRED!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                throw new UnsupportedOperationException("DISCREPANCY!!");
+            }
+            
+            if (Math.abs(restPathLength - normalPathLength) > 0.000001f) {
+                System.out.println("============");
+                System.out.println("Discrepancy Discovered!");
+                System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
+                System.out.println("Actual: " + restPathLength + " , Expected: " + normalPathLength);
+                System.out.println(restPathLength / normalPathLength);
+                System.out.println("============");
+                throw new UnsupportedOperationException("DISCREPANCY!!");
+            } else {
+                if (i%10000 == 9999) {
+                    System.out.println("Count: " + (i+1));
+                    System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                    System.out.println("Actual: " + restPathLength + " , Expected: " + normalPathLength);
+                }
+            }
+        }
+    }
     
     private static boolean testTautness(GridGraph gridGraph, AlgoFunction algo, int sx, int sy, int ex, int ey) {
         AnyAnglePathfinding.algoFunction = algo;
