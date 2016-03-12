@@ -3,7 +3,6 @@ package main;
 import grid.GridGraph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import main.AnyAnglePathfinding.AlgoFunction;
 import main.analysis.TwoPoint;
@@ -26,8 +25,8 @@ import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
+import algorithms.strictthetastar.StrictThetaStar;
 
 public class AlgoTest {
     private static FileIO io;
