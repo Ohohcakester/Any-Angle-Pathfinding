@@ -3,1203 +3,866 @@ package algorithms;
 import grid.GridGraph;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import algorithms.anya.Fraction;
-import algorithms.anya.Interval;
-import algorithms.anya.IntervalFValueComparator;
-import algorithms.bst.AVLTree;
-import algorithms.bst.Node;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
+import algorithms.priorityqueue.FastVariableSizeIndirectHeap;
 
-
-/**
- * Anya Observations:
- * 1) Every root point must occur at a corner of a blocked tile or the start point. 
- *   - possible exception: consecutive adjacent intervals on same row.
- * 
- * 2) If a root is on the same row (y-coordinate) as the interval, and the
- *    root is not the start point, then the root must be one of the endpoints.
- *
- */
 public class Anya extends PathFindingAlgorithm {
-    
-    private interface CheckFunction {
-        public boolean check(int x, int y);
-    }
-    
-    private ArrayList<ExploredInterval> exploredList;
-    private ArrayList<ExploredInterval> recordList;
 
-    private ArrayList<AVLTree<Interval>> intervalSets;
-    private float[] distance;
-    private Interval[] pointInterval;
+    private AnyaState goalState;
+    private AnyaState[] states;
+    private FastVariableSizeIndirectHeap pq;
+    private HashMap<AnyaState, Integer> existingStates;
+
+    private static int[][] rightDownExtents;
+    private static int[][] leftDownExtents;
     
-    private Interval start;
-    private Interval finish;
-    private PriorityQueue<Interval> pq;
-    
-    private final Fraction rightBoundary;
-    private final Fraction leftBoundary;
-    
-    public Anya(GridGraph graph, int sx, int sy, int ex,
-            int ey) {
-        super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
-        leftBoundary = new Fraction(0);
-        rightBoundary = new Fraction(graph.sizeX);
+    public static void initialiseUpExtents(GridGraph graph) {
+        // Don't reinitialise if graph is the same size as the last time.
+        if (rightDownExtents != null && graph.sizeY+2 == rightDownExtents.length && graph.sizeX+1 == rightDownExtents[0].length) return;
+
+        rightDownExtents = new int[graph.sizeY+2][];
+        leftDownExtents = new int[graph.sizeY+2][];
+        for (int y=0;y<graph.sizeY+2;++y) {
+            rightDownExtents[y] = new int[graph.sizeX+1];
+            leftDownExtents[y] = new int[graph.sizeX+1];
+        }
     }
     
+    public Anya(GridGraph graph, int sx, int sy, int ex, int ey) {
+        super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
+    }
 
     @Override
     public void computePath() {
-        int totalSize = (graph.sizeX+1) * (graph.sizeY+1);
-        initialiseIndirectHeap();
-        initialiseIntervalSets();
-        pointInterval = new Interval[totalSize];
-        distance = new float[totalSize];
-        for (int i=0;i<totalSize;i++) {
-            distance[i] = Float.POSITIVE_INFINITY;
-        }
-        setDistance(sx, sy, 0, start);
+        existingStates = new HashMap<>();
+        pq = new FastVariableSizeIndirectHeap();
+        states = new AnyaState[11];
+        goalState = null;
         
-        while (finish == null && !pq.isEmpty()) {
-            Interval interval = pq.poll();
-            if (interval.fValue == Float.POSITIVE_INFINITY) {
+        computeExtents();
+        generateStartingStates();
+        
+        while (!pq.isEmpty()) {
+            maybeSaveSearchSnapshot();
+            int currentID = pq.popMinIndex();
+            AnyaState currState = states[currentID];
+            currState.visited = true;
+            
+            //System.out.println("Explore " + currState + " :: " + currState.fValue);
+            // Check if goal state.
+            if (currState.y == ey && currState.xL.isLessThanOrEqual(ex) && !currState.xR.isLessThan(ex)) {
+                goalState = currState;
                 break;
             }
-            explore(interval);
+
+            generateSuccessors(currState);
         }
     }
     
-    private void initialiseIndirectHeap() {
-        pq = new PriorityQueue<>(new IntervalFValueComparator());
-    }
-    
-    private void explore(Interval interval) {
-        //System.out.println("EXPLORE "+interval + " PARENT = " + interval.parent);
-        tryRecordExploredInterval(interval.y, interval.xL, interval.xR, interval.parent);
-        assert !interval.visited;
-        assert interval.fValue != Float.POSITIVE_INFINITY;
-        assert interval.parent != null;
-        //count(10, () -> breakPoint());
+    private void generateStartingStates() {
+        boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
+        boolean bottomRightOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
+        boolean topLeftOfBlocked = graph.topLeftOfBlockedTile(sx, sy);
+        boolean topRightOfBlocked = graph.topRightOfBlockedTile(sx, sy);
         
-        interval.visited = true;
+        Point start = new Point(sx,sy);
         
-        if (containsFinishPoint(interval)) {
-            finish = interval;
-            return;
-        }
-        
-        Point curParent = interval.parent;
-        
-        // explore 1 step up, 1 step down
-        if (curParent.y == interval.y) {
-            exploreFromSameLevel(interval, curParent);
+        // Generate up
+        if (!bottomLeftOfBlocked || !bottomRightOfBlocked) {
+            Fraction leftExtent, rightExtent;
             
-        } else if (curParent.y < interval.y) {
-            exploreUpwards(interval, curParent);
+            if (bottomLeftOfBlocked) {
+                // Explore up-left
+                leftExtent = new Fraction(leftUpExtent(sx, sy));
+                rightExtent = new Fraction(sx);
+            } else if (bottomRightOfBlocked) {
+                // Explore up-right
+                leftExtent = new Fraction(sx);
+                rightExtent = new Fraction(rightUpExtent(sx, sy));
+            } else {
+                // Explore up-left-right
+                leftExtent = new Fraction(leftUpExtent(sx, sy));
+                rightExtent = new Fraction(rightUpExtent(sx, sy));
+            }
+
+            this.generateUpwardsStart(leftExtent, rightExtent, start);
+        }
+
+        // Generate down
+        if (!topLeftOfBlocked || !topRightOfBlocked) {
+            Fraction leftExtent, rightExtent;
             
-        } else if (curParent.y > interval.y) {
-            exploreDownwards(interval, curParent);
+            if (topLeftOfBlocked) {
+                // Explore down-left
+                leftExtent = new Fraction(leftDownExtent(sx, sy));
+                rightExtent = new Fraction(sx);
+            } else if (topRightOfBlocked) {
+                // Explore down-right
+                leftExtent = new Fraction(sx);
+                rightExtent = new Fraction(rightDownExtent(sx, sy));
+            } else {
+                // Explore down-left-right
+                leftExtent = new Fraction(leftDownExtent(sx, sy));
+                rightExtent = new Fraction(rightDownExtent(sx, sy));
+            }
+
+            this.generateDownwardsStart(leftExtent, rightExtent, start);
+        }
+
+        // Generate left
+        if (!topRightOfBlocked || !bottomRightOfBlocked) {
+            this.generateSameLevelStart(start, leftAnyExtent(sx,sy), sx);
+        }
+
+        // Generate right
+        if (!topLeftOfBlocked || !bottomLeftOfBlocked) {
+            this.generateSameLevelStart(start, sx, rightAnyExtent(sx,sy));
         }
     }
 
-    private void exploreFromSameLevel(Interval interval, Point curParent) {
-        //if (interval.xL.isLessThan(curParent.x)) {
-            searchLeftDirect(interval, curParent);
-        //}
-        //if (isLessThan(curParent.x, interval.xR)) {
-            searchRightDirect(interval, curParent);
-        //}
-
-        int yUp = curParent.y+1;
-        int yDown = curParent.y-1;
-        
-        if (interval.xL.isWholeNumber()) {
-            int pivotX = interval.xL.n;
-            int pivotY = interval.y;
-            Point pivot = new Point(pivotX, pivotY);
-            if (curParent.equals(pivot)) { // case: root is at pivot...?
-                if (pivot.equals(start.parent)) {
-                    if (yUp <= graph.sizeY+1) {
-                        Fraction currX = new Fraction(pivotX);
-                        exploreUpBothWays(interval, pivot, currX);
-                    }
-                    if (yDown >= 0) {
-                        Fraction currX = new Fraction(pivotX);
-                        exploreDownBothWays(interval, pivot, currX);
-                    }
-                }
-            } else if (yUp <= graph.sizeY+1 && bottomLeftOfBlockedTile(pivotX, pivotY)) {
-                // Pivot up
-                setGValueOfLeftEndpoint(interval);
-                exploreUpLeft(interval, pivot, interval.xL, leftBoundary);
-                
-            } else if (yDown >= 0 && topLeftOfBlockedTile(pivotX, pivotY)) { // cannot happen simultaneously...?
-                // Pivot down
-                setGValueOfLeftEndpoint(interval);
-                exploreDownLeft(interval, pivot, interval.xL, leftBoundary);
-            }
-        }
-        if (interval.xR.isWholeNumber()) {
-            int pivotX = interval.xR.n;
-            int pivotY = interval.y;
-            Point pivot = new Point(pivotX, pivotY);
-            if (curParent.equals(pivot)) { // case: root is at pivot...?
-                /*if (!interval.xL.equals(interval.xR)) {
-                    if (yUp <= graph.sizeY+1) {
-                        Fraction currX = new Fraction(pivotX);
-                        exploreUpBothWays(interval, pivot, currX);
-                    }
-                    if (yDown >= 0) {
-                        Fraction currX = new Fraction(pivotX);
-                        exploreDownBothWays(interval, pivot, currX);
-                    }
-                }*/
-            } else if (yUp <= graph.sizeY+1 && bottomRightOfBlockedTile(pivotX, pivotY)) {
-                // Pivot up
-                setGValueOfRightEndpoint(interval);
-                exploreUpRight(interval, pivot, interval.xR, rightBoundary);
-                
-            } else if (yDown >= 0 && topRightOfBlockedTile(pivotX, pivotY)) { // cannot happen simultaneously...?
-                // Pivot down
-                setGValueOfRightEndpoint(interval);
-                exploreDownRight(interval, pivot, interval.xR, rightBoundary);
-            }
-        }
-    }
-
-    private void exploreUpwards(Interval interval, Point curParent) {
-        boolean isUpwards = true;
-        
-        int yUp = interval.y + 1;
-        if (yUp > graph.sizeY+1) {
-            return;
-        }
-        Fraction xL = null;
-        Fraction xR = null;
-        
-        //if (yUp <= graph.sizeY+1) {
-        boolean blockedAbove;
-        if (bottomLeftOfBlockedTile(interval.xL.floor(), interval.y)) { // blocked above.
-            blockedAbove = true;
-            xL = interval.xL;
-            xR = interval.xR;
+    private void addSuccessor(AnyaState source, AnyaState successor) {
+        Integer existingHandle = existingStates.get(successor);
+        if (existingHandle == null) {
+            addToOpen(successor);
         } else {
-            blockedAbove = false;
-            // explore up.
-            int dy = interval.y - curParent.y;
+            relaxExisting(source, existingHandle);
+        }
+        //maybeSaveSearchSnapshot();
+    }
+    
+    private void addToOpen(AnyaState successor) {
+        // set heuristic and f-value
+        successor.hValue = heuristic(successor);
+        successor.fValue = successor.gValue + successor.hValue;
+        
+        int handle = pq.insert(successor.fValue);
+        if (handle >= states.length) {
+            states = Arrays.copyOf(states, states.length*2);
+        }
+        successor.handle = handle;
+        states[handle] = successor;
+        existingStates.put(successor, handle);
+
+        //System.out.println("Generate " + successor + " -> " + handle);
+    }
+    
+    private void relaxExisting(AnyaState source, int existingHandle) {
+        AnyaState successor = states[existingHandle];
+        if (successor.visited) return;
+        
+        int dx = successor.basePoint.x - source.basePoint.x;
+        int dy = successor.basePoint.y - source.basePoint.y;
+        float newgValue = source.gValue + (float)Math.sqrt(dx*dx+dy*dy);
+        
+        if (newgValue < successor.gValue) {
+            successor.gValue = newgValue;
+            successor.fValue = newgValue + successor.hValue;
+            successor.parent = source;
+            pq.decreaseKey(existingHandle, successor.fValue);
             
-            xL = interval.xL.minus(curParent.x);
-            xL = xL.multiplyDivide(dy+1,dy); // *= (dy+1)/dy
-            xL = xL.plus(curParent.x);
-                
-            xR = interval.xR.minus(curParent.x);
-            xR = xR.multiplyDivide(dy+1,dy); // *= (dy+1)/dy
-            xR = xR.plus(curParent.x);
-
-            if (xL.isLessThan(interval.xL)) { // xL < interval.xL
-                xL = restrictLeft(interval.xL, yUp, xL, isUpwards);
-            } else {
-                xL = restrictRight(interval.xR, yUp, xL, isUpwards);
-            }
-            if (!xR.isLessThanOrEqual(interval.xR)) { // xR > interval.xR
-                xR = restrictRight(interval.xR, yUp, xR, isUpwards);
-            } else {
-                xR = restrictLeft(interval.xL, yUp, xR, isUpwards);
-            }
-
-            processDirectSuccessors(interval, yUp, xL, xR, isUpwards);
+            //System.out.println("Relax " + successor + " : " + successor.fValue);
         }
- //     }
-        if (interval.xL.isWholeNumber()) {
-            int pivotX = interval.xL.n;
-            int pivotY = interval.y;
-            if (blockedAbove) {
-                if (!bottomRightOfBlockedTile(pivotX, pivotY)) {
-                    setGValueOfLeftEndpoint(interval);
-                    Point pivot = new Point(pivotX, pivotY);
-
-                    int dy = pivotY - curParent.y;
-                    int dx = pivotX - curParent.x;
-                    Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
-
-                    exploreUpLeft(interval, pivot, xL, xLimit);
+        //else System.out.println("Failed to relax " + successor + ": " + successor.fValue);
+    }
+    
+    
+    private void computeExtents() {
+        // graph.isBlocked(x,y) is the same as graph.bottomLeftOfBlockedTile(x,y)
+        Anya.initialiseUpExtents(graph);
+        
+        for (int y=0;y<sizeY+2;++y) {
+            boolean lastIsBlocked = true;
+            int lastX = -1;
+            for (int x=0;x<=sizeX;++x) {
+                leftDownExtents[y][x] = lastX; 
+                if (graph.isBlocked(x, y-1) != lastIsBlocked) {
+                    lastX = x;
+                    lastIsBlocked = !lastIsBlocked;
                 }
-                
-            } else if (topRightOfBlockedTile(pivotX, pivotY) != bottomRightOfBlockedTile(pivotX, pivotY)) { //XOR
-                setGValueOfLeftEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-                
-                if (topRightOfBlockedTile(pivotX, pivotY)) {
-                    searchLeft(interval, pivot);
-                }
-                //if (yUp <= graph.sizeY+1) {
-                exploreUpLeft(interval, pivot, xL, leftBoundary);
-                //}
             }
-        }
-        if (interval.xR.isWholeNumber()) {
-            int pivotX = interval.xR.n;
-            int pivotY = interval.y;
-            if (bottomRightOfBlockedTile(pivotX, pivotY)) {
-                setGValueOfRightEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-
-                int dy = pivotY - curParent.y;
-                int dx = pivotX - curParent.x;
-                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
-                
-                exploreUpRight(interval, pivot, xR, xLimit);
-                
-            } else if (topLeftOfBlockedTile(pivotX, pivotY) != bottomLeftOfBlockedTile(pivotX, pivotY)) { //XOR
-                setGValueOfRightEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-
-                if (topLeftOfBlockedTile(pivotX, pivotY)) {
-                    searchRight(interval, pivot);
+            lastIsBlocked = true;
+            lastX = sizeX+1;
+            for (int x=sizeX;x>=0;--x) {
+                rightDownExtents[y][x] = lastX; 
+                if (graph.isBlocked(x-1, y-1) != lastIsBlocked) {
+                    lastX = x;
+                    lastIsBlocked = !lastIsBlocked;
                 }
-                //if (yUp <= graph.sizeY+1) {
-                exploreUpRight(interval, pivot, xR, rightBoundary);
-                //}
             }
         }
     }
-
-    private void exploreDownwards(Interval interval, Point curParent) {
-        boolean isUpwards = false;
+    
+    
+    
+    /// === GENERATE SUCCESSORS - PATTERNS - START ===
+    
+    private void generateSuccessors(AnyaState currState) {
+        Point basePoint = currState.basePoint;
         
-        int yDown = interval.y - 1;
-        if (yDown < 0) {
-            return;
-        }
-        Fraction xL = null;
-        Fraction xR = null;
-        
-        if (topLeftOfBlockedTile(interval.xL.floor(), interval.y)) { // blocked above.
-            xL = interval.xL;
-            xR = interval.xR;
+        if (basePoint.y == currState.y) {
+            exploreFromSameLevel(currState, basePoint);
+        } else if (basePoint.y < currState.y) {
+            explorefromBelow(currState, basePoint);
         } else {
-            // explore down.
-            int dy = curParent.y - interval.y;
-            
-            xL = interval.xL.minus(curParent.x);
-            xL = xL.multiplyDivide(dy+1,dy); // *= (dy+1)/dy
-            xL = xL.plus(curParent.x);
-            
-            xR = interval.xR.minus(curParent.x);
-            xR = xR.multiplyDivide(dy+1,dy); // *= (dy+1)/dy
-            xR = xR.plus(curParent.x);
-
-            if (xL.isLessThan(interval.xL)) { // xL < interval.xL
-                xL = restrictLeft(interval.xL, yDown, xL, isUpwards);
-            } else {
-                xL = restrictRight(interval.xR, yDown, xL, isUpwards);
-            }
-            if (!xR.isLessThanOrEqual(interval.xR)) { // xR > interval.xR
-                xR = restrictRight(interval.xR, yDown, xR, isUpwards);
-            } else {
-                xR = restrictLeft(interval.xL, yDown, xR, isUpwards);
-            }
-
-            processDirectSuccessors(interval, yDown, xL, xR, isUpwards);
+            explorefromAbove(currState, basePoint);
         }
-        if (interval.xL.isWholeNumber()) {
-            int pivotX = interval.xL.n;
-            int pivotY = interval.y;
-            if (topLeftOfBlockedTile(pivotX, pivotY)) {
-                setGValueOfLeftEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
+    }
+    
+    private void exploreFromSameLevel(AnyaState currState, Point basePoint) {
+        // Note: basePoint.y == currState.y
+        // Note: basePoint == currState.basePoint
+        // Property 1: basePoint is not strictly between the two endpoints of the interval.
+        // Property 2: the endpoints of the interval are integers. 
 
-                int dy = curParent.y - pivotY;
-                int dx = pivotX - curParent.x;
-                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
-                
-                exploreDownLeft(interval, pivot, xL, xLimit);
-                
-            } else if (bottomRightOfBlockedTile(pivotX, pivotY) != topRightOfBlockedTile(pivotX, pivotY)) { //XOR
-                setGValueOfLeftEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-                
-                if (bottomRightOfBlockedTile(pivotX, pivotY)) {
-                    searchLeft(interval, pivot);
+        assert basePoint.y == currState.y;
+        assert currState.xL.isWholeNumber();
+        assert currState.xR.isWholeNumber();
+        
+        int y = basePoint.y;
+        
+        if (currState.xR.n <= basePoint.x) { // currState.xR <= point.x  (explore left)
+            int xL = currState.xL.n;
+            if (graph.bottomLeftOfBlockedTile(xL, y)) {
+                if (!graph.bottomRightOfBlockedTile(xL, y)) {
+                    /* ----- |XXXXXXXX|
+                     *       |XXXXXXXX|
+                     * ----- P========B
+                     */
+                    Fraction leftBound = new Fraction(leftUpExtent(xL, y)); 
+                    generateUpwardsUnobservable(new Point(xL,y), leftBound, currState.xL, currState);
                 }
-                exploreDownLeft(interval, pivot, xL, leftBoundary);
-            }
-        }
-        if (interval.xR.isWholeNumber()) {
-            int pivotX = interval.xR.n;
-            int pivotY = interval.y;
-            if (topRightOfBlockedTile(pivotX, pivotY)) {
-                setGValueOfRightEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-
-                int dy = curParent.y - pivotY;
-                int dx = pivotX - curParent.x;
-                Fraction xLimit = new Fraction(pivot.x*dy + dx, dy); // pivot.x + dx*(1/dy)
-                
-                exploreDownRight(interval, pivot, xR, xLimit);
-                
-            } else if (bottomLeftOfBlockedTile(pivotX, pivotY) != topLeftOfBlockedTile(pivotX, pivotY)) { //XOR
-                setGValueOfRightEndpoint(interval);
-                Point pivot = new Point(pivotX, pivotY);
-
-                if (bottomLeftOfBlockedTile(pivotX, pivotY)) {
-                    searchRight(interval, pivot);
+            } else if (graph.topLeftOfBlockedTile(xL, y)) {
+                if (!graph.topRightOfBlockedTile(xL, y)) {
+                    /* ----- P========B
+                     *       |XXXXXXXX|
+                     * ----- |XXXXXXXX|
+                     */
+                    Fraction leftBound = new Fraction(leftDownExtent(xL, y)); 
+                    generateDownwardsUnobservable(new Point(xL,y), leftBound, currState.xL, currState);
                 }
-                exploreDownRight(interval, pivot, xR, rightBoundary);
             }
-        }
-    }
-
-    private void exploreUpLeft(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
-        if (!fromX.isLessThanOrEqual(rightBoundary)) { // if fromX > rightBoundary
-            fromX = rightBoundary;
-        }
-        int yUp = pivot.y+1;
-        Fraction leftEnd = restrictLeft(fromX, yUp, toX, true);
-        if (!leftEnd.isLessThan(fromX)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, leftEnd, fromX);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yUp, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
+            
+            if (!graph.bottomRightOfBlockedTile(xL, y) || !graph.topRightOfBlockedTile(xL, y)) {
+                int leftBound = leftAnyExtent(xL, y);
+                generateSameLevelObservable(leftBound, xL, currState);
             }
-        }
-    }
+            
+        } else { // point.x <= currState.xL  (explore right)
+            assert basePoint.x <= currState.xL.n;
 
-    private void exploreUpRight(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
-        if (fromX.isLessThan(leftBoundary)) { // if fromX < leftBoundary
-            fromX = leftBoundary;
-        }
-        int yUp = pivot.y+1;
-        Fraction rightEnd = restrictRight(fromX, yUp, toX, true);
-        if (!fromX.isLessThan(rightEnd)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, fromX, rightEnd);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yUp, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
+            int xR = currState.xR.n;
+            if (graph.bottomRightOfBlockedTile(xR, y)) {
+                if (!graph.bottomLeftOfBlockedTile(xR, y)) {
+                    /*  |XXXXXXXX| -----
+                     *  |XXXXXXXX|
+                     *  B========P -----
+                     */
+                    Fraction rightBound = new Fraction(rightUpExtent(xR, y)); 
+                    generateUpwardsUnobservable(new Point(xR,y), currState.xR, rightBound, currState);
+                }
+            } else if (graph.topRightOfBlockedTile(xR, y)) {
+                if (!graph.topLeftOfBlockedTile(xR, y)) {
+                    /*  B========P -----
+                     *  |XXXXXXXX|
+                     *  |XXXXXXXX| -----
+                     */
+                    Fraction rightBound = new Fraction(rightDownExtent(xR, y)); 
+                    generateDownwardsUnobservable(new Point(xR,y), currState.xR, rightBound, currState);
+                }
             }
-        }
-    }
-
-    private void exploreDownLeft(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
-        if (toX.isLessThan(leftBoundary)) {
-            toX = leftBoundary;
-        }
-        
-        int yDown = pivot.y-1;
-        Fraction leftEnd = restrictLeft(fromX, yDown, toX, false);
-        if (!leftEnd.isLessThan(fromX)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksBelow(yDown, leftEnd, fromX);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yDown, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
+            
+            if (!graph.bottomLeftOfBlockedTile(xR, y) || !graph.topLeftOfBlockedTile(xR, y)) {
+                int rightBound = rightAnyExtent(xR, y);
+                generateSameLevelObservable(xR, rightBound, currState);
             }
-        }
-    }
-
-    private void exploreDownRight(Interval interval, Point pivot, Fraction fromX, Fraction toX) {
-        if (rightBoundary.isLessThan(toX)) {
-            toX = rightBoundary;
-        }
-        
-        int yDown = pivot.y-1;
-        Fraction rightEnd = restrictRight(fromX, yDown, toX, false);
-        if (!fromX.isLessThan(rightEnd)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksBelow(yDown, fromX, rightEnd);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yDown, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
-            }
-        }
-    }
-    
-    private void exploreUpBothWays(Interval interval, Point pivot, Fraction currX) {
-        int yUp = pivot.y+1;
-        
-
-        Fraction xL = this.restrictLeft(currX, yUp, leftBoundary, true);
-        Fraction xR = this.restrictRight(currX, yUp, rightBoundary, true);
-        if (!xL.isLessThan(xR)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksAbove(yUp, xL, xR);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yUp, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
-            }
-        }
-    }
-    
-    private void exploreDownBothWays(Interval interval, Point pivot, Fraction currX) {
-        int yDown = pivot.y-1;
-        
-
-        Fraction xL = this.restrictLeft(currX, yDown, leftBoundary, false);
-        Fraction xR = this.restrictRight(currX, yDown, rightBoundary, false);
-        if (!xL.isLessThan(xR)) return;
-
-        LinkedList<Fraction> splitList = splitByBlocksBelow(yDown, xL, xR);
-
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
-            } else {
-                relaxUsingPoint(pivot, yDown, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
-            }
+            
         }
     }
     
 
-    private void searchLeft(Interval interval, Point pivot) {
-        Fraction pivotX = new Fraction(pivot.x);
-        Interval left = new Interval(pivot.y, pivotX, pivotX);
-        Node<Interval> fromNode = intervalSets.get(pivot.y).search(left);
+
+    private void explorefromBelow(AnyaState currState, Point basePoint) {
+        // Note: basePoint.y < currState.y
+        // Note: basePoint == currState.basePoint
+
+        assert basePoint.y < currState.y;
         
-        if (fromNode == null) {
-            return;
-        }
-        
-        left = fromNode.getData();
-        assert left.xR.equals(pivotX);
-        if (left.visited) {
-            return;
-        }
-        
-        Fraction xL = leftSearchTillCorner(pivotX, pivot.y, left.xL);
-        Fraction xR = pivotX;
+        if (graph.bottomLeftOfBlockedTile(currState.xL.floor(), currState.y)) {
+            // Is Blocked Above
+            if (currState.xL.isWholeNumber()) {
+                int xL = currState.xL.n;
+                if (xL < basePoint.x && !graph.bottomRightOfBlockedTile(xL, currState.y)) {
+                    /* 
+                     * .-----|XXXXXXX
+                     *  '.   |XXXXXXXX
+                     *    '. |XXXXXXXX
+                     *      'P========
+                     *        '.    ? 
+                     *          '. ? 
+                     *            B  
+                     */
+                    
+                    // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                    int dy = currState.y - basePoint.y; 
+                    Fraction leftProjection = new Fraction((xL-basePoint.x)*(dy+1), dy).plus(basePoint.x);
 
-        //float distance = getDistance(pivot);
-        //float fValue = distance;// - xL.minus(pivot.x).toFloat(); // distance + (pivot.X - xL)
-        tryRelax(pivot.y, xL, xR, pivot);
-    }
-
-    
-    private void searchRight(Interval interval, Point pivot) {
-        Fraction pivotX = new Fraction(pivot.x);
-        Interval right = new Interval(pivot.y, pivotX, pivotX);
-        //System.out.println(intervalSets.get(pivot.y).inorderToString());
-        Node<Interval> fromNode = intervalSets.get(pivot.y).search(right);
-        assert fromNode != null;
-        
-        if (fromNode.getNext() == null) {
-            return;
-        }
-        
-        right = fromNode.getNext().getData();
-        assert right.xL.equals(pivotX);
-        if (right.visited) {
-            return;
-        }
-
-        Fraction xL = pivotX;
-        Fraction xR = rightSearchTillCorner(pivotX, pivot.y, right.xR);
-
-        //float distance = getDistance(pivot);
-        //float fValue = distance;// + xR.minus(pivot.x).toFloat(); // distance + (xR - pivot.x)
-        tryRelax(pivot.y, xL, xR, pivot);
-    }
-
-    private void searchLeftDirect(Interval interval, Point pivot) {
-        Fraction leftEndpoint = interval.xL;
-        Interval left = new Interval(pivot.y, leftEndpoint, leftEndpoint);
-        //left.isStartPoint = interval.isStartPoint;
-        
-        Node<Interval> fromNode = intervalSets.get(pivot.y).search(left);
-
-        if (fromNode == null) {
-            return;
-        }
-        
-        left = fromNode.getData();
-        assert left.xR.equals(leftEndpoint);
-        if (left.visited) {
-            return;
-        }
-        
-        Fraction xL = leftSearchTillCorner(leftEndpoint, pivot.y, left.xL);
-        Fraction xR = leftEndpoint;
-
-        //float distance = getDistance(pivot);
-        //float fValue = distance - xR.minus(pivot.x).toFloat(); // distance + (pivot.X - xR)
-        tryRelax(pivot.y, xL, xR, pivot);
-    }
-
-    private void searchRightDirect(Interval interval, Point pivot) {
-        Fraction rightEndpoint = interval.xR;
-        Interval right = new Interval(pivot.y, rightEndpoint, rightEndpoint);
-        right.isStartPoint = interval.isStartPoint;
-
-        Node<Interval> fromNode = intervalSets.get(pivot.y).search(right);
-        assert fromNode != null;
-        
-        if (fromNode.getNext() == null) {
-            return;
-        }
-        
-        right = fromNode.getNext().getData();
-        assert right.xL.equals(rightEndpoint);
-        if (right.visited) {
-            return;
-        }
-
-        Fraction xL = rightEndpoint;
-        Fraction xR = rightSearchTillCorner(rightEndpoint, pivot.y, right.xR);
-
-        //float distance = getDistance(pivot);
-        //float fValue = distance + xL.minus(pivot.x).toFloat(); // distance + (xL - pivot.x)
-        tryRelax(pivot.y, xL, xR, pivot);
-    }
-
-    private void setGValueOfLeftEndpoint(Interval interval) {
-        if (interval.xL.isWholeNumber()) {
-            int x = interval.xL.n;
-            int y = interval.y;
-            int parentX = interval.parent.x;
-            int parentY = interval.parent.y;
-            float gValue = getDistance(parentX, parentY);
-            gValue += distance2D(x, y, parentX, parentY);
-            setDistance(x, y, gValue, interval);
-        }
-    }
-    
-    private void setGValueOfRightEndpoint(Interval interval) {
-        if (interval.xR.isWholeNumber()) {
-            int x = interval.xR.n;
-            int y = interval.y;
-            int parentX = interval.parent.x;
-            int parentY = interval.parent.y;
-            float gValue = getDistance(parentX, parentY);
-            gValue += distance2D(x, y, parentX, parentY);
-            setDistance(x, y, gValue, interval);
-        }
-    }
-    
-    /**
-     * Goes left until it hits a corner of a tile, then returns.
-     */
-    private Fraction leftSearchTillCorner(Fraction fromXL, int y, Fraction toXL) {
-        int fromLceil = fromXL.ceil();
-        int toLfloor = toXL.floor();
-
-        CheckFunction currentSideBlocked; // represents up/down.
-        CheckFunction otherSideBlocked;   // represents opposite vertical direction of currentSideBlocked
-        
-        boolean currentlyBlocked;
-        if (topRightOfBlockedTile(fromLceil, y)) {
-            if (bottomRightOfBlockedTile(fromLceil, y)) {
-                //completely blocked.
-                return fromXL;
-            } else {
-                currentSideBlocked = (a,b) -> topRightOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> bottomRightOfBlockedTile(a,b);
-                currentlyBlocked = true;
+                    int leftBound = leftUpExtent(xL, currState.y);
+                    if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                        leftProjection = new Fraction(leftBound);
+                    }
+                    
+                    generateUpwardsUnobservable(new Point(xL,currState.y), leftProjection, currState.xL, currState);
+                }
             }
+
+            if (currState.xR.isWholeNumber()) {
+                int xR = currState.xR.n;
+                if (basePoint.x < xR && !graph.bottomLeftOfBlockedTile(xR, currState.y)) {
+                    /* 
+                     *  XXXXXXX|-----.
+                     * XXXXXXXX|   .'
+                     * XXXXXXXX| .'
+                     * ========P' 
+                     *  ?    .'
+                     *   ? .'
+                     *    B
+                     */
+
+                    // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                    int dy = currState.y - basePoint.y; 
+                    Fraction rightProjection = new Fraction((xR-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+
+                    int rightBound = rightUpExtent(xR, currState.y);
+                    if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                        rightProjection = new Fraction(rightBound);
+                    }
+                    
+                    generateUpwardsUnobservable(new Point(xR,currState.y), currState.xR, rightProjection, currState);
+                }
+            }
+            
+            
         } else {
-            if (bottomRightOfBlockedTile(fromLceil, y)) {
-                currentSideBlocked = (a,b) -> bottomRightOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> topRightOfBlockedTile(a,b);
-                currentlyBlocked = true;
-            } else {
-                currentSideBlocked = (a,b) -> rightOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> false;
-                currentlyBlocked = false;
+            // Is not Blocked Above
+            /*
+             * =======      =====    =====
+             *  \   /       / .'      '. \
+             *   \ /   OR  /.'    OR    '.\
+             *    B       B                B
+             */
+
+            // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+            int dy = currState.y - basePoint.y; 
+            Fraction leftProjection = currState.xL.minus(basePoint.x).multiplyDivide(dy+1, dy).plus(basePoint.x);
+            
+            int leftBound = leftUpExtent(currState.xL.floor()+1, currState.y);
+            if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                leftProjection = new Fraction(leftBound);
+            }
+
+            // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+            Fraction rightProjection = currState.xR.minus(basePoint.x).multiplyDivide(dy+1, dy).plus(basePoint.x);
+            
+            int rightBound = rightUpExtent(currState.xR.ceil()-1, currState.y);
+            if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                rightProjection = new Fraction(rightBound);
+            }
+
+            if (leftProjection.isLessThan(rightProjection)) {
+                generateUpwardsObservable(leftProjection, rightProjection, currState);
             }
         }
         
-        fromLceil--;
-        while (fromLceil > toLfloor) {
-            if (otherSideBlocked.check(fromLceil, y)) {
-                return new Fraction(fromLceil);
+
+        if (currState.xL.isWholeNumber()) {
+            int xL = currState.xL.n;
+            if (graph.topRightOfBlockedTile(xL, currState.y) && !graph.bottomRightOfBlockedTile(xL, currState.y)) {
+                /*
+                 * .------P======
+                 * |XXXXXX|\   /
+                 * |XXXXXX| \ /
+                 *           B
+                 */
+                Point pivot = new Point(xL,currState.y);
+                
+                {
+                    int leftBound = leftAnyExtent(xL, currState.y);
+                    generateSameLevelUnobservable(pivot, leftBound, xL, currState);
+                }
+
+                {
+                    int dy = currState.y - basePoint.y; 
+                    Fraction leftProjection = new Fraction((xL-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+                    
+                    int leftBound = leftUpExtent(xL, currState.y);
+                    if (!leftProjection.isLessThanOrEqual(leftBound)) { // leftBound < leftProjection
+                        this.generateUpwardsUnobservable(pivot, new Fraction(leftBound), leftProjection, currState);
+                    }
+                }
+            }
+        }
+
+        if (currState.xR.isWholeNumber()) {
+            int xR = currState.xR.n;
+            if (graph.topLeftOfBlockedTile(xR, currState.y) && !graph.bottomLeftOfBlockedTile(xR, currState.y)) {
+                /*
+                 * ======P------.
+                 *  \   /|XXXXXX|
+                 *   \ / |XXXXXX|
+                 *    B
+                 */
+                Point pivot = new Point(xR,currState.y);
+                
+                {
+                    int rightBound = rightAnyExtent(xR, currState.y);
+                    generateSameLevelUnobservable(new Point(xR,currState.y), xR, rightBound, currState);
+                }
+
+                {
+                    int dy = currState.y - basePoint.y; 
+                    Fraction rightProjection = new Fraction((xR-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+                    int rightBound = rightUpExtent(xR, currState.y);
+                    if (rightProjection.isLessThan(rightBound)) { // rightProjection < rightBound
+                        this.generateUpwardsUnobservable(pivot, rightProjection, new Fraction(rightBound), currState);
+                    }
+                }
+            }
+        }
+    }
+
+    private void explorefromAbove(AnyaState currState, Point basePoint) {
+        // Note: basePoint.y > currState.y
+        // Note: basePoint == currState.basePoint
+
+        assert basePoint.y > currState.y;
+
+        if (graph.topLeftOfBlockedTile(currState.xL.floor(), currState.y)) {
+            // Is Blocked Below
+            if (currState.xL.isWholeNumber()) {
+                int xL = currState.xL.n;
+                if (xL < basePoint.x && !graph.topRightOfBlockedTile(xL, currState.y)) {
+                    /* 
+                     *            B  
+                     *          .' ? 
+                     *        .'    ? 
+                     *      .P========
+                     *    .' |XXXXXXXX
+                     *  .'   |XXXXXXXX
+                     * '-----|XXXXXXX
+                     */
+                    
+                    // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                    int dy = basePoint.y - currState.y; 
+                    Fraction leftProjection = new Fraction((xL-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+
+                    int leftBound = leftDownExtent(xL, currState.y);
+                    if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                        leftProjection = new Fraction(leftBound);
+                    }
+
+                    generateDownwardsUnobservable(new Point(xL,currState.y), leftProjection, currState.xL, currState);
+                }
+            }
+
+            if (currState.xR.isWholeNumber()) {
+                int xR = currState.xR.n;
+                if (basePoint.x < xR && !graph.topLeftOfBlockedTile(xR, currState.y)) {
+                    /* 
+                     *    B
+                     *   ? '.
+                     *  ?    '.
+                     * ========P. 
+                     * XXXXXXXX| '.
+                     * XXXXXXXX|   '.
+                     *  XXXXXXX|-----'
+                     */
+
+                    // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                    int dy = basePoint.y - currState.y; 
+                    Fraction rightProjection = new Fraction((xR-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+
+                    int rightBound = rightDownExtent(xR, currState.y);
+                    if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                        rightProjection = new Fraction(rightBound);
+                    }
+                    
+                    generateDownwardsUnobservable(new Point(xR,currState.y), currState.xR, rightProjection, currState);
+                }
+            }
+
+        } else {
+            // Is not Blocked Below
+            /*
+             *    B       B                B
+             *   / \   OR  \'.    OR    .'/
+             *  /   \       \ '.      .' /
+             * =======      =====    =====
+             */
+
+            // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+            int dy = basePoint.y - currState.y; 
+            Fraction leftProjection = currState.xL.minus(basePoint.x).multiplyDivide(dy+1, dy).plus(basePoint.x);
+            
+            int leftBound = leftDownExtent(currState.xL.floor()+1, currState.y);
+            if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                leftProjection = new Fraction(leftBound);
+            }
+
+            // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+            Fraction rightProjection = currState.xR.minus(basePoint.x).multiplyDivide(dy+1, dy).plus(basePoint.x);
+            
+            int rightBound = rightDownExtent(currState.xR.ceil()-1, currState.y);
+            if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                rightProjection = new Fraction(rightBound);
             }
             
-            boolean isBlocked = currentSideBlocked.check(fromLceil, y);
-            if (currentlyBlocked != isBlocked) {
-                return new Fraction(fromLceil);
+            if (leftProjection.isLessThan(rightProjection)) {
+                generateDownwardsObservable(leftProjection, rightProjection, currState);
             }
-            fromLceil--;
         }
-        return toXL;
+        
+
+        if (currState.xL.isWholeNumber()) {
+            int xL = currState.xL.n;
+            if (graph.bottomRightOfBlockedTile(xL, currState.y) && !graph.topRightOfBlockedTile(xL, currState.y)) {
+                /*
+                 *           B
+                 * |XXXXXX| / \
+                 * |XXXXXX|/   \
+                 * '------P======
+                 */
+                Point pivot = new Point(xL,currState.y);
+                
+                {
+                    int leftBound = leftAnyExtent(xL, currState.y);
+                    generateSameLevelUnobservable(pivot, leftBound, xL, currState);
+                }
+
+                {
+                    int dy = basePoint.y - currState.y; 
+                    Fraction leftProjection = new Fraction((xL-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+                    
+                    int leftBound = leftDownExtent(xL, currState.y);
+                    if (!leftProjection.isLessThanOrEqual(leftBound)) { // leftBound < leftProjection
+                        this.generateDownwardsUnobservable(pivot, new Fraction(leftBound), leftProjection, currState);
+                    }
+                }
+            }
+        }
+
+        if (currState.xR.isWholeNumber()) {
+            int xR = currState.xR.n;
+            if (graph.bottomLeftOfBlockedTile(xR, currState.y) && !graph.topLeftOfBlockedTile(xR, currState.y)) {
+                /*
+                 *    B
+                 *   / \ |XXXXXX|
+                 *  /   \|XXXXXX|
+                 * ======P------'
+                 */
+                Point pivot = new Point(xR,currState.y);
+                
+                {
+                    int rightBound = rightAnyExtent(xR, currState.y);
+                    generateSameLevelUnobservable(new Point(xR,currState.y), xR, rightBound, currState);
+                }
+
+                {
+                    int dy = basePoint.y - currState.y; 
+                    Fraction rightProjection = new Fraction((xR-basePoint.x)*(dy+1), dy).plus(basePoint.x);
+                    int rightBound = rightDownExtent(xR, currState.y);
+                    if (rightProjection.isLessThan(rightBound)) { // rightProjection < rightBound
+                        this.generateDownwardsUnobservable(pivot, rightProjection, new Fraction(rightBound), currState);
+                    }
+                }
+            }
+        }
+    }
+    
+    /// === GENERATE SUCCESSORS - PATTERNS - END ===
+    
+    /// === GENERATE SUCCESSORS - UTILITY - START ===
+
+    private int leftUpExtent(int xL, int y) {
+        return leftDownExtents[y+1][xL];
+    }
+
+    private int leftDownExtent(int xL, int y) {
+        return leftDownExtents[y][xL];
+    }
+    
+    private int leftAnyExtent(int xL, int y) {
+        return Math.max(leftDownExtents[y][xL], leftDownExtents[y+1][xL]);
+    }
+
+    private int rightUpExtent(int xR, int y) {
+        return rightDownExtents[y+1][xR];
+    }
+
+    private int rightDownExtent(int xR, int y) {
+        return rightDownExtents[y][xR];
+    }
+
+    private int rightAnyExtent(int xR, int y) {
+        return Math.min(rightDownExtents[y][xR], rightDownExtents[y+1][xR]);
     }
 
     /**
-     * Goes Right until it hits a corner of a tile, then returns.
+     * Can be used for exploreLeftwards or exploreRightwards.
+     * This function will not split intervals.
      */
-    private Fraction rightSearchTillCorner(Fraction fromXR, int y, Fraction toXR) {
-        int fromRfloor = fromXR.floor();
-        int toRceil = toXR.ceil();
-        
-        CheckFunction currentSideBlocked; // represents up/down.
-        CheckFunction otherSideBlocked;   // represents opposite vertical direction of currentSideBlocked
-        
-        boolean currentlyBlocked;
-        if (topLeftOfBlockedTile(fromRfloor, y)) {
-            if (bottomLeftOfBlockedTile(fromRfloor, y)) {
-                //completely blocked.
-                return fromXR;
-            } else {
-                currentSideBlocked = (a,b) -> topLeftOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> bottomLeftOfBlockedTile(a,b);
-                currentlyBlocked = true;
-            }
-        } else {
-            if (bottomLeftOfBlockedTile(fromRfloor, y)) {
-                currentSideBlocked = (a,b) -> bottomLeftOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> topLeftOfBlockedTile(a,b);
-                currentlyBlocked = true;
-            } else {
-                currentSideBlocked = (a,b) -> leftOfBlockedTile(a,b);
-                otherSideBlocked = (a,b) -> false;
-                currentlyBlocked = false;
-            }
-        }
-
-        fromRfloor++;
-        while (fromRfloor < toRceil) {
-            if (otherSideBlocked.check(fromRfloor, y)) {
-                return new Fraction(fromRfloor);
-            }
-            
-            boolean isBlocked = currentSideBlocked.check(fromRfloor, y);
-            if (currentlyBlocked != isBlocked) {
-                return new Fraction(fromRfloor);
-            }
-            fromRfloor++;
-        }
-        return toXR;
+    private void generateSameLevelObservable(int leftBound, int rightBound, AnyaState source) {
+        addSuccessor(source,
+                AnyaState.createObservableSuccessor(new Fraction(leftBound), new Fraction(rightBound), source.y, source));
     }
 
     /**
-     * Searches left until it hits a blocked tile.
-     * Returns when it first hits a blocked tile. otherwise it returns toXL.
-     * above iff checking up.
+     * Can be used for exploreLeftwards or exploreRightwards.
+     * This function will not split intervals.
      */
-    private Fraction restrictLeft(Fraction fromXL, int yUpDown, Fraction toXL, boolean above) {
-        CheckFunction isBlocked;
-        if (above) {
-            isBlocked = (x,y) -> topRightOfBlockedTile(x,y);
-        } else {
-            isBlocked = (x,y) -> bottomRightOfBlockedTile(x,y);
-        }
-        
-        int fromLfloor = fromXL.floor();
-        int toLfloor = toXL.floor();
-        
-        while (fromLfloor > toLfloor) {
-            if (isBlocked.check(fromLfloor, yUpDown)) {
-                return new Fraction(fromLfloor);
-            }
-            fromLfloor--;
-        }
-        return toXL;
+    private void generateSameLevelUnobservable(Point basePoint, int leftBound, int rightBound, AnyaState source) {
+        addSuccessor(source,
+                AnyaState.createUnobservableSuccessor(new Fraction(leftBound), new Fraction(rightBound), source.y, basePoint, source));
     }
 
     /**
-     * Searches right until it hits a blocked tile.
-     * Returns when it first hits a blocked tile. otherwise it returns toXR.
-     * above iff checking up.
+     * Can be used for exploreLeftwards or exploreRightwards.
+     * This function will not split intervals.
      */
-    private Fraction restrictRight(Fraction fromXR, int currY, Fraction toXR, boolean above) {
-        CheckFunction isBlocked;
-        if (above) {
-            isBlocked = (x,y) -> topLeftOfBlockedTile(x,y);
-        } else {
-            isBlocked = (x,y) -> bottomLeftOfBlockedTile(x,y);
-        }
-        
-        int fromRceil = fromXR.ceil();
-        int toRceil = toXR.ceil();
+    private void generateSameLevelStart(Point start, int leftBound, int rightBound) {
+        addSuccessor(null,
+                AnyaState.createStartState(new Fraction(leftBound), new Fraction(rightBound), start.y, start));
+    }
 
-        while (fromRceil < toRceil) {
-            if (isBlocked.check(fromRceil, currY)) {
-                return new Fraction(fromRceil);
-            }
-            fromRceil++;
-        }
-        return toXR;
+    private void generateUpwardsUnobservable(Point basePoint, Fraction leftBound, Fraction rightBound, AnyaState source) {
+        generateAndSplitIntervals(
+                source.y + 2, source.y + 1,
+                basePoint,
+                leftBound, rightBound,
+                source);
     }
     
+    private void generateUpwardsObservable(Fraction leftBound, Fraction rightBound, AnyaState source) {
+        generateAndSplitIntervals(
+                source.y + 2, source.y + 1,
+                null,
+                leftBound, rightBound,
+                source);
+    }
     
-    private void processDirectSuccessors(Interval interval, int currY,
-            Fraction xL, Fraction xR, boolean above) {
-        
-        // Now we split the intervals by blocks.
-        LinkedList<Fraction> splitList = splitByBlocks(currY, xL, xR, above);
-        
-        Fraction intervalLeft = null;
-        for (Fraction intervalRight : splitList) {
-            if (intervalLeft == null) {
-                intervalLeft = intervalRight;
+    private void generateUpwardsStart(Fraction leftBound, Fraction rightBound, Point start) {
+        generateAndSplitIntervals(
+                start.y + 2, start.y + 1,
+                start,
+                leftBound, rightBound,
+                null);
+    }
+
+    private void generateDownwardsUnobservable(Point basePoint, Fraction leftBound, Fraction rightBound, AnyaState source) {
+        generateAndSplitIntervals(
+                source.y - 1, source.y - 1,
+                basePoint,
+                leftBound, rightBound,
+                source);
+    }
+    
+    private void generateDownwardsObservable(Fraction leftBound, Fraction rightBound, AnyaState source) {
+        generateAndSplitIntervals(
+                source.y - 1, source.y - 1,
+                null,
+                leftBound, rightBound,
+                source);
+    }
+    
+    private void generateDownwardsStart(Fraction leftBound, Fraction rightBound, Point start) {
+        generateAndSplitIntervals(
+                start.y - 1, start.y - 1,
+                start,
+                leftBound, rightBound,
+                null);
+    }
+    
+    /**
+     * Called by generateUpwards / Downwards.
+     * basePoint is null if observable. Not null if unobservable.
+     * source is null if start state.
+     * 
+     * This is used to avoid repeated code in generateUpwardsUnobservable, generateUpwardsObservable,
+     * // generateDownwardsUnobservable, generateDownwardsObservable, generateDownwardsStart, generateDownwardsStart.
+     */
+    private void generateAndSplitIntervals(int checkY, int newY, Point basePoint, Fraction leftBound, Fraction rightBound, AnyaState source) {
+        Fraction left = leftBound;
+        int leftFloor = left.floor();
+
+        // Divide up the intervals.
+        while(true) {
+            int right = rightDownExtents[checkY][leftFloor]; // it's actually rightDownExtents for exploreDownwards. (thus we use checkY = currY - 2)
+            if (rightBound.isLessThanOrEqual(right)) break; // right < rightBound            
+            
+            if (basePoint == null) {
+                addSuccessor(source, AnyaState.createObservableSuccessor(left, new Fraction(right), newY, source));
             } else {
-                directRelax(interval, currY, intervalLeft, intervalRight);
-                intervalLeft = intervalRight;
+                if (source == null) {
+                    addSuccessor(null, AnyaState.createStartState(left, new Fraction(right), newY, basePoint));
+                } else {
+                    addSuccessor(source, AnyaState.createUnobservableSuccessor(left, new Fraction(right), newY, basePoint, source));
+                }
             }
+            
+            leftFloor = right;
+            left = new Fraction(leftFloor);
         }
-    }
-    
-
-    private void directRelax(Interval interval, int yUp, Fraction intervalLeft,
-            Fraction intervalRight) {
-        Point curParent = interval.parent;
-        relaxUsingPoint(curParent, yUp, intervalLeft, intervalRight);
-    }
-
-    private void relaxUsingPoint(Point pivot, int y, Fraction xL, Fraction xR) {
-        //float distance = computePointToIntervalDistance(y, xL, xR, pivot);
-        //float fValue = distance + getDistance(pivot);
-        tryRelax(y, xL, xR, pivot);
-    }
-
-    private float computePointToIntervalDistance(int yUp, Fraction intervalLeft,
-            Fraction intervalRight, Point point) {
-        if (isLessThan(point.x, intervalLeft)) {
-            // xL as target
-            return Fraction.length(intervalLeft.minus(point.x), yUp - point.y);
-        } else if (isLessThanOrEqual(point.x, intervalRight)) {
-            // vertically up
-            float distance = yUp - point.y;
-            if (distance<0) distance = -distance;
-            return distance;
+        
+        if (basePoint == null) {
+            addSuccessor(source, AnyaState.createObservableSuccessor(left, rightBound, newY, source));
         } else {
-            // xR as target.
-            return Fraction.length(intervalRight.minus(point.x), yUp - point.y);
-        }
-    }
-
-    private LinkedList<Fraction> splitByBlocksAbove(int yUp, Fraction xL, Fraction xR) {
-        return splitByBlocks(yUp, xL, xR, true);
-    }
-
-    private LinkedList<Fraction> splitByBlocksBelow(int yDown, Fraction xL, Fraction xR) {
-        return splitByBlocks(yDown, xL, xR, false);
-    }
-
-    private LinkedList<Fraction> splitByBlocks(int currY, Fraction xL, Fraction xR, boolean above) {
-        CheckFunction currentlyBlocked;
-        if (above) {
-            currentlyBlocked = (a,b) -> bottomLeftOfBlockedTile(a,b);
-        } else {
-            currentlyBlocked = (a,b) -> topLeftOfBlockedTile(a,b);
-        }
-        
-        LinkedList<Fraction> splitList = new LinkedList<>();
-        
-        splitList.offer(xL);
-        
-        if (currY >= graph.sizeY+1) { // there's nothing above.
-            splitList.offer(xR);
-            return splitList;
-        }
-                
-        int leftFloor = xL.floor();
-        int rightFloor = xR.floor();
-        boolean currentBlocked = currentlyBlocked.check(leftFloor, currY);
-        
-        int current = leftFloor+1;
-        while (current <= rightFloor) {
-            boolean isBlocked = currentlyBlocked.check(current, currY);
-            if (currentBlocked != isBlocked) {
-                splitList.offer(new Fraction(current));
-                currentBlocked = isBlocked;
-            }
-            current++;
-        }
-        splitList.offer(xR);
-        
-        return splitList;
-    }
-
-    private void initialiseIntervalSets() {
-        intervalSets = new ArrayList<>(graph.sizeY+1);
-        for (int i=0; i<graph.sizeY+1; i++) {
-            AVLTree<Interval> avlTree = new AVLTree<>();
-            intervalSets.add(avlTree);
-            if (i != sy) {
-                Interval interval = new Interval(i, leftBoundary, rightBoundary);
-                pq.add(interval);
-                avlTree.insert(interval);
+            if (source == null) {
+                addSuccessor(null, AnyaState.createStartState(left, rightBound, newY, basePoint));
             } else {
-                Fraction startX = new Fraction(sx);
-                start = new Interval(i, sx);
-                pq.add(start);
-                
-                if (!startX.equals(leftBoundary)) {
-                    Interval interval = new Interval(i, leftBoundary, startX);
-                    pq.add(interval);
-                    avlTree.insert(interval);
-                }
-                avlTree.insert(start);
-                if (!startX.equals(rightBoundary)) {
-                    Interval interval = new Interval(i, startX, rightBoundary);
-                    pq.add(interval);
-                    avlTree.insert(interval);
-                }
+                addSuccessor(source, AnyaState.createUnobservableSuccessor(left, rightBound, newY, basePoint, source));
             }
         }
     }
     
-    /*private void printTree(AVLTree<Interval> intervalSet) { // DEBUGGING TOOL
-        System.out.println(intervalSet.inorderToString());
-        Node<Interval> a = intervalSet.getFirst();
-        while (a != null){
-            System.out.print(a+ " ");
-            a = a.getNext();
-        }
-        System.out.println();
-        a = intervalSet.getLast();
-        while (a != null){
-            System.out.print(a+ " ");
-            a = a.getPrev();
-            }
-        System.out.println();
-    }*/
+    /// === GENERATE SUCCESSORS - UTILITY - END ===
     
-    private void tryRelax(int y, Fraction xL, Fraction xR, Point newParent) {
-        if (!xL.isLessThan(xR)) return;
-        float gValue = getDistance(newParent);
-        
-        AVLTree<Interval> intervalSet = intervalSets.get(y);
-        Interval left = new Interval(y,xL,xL);
-        Interval right = new Interval(y,xR,xR);
-        
-        Node<Interval> leftMost = intervalSet.ceiling(left);
-        while (left.xL.equals(leftMost.getData().xR)) leftMost = leftMost.getNext();
-        Node<Interval> rightMost = intervalSet.ceiling(right);
-        if (rightMost == null) rightMost = intervalSet.getLast();
 
-        // STEP 1: TRIM VISITED INTERVALS FROM ENDS
-        while (leftMost.getData().visited || leftMost.getData().fValue < gValue) {
-            // while leftMost.visited && leftMost <= rightMost
-            left = leftMost.getData();
-            leftMost = leftMost.getNext();
-            if (leftMost == null || !leftMost.getData().isLessThanOrEqual(rightMost.getData())) {
-                return;
+
+    private float heuristic(AnyaState currState) {
+        int baseX = currState.basePoint.x;
+        int baseY = currState.basePoint.y;
+        Fraction xL = currState.xL;
+        Fraction xR = currState.xR;
+
+        // Special case: base, goal, interval all on same row.
+        if (currState.y == baseY && currState.y == ey) {
+
+            // Case 1: base and goal on left of interval.
+            // baseX < xL && ex < xL
+            if (!xL.isLessThanOrEqual(baseX) && !xL.isLessThanOrEqual(ex)) {
+                return 2*xL.toFloat() - baseX - ex; // (xL-baseX) + (xL-ex);
             }
-        }
-        while (rightMost.getData().visited || leftMost.getData().fValue < gValue) {
-            // while rightMost.visited && leftMost <= rightMost
-            rightMost = rightMost.getPrev();
-            right = rightMost.getData();
-            if (rightMost == null || !leftMost.getData().isLessThanOrEqual(rightMost.getData())) {
-                return;
-            }
-        }
-
-        // Nothing to relax.
-        if (leftMost == null || rightMost == null || !leftMost.getData().isLessThanOrEqual(rightMost.getData())) {
-            return;
-        }
-        
-        // now left.xR = left boundary of unvisited, right.xR = right boundary of unvisited.
-        // also, subset is non-empty.
-        // STEP 2: INTERVAL SPLITTING. Note: we do not split visited nodes.
-        Fraction x1_L = null;
-        Fraction x2_L = null;
-        Fraction x3_L = null;
-        Fraction x1_R = null;
-        Fraction x2_R = null;
-        Fraction x3_R = null;
-
-        // Check whether left requires splitting
-        if (!left.xR.equals(leftMost.getData().xL)) { // left.xR != leftMost.xL
-            Interval first = leftMost.getData();
             
-            // This means first.xL < left.xR < first.xR
-            if (!(first.xL.isLessThan(left.xR) && left.xR.isLessThan(first.xR)))
-                throw new UnsupportedOperationException();
-            assert first.xL.isLessThan(left.xR) && left.xR.isLessThan(first.xR);
-            x1_L = first.xL;
-            x2_L = left.xR;
-            x3_L = first.xR;
-        }
-        // Check whether right requires splitting
-        if (!right.xR.equals(rightMost.getData().xR)) { // right.xR != last.xR
-            Interval last = rightMost.getData();
-            
-            // This means last.xL < right.xR < last.xR
-            assert last.xL.isLessThan(right.xR) && right.xR.isLessThan(last.xR);
-            x1_R = last.xL;
-            x2_R = right.xR;
-            x3_R = last.xR;
-        }
-        
-        if (x1_L != null && x1_R != null && x1_L.equals(x1_R)) { // Special case. Both left and right in same interval.
-            assert x3_L.equals(x3_R);
-            assert x2_L.isLessThan(x2_R);
-            
-            // We split this single interval into three.
-            float fValue = leftMost.getData().fValue;
-            Point parent = leftMost.getData().parent;
-            // x1_L=x1_R < x2_L < x2_R < x3_L=x3_R
-            Interval in1 = new Interval(y, x1_L, x2_L, fValue, parent);
-            Interval in2 = new Interval(y, x2_L, x2_R, fValue, parent);
-            Interval in3 = new Interval(y, x2_R, x3_R, fValue, parent);
-            //tryRecomputeFValue(in1);
-            //tryRecomputeFValue(in2);
-            //tryRecomputeFValue(in3);
-            intervalSet.delete(in3); // original interval has same xR as in3.
-            pq.remove(in3);
-
-            intervalSet.insert(in1);
-            intervalSet.insert(in2);
-            intervalSet.insert(in3);
-            pq.add(in1);
-            pq.add(in2);
-            pq.add(in3);
-            
-            assert leftMost.equals(rightMost);
-            leftMost = intervalSet.search(in2);
-            rightMost = leftMost;
-        } else {
-            if (x1_L != null) {
-                // We split a single interval into two.
-                float fValue = leftMost.getData().fValue;
-                Point parent = leftMost.getData().parent;
-                // x1_L < x2_L < x3_L
-                Interval in1 = new Interval(y, x1_L, x2_L, fValue, parent);
-                Interval in2 = new Interval(y, x2_L, x3_L, fValue, parent);
-                //tryRecomputeFValue(in1);
-                //tryRecomputeFValue(in2);
-                
-                boolean replaceRightmost = rightMost.getData().equals(in2);
-                
-                intervalSet.delete(in2); // original interval has same xR as in2.
-                boolean result = pq.remove(in2); assert result;
-
-                intervalSet.insert(in1);
-                intervalSet.insert(in2);
-                pq.add(in1);
-                pq.add(in2);
-                
-                leftMost = intervalSet.search(in2);
-                if (replaceRightmost) {
-                    assert x1_R == null;
-                    rightMost = leftMost;
-                }
+            // Case 2: base and goal on right of interval.
+            // xR < baseX && xR < ex
+            else if (xR.isLessThan(baseX) && xR.isLessThan(ex)) {
+                return baseX + ex - 2*xL.toFloat(); // (baseX-xL) + (ex-xL)
             }
-            if (x1_R != null) {
-                // We split a single interval into two.
-                float fValue = rightMost.getData().fValue;
-                Point parent = rightMost.getData().parent;
-                // x1_R < x2_R < x3_R
-                Interval in1 = new Interval(y, x1_R, x2_R, fValue, parent);
-                Interval in2 = new Interval(y, x2_R, x3_R, fValue, parent);
-                //tryRecomputeFValue(in1);
-                //tryRecomputeFValue(in2);
-                
-                boolean replaceLeftmost = leftMost.getData().equals(in2);
-                
-                intervalSet.delete(in2); // original interval has same xR as in2.
-                boolean result = pq.remove(in2); assert result;
-                
-                intervalSet.insert(in1);
-                intervalSet.insert(in2);
-                pq.add(in1);
-                pq.add(in2);
-                right = in1;
-
-                rightMost = intervalSet.search(in1);
-                if (replaceLeftmost) {
-                    assert x1_L == null;
-                    leftMost = rightMost;
-                }
+            
+            // Case 3: Otherwise, the direct path from base to goal will pass through the interval.
+            else {
+                return Math.abs(baseX - ex);
             }
         }
-        
-        // Step 3: RELAXATION - FINALLY
-        while (leftMost != null && leftMost.getData().isLessThanOrEqual(rightMost.getData())) {
-            Interval interval = leftMost.getData();
-            if (!interval.visited) {
-                tryRelax(interval, newParent, gValue);
-            }
-            leftMost = leftMost.getNext();
-        }
-        
-    }
+
     
-    
-    private void tryRelax(Interval interval, Point newParent, float gValue) {
-        float distance = computePointToIntervalDistance(interval.y, interval.xL, interval.xR, newParent);
-        float newFValue = gValue + distance;
-        if (newFValue < interval.fValue) {
-            //System.out.println("RELAX: " + interval + "from " + interval.fValue + " --> " + newFValue); 
+        int dy1 = baseY - currState.y;
+        int dy2 = ey - currState.y;
+        
+        // If goal and base on same side of interval, reflect goal about interval -> ey2.
+        int ey2 = ey;
+        if (dy1 * dy2 > 0) ey2 = 2*currState.y - ey;
+        
+        /*  E
+         *   '.
+         * ----X----- <--currState.y
+         *      '.
+         *        B
+         */
+        // (ey-by)/(ex-bx) = (cy-by)/(cx-bx)
+        // cx = bx + (cy-by)(ex-bx)/(ey-by)
+        
+        // Find the pivot point on the interval for shortest path from base to goal.
+        float intersectX = baseX + (float)(currState.y - baseY)*(ex - baseX)/(ey2-baseY);
+        float xlf = xL.toFloat();
+        float xrf = xR.toFloat();
+        
+        // Snap to endpoints of interval if intersectX it lies outside interval.
+        if (intersectX < xlf) intersectX = xlf;
+        if (intersectX > xrf) intersectX = xrf;
+        
+        {
+            // Return sum of euclidean distances. (base~intersection~goal)
+            float dx1 = intersectX - baseX;
+            float dx2 = intersectX - ex;
             
-            boolean result = pq.remove(interval); assert result;
-            interval.fValue = newFValue;
-            interval.parent = newParent;
-            pq.add(interval);
-            tryRecordInterval(interval.y, interval.xL, interval.xR, interval.parent);
+            return (float)(Math.sqrt(dx1*dx1+dy1*dy1) + Math.sqrt(dx2*dx2+dy2*dy2));
         }
     }
     
-    private void tryRecomputeFValue(Interval interval) {
-        if (interval.fValue == Float.POSITIVE_INFINITY) {
-            return;
+
+    private int pathLength() {
+        int length = 1;
+        AnyaState current = goalState;
+        while (current != null) {
+            current = current.parent;
+            length++;
         }
-        float gValue = getDistance(interval.parent);
-        float distance = computePointToIntervalDistance(interval.y, interval.xL, interval.xR, interval.parent);
-        interval.fValue = gValue + distance;
-    }
-    
-    private boolean containsFinishPoint(Interval interval) {
-        if (ey != interval.y) return false; // ey == y
-        if (interval.xR.isLessThan(ex)) return false; // ex <= xR
-        return (interval.xL.isLessThanOrEqual(ex)); // xL <= ex
-    }
-
-    private void setDistance(int x, int y, float value, Interval interval) {
-        //System.out.println("SET: " + x+","+y + " from " + distance[toOneDimIndex(x, y)] + " --> " + value); 
-        if (value < distance[toOneDimIndex(x, y)]) {
-            int index = toOneDimIndex(x, y);
-            distance[index] = value;
-            pointInterval[index] = interval;
-        }
-    }
-
-    private float getDistance(int x, int y) {
-        assert distance[toOneDimIndex(x, y)] != Float.POSITIVE_INFINITY : x + "," + y;
-        return distance[toOneDimIndex(x, y)];
-    }
-
-    private float getDistance(Point point) {
-        return getDistance(point.x, point.y);
-    }
-
-    private float distance2D(int x, int y, int parentX, int parentY) {
-        int dx = parentX-x;
-        int dy = parentY-y;
-        return (float)Math.sqrt((dx*dx) + (dy*dy));
-    }
-    
-    private boolean isLessThan(int x, Fraction o) {
-        return x*o.d < o.n;
-    }
-    
-    private boolean isLessThanOrEqual(int x, Fraction o) {
-        return x*o.d <= o.n;
-    }
-    
-    private boolean topRightOfBlockedTile(int x, int y) {
-        return graph.topRightOfBlockedTile(x, y);
-    }
-
-    private boolean topLeftOfBlockedTile(int x, int y) {
-        return graph.topLeftOfBlockedTile(x, y);
-    }
-
-    private boolean bottomRightOfBlockedTile(int x, int y) {
-        return graph.bottomRightOfBlockedTile(x, y);
-    }
-
-    private boolean bottomLeftOfBlockedTile(int x, int y) {
-        return graph.bottomLeftOfBlockedTile(x, y);
-    }
-
-    private boolean rightOfBlockedTile(int x, int y) {
-        return bottomRightOfBlockedTile(x,y) || topRightOfBlockedTile(x,y);
-    }
-
-    private boolean leftOfBlockedTile(int x, int y) {
-        return bottomLeftOfBlockedTile(x,y) || topLeftOfBlockedTile(x,y);
-    }
-    
-    public int[][] emptyPath() {
-        return new int[0][];
-    }
-
-    @Override
-    public int[][] getPath() {
-        LinkedList<int[]> pathList = new LinkedList<>();
-        Interval currentInterval = finish;
-        if (currentInterval == null) {
-            return emptyPath();
-        }
-
-        int[] node = new int[2];
-        node[0] = ex;
-        node[1] = ey;
-        pathList.add(node);
-        
-        Point current = currentInterval.parent;
-        while (!currentInterval.isStartPoint) {
-            currentInterval = pointInterval[toOneDimIndex(current.x, current.y)];
-
-            node = new int[2];
-            node[0] = current.x;
-            node[1] = current.y;
-            pathList.add(node);
-            
-            current = currentInterval.parent;
-        }
-        
-        int[][] path = new int[pathList.size()][];
-        return pathList.toArray(path);
-    }
-    
-    
-    
-    
-    
-
-    private void tryRecordInterval(int y, Fraction xL, Fraction xR, Point parent) {
-        if (recordList != null) {
-            recordList.add(new ExploredInterval(xR,xL,y, parent));
-            maybeSaveSearchSnapshot();
-        }
-    }
-    private void tryRecordExploredInterval(int y, Fraction xL, Fraction xR, Point parent) {
-        if (exploredList != null) {
-            exploredList.add(new ExploredInterval(xR,xL,y, parent));
-            maybeSaveSearchSnapshot();
-        }
+        return length;
     }
     
     @Override
-    public void startRecording() {
-        super.startRecording();
-        exploredList = new ArrayList<>();
-        recordList = new ArrayList<>();
+    public int[][] getPath() {
+        if (goalState == null) return new int[0][]; // Fail
+
+        // Start from goalState and traverse backwards.
+        int length = pathLength();
+        int[][] path = new int[length][];
+        AnyaState current = goalState;
+
+        path[length-1] = new int[2];
+        path[length-1][0] = ex;
+        path[length-1][1] = ey;
+        
+        int index = length-2;
+        while (current != null) {
+            path[index] = new int[2];
+            path[index][0] = current.basePoint.x;
+            path[index][1] = current.basePoint.y;
+            
+            index--;
+            current = current.parent;
+        }
+        
+        return path;
     }
+
+    @Override
+    protected float getPathLength() {
+        if (goalState == null) return -1; // Fail
+
+        // Start from goalState and traverse backwards.
+        double pathLength = 0;
+        int currX = ex;
+        int currY = ey;
+        AnyaState current = goalState;
+
+        while (current != null) {
+            int nextX = current.basePoint.x;
+            int nextY = current.basePoint.y;
+            
+            pathLength += graph.distance_double(currX,currY,nextX,nextY);
+            current = current.parent;
+            currX = nextX;
+            currY = nextY;
+        }
+        
+        return (float)pathLength;
+    }
+    
 
     @Override
     protected List<SnapshotItem> computeSearchSnapshot() {
-        ArrayList<SnapshotItem> list = new ArrayList<>(exploredList.size());
+        ArrayList<SnapshotItem> list = new ArrayList<>(states.length);
 
-        for (ExploredInterval in : recordList) {
+        for (AnyaState in : states) {
             // y, xLn, xLd, xRn, xRd, px, py
+            if (in == null) continue;
             
             Integer[] line = new Integer[7];
             line[0] = in.y;
@@ -1207,12 +870,15 @@ public class Anya extends PathFindingAlgorithm {
             line[2] = in.xL.d;
             line[3] = in.xR.n;
             line[4] = in.xR.d;
-            line[5] = in.parent.x;
-            line[6] = in.parent.y;
+            line[5] = in.basePoint.x;
+            line[6] = in.basePoint.y;
             list.add(SnapshotItem.generate(line));
         }
-        for (ExploredInterval in : exploredList) {
-            // y, xLn, xLd, xRn, xRd, px, py
+        
+        if (!pq.isEmpty()) {
+            int index = pq.getMinIndex();
+            AnyaState in = states[index];
+
             Integer[] line = new Integer[5];
             line[0] = in.y;
             line[1] = in.xL.n;
@@ -1225,45 +891,81 @@ public class Anya extends PathFindingAlgorithm {
         return list;
     }
 
-    /**
-     * Debugging tool : abruptly terminate the algorithm.
-     */
-    private void crash() {
-        throw new UnsupportedOperationException("Terminated");
-    }
-
-    /**
-     * Debugging tool : set a break point.
-     */
-    private void breakPoint() {
-    }
-    
-    private int counter = 0;
-    /**
-     * Debugging tool : call the function (e.g. break point) after this method
-     * has been called triggerAtThisNumber times.
-     */
-    private void count(int triggerAtThisNumber, Runnable function) {
-        counter++;
-        if (counter == triggerAtThisNumber) {
-            //System.out.println("Trigger: " + counter);
-            function.run();
-        } else {
-            //System.out.println("Count: " + counter);
-        }
-    }
 }
 
-class ExploredInterval {
+
+class AnyaState {
     public final Fraction xL;
     public final Fraction xR;
     public final int y;
-    public final Point parent;
+    public final Point basePoint;
     
-    public ExploredInterval(Fraction xL, Fraction xR, int y, Point parent) {
+    public float hValue;
+    public float fValue;
+    public float gValue;
+    public AnyaState parent;
+    public int handle;
+    public boolean visited;
+
+    private AnyaState(Fraction xL, Fraction xR, int y, Point basePoint, float gValue, AnyaState parent) {
         this.xL = xL;
         this.xR = xR;
         this.y = y;
+        this.basePoint = basePoint;
+        
+        this.gValue = gValue;
         this.parent = parent;
+        this.visited = false;
+    }
+
+    public static AnyaState createStartState(Fraction xL, Fraction xR, int y, Point start) {
+        return new AnyaState(xL,xR,y,
+                start,
+                0f,
+                null);
+    }
+    
+    public static AnyaState createObservableSuccessor(Fraction xL, Fraction xR, int y, AnyaState sourceInterval) {
+        return new AnyaState(xL,xR,y,
+                sourceInterval.basePoint,
+                sourceInterval.gValue,
+                sourceInterval.parent);
+    }
+
+    public static AnyaState createUnobservableSuccessor(Fraction xL, Fraction xR, int y, Point basePoint, AnyaState sourceInterval) {
+        int dx = basePoint.x - sourceInterval.basePoint.x;
+        int dy = basePoint.y - sourceInterval.basePoint.y;
+        return new AnyaState(xL,xR,y,
+                basePoint,
+                sourceInterval.gValue + (float)Math.sqrt(dx*dx+dy*dy),
+                sourceInterval);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        // Removed null checks.
+        result = prime * result + basePoint.hashCode();
+        result = prime * result + xL.hashCode();
+        result = prime * result + xR.hashCode();
+        result = prime * result + y;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // Removed type checks. Removed null checks.
+        AnyaState other = (AnyaState) obj;
+        if (!xL.equals(other.xL)) return false;
+        if (!xR.equals(other.xR)) return false;
+        if (y != other.y) return false;
+        if (!basePoint.equals(other.basePoint)) return false;
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        return "(" + xL + " " + xR + ") - " + y;   
     }
 }

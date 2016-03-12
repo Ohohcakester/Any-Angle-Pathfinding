@@ -2,8 +2,6 @@ package algorithms.bst;
 
 import java.util.Stack;
 
-import algorithms.anya.Interval;
-
 class AVLNode<E> extends Node<E> {
     int balance;
     
