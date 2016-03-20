@@ -21,6 +21,7 @@ public class Memory {
         Memory.size = size;
         
         if (ticketCheck == null || ticketCheck.length != size) {
+            //System.out.println("REINITIALISE MEMORY " + ticketNumber);
             distance = new float[size];
             parent = new int[size];
             visited = new boolean[size];

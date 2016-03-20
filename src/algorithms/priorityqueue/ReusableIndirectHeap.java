@@ -80,13 +80,21 @@ public class ReusableIndirectHeap {
             outList[index] = value;
         }
     }
-    
+
     
     /**
      * Runtime: O(1)
      */
     public ReusableIndirectHeap(int size) {
         initialise(size, Float.POSITIVE_INFINITY);
+        heapSize = size;
+    }
+    
+    /**
+     * Runtime: O(1)
+     */
+    public ReusableIndirectHeap(int size, int memorySize) {
+        initialise(memorySize, Float.POSITIVE_INFINITY);
         heapSize = size;
     }
 
