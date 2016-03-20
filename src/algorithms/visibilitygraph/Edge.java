@@ -25,15 +25,6 @@ public class Edge {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Edge other = (Edge) obj;
-        if (dest != other.dest)
-            return false;
-        return true;
+        return (dest == ((Edge)obj).dest);
     }
 }
