@@ -4,14 +4,12 @@ import grid.GridGraph;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+//import main.utility.TimeCounter;
 import algorithms.AStarStaticMemory;
-import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
-import algorithms.visibilitygraph.Edge;
 
 
 public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
@@ -35,16 +33,17 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
     @Override
     public void computePath() {
         setupVisibilityGraph();
+//long start = System.nanoTime();
+        
 
         int size = visibilityGraph.size();
         int memorySize = visibilityGraph.maxSize();
         pq = new ReusableIndirectHeap(size, memorySize);
         this.initialiseMemory(memorySize, Float.POSITIVE_INFINITY, -1, false);
-        // TODO: Check that this doesn't reinitialise again and again due to slightly differing sizes
         
         initialise(visibilityGraph.startNode());
-
         int finish = visibilityGraph.endNode();
+
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             setVisited(current, true);
@@ -53,19 +52,28 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
                 break;
             }
             
-            // TODO: Arraylist or Iterator faster?
-            Iterator<Edge> itr = visibilityGraph.edgeIterator(current);
-            while (itr.hasNext()) {
-                Edge edge = itr.next();
-                if (!visited(edge.dest) && relax(edge)) {
+            SVGNode node = visibilityGraph.getOutgoingEdges(current);
+            int[] outgoingEdges = node.outgoingEdges;
+            float[] outgoingWeights = node.edgeWeights;
+            int nEdges = node.nEdges;
+            
+            for (int i=0;i<nEdges;++i) {
+                int dest = outgoingEdges[i];
+                float weight = outgoingWeights[i];
+                
+                if (!visited(dest) && relax(current, dest, weight)) {
                     // If relaxation is done.
-                    Point dest = visibilityGraph.coordinateOf(edge.dest);
-                    pq.decreaseKey(edge.dest, distance(edge.dest) + heuristic(dest.x, dest.y));
+                    int destX = visibilityGraph.xCoordinateOf(dest);
+                    int destY = visibilityGraph.yCoordinateOf(dest);
+                    
+                    pq.decreaseKey(dest, distance(dest) + heuristic(destX, destY));
                 }
             }
             
             maybeSaveSearchSnapshot();
         }
+//long end = System.nanoTime();
+//TimeCounter.timeC += (end-start);
     }
 
     protected void setupVisibilityGraph() {
@@ -83,12 +91,6 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
             visibilityGraph.initialise();
         }
     }
-    
-    
-    protected final boolean relax(Edge edge) {
-        // return true iff relaxation is done.
-        return relax(edge.source, edge.dest, edge.weight);
-    }
 
     protected final boolean relax(int u, int v, float weightUV) {
         // return true iff relaxation is done.
@@ -96,11 +98,14 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
         if (newWeight < distance(v)) {
             int p = parent(u);
             if (p != -1) {
-                Point p1 = visibilityGraph.coordinateOf(p);
-                Point p2 = visibilityGraph.coordinateOf(u);
-                Point p3 = visibilityGraph.coordinateOf(v);
+                int x1 = visibilityGraph.xCoordinateOf(p);
+                int y1 = visibilityGraph.yCoordinateOf(p);
+                int x2 = visibilityGraph.xCoordinateOf(u);
+                int y2 = visibilityGraph.yCoordinateOf(u);
+                int x3 = visibilityGraph.xCoordinateOf(v);
+                int y3 = visibilityGraph.yCoordinateOf(v);
                 
-                if (!graph.isTaut(p1.x,p1.y,p2.x,p2.y,p3.x,p3.y)) return false;
+                if (!graph.isTaut(x1,y1,x2,y2,x3,y3)) return false;
             }
             setDistance(v, newWeight);
             setParent(v, u);
@@ -128,9 +133,8 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
         
         int index = length-1;
         while (current != -1) {
-            Point point = visibilityGraph.coordinateOf(current);
-            int x = point.x;
-            int y = point.y;
+            int x = visibilityGraph.xCoordinateOf(current);
+            int y = visibilityGraph.yCoordinateOf(current);
             
             path[index] = new int[2];
             path[index][0] = x;
@@ -152,22 +156,19 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
     protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
         int startIndex = parent(endIndex);
-        Point startPoint = visibilityGraph.coordinateOf(startIndex);
-        Point endPoint = visibilityGraph.coordinateOf(endIndex);
-        edge[0] = startPoint.x;
-        edge[1] = startPoint.y;
-        edge[2] = endPoint.x;
-        edge[3] = endPoint.y;
+        edge[0] = visibilityGraph.xCoordinateOf(startIndex);
+        edge[1] = visibilityGraph.yCoordinateOf(startIndex);
+        edge[2] = visibilityGraph.xCoordinateOf(endIndex);
+        edge[3] = visibilityGraph.yCoordinateOf(endIndex);
         return edge;
     }
 
     @Override
     protected Integer[] snapshotVertex(int index) {
         if (selected(index)) {
-            Point point = visibilityGraph.coordinateOf(index);
             Integer[] edge = new Integer[2];
-            edge[0] = point.x;
-            edge[1] = point.y;
+            edge[0] = visibilityGraph.xCoordinateOf(index);
+            edge[1] = visibilityGraph.yCoordinateOf(index);
             return edge;
         }
         return null;
@@ -182,18 +183,20 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
         List<SnapshotItem> snapshotItemList = new ArrayList<>(size);
 
         for (int i=0;i<size;i++) {
-            Iterator<Edge> iterator = visibilityGraph.edgeIterator(i);
-            while (iterator.hasNext()) {
-                Edge edge = iterator.next();
-                if (edge.source < edge.dest) {
-                    Point start = visibilityGraph.coordinateOf(edge.source);
-                    Point end = visibilityGraph.coordinateOf(edge.dest);
-                    
+            SVGNode node = visibilityGraph.getOutgoingEdges(i);
+            int[] outgoingEdges = node.outgoingEdges;
+            int nEdges = node.nEdges;
+            
+            for (int j=0;j<nEdges;++j) {
+                int source = i;
+                int dest = outgoingEdges[j];
+                
+                if (source < dest) {
                     Integer[] path = new Integer[4];
-                    path[0] = start.x;
-                    path[1] = start.y;
-                    path[2] = end.x;
-                    path[3] = end.y;
+                    path[0] = visibilityGraph.xCoordinateOf(source);
+                    path[1] = visibilityGraph.yCoordinateOf(source);
+                    path[2] = visibilityGraph.xCoordinateOf(dest);
+                    path[3] = visibilityGraph.yCoordinateOf(dest);
                     
                     SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
                     snapshotItemList.add(snapshotItem);
