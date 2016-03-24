@@ -71,11 +71,11 @@ public class TimeCounter {
     }
 
     private static double toSecs(long value) {
-        return value / 1000000000.;
+        return value / 1000000.;
     }
 
     private static double toSecsPer(long value) {
-        return value / 1000000000. / iterations;
+        return value / 1000000. / iterations;
     }
 
     public static void print() {
