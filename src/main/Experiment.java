@@ -1,5 +1,6 @@
 package main;
 
+import grid.GridAndGoals;
 import grid.GridGraph;
 import grid.ReachableNodes;
 import grid.StartGoalPoints;
@@ -7,6 +8,7 @@ import grid.StartGoalPoints;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import main.graphgeneration.DefaultGenerator;
@@ -20,10 +22,15 @@ import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
+import algorithms.datatypes.SnapshotItem;
+import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.visibilitygraph.VisibilityGraph;
+import draw.DrawCanvas;
 import draw.GridLineSet;
+import draw.GridObjects;
+import draw.GridPointSet;
 
 public class Experiment {
     
@@ -32,10 +39,11 @@ public class Experiment {
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
 //        findUpperBound();
-        testAlgorithmOptimality();
+//        testAlgorithmOptimality();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
+        testLOSScan();
     }
     
     /**
@@ -107,6 +115,57 @@ public class Experiment {
     private static boolean hasSolution(AlgoFunction algo, GridGraph gridGraph, StartGoalPoints p) {
         int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
         return path.length > 1;
+    }
+    
+    private static void testLOSScan() {
+        GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
+        GridGraph gridGraph = gridAndGoals.gridGraph;
+        ArrayList<GridObjects> gridObjectsList = new ArrayList<>();
+        GridLineSet gridLineSet = new GridLineSet();;
+        GridPointSet gridPointSet = new GridPointSet();
+        
+        Random rand = new Random();
+        {
+            int sx = rand.nextInt(gridGraph.sizeX+1);
+            int sy = rand.nextInt(gridGraph.sizeY+1);
+            //sx = 10; sy = 8;
+            
+            LineOfSightScanner losScanner = new LineOfSightScanner(gridGraph);
+            try {
+                int iterations = 30000;
+                long start = System.nanoTime();
+                for (int i=0;i<iterations;++i) {
+                    losScanner.computeAllVisibleTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
+                    //losScanner.clearSnapshots();
+                }
+                long end = System.nanoTime();
+                double totalTime = (end-start)/1000000.; // convert to milliseconds
+                System.out.println("Total Time: " + totalTime);
+                System.out.println("Per iteration time: " + (totalTime/iterations));
+                
+                losScanner.computeAllVisibleTautSuccessors(sx, sy);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            for (int i=0;i<losScanner.nSuccessors;++i) {
+                int x = losScanner.successorsX[i];
+                int y = losScanner.successorsY[i];
+                gridLineSet.addLine(sx, sy, x,y, Color.GREEN);
+                gridPointSet.addPoint(x, y, Color.RED);
+            }
+            
+            //gridLineSet = generateRandomTestLines(gridGraph, 10);
+            gridPointSet.addPoint(sx, sy, Color.BLUE);
+            gridObjectsList.add(new GridObjects(gridLineSet, gridPointSet));
+            for (List<SnapshotItem> l : LineOfSightScanner.snapshotList) {
+                gridObjectsList.add(GridObjects.create(l));
+            }
+        }
+        
+
+        DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
+        Visualisation.setupMainFrame(drawCanvas, gridObjectsList);
     }
 
     /**

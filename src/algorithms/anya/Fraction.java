@@ -27,59 +27,59 @@ public class Fraction implements Comparable<Fraction> {
         this.d = d/gcd;
     }
     
-    public boolean isWholeNumber() {
-        assert gcd(n,d) == 1;
+    public final boolean isWholeNumber() {
+        //assert gcd(n,d) == 1;
         return (d == 1);
     }
     
-    public boolean isLessThanOrEqual(Fraction o) {
+    public final boolean isLessThanOrEqual(Fraction o) {
         return this.compareTo(o) <= 0;
     }
     
-    public boolean isLessThan(Fraction o) {
+    public final boolean isLessThan(Fraction o) {
         return this.compareTo(o) < 0;
     }
     
-    public boolean isLessThanOrEqual(int x) {
+    public final boolean isLessThanOrEqual(int x) {
         return n <= d*x;
     }
     
-    public boolean isLessThan(int x) {
+    public final boolean isLessThan(int x) {
         return n < d*x;
     }
     
-    public Fraction multiplyDivide(int multiply, int divide) {
+    public final Fraction multiplyDivide(int multiply, int divide) {
         return new Fraction(n*multiply, d*divide);
     }
     
-    public Fraction multiply(Fraction o) {
+    public final Fraction multiply(Fraction o) {
         return new Fraction(n*o.n, d*o.d);
     }
     
-    public Fraction divide(Fraction o) {
+    public final Fraction divide(Fraction o) {
         return new Fraction(n*o.d, d*o.n);
     }
 
-    public Fraction minus(Fraction o) {
+    public final Fraction minus(Fraction o) {
         return new Fraction(n*o.d - o.n*d, d*o.d);
     }
 
-    public Fraction plus(Fraction o) {
+    public final Fraction plus(Fraction o) {
         return new Fraction(n*o.d + o.n*d, d*o.d);
     }
 
-    public Fraction minus(int value) {
+    public final Fraction minus(int value) {
         return new Fraction(n - value*d, d);
     }
 
-    public Fraction plus(int value) {
+    public final Fraction plus(int value) {
         return new Fraction(n + value*d, d);
     }
     
     /**
      * @return largest integer leq to this.
      */
-    public int floor() {
+    public final int floor() {
         if (d == 1) return n;
         if (n > 0) {
             return n/d;
@@ -91,7 +91,7 @@ public class Fraction implements Comparable<Fraction> {
     /**
      * @return smallest integer geq to this.
      */
-    public int ceil() {
+    public final int ceil() {
         if (d == 1) return n;
         if (n > 0) {
             return (n-1)/d + 1;
@@ -100,19 +100,19 @@ public class Fraction implements Comparable<Fraction> {
         }
     }
     
-    public float toFloat() {
+    public final float toFloat() {
         return (float)n/d;
     }
 
     @Override
-    public int compareTo(Fraction o) {
+    public final int compareTo(Fraction o) {
         // this - that.
         // n1/d1 < n2/d2 iff n1d2 < n2d1 as d1,d2 are positive.
         return n*o.d - o.n*d; // n1d2 - n2d1
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (60*n/d);
@@ -120,28 +120,32 @@ public class Fraction implements Comparable<Fraction> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         Fraction o = (Fraction)obj;
         return (n*o.d == o.n*d);
     }
 
+    // slightly faster than equals()
+    public final boolean isEqualTo(Fraction o) {
+        return (n*o.d == o.n*d);
+    }
     
-    public static int gcd(int x, int y) {
+    public static final int gcd(int x, int y) {
         int result = gcdRecurse(x,y);
         return result<0 ? -result : result;
     }
     
-    private static int gcdRecurse(int x, int y) {
+    private static final int gcdRecurse(int x, int y) {
         return x == 0 ? y : gcdRecurse(y%x, x);
     }
 
-    public static float length(Fraction width, int height) {
+    public static final float length(Fraction width, int height) {
         float fWidth = width.toFloat();
         return (float)Math.sqrt((fWidth*fWidth) + (height*height));
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return n+"/"+d;
     }
 }
