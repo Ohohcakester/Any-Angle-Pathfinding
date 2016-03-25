@@ -10,8 +10,8 @@ public class SparseVisibilityGraph {
     private static SparseVisibilityGraph storedVisibilityGraph;
     private static GridGraph storedGridGraph;
     
-    protected LineOfSightScanner losScanner;
     protected final GridGraph graph;
+    protected LineOfSightScanner losScanner;
     protected int[][] nodeIndex;
     protected int startIndex;
     protected boolean startIsNewNode;
@@ -123,7 +123,6 @@ public class SparseVisibilityGraph {
      * happens to be one of the existing vertices in the visibility graph.
      */
     protected void connectAdditionalEdges(int index, int x, int y) {
-        int lastMatchingIndex = 0;
         int[] outgoingEdges = nodes[index].outgoingEdges;
         int existingNEdges = nodes[index].nEdges;
         
@@ -175,6 +174,11 @@ public class SparseVisibilityGraph {
      * Special case that is missed by the LOS scanner method.
      * If this happens, might as well end the algorithm prematurely.
      * But whatever. It won't take much time anyway.
+     * 
+     * Note: As this does not check whether the edge already exists, this could
+     *       possibly cause a repeated edge in the graph. This can happen when the
+     *       when either the start or end is placed at an outer corner (an existing
+     *       visibility graph vertex), causing the LOS scans to detect it.
      */
     protected void tryConnectStartAndEnd() {
         if (graph.lineOfSight(sx, sy, ex, ey)) {
@@ -296,6 +300,11 @@ public class SparseVisibilityGraph {
         }
     }
     
+    /**
+     * Deprecated. Was used for the all-pairs LOS checks. Now the tautness
+     * checks are implicitly covered in the LineOfSightScanner scans.
+     */
+    @Deprecated
     private boolean shouldAddEdge(int x1, int y1, int x2, int y2) {
         // Assumption: (x1,y1), (x2,y2) are either outer corners or start / goal vertices
         int dx = x2-x1;
@@ -340,15 +349,14 @@ public class SparseVisibilityGraph {
     }
     
     
-    protected int indexOf(int x, int y) {
+    protected final int indexOf(int x, int y) {
         return nodeIndex[y][x];
     }
     
-    protected boolean isNode(int x, int y) {
+    protected final boolean isNode(int x, int y) {
         return nodeIndex[y][x] != -1;
     }
     
-
     protected final boolean isCorner(int x, int y) {
         boolean a = graph.isBlocked(x-1, y-1);
         boolean b = graph.isBlocked(x, y-1);
@@ -374,23 +382,23 @@ public class SparseVisibilityGraph {
         return (results == 1);*/
     }
 
-    public int xCoordinateOf(int index) {
+    public final int xCoordinateOf(int index) {
         return nodes[index].x;
     }
 
-    public int yCoordinateOf(int index) {
+    public final int yCoordinateOf(int index) {
         return nodes[index].y;
     }
 
-    public int size() {
+    public final int size() {
         return nNodes;
     }
     
-    public int maxSize() {
+    public final int maxSize() {
         return maxSize;
     }
     
-    public int computeSumDegrees() {
+    public final int computeSumDegrees() {
         int sum = 0;
         for (int i=0;i<nNodes;++i) {
             sum += nodes[i].nEdges;
@@ -398,7 +406,7 @@ public class SparseVisibilityGraph {
         return sum;
     }
 
-    SVGNode getOutgoingEdges(int source) {
+    public final SVGNode getOutgoingEdges(int source) {
         return nodes[source];
     }
 
@@ -413,22 +421,22 @@ public class SparseVisibilityGraph {
         return new Edge(source, dest, Float.POSITIVE_INFINITY);
     }*/
 
-    public int startNode() {
+    public final int startNode() {
         return startIndex;
     }
 
-    public int endNode() {
+    public final int endNode() {
         return endIndex;
     }
     
-    private void maybeSaveSnapshot() {
+    private final void maybeSaveSnapshot() {
         if (saveSnapshot != null)
             saveSnapshot.run();
     }
     
 
     
-    public static SparseVisibilityGraph repurpose(SparseVisibilityGraph oldGraph, int sx, int sy, int ex, int ey) {
+    public static final SparseVisibilityGraph repurpose(SparseVisibilityGraph oldGraph, int sx, int sy, int ex, int ey) {
         oldGraph.removeStartAndEnd();
         
         SparseVisibilityGraph newGraph = new SparseVisibilityGraph(oldGraph.graph, sx, sy, ex, ey);
@@ -447,7 +455,7 @@ public class SparseVisibilityGraph {
         return newGraph;
     }
     
-    public static SparseVisibilityGraph getStoredGraph(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public static final SparseVisibilityGraph getStoredGraph(GridGraph graph, int sx, int sy, int ex, int ey) {
         SparseVisibilityGraph visibilityGraph = null;
         if (storedGridGraph != graph || storedVisibilityGraph == null) {
             //("Get new graph");
@@ -474,9 +482,9 @@ public class SparseVisibilityGraph {
     
 }
 
-class SVGNode {
-    int x;
-    int y;
+final class SVGNode {
+    final int x;
+    final int y;
 
     /** Invariant: If any new neighbour is added to outgoingEdges, (i.e. not in the static version)
      *             it will appear after all other outgoing edges
@@ -504,7 +512,7 @@ class SVGNode {
         this.nEdges = 0;
     }
 
-    public void addEdge(int toIndex, float weight) {
+    public final void addEdge(int toIndex, float weight) {
         if (nEdges >= outgoingEdges.length) {
             outgoingEdges = Arrays.copyOf(outgoingEdges, outgoingEdges.length*2);
             edgeWeights = Arrays.copyOf(edgeWeights, edgeWeights.length*2);
@@ -514,11 +522,11 @@ class SVGNode {
         nEdges++;
     }
     
-    public void lockOriginalNEdges() {
+    public final void lockOriginalNEdges() {
         originalNEdges = nEdges;
     }
     
-    public void removeExtraEdges() {
+    public final void removeExtraEdges() {
         nEdges = originalNEdges;
     }
 }
