@@ -1,7 +1,7 @@
 package algorithms.anya;
 
 
-public class Fraction implements Comparable<Fraction> {
+public final class Fraction implements Comparable<Fraction> {
 
     public final int n; // numerator. Can be negative
     public final int d; // denominator. Cannot be negative.

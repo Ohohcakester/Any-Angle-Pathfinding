@@ -13,7 +13,7 @@ import algorithms.datatypes.SnapshotItem;
 /**
  * Singleton. Do not make multiple simultaneous copies of this class or use in parallel code.
  */
-public class LineOfSightScanner {
+public final class LineOfSightScanner {
     public static ArrayList<List<SnapshotItem>> snapshotList = new ArrayList<>();
     private static ArrayList<SnapshotItem> snapshots = new ArrayList<>();
     
@@ -544,7 +544,7 @@ public class LineOfSightScanner {
 
 
 
-class LOSInterval {
+final class LOSInterval {
     final int y;
     final Fraction xL;
     final Fraction xR;

@@ -1,6 +1,6 @@
 package algorithms.datatypes;
 
-public class Memory {
+public final class Memory {
     private static float[] distance;
     private static int[] parent;
     private static boolean[] visited;
@@ -14,7 +14,7 @@ public class Memory {
     
     private static int size = 0;
     
-    public static int initialise(int size, float defaultDistance, int defaultParent, boolean defaultVisited) {
+    public static final int initialise(int size, float defaultDistance, int defaultParent, boolean defaultVisited) {
         Memory.defaultDistance = defaultDistance;
         Memory.defaultParent = defaultParent;
         Memory.defaultVisited= defaultVisited;
@@ -37,30 +37,30 @@ public class Memory {
         return ticketNumber;
     }
     
-    public static int currentTicket() {
+    public static final int currentTicket() {
         return ticketNumber;
     }
     
-    public static int size() {
+    public static final int size() {
         return size;
     }
     
-    public static float distance(int index) {
+    public static final float distance(int index) {
         if (ticketCheck[index] != ticketNumber) return defaultDistance;
         return distance[index];
     }
     
-    public static int parent(int index) {
+    public static final int parent(int index) {
         if (ticketCheck[index] != ticketNumber) return defaultParent;
         return parent[index];
     }
     
-    public static boolean visited(int index) {
+    public static final boolean visited(int index) {
         if (ticketCheck[index] != ticketNumber) return defaultVisited;
         return visited[index];
     }
     
-    public static void setDistance(int index, float value) {
+    public static final void setDistance(int index, float value) {
         if (ticketCheck[index] != ticketNumber) {
             distance[index] = value;
             parent[index] = defaultParent;
@@ -71,7 +71,7 @@ public class Memory {
         }
     }
     
-    public static void setParent(int index, int value) {
+    public static final void setParent(int index, int value) {
         if (ticketCheck[index] != ticketNumber) {
             distance[index] = defaultDistance;
             parent[index] = value;
@@ -82,7 +82,7 @@ public class Memory {
         }
     }
     
-    public static void setVisited(int index, boolean value) {
+    public static final void setVisited(int index, boolean value) {
         if (ticketCheck[index] != ticketNumber) {
             distance[index] = defaultDistance;
             parent[index] = defaultParent;
