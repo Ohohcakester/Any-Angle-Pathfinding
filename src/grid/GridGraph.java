@@ -27,63 +27,63 @@ public class GridGraph {
         }
     }
     
-    public void setBlocked(int x, int y, boolean value) {
+    public final void setBlocked(int x, int y, boolean value) {
         tiles[y][x] = value;
     }
     
-    public void trySetBlocked(int x, int y, boolean value) {
+    public final void trySetBlocked(int x, int y, boolean value) {
         if (isValidBlock(x,y))
             tiles[y][x] = value;
     }
     
-    public boolean isBlocked(int x, int y) {
+    public final boolean isBlocked(int x, int y) {
         if (x >= sizeX || y >= sizeY) return true;
         if (x < 0 || y < 0) return true;
         return tiles[y][x];
     }
     
-    public boolean isValidCoordinate(int x, int y) {
+    public final boolean isValidCoordinate(int x, int y) {
         return (x <= sizeX && y <= sizeY &&
                 x >= 0 && y >= 0);
     }
     
-    public boolean isValidBlock(int x, int y) {
+    public final boolean isValidBlock(int x, int y) {
         return (x < sizeX && y < sizeY &&
                 x >= 0 && y >= 0);
     }
 
-    public int toOneDimIndex(int x, int y) {
+    public final int toOneDimIndex(int x, int y) {
         return y*sizeXplusOne + x;
     }
     
-    public int toTwoDimX(int index) {
+    public final int toTwoDimX(int index) {
         return index%sizeXplusOne;
     }
     
-    public int toTwoDimY(int index) {
+    public final int toTwoDimY(int index) {
         return index/sizeXplusOne;
     }
 
-    public boolean isUnblockedCoordinate(int x, int y) {
+    public final boolean isUnblockedCoordinate(int x, int y) {
         return !topRightOfBlockedTile(x,y) ||
                 !topLeftOfBlockedTile(x,y) ||
                 !bottomRightOfBlockedTile(x,y) ||
                 !bottomLeftOfBlockedTile(x,y);
     }
     
-    public boolean topRightOfBlockedTile(int x, int y) {
+    public final boolean topRightOfBlockedTile(int x, int y) {
         return isBlocked(x-1, y-1);
     }
 
-    public boolean topLeftOfBlockedTile(int x, int y) {
+    public final boolean topLeftOfBlockedTile(int x, int y) {
         return isBlocked(x, y-1);
     }
 
-    public boolean bottomRightOfBlockedTile(int x, int y) {
+    public final boolean bottomRightOfBlockedTile(int x, int y) {
         return isBlocked(x-1, y);
     }
 
-    public boolean bottomLeftOfBlockedTile(int x, int y) {
+    public final boolean bottomLeftOfBlockedTile(int x, int y) {
         return isBlocked(x, y);
     }
     
@@ -95,7 +95,7 @@ public class GridGraph {
      * @param y2 Condition: y2 between 0 and sizeY inclusive.
      * @return distance.
      */
-    public float distance(int x1, int y1, int x2, int y2) {
+    public final float distance(int x1, int y1, int x2, int y2) {
         int xDiff = x2 - x1;
         int yDiff = y2 - y1;
         
@@ -114,7 +114,7 @@ public class GridGraph {
         return (float)Math.sqrt(squareDistance);
     }
     
-    public double distance_double(int x1, int y1, int x2, int y2) {
+    public final double distance_double(int x1, int y1, int x2, int y2) {
         int xDiff = x2 - x1;
         int yDiff = y2 - y1;
         
@@ -138,7 +138,7 @@ public class GridGraph {
      *   min(dx,dy)*sqrt(2) + (max(dx,dy)-min(dx,dy))
      * = min(dx,dy)*(sqrt(2)-1) + max(dx,dy)
      */
-    public float octileDistance(int x1, int y1, int x2, int y2) {
+    public final float octileDistance(int x1, int y1, int x2, int y2) {
         int dx = x1-x2;
         int dy = y1-y2;
         if (dx<0) dx = -dx;
@@ -158,7 +158,7 @@ public class GridGraph {
      * Same as lineOfSight, but only works with a vertex and its 8 immediate neighbours.
      * Also (x1,y1) != (x2,y2)
      */
-    public boolean neighbourLineOfSight(int x1, int y1, int x2, int y2) {
+    public final boolean neighbourLineOfSight(int x1, int y1, int x2, int y2) {
         if (x1 == x2) {
             if (y1 > y2) {
                 return !isBlocked(x1,y2) || !isBlocked(x1-1,y2);
@@ -188,7 +188,7 @@ public class GridGraph {
     /**
      * @return true iff there is line-of-sight from (x1,y1) to (x2,y2).
      */
-    public boolean lineOfSight(int x1, int y1, int x2, int y2) {
+    public final boolean lineOfSight(int x1, int y1, int x2, int y2) {
         int dy = y2 - y1;
         int dx = x2 - x1;
 
@@ -247,7 +247,7 @@ public class GridGraph {
         return true;
     }
 
-    public Point findFirstBlockedTile(int x1, int y1, int dx, int dy) {
+    public final Point findFirstBlockedTile(int x1, int y1, int dx, int dy) {
         
         int f = 0;
 
@@ -319,7 +319,7 @@ public class GridGraph {
      *  int j = Math.min(x, y);
      *  return maxRange[i][j + k] - k;
      */
-    public int[][] computeMaxDownLeftRanges() {
+    public final int[][] computeMaxDownLeftRanges() {
         int[][] downRange = new int[sizeY+1][sizeX+1];
         int[][] leftRange = new int[sizeY+1][sizeX+1];
 
@@ -387,14 +387,14 @@ public class GridGraph {
     /**
      * @return the percentage of blocked tiles as compared to the total grid size.
      */
-    public float getPercentageBlocked() {
+    public final float getPercentageBlocked() {
         return (float)getNumBlocked() / (sizeX*sizeY);
     }
     
     /**
      * @return the number of blocked tiles in the grid.
      */
-    public int getNumBlocked() {
+    public final int getNumBlocked() {
         int nBlocked = 0;
         for (int y=0; y<sizeY; y++) {
             for (int x=0; x<sizeX; x++) {
@@ -410,7 +410,7 @@ public class GridGraph {
     /**
      * Checks whether the path (x1,y1),(x2,y2),(x3,y3) is taut.
      */
-    public boolean isTaut(int x1, int y1, int x2, int y2, int x3, int y3) {
+    public final boolean isTaut(int x1, int y1, int x2, int y2, int x3, int y3) {
         if (x1 < x2) {
             if (y1 < y2) {
                 return isTautFromBottomLeft(x1, y1, x2, y2, x3, y3);
@@ -439,7 +439,7 @@ public class GridGraph {
     }
 
     
-    private boolean isTautFromBottomLeft(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromBottomLeft(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 < x2 || y3 < y2) return false;
         
@@ -454,7 +454,7 @@ public class GridGraph {
     }
 
     
-    private boolean isTautFromTopLeft(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromTopLeft(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 < x2 || y3 > y2) return false;
         
@@ -468,7 +468,7 @@ public class GridGraph {
         }
     }
     
-    private boolean isTautFromBottomRight(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromBottomRight(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 > x2 || y3 < y2) return false;
         int compareGradients = (y2-y1)*(x3-x2) - (y3-y2)*(x2-x1); // m1 - m2
@@ -482,7 +482,7 @@ public class GridGraph {
     }
 
     
-    private boolean isTautFromTopRight(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromTopRight(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 > x2 || y3 > y2) return false;
         
@@ -497,7 +497,7 @@ public class GridGraph {
     }
 
     
-    private boolean isTautFromLeft(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromLeft(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 < x2) return false;
         
@@ -511,7 +511,7 @@ public class GridGraph {
         }
     }
 
-    private boolean isTautFromRight(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromRight(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (x3 > x2) return false;
         
@@ -525,7 +525,7 @@ public class GridGraph {
         }
     }
 
-    private boolean isTautFromBottom(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromBottom(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (y3 < y2) return false;
         
@@ -539,7 +539,7 @@ public class GridGraph {
         }
     }
 
-    private boolean isTautFromTop(int x1, int y1, int x2, int y2, int x3,
+    private final boolean isTautFromTop(int x1, int y1, int x2, int y2, int x3,
             int y3) {
         if (y3 > y2) return false;
         

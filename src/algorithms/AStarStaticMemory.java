@@ -143,7 +143,7 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
         return length;
     }
     
-    protected boolean lineOfSight(int node1, int node2) {
+    protected final boolean lineOfSight(int node1, int node2) {
         int x1 = toTwoDimX(node1);
         int y1 = toTwoDimY(node1);
         int x2 = toTwoDimX(node2);
@@ -151,7 +151,7 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
         return graph.lineOfSight(x1, y1, x2, y2);
     }
 
-    protected float physicalDistance(int node1, int node2) {
+    protected final float physicalDistance(int node1, int node2) {
         int x1 = toTwoDimX(node1);
         int y1 = toTwoDimY(node1);
         int x2 = toTwoDimX(node2);
@@ -159,7 +159,7 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
         return graph.distance(x1, y1, x2, y2);
     }
 
-    protected float physicalDistance(int x1, int y1, int node2) {
+    protected final float physicalDistance(int x1, int y1, int node2) {
         int x2 = toTwoDimX(node2);
         int y2 = toTwoDimY(node2);
         return graph.distance(x1, y1, x2, y2);
@@ -248,32 +248,32 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
     }
     
     @Override
-    protected boolean selected(int index) {
+    protected final boolean selected(int index) {
         return visited(index);
     }
 
     
-    protected int parent(int index) {
+    protected final int parent(int index) {
         return Memory.parent(index);
     }
     
-    protected void setParent(int index, int value) {
+    protected final void setParent(int index, int value) {
         Memory.setParent(index, value);
     }
     
-    protected float distance(int index) {
+    protected final float distance(int index) {
         return Memory.distance(index);
     }
     
-    protected void setDistance(int index, float value) {
+    protected final void setDistance(int index, float value) {
         Memory.setDistance(index, value);
     }
     
-    protected boolean visited(int index) {
+    protected final boolean visited(int index) {
         return Memory.visited(index);
     }
     
-    protected void setVisited(int index, boolean value) {
+    protected final void setVisited(int index, boolean value) {
         Memory.setVisited(index, value);
     }
 }
