@@ -10,7 +10,7 @@ public class ReusableIndirectHeap {
     private static int[] inList;
     private static int[] outList;
     private int heapSize;
-    
+        
     private static float defaultKey = Float.POSITIVE_INFINITY;
 
     public static int[] ticketCheck;
@@ -33,22 +33,19 @@ public class ReusableIndirectHeap {
         }
     }
     
-    public static float getKey(int index) {
-        if (ticketCheck[index] != ticketNumber) return defaultKey;
-        return keyList[index];
+    public static final float getKey(int index) {
+        return ticketCheck[index] == ticketNumber ? keyList[index] : defaultKey;
     }
     
-    public static int getIn(int index) {
-        if (ticketCheck[index] != ticketNumber) return index;
-        return inList[index];
+    public static final int getIn(int index) {
+        return ticketCheck[index] == ticketNumber ? inList[index] : index;
     }
     
-    public static int getOut(int index) {
-        if (ticketCheck[index] != ticketNumber) return index;
-        return outList[index];
+    public static final int getOut(int index) {
+        return ticketCheck[index] == ticketNumber ? outList[index] : index;
     }
     
-    public static void setKey(int index, float value) {
+    public static final void setKey(int index, float value) {
         if (ticketCheck[index] != ticketNumber) {
             keyList[index] = value;
             inList[index] = index;
@@ -59,7 +56,7 @@ public class ReusableIndirectHeap {
         }
     }
     
-    public static void setIn(int index, int value) {
+    public static final void setIn(int index, int value) {
         if (ticketCheck[index] != ticketNumber) {
             keyList[index] = defaultKey;
             inList[index] = value;
@@ -70,7 +67,7 @@ public class ReusableIndirectHeap {
         }
     }
     
-    public static void setOut(int index, int value) {
+    public static final void setOut(int index, int value) {
         if (ticketCheck[index] != ticketNumber) {
             keyList[index] = defaultKey;
             inList[index] = index;
@@ -87,7 +84,7 @@ public class ReusableIndirectHeap {
      */
     public ReusableIndirectHeap(int size) {
         initialise(size, Float.POSITIVE_INFINITY);
-        heapSize = size;
+        heapSize = 0;
     }
     
     /**
@@ -95,32 +92,30 @@ public class ReusableIndirectHeap {
      */
     public ReusableIndirectHeap(int size, int memorySize) {
         initialise(memorySize, Float.POSITIVE_INFINITY);
-        heapSize = size;
+        heapSize = 0;
     }
 
     /**
      * Runtime: O(n)
      */
     /*public void heapify() {
-        for (int i=keyList.length/2-1; i>=0; i--) {
+        for (int i=heapSize/2-1; i>=0; i--) {
             bubbleDown(i);
         }
     }*/
     
     
-    private void bubbleUp(int index) {
-        if (index == 0) // Reached root
-            return;
-        
-        int parent = (index-1)/2;
-        if (getKey(index) < getKey(parent)) {
+    private final void bubbleUp(int index) {
+        int parent = (index-1) / 2;
+        while (index > 0 && getKey(index) < getKey(parent)) {
             // If meets the conditions to bubble up,
-            swapData(index,parent);
-            bubbleUp(parent);
+            swapData(index, parent);
+            index = parent;
+            parent = (index-1) / 2;
         }
     }
     
-    private void swapData(int a, int b) {
+    private final void swapData(int a, int b) {
         // s = Data at a = out[a]
         // t = Data at b = out[b]
         // key[a] <-> key[b]
@@ -138,7 +133,7 @@ public class ReusableIndirectHeap {
     /**
      * swap integers in list
      */
-    private void swapKey(int i1, int i2) {
+    private final void swapKey(int i1, int i2) {
         float temp = getKey(i1);
         setKey(i1,getKey(i2));
         setKey(i2,temp);
@@ -147,7 +142,7 @@ public class ReusableIndirectHeap {
     /**
      * swap integers in list
      */
-    private void swapOut(int i1, int i2) {
+    private final void swapOut(int i1, int i2) {
         int temp = getOut(i1);
         setOut(i1,getOut(i2));
         setOut(i2,temp);
@@ -156,13 +151,13 @@ public class ReusableIndirectHeap {
     /**
      * swap integers in list
      */
-    private void swapIn(int i1, int i2) {
+    private final void swapIn(int i1, int i2) {
         int temp = getIn(i1);
         setIn(i1,getIn(i2));
         setIn(i2,temp);
     }
     
-    private int smallerNode(int index1, int index2) {
+    private final int smallerNode(int index1, int index2) {
         if (index1 >= heapSize) {
             if (index2 >= heapSize)
                 return -1;
@@ -175,34 +170,44 @@ public class ReusableIndirectHeap {
         return getKey(index1) < getKey(index2) ? index1 : index2;
     }
     
-    private void bubbleDown(int index) {
-        int leftChild = leftChild(index);
-        int rightChild = rightChild(index);
-        
+    private final void bubbleDown(int index) {
+        int leftChild = 2*index+1;
+        int rightChild = 2*index+2;
         int smallerChild = smallerNode(leftChild, rightChild);
-        if (smallerChild == -1) return;
         
-        if (getKey(index) > getKey(smallerChild)) {
+        while (smallerChild != -1 && getKey(index) > getKey(smallerChild)) {
             // If meets the conditions to bubble down,
             swapData(index,smallerChild);
-            bubbleDown(smallerChild);
+            
+            // Recurse
+            index = smallerChild;
+            leftChild = 2*index+1;
+            rightChild = 2*index+2;
+            smallerChild = smallerNode(leftChild, rightChild);
         }
     }
 
     /**
      * Runtime: O(lgn)
      */
-    public void decreaseKey(int outIndex, float newKey) {
+    public final void decreaseKey(int outIndex, float newKey) {
         // Assume newKey < old key
-        //System.out.println(keyList);
-        //System.out.println(inList);
-        //System.out.println(outList);
         int inIndex = getIn(outIndex);
+
+        // Optimisation: Jump the newly set value to the bottom of the heap.
+        // Faster if there are a lot of POSITIVE_INFINITY values.
+        // This is equivalent to an insert operation.
+        if (getKey(inIndex) == Float.POSITIVE_INFINITY) {
+            swapData(inIndex, heapSize);
+            inIndex = heapSize;
+            ++heapSize;
+        }
         setKey(inIndex,newKey);
+        
         bubbleUp(inIndex);
     }
     
-    public float getMinValue() {
+    public final float getMinValue() {
         return getKey(0);
     }
 
@@ -210,13 +215,11 @@ public class ReusableIndirectHeap {
      * Runtime: O(lgn)
      * @return index of min element
      */
-    public int popMinIndex() {
+    public final int popMinIndex() {
         if (heapSize == 0)
             throw new NullPointerException("Indirect Heap is empty!");
         else if (heapSize == 1) {
-            int s = getOut(0);
-            setIn(s,-1);
-            heapSize--;
+            --heapSize;
             return getOut(0);
         }
         // nodeList.size() > 1
@@ -229,48 +232,45 @@ public class ReusableIndirectHeap {
         // out[0] = out[lastIndex], remove out[lastIndex]
         
         //E temp = keyList.get(0);
-        int lastIndex = heapSize-1;
+        int s = getOut(0);        
+        swapData(0, heapSize-1);
         
-        int s = getOut(0);
-        int t = getOut(lastIndex);
-        
-        setKey(0,getKey(lastIndex));
-        setIn(s,-1);
-        setIn(t,0);
-        setOut(0,getOut(lastIndex));
-        
-        heapSize--;
-        
+        --heapSize;
         bubbleDown(0);
         
         return s;
     }
 
-    
+
     public String arrayToString() {
         StringBuilder sb = new StringBuilder();
-        for (int i=0; i<heapSize; i++) {
-            sb.append(i);
+        for (int i=0; i<ticketCheck.length; i++) {
+            if (i == heapSize) sb.append("* ");
+            sb.append("[");
+            sb.append(getOut(i));
             sb.append(" ");
-            sb.append(getKey(i));
-            sb.append("\n");
+            float val = getKey(i);
+            sb.append(val == Float.POSITIVE_INFINITY ? "_" : (int)val);
+            sb.append("], ");
         }
-        return sb.toString();
+        return getIn(1) + " / " + sb.toString();
     }
     
-    private static int parent(int index) {
+    /*
+    private static final int parent(int index) {
         return (index-1)/2;
     }
     
-    private static int leftChild(int index) {
+    private static final int leftChild(int index) {
         return 2*index+1;
     }
     
-    private static int rightChild(int index) {
+    private static final int rightChild(int index) {
         return 2*index+2;
     }
+    */
     
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return heapSize <= 0;
     }
 }
