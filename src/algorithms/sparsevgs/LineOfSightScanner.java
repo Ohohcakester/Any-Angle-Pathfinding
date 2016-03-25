@@ -55,11 +55,11 @@ public class LineOfSightScanner {
         nSuccessors = 0;
     }
     
-    private static void clearSuccessors() {
+    private static final void clearSuccessors() {
         nSuccessors = 0;
     }
     
-    private static void stackPush(LOSInterval interval) {
+    private static final void stackPush(LOSInterval interval) {
         if (intervalStackSize >= intervalStack.length) {
             intervalStack = Arrays.copyOf(intervalStack, intervalStack.length*2);
         }
@@ -69,28 +69,28 @@ public class LineOfSightScanner {
         //addToSnapshot(interval); // Uncomment for debugging.
     }
     
-    private static void addToSnapshot(LOSInterval interval) {
+    private static final void addToSnapshot(LOSInterval interval) {
         snapshots.add(SnapshotItem.generate(new Integer[]{interval.y, interval.xL.n, interval.xL.d, interval.xR.n, interval.xR.d}, Color.GREEN));
         snapshotList.add(new ArrayList<SnapshotItem>(snapshots));
     }
     
-    public static void clearSnapshots() {
+    public static final void clearSnapshots() {
         snapshotList.clear();
         snapshots.clear();
     }
     
-    private static LOSInterval stackPop() {
+    private static final LOSInterval stackPop() {
         LOSInterval temp = intervalStack[intervalStackSize-1];
         --intervalStackSize;
         intervalStack[intervalStackSize] = null;
         return temp;
     }
     
-    private static void clearStack() {
+    private static final void clearStack() {
         intervalStackSize = 0;
     }
     
-    private static void addSuccessor(int x, int y) {
+    private static final void addSuccessor(int x, int y) {
         if (nSuccessors >= successorsX.length) {
             successorsX = Arrays.copyOf(successorsX, successorsX.length*2);
             successorsY = Arrays.copyOf(successorsY, successorsY.length*2);
@@ -140,7 +140,7 @@ public class LineOfSightScanner {
     /**
      * Stores results in successorsX, successorsY and nSuccessors. 
      */
-    public void computeAllVisibleTautSuccessors(int sx, int sy) {
+    public final void computeAllVisibleTautSuccessors(int sx, int sy) {
         clearSuccessors();
         clearStack();
 
@@ -148,8 +148,92 @@ public class LineOfSightScanner {
         exploreStates(sx, sy);
     }
     
+    /**
+     * Stores results in successorsX, successorsY and nSuccessors. 
+     */
+    public final void computeAllVisibleTwoWayTautSuccessors(int sx, int sy) {
+        clearSuccessors();
+        clearStack();
 
-    private void generateStartingStates(int sx, int sy) {
+        generateTwoWayTautStartingStates(sx, sy);
+        exploreStates(sx, sy);
+    }
+
+    /**
+     * Assumption: We are at an outer corner. One of six cases:
+     *   BR        BL        TR        TL       TRBL      TLBR
+     * XXX|         |XXX      :         :         |XXX   XXX|
+     * XXX|...   ...|XXX   ___:...   ...:___   ___|XXX   XXX|___
+     *    :         :      XXX|         |XXX   XXX|         |XXX
+     *    :         :      XXX|         |XXX   XXX|         |XXX    
+     * 
+     */
+    private final void generateTwoWayTautStartingStates(int sx, int sy) {
+        boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
+        boolean bottomRightOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
+        boolean topLeftOfBlocked = graph.topLeftOfBlockedTile(sx, sy);
+        boolean topRightOfBlocked = graph.topRightOfBlockedTile(sx, sy);
+
+        // Generate up-left direction
+        if (topRightOfBlocked || bottomLeftOfBlocked) {
+            Fraction leftExtent = new Fraction(leftUpExtent(sx,sy));
+            Fraction rightExtent = bottomLeftOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY - 1, sizeY);
+
+            // TODO: I need to figure out how to disable direct upwards search if !bottomLeftOfBlocked.
+            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy);
+        }
+        
+        // Generate up-right direction
+        if (bottomRightOfBlocked || topLeftOfBlocked) {
+            Fraction leftExtent = bottomRightOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY + 1, sizeY);
+            Fraction rightExtent = new Fraction(rightUpExtent(sx,sy));
+
+            // TODO: I need to figure out how to disable direct upwards search if !bottomRightOfBlocked.
+            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy);
+        }
+
+        // Generate down-left direction
+        if (bottomRightOfBlocked || topLeftOfBlocked) {
+            Fraction leftExtent = new Fraction(leftDownExtent(sx,sy));
+            Fraction rightExtent = topLeftOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY - 1, sizeY);
+
+            // TODO: I need to figure out how to disable direct downwards search if !topLeftOfBlocked.
+            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy);
+        }
+        
+        // Generate down-right direction
+        if (topRightOfBlocked || bottomLeftOfBlocked) {
+            Fraction leftExtent = topRightOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY + 1, sizeY);
+            Fraction rightExtent = new Fraction(rightDownExtent(sx,sy));
+
+            // TODO: I need to figure out how to disable direct downwards search if !topRightOfBlocked.
+            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy);
+        }
+        
+        // Search leftwards
+        if (topRightOfBlocked || bottomRightOfBlocked) {
+            int x = sx;
+            int y = sy;
+            while (true) {
+                x = leftAnyExtent(x,y);
+                if (graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y)) break;
+                if (graph.topLeftOfBlockedTile(x, y) || graph.bottomLeftOfBlockedTile(x, y)) addSuccessor(x,y);
+            }
+        }
+
+        // Search rightwards
+        if (topLeftOfBlocked || bottomLeftOfBlocked) {
+            int x = sx;
+            int y = sy;
+            while (true) {
+                x = rightAnyExtent(x,y);
+                if (graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y)) break;
+                if (graph.topRightOfBlockedTile(x, y) || graph.bottomRightOfBlockedTile(x, y)) addSuccessor(x,y);
+            }
+        }
+    }
+
+    private final void generateStartingStates(int sx, int sy) {
         boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
         boolean bottomRightOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
         boolean topLeftOfBlocked = graph.topLeftOfBlockedTile(sx, sy);
@@ -220,7 +304,7 @@ public class LineOfSightScanner {
         }
     }
     
-    private void exploreStates(int sx, int sy) {
+    private final void exploreStates(int sx, int sy) {
         while (intervalStackSize > 0) {
             LOSInterval currState = stackPop();
 
@@ -267,7 +351,7 @@ public class LineOfSightScanner {
                         if (!zeroLengthInterval || !leftSideAdded) addSuccessor(x, y);
                     }
                 }
-                
+
                 
                 
                 // Generate Upwards
@@ -279,10 +363,12 @@ public class LineOfSightScanner {
                  */
 
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
-                int dy = currState.y - sy; 
+                int dy = currState.y - sy;
                 Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+
+                int leftBound = leftUpExtent(currState.xL.ceil(), currState.y);
+                if (currState.xL.isWholeNumber() && graph.bottomRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
                 
-                int leftBound = leftUpExtent(currState.xL.floor()+1, currState.y);
                 if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
                     leftProjection = new Fraction(leftBound);
                 }
@@ -290,7 +376,9 @@ public class LineOfSightScanner {
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
                 
-                int rightBound = rightUpExtent(currState.xR.ceil()-1, currState.y);
+                int rightBound = rightUpExtent(currState.xR.floor(), currState.y);
+                if (currState.xR.isWholeNumber() && graph.bottomLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
+                
                 if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
                     rightProjection = new Fraction(rightBound);
                 }
@@ -339,7 +427,7 @@ public class LineOfSightScanner {
                         if (!zeroLengthInterval || !leftSideAdded) addSuccessor(x, y);
                     }
                 }
-                
+
                 
                 
                 // Generate downwards
@@ -354,15 +442,19 @@ public class LineOfSightScanner {
                 int dy = sy - currState.y; 
                 Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
                 
-                int leftBound = leftDownExtent(currState.xL.floor()+1, currState.y);
+                int leftBound = leftDownExtent(currState.xL.ceil(), currState.y);
+                if (currState.xL.isWholeNumber() && graph.topRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
+                
                 if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
                     leftProjection = new Fraction(leftBound);
                 }
 
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+
+                int rightBound = rightDownExtent(currState.xR.floor(), currState.y);
+                if (currState.xR.isWholeNumber() && graph.topLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
                 
-                int rightBound = rightDownExtent(currState.xR.ceil()-1, currState.y);
                 if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
                     rightProjection = new Fraction(rightBound);
                 }
@@ -376,38 +468,38 @@ public class LineOfSightScanner {
         }
     }
 
-    private int leftUpExtent(int xL, int y) {
+    private final int leftUpExtent(int xL, int y) {
         return xL > sizeX ? sizeX : leftDownExtents[y+1][xL];
     }
 
-    private int leftDownExtent(int xL, int y) {
+    private final int leftDownExtent(int xL, int y) {
         return xL > sizeX ? sizeX : leftDownExtents[y][xL];
     }
     
-    private int leftAnyExtent(int xL, int y) {
+    private final int leftAnyExtent(int xL, int y) {
         return Math.max(leftDownExtents[y][xL], leftDownExtents[y+1][xL]);
     }
 
-    private int rightUpExtent(int xR, int y) {
+    private final int rightUpExtent(int xR, int y) {
         return xR < 0 ? 0 : rightDownExtents[y+1][xR];
     }
 
-    private int rightDownExtent(int xR, int y) {
+    private final int rightDownExtent(int xR, int y) {
         return xR < 0 ? 0 : rightDownExtents[y][xR];
     }
 
-    private int rightAnyExtent(int xR, int y) {
+    private final int rightAnyExtent(int xR, int y) {
         return Math.min(rightDownExtents[y][xR], rightDownExtents[y+1][xR]);
     }
 
-    private void generateUpwards(Fraction leftBound, Fraction rightBound, int sx, int sy, int currY) {
+    private final void generateUpwards(Fraction leftBound, Fraction rightBound, int sx, int sy, int currY) {
         generateAndSplitIntervals(
                 currY + 2, currY + 1,
                 sx, sy,
                 leftBound, rightBound);
     }
 
-    private void generateDownwards(Fraction leftBound, Fraction rightBound, int sx, int sy, int currY) {
+    private final void generateDownwards(Fraction leftBound, Fraction rightBound, int sx, int sy, int currY) {
         generateAndSplitIntervals(
                 currY - 1, currY - 1,
                 sx, sy,
@@ -418,7 +510,7 @@ public class LineOfSightScanner {
      * Called by generateUpwards / Downwards.
      * Note: Unlike Anya, 0-length intervals are possible.
      */
-    private void generateAndSplitIntervals(int checkY, int newY, int sx, int sy, Fraction leftBound, Fraction rightBound) {
+    private final void generateAndSplitIntervals(int checkY, int newY, int sx, int sy, Fraction leftBound, Fraction rightBound) {
         Fraction left = leftBound;
         int leftFloor = left.floor();
 

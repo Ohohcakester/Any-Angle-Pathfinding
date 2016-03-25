@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-//import main.utility.TimeCounter;
 import algorithms.AStarStaticMemory;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
@@ -33,8 +32,6 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
     @Override
     public void computePath() {
         setupVisibilityGraph();
-//long start = System.nanoTime();
-        
 
         int size = visibilityGraph.size();
         int memorySize = visibilityGraph.maxSize();
@@ -72,8 +69,6 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
             
             maybeSaveSearchSnapshot();
         }
-//long end = System.nanoTime();
-//TimeCounter.timeC += (end-start);
     }
 
     protected void setupVisibilityGraph() {

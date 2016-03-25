@@ -3,14 +3,14 @@ package algorithms.sparsevgs;
 import grid.GridGraph;
 
 import java.util.Arrays;
-
-//import main.utility.TimeCounter;
+import java.util.HashSet;
 
 public class SparseVisibilityGraph {
 
     private static SparseVisibilityGraph storedVisibilityGraph;
     private static GridGraph storedGridGraph;
     
+    protected LineOfSightScanner losScanner;
     protected final GridGraph graph;
     protected int[][] nodeIndex;
     protected int startIndex;
@@ -44,6 +44,8 @@ public class SparseVisibilityGraph {
             //("already initialised.");
             return;
         }
+
+        losScanner = new LineOfSightScanner(graph);
         
         nodes = new SVGNode[11];
         nNodes = 0;
@@ -84,7 +86,20 @@ public class SparseVisibilityGraph {
         if (index >= nodes.length) nodes = Arrays.copyOf(nodes, nodes.length*2);
         nodes[index] = new SVGNode(x,y);
 
+        losScanner.computeAllVisibleTautSuccessors(x, y);
+        int nSuccessors = losScanner.nSuccessors;
+        for (int i=0;i<nSuccessors;++i) {
+            int toX = losScanner.successorsX[i];
+            int toY = losScanner.successorsY[i];
+            int targetIndex = nodeIndex[toY][toX];
 
+            float weight = computeWeight(x, y, toX, toY);
+            addEdge(targetIndex, index, weight);
+            addEdge(index, targetIndex, weight);
+        }
+        
+        /*// Disabled: Old method: LOS scan to all possible taut vertices.
+          // Note: Remember to comment out "tryConnectStartAndEnd" if you want to use this scheme.
         for (int i=0; i<nNodes; i++) {
             int toX = xCoordinateOf(i);
             int toY = yCoordinateOf(i);
@@ -93,7 +108,7 @@ public class SparseVisibilityGraph {
                 addEdge(i, index, weight);
                 addEdge(index, i, weight);
             }
-        }
+        }*/
 
         nNodes++;
         return index;
@@ -112,6 +127,30 @@ public class SparseVisibilityGraph {
         int[] outgoingEdges = nodes[index].outgoingEdges;
         int existingNEdges = nodes[index].nEdges;
         
+        // I don't think this hashset will ever be a bottleneck, but if somehow it does,
+        // this can be replaced with an index table check to check for duplicate edges.
+        HashSet<Integer> existingEdges = new HashSet<>();
+        for (int i=0;i<existingNEdges;++i) {
+            existingEdges.add(outgoingEdges[i]);
+        }
+
+        losScanner.computeAllVisibleTautSuccessors(x, y);
+        int nSuccessors = losScanner.nSuccessors;
+        for (int i=0;i<nSuccessors;++i) {
+            int toX = losScanner.successorsX[i];
+            int toY = losScanner.successorsY[i];
+            int targetIndex = nodeIndex[toY][toX];
+            
+            if (existingEdges.contains(targetIndex)) continue;
+
+            float weight = computeWeight(x, y, toX, toY);
+            addEdge(targetIndex, index, weight);
+            addEdge(index, targetIndex, weight);
+        }
+        
+        
+        /* // Disabled: Old method: LOS scan to all possible taut vertices.
+           // Note: Remember to comment out "tryConnectStartAndEnd" if you want to use this scheme.
         for (int i=0; i<nNodes; i++) {
             // We skip over nodes that are already connected to the current node, in order to avoid duplicates.
             // We can do each check in constant time by assuming that the neighbours are ordered by index.
@@ -129,6 +168,19 @@ public class SparseVisibilityGraph {
                 addEdge(i, index, weight);
                 addEdge(index, i, weight);
             }
+        }*/
+    }
+    
+    /**
+     * Special case that is missed by the LOS scanner method.
+     * If this happens, might as well end the algorithm prematurely.
+     * But whatever. It won't take much time anyway.
+     */
+    protected void tryConnectStartAndEnd() {
+        if (graph.lineOfSight(sx, sy, ex, ey)) {
+            float weight = computeWeight(sx,sy,ex,ey);
+            addEdge(startIndex, endIndex, weight);
+            addEdge(endIndex, startIndex, weight);
         }
     }
     
@@ -189,12 +241,35 @@ public class SparseVisibilityGraph {
             endIndex = nodeIndex[ey][ex] = assignNodeAndConnect(ex, ey);
             endIsNewNode = true;
         }
+        
+        // The only case missed out from the LOS scans.
+        tryConnectStartAndEnd();
     }
     
     protected void addAllEdges() {
         int saveFactor = nNodes/10;
         if (saveFactor == 0) saveFactor = 1;
         
+        int fromX, fromY, toX, toY;
+        for (int i=0;i<nNodes;++i) {
+            fromX = xCoordinateOf(i);
+            fromY = yCoordinateOf(i);
+            
+            losScanner.computeAllVisibleTwoWayTautSuccessors(fromX, fromY);
+            int nSuccessors = losScanner.nSuccessors;
+            for (int j=0;j<nSuccessors;++j) {
+                toX = losScanner.successorsX[j];
+                toY = losScanner.successorsY[j];
+                int toIndex = nodeIndex[toY][toX];
+
+                float weight = computeWeight(fromX, fromY, toX, toY);
+                addEdge(i, toIndex, weight);
+                //addEdge(toIndex, i, weight);
+            }
+        }
+        
+        
+        /*// Disabled: VG construction by all-pairs LOS checks.
         int fromX, fromY, toX, toY;
         for (int i=0; i<nNodes; i++) {
             fromX = xCoordinateOf(i);
@@ -213,7 +288,8 @@ public class SparseVisibilityGraph {
             
             if (i%saveFactor == 0)
                 maybeSaveSnapshot();
-        }
+        }*/
+        
         
         for (int i=0; i<nNodes; ++i) {
             nodes[i].lockOriginalNEdges();
@@ -353,12 +429,8 @@ public class SparseVisibilityGraph {
 
     
     public static SparseVisibilityGraph repurpose(SparseVisibilityGraph oldGraph, int sx, int sy, int ex, int ey) {
-//long start = System.nanoTime();
         oldGraph.removeStartAndEnd();
-//long end = System.nanoTime();
-//TimeCounter.timeA    += (end-start);
-//start = System.nanoTime();
-
+        
         SparseVisibilityGraph newGraph = new SparseVisibilityGraph(oldGraph.graph, sx, sy, ex, ey);
         newGraph.nodeIndex = oldGraph.nodeIndex;
         newGraph.startIndex = oldGraph.startIndex;
@@ -368,13 +440,10 @@ public class SparseVisibilityGraph {
         newGraph.nodes = oldGraph.nodes;
         newGraph.nNodes = oldGraph.nNodes;
         newGraph.maxSize = oldGraph.maxSize;
-//end = System.nanoTime();
-//TimeCounter.timeD += (end-start);
-//start = System.nanoTime();
+        newGraph.losScanner = oldGraph.losScanner;
+        
         newGraph.addStartAndEnd(sx, sy, ex, ey);
 
-//end = System.nanoTime();
-//TimeCounter.timeB += (end-start);
         return newGraph;
     }
     
@@ -452,18 +521,4 @@ class SVGNode {
     public void removeExtraEdges() {
         nEdges = originalNEdges;
     }
-
-    /*public void removeEdgeTo(int target) {
-        int i = 0;
-        while (outgoingEdges[i] != target) {
-            ++i;
-            if (i >= nEdges) return; // edge does not exist.
-        }
-        
-        nEdges--;
-        while (i < nEdges) {
-            outgoingEdges[i] = outgoingEdges[i+1];
-            edgeWeights[i] = edgeWeights[i+1];
-        }
-    }*/
 }
