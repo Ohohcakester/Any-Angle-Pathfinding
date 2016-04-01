@@ -179,7 +179,6 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(leftUpExtent(sx,sy));
             Fraction rightExtent = bottomLeftOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY - 1, sizeY);
 
-            // TODO: I need to figure out how to disable direct upwards search if !bottomLeftOfBlocked.
             this.generateUpwards(leftExtent, rightExtent, sx, sy, sy);
         }
         
@@ -188,7 +187,6 @@ public final class LineOfSightScanner {
             Fraction leftExtent = bottomRightOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY + 1, sizeY);
             Fraction rightExtent = new Fraction(rightUpExtent(sx,sy));
 
-            // TODO: I need to figure out how to disable direct upwards search if !bottomRightOfBlocked.
             this.generateUpwards(leftExtent, rightExtent, sx, sy, sy);
         }
 
@@ -197,7 +195,6 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(leftDownExtent(sx,sy));
             Fraction rightExtent = topLeftOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY - 1, sizeY);
 
-            // TODO: I need to figure out how to disable direct downwards search if !topLeftOfBlocked.
             this.generateDownwards(leftExtent, rightExtent, sx, sy, sy);
         }
         
@@ -206,7 +203,6 @@ public final class LineOfSightScanner {
             Fraction leftExtent = topRightOfBlocked ? new Fraction(sx) : new Fraction(sx*sizeY + 1, sizeY);
             Fraction rightExtent = new Fraction(rightDownExtent(sx,sy));
 
-            // TODO: I need to figure out how to disable direct downwards search if !topRightOfBlocked.
             this.generateDownwards(leftExtent, rightExtent, sx, sy, sy);
         }
         
