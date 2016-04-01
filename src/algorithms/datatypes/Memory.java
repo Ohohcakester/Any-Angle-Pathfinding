@@ -14,6 +14,44 @@ public final class Memory {
     
     private static int size = 0;
     
+    public static final class Context {
+        private float[] distance;
+        private int[] parent;
+        private boolean[] visited;
+        private float defaultDistance;
+        private int defaultParent;
+        private boolean defaultVisited;
+        private int[] ticketCheck;
+        private int ticketNumber;
+        private int size;
+
+        public Context(){};
+    }
+    
+    public static final void loadContext(Context context) {
+        Memory.distance = context.distance;
+        Memory.parent = context.parent;
+        Memory.visited = context.visited;
+        Memory.defaultDistance = context.defaultDistance;
+        Memory.defaultParent = context.defaultParent;
+        Memory.defaultVisited = context.defaultVisited;
+        Memory.ticketCheck = context.ticketCheck;
+        Memory.ticketNumber = context.ticketNumber;
+        Memory.size = context.size;
+    }
+    
+    public static final void saveContext(Context context) {
+        context.distance = Memory.distance;
+        context.parent = Memory.parent;
+        context.visited = Memory.visited;
+        context.defaultDistance = Memory.defaultDistance;
+        context.defaultParent = Memory.defaultParent;
+        context.defaultVisited = Memory.defaultVisited;
+        context.ticketCheck = Memory.ticketCheck;
+        context.ticketNumber = Memory.ticketNumber;
+        context.size = Memory.size;
+    }
+    
     public static final int initialise(int size, float defaultDistance, int defaultParent, boolean defaultVisited) {
         Memory.defaultDistance = defaultDistance;
         Memory.defaultParent = defaultParent;

@@ -13,8 +13,34 @@ public class ReusableIndirectHeap {
         
     private static float defaultKey = Float.POSITIVE_INFINITY;
 
-    public static int[] ticketCheck;
-    public static int ticketNumber = 0;
+    private static int[] ticketCheck;
+    private static int ticketNumber = 0;
+    
+    public static final class Context {
+        private float[] keyList;
+        private int[] inList;
+        private int[] outList;
+        private int[] ticketCheck;
+        private int ticketNumber;
+        
+        public Context(){};
+    }
+    
+    public static final void loadContext(Context context) {
+        ReusableIndirectHeap.keyList = context.keyList;
+        ReusableIndirectHeap.inList = context.inList;
+        ReusableIndirectHeap.outList = context.outList;
+        ReusableIndirectHeap.ticketCheck = context.ticketCheck;
+        ReusableIndirectHeap.ticketNumber = context.ticketNumber;
+    }
+    
+    public static final void saveContext(Context context) {
+        context.keyList = ReusableIndirectHeap.keyList;
+        context.inList = ReusableIndirectHeap.inList;
+        context.outList = ReusableIndirectHeap.outList;
+        context.ticketCheck = ReusableIndirectHeap.ticketCheck;
+        context.ticketNumber = ReusableIndirectHeap.ticketNumber;
+    }
 
     public static void initialise(int size, float defaultKey) {
         ReusableIndirectHeap.defaultKey = defaultKey;
