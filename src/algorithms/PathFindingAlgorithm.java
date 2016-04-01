@@ -90,7 +90,7 @@ public abstract class PathFindingAlgorithm {
      * @return directly get path length without computing path.
      * Has to run fast, unlike getPath.
      */
-    protected abstract float getPathLength();
+    public abstract float getPathLength();
     
     /**
      * An optimal overridable method which prints some statistics when called for.

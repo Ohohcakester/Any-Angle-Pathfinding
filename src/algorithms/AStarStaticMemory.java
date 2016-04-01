@@ -223,7 +223,7 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
         return path;
     }
 
-    protected float getPathLength() {
+    public float getPathLength() {
         int current = finish;
         if (current == -1) return -1;
         
