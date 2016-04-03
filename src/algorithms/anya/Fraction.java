@@ -64,8 +64,16 @@ public final class Fraction implements Comparable<Fraction> {
         return new Fraction(n*o.d - o.n*d, d*o.d);
     }
 
+    public final Fraction minus(int _n, int _d) {
+        return new Fraction(n*_d - _n*d, d*_d);
+    }
+
     public final Fraction plus(Fraction o) {
         return new Fraction(n*o.d + o.n*d, d*o.d);
+    }
+
+    public final Fraction plus(int _n, int _d) {
+        return new Fraction(n*_d + _n*d, d*_d);
     }
 
     public final Fraction minus(int value) {
@@ -128,6 +136,10 @@ public final class Fraction implements Comparable<Fraction> {
     // slightly faster than equals()
     public final boolean isEqualTo(Fraction o) {
         return (n*o.d == o.n*d);
+    }
+
+    public final boolean isEqualTo(int k) {
+        return (n == k*d);
     }
     
     public static final int gcd(int x, int y) {
