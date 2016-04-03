@@ -17,9 +17,9 @@ public final class LineOfSightScanner {
     public static ArrayList<List<SnapshotItem>> snapshotList = new ArrayList<>();
     private static ArrayList<SnapshotItem> snapshots = new ArrayList<>();
     
-    private GridGraph graph;
-    private int sizeX;
-    private int sizeY;
+    private final GridGraph graph;
+    private final int sizeX;
+    private final int sizeY;
     
     private static int[][] rightDownExtents;
     private static int[][] leftDownExtents;
@@ -147,7 +147,7 @@ public final class LineOfSightScanner {
         generateStartingStates(sx, sy);
         exploreStates(sx, sy);
     }
-    
+
     /**
      * Stores results in successorsX, successorsY and nSuccessors. 
      */
@@ -158,6 +158,19 @@ public final class LineOfSightScanner {
         generateTwoWayTautStartingStates(sx, sy);
         exploreStates(sx, sy);
     }
+    
+    /**
+     * Stores results in successorsX, successorsY and nSuccessors. 
+     * We are moving in direction dx, dy
+     */
+    public final void computeAllVisibleIncrementalTautSuccessors(int sx, int sy, int dx, int dy) {
+        clearSuccessors();
+        clearStack();
+
+        generateIncrementalTautStartingStates(sx, sy, dx, dy);
+        exploreStates(sx, sy);
+    }
+
 
     /**
      * Assumption: We are at an outer corner. One of six cases:
@@ -165,8 +178,28 @@ public final class LineOfSightScanner {
      * XXX|         |XXX      :         :         |XXX   XXX|
      * XXX|...   ...|XXX   ___:...   ...:___   ___|XXX   XXX|___
      *    :         :      XXX|         |XXX   XXX|         |XXX
-     *    :         :      XXX|         |XXX   XXX|         |XXX    
+     *    :         :      XXX|         |XXX   XXX|         |XXX
+     *    
+     * Assumption: We are also entering from a taut direction.
+     * dx > 0, dy > 0 : BR TL
+     * dx > 0, dy < 0 : BL TR
+     * dx < 0, dy < 0 : BR TL
+     * dx < 0, dy > 0 : BL TR
+     *      
+     * dx = 0, dy < 0 : BR BL (TR TL) // We'll have to relook at horizontal / vertical cases.
      * 
+     */
+    private void generateIncrementalTautStartingStates(int sx, int sy, int dx, int dy) {
+        
+    }
+
+    /**
+     * Assumption: We are at an outer corner. One of six cases:
+     *   BR        BL        TR        TL       TRBL      TLBR
+     * XXX|         |XXX      :         :         |XXX   XXX|
+     * XXX|...   ...|XXX   ___:...   ...:___   ___|XXX   XXX|___
+     *    :         :      XXX|         |XXX   XXX|         |XXX
+     *    :         :      XXX|         |XXX   XXX|         |XXX
      */
     private final void generateTwoWayTautStartingStates(int sx, int sy) {
         boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
