@@ -66,8 +66,7 @@ public final class LineOfSightScanner {
         intervalStack[intervalStackSize] = interval;
         ++intervalStackSize;
         
-        // TODO: C
-        addToSnapshot(interval); // Uncomment for debugging.
+        //addToSnapshot(interval); // Uncomment for debugging.
     }
     
     private static final void addToSnapshot(LOSInterval interval) {
@@ -213,7 +212,7 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(leftUpExtent(sx,sy));
             Fraction rightExtent = new Fraction(sx);
 
-            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, bottomLeftOfBlocked);
+            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
         }
         
         // Generate up-right direction
@@ -221,7 +220,7 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(sx);
             Fraction rightExtent = new Fraction(rightUpExtent(sx,sy));
 
-            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, bottomRightOfBlocked, true);
+            this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
         }
 
         // Generate down-left direction
@@ -229,7 +228,7 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(leftDownExtent(sx,sy));
             Fraction rightExtent = new Fraction(sx);
 
-            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, topLeftOfBlocked);
+            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
         }
         
         // Generate down-right direction
@@ -237,28 +236,24 @@ public final class LineOfSightScanner {
             Fraction leftExtent = new Fraction(sx);
             Fraction rightExtent = new Fraction(rightDownExtent(sx,sy));
 
-            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, topRightOfBlocked, true);
+            this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
         }
         
         // Search leftwards
-        if (topRightOfBlocked || bottomRightOfBlocked) {
-            int x = sx;
+        if (!topRightOfBlocked || !bottomRightOfBlocked) {
+            int x = leftAnyExtent(sx, sy);
             int y = sy;
-            while (true) {
-                x = leftAnyExtent(x,y);
-                if (graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y)) break;
-                if (graph.topLeftOfBlockedTile(x, y) || graph.bottomLeftOfBlockedTile(x, y)) addSuccessor(x,y);
+            if (!(graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y))) {
+                addSuccessor(x,y);
             }
         }
 
         // Search rightwards
-        if (topLeftOfBlocked || bottomLeftOfBlocked) {
-            int x = sx;
+        if (!topLeftOfBlocked || !bottomLeftOfBlocked) {
+            int x = rightAnyExtent(sx, sy);
             int y = sy;
-            while (true) {
-                x = rightAnyExtent(x,y);
-                if (graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y)) break;
-                if (graph.topRightOfBlockedTile(x, y) || graph.bottomRightOfBlockedTile(x, y)) addSuccessor(x,y);
+            if (!(graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y))) {
+                addSuccessor(x,y);
             }
         }
     }
@@ -313,24 +308,35 @@ public final class LineOfSightScanner {
 
         // Search leftwards
         if (!topRightOfBlocked || !bottomRightOfBlocked) {
-            int x = sx;
+            int x = leftAnyExtent(sx, sy);
+            int y = sy;
+            if (!(graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y))) {
+                addSuccessor(x,y);
+            }
+            
+            /*int x = sx;
             int y = sy;
             while (true) {
                 x = leftAnyExtent(x,y);
                 if (graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y)) break;
                 if (graph.topLeftOfBlockedTile(x, y) || graph.bottomLeftOfBlockedTile(x, y)) addSuccessor(x,y);
-            }
+            }*/
         }
 
         // Search rightwards
         if (!topLeftOfBlocked || !bottomLeftOfBlocked) {
-            int x = sx;
+            int x = rightAnyExtent(sx, sy);
+            int y = sy;
+            if (!(graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y))) {
+                addSuccessor(x,y);
+            }
+            /*int x = sx;
             int y = sy;
             while (true) {
                 x = rightAnyExtent(x,y);
                 if (graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y)) break;
                 if (graph.topRightOfBlockedTile(x, y) || graph.bottomRightOfBlockedTile(x, y)) addSuccessor(x,y);
-            }
+            }*/
         }
     }
     
@@ -339,7 +345,7 @@ public final class LineOfSightScanner {
             LOSInterval currState = stackPop();
             boolean leftInclusive = (currState.inclusive & LOSInterval.LEFT_INCLUSIVE) != 0;
             boolean rightInclusive = (currState.inclusive & LOSInterval.RIGHT_INCLUSIVE) != 0;
-            System.out.println("POP " + currState);
+            //System.out.println("POP " + currState);
 
             boolean zeroLengthInterval = currState.xR.isEqualTo(currState.xL);
             //boolean leftSuccessorAdded = false;
@@ -359,11 +365,14 @@ public final class LineOfSightScanner {
                     
                     int x = currState.xL.n;
                     int y = currState.y;
-                    if (x <= sx && graph.topRightOfBlockedTile(x, y) && !graph.bottomRightOfBlockedTile(x, y)) {
+                    boolean topRightOfBlockedTile = graph.topRightOfBlockedTile(x, y);
+                    boolean bottomRightOfBlockedTile = graph.bottomRightOfBlockedTile(x, y);
+                    
+                    if (x <= sx && topRightOfBlockedTile && !bottomRightOfBlockedTile) {
                         addSuccessor(x, y);
                         leftInclusive = false;
                     }
-                    else if (sx < x && graph.bottomRightOfBlockedTile(x, y)) {
+                    else if (sx <= x && bottomRightOfBlockedTile && !topRightOfBlockedTile) {
                         addSuccessor(x, y);
                         leftInclusive = false;
                     }
@@ -378,13 +387,16 @@ public final class LineOfSightScanner {
                     
                     int x = currState.xR.n;
                     int y = currState.y;
-                    if (x < sx && graph.bottomLeftOfBlockedTile(x, y)) {
+                    boolean bottomLeftOfBlockedTile = graph.bottomLeftOfBlockedTile(x, y);
+                    boolean topLeftOfBlockedTile = graph.topLeftOfBlockedTile(x, y);
+                    
+                    if (x <= sx && bottomLeftOfBlockedTile && !topLeftOfBlockedTile) {
                         if (leftInclusive || !zeroLengthInterval) {
                             addSuccessor(x, y);
                             rightInclusive = false;
                         }
                     }
-                    else if (sx <= x && graph.topLeftOfBlockedTile(x, y)  && !graph.bottomLeftOfBlockedTile(x, y)) {
+                    else if (sx <= x && topLeftOfBlockedTile  && !bottomLeftOfBlockedTile) {
                         if (leftInclusive || !zeroLengthInterval) {
                             addSuccessor(x, y);
                             rightInclusive = false;
@@ -451,16 +463,19 @@ public final class LineOfSightScanner {
                     
                     int x = currState.xL.n;
                     int y = currState.y;
-                    if (x <= sx && graph.bottomRightOfBlockedTile(x, y) && !graph.topRightOfBlockedTile(x, y)) {
+                    boolean bottomRightOfBlockedTile = graph.bottomRightOfBlockedTile(x, y);
+                    boolean topRightOfBlockedTile = graph.topRightOfBlockedTile(x, y);
+                    
+                    if (x <= sx && bottomRightOfBlockedTile && !topRightOfBlockedTile) {
                         addSuccessor(x, y);
                         leftInclusive = false;
                     }
-                    else if (sx < x && graph.topRightOfBlockedTile(x, y)) {
+                    else if (sx <= x && topRightOfBlockedTile && !bottomRightOfBlockedTile) {
                         addSuccessor(x, y);
                         leftInclusive = false;
                     }
                 }
-                if (currState.xR.isWholeNumber()) {
+                if (rightInclusive && currState.xR.isWholeNumber()) {
                     /*       The two cases
                      *      B     B
                      *    .'       '.   _
@@ -470,13 +485,16 @@ public final class LineOfSightScanner {
                     
                     int x = currState.xR.n;
                     int y = currState.y;
-                    if (x < sx && graph.topLeftOfBlockedTile(x, y)) {
+                    boolean topLeftOfBlockedTile = graph.topLeftOfBlockedTile(x, y);
+                    boolean bottomLeftOfBlockedTile = graph.bottomLeftOfBlockedTile(x, y);
+                    
+                    if (x <= sx && topLeftOfBlockedTile && !bottomLeftOfBlockedTile) {
                         if (leftInclusive || !zeroLengthInterval) {
                             addSuccessor(x, y);
                             rightInclusive = false;
                         }
                     }
-                    else if (sx <= x && graph.bottomLeftOfBlockedTile(x, y)  && !graph.topLeftOfBlockedTile(x, y)) {
+                    else if (sx <= x && bottomLeftOfBlockedTile  && !topLeftOfBlockedTile) {
                         if (leftInclusive || !zeroLengthInterval) {
                             addSuccessor(x, y);
                             rightInclusive = false;
@@ -608,20 +626,11 @@ public final class LineOfSightScanner {
             int inclusive = (leftInclusive ? LOSInterval.LEFT_INCLUSIVE : 0) | (rightInclusive ? LOSInterval.RIGHT_INCLUSIVE : 0); 
             stackPush(new LOSInterval(newY, left, rightBound, inclusive));
         } else {
-            // The possibility of there being one degenerate interval at the end. (!bottomRightOfBlockedTile
-            if (rightInclusive && rightBound.isWholeNumber() && !graph.isBlocked(rightBound.n-1, checkY-1)) {
+            // The possibility of there being one degenerate interval at the end. ( !bottomLeftOfBlockedTile(xR, checkY) )
+            if (rightInclusive && rightBound.isWholeNumber() && !graph.isBlocked(rightBound.n, checkY-1)) {
                 stackPush(new LOSInterval(newY, rightBound, rightBound, LOSInterval.BOTH_INCLUSIVE));
             }
         }
-        
-        
-        
-        // right >= rightBound
-        // if !bottomLeftOfBlockedTile(leftFloor, checkY)
-        /*if (!graph.isBlocked(leftFloor, checkY-1) && (rightInclusive || !left.isEqualTo(rightBound))) {
-            int inclusive = (leftInclusive ? LOSInterval.LEFT_INCLUSIVE : 0) | (rightInclusive ? LOSInterval.RIGHT_INCLUSIVE : 0); 
-            stackPush(new LOSInterval(newY, left, rightBound, inclusive));
-        }*/
     }
     
 }
@@ -629,10 +638,10 @@ public final class LineOfSightScanner {
 
 
 final class LOSInterval {
-    public static final int BOTH_EXCLUSIVE = 0;
-    public static final int LEFT_INCLUSIVE = 1;
-    public static final int RIGHT_INCLUSIVE = 2;
-    public static final int BOTH_INCLUSIVE = 3; // LEFT_INCLUSIVE | RIGHT_INCLUSIVE
+    public static final int BOTH_EXCLUSIVE = 0x0;
+    public static final int LEFT_INCLUSIVE = 0x1;
+    public static final int RIGHT_INCLUSIVE = 0x2;
+    public static final int BOTH_INCLUSIVE = 0x3; // LEFT_INCLUSIVE | RIGHT_INCLUSIVE
     
     
     final int y;
