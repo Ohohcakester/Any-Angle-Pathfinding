@@ -128,14 +128,17 @@ public class Experiment {
         {
             int sx = rand.nextInt(gridGraph.sizeX+1);
             int sy = rand.nextInt(gridGraph.sizeY+1);
-            //sx = 10; sy = 8;
+            sx = gridAndGoals.startGoalPoints.sx;
+            sy = gridAndGoals.startGoalPoints.sy;
+            //sx = 0; sy = 5;
             
             LineOfSightScanner losScanner = new LineOfSightScanner(gridGraph);
             try {
+                // Expected running time: 500x500, blocked ratio 25 ==> 0.07ms to 0.1ms per iteration.
                 int iterations = 30000;
                 long start = System.nanoTime();
                 for (int i=0;i<iterations;++i) {
-                    losScanner.computeAllVisibleTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
+                    //losScanner.computeAllVisibleTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
                     //losScanner.clearSnapshots();
                 }
                 long end = System.nanoTime();
@@ -143,7 +146,8 @@ public class Experiment {
                 System.out.println("Total Time: " + totalTime);
                 System.out.println("Per iteration time: " + (totalTime/iterations));
                 
-                losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleTautSuccessors(sx, sy);
             } catch (Exception e) {
                 e.printStackTrace();
             }

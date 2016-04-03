@@ -159,6 +159,10 @@ public class AnyAnglePathfinding {
                 return GraphImporter.loadStoredMaze("corr2_maze512-2-1", "219-187_186-334");
             case 33 :
                 return GraphImporter.importGraphFromFile("anyaCont2b.txt", 9, 9, 9, 1); // difficult case for anya
+            case 34:
+                return DefaultGenerator.generateSeeded(47280928, 40, 40, 15, 24, 18, 0, 0); // Line of sight test 1
+            case 35 :
+                return GraphImporter.importGraphFromFile("lineOfSightTest.txt", 14, 18, 0, 1);// Line of sight test 2
             default :
                 return null;
         }
