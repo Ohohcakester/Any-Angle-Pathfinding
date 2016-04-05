@@ -54,66 +54,69 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
                 return;
             }
         }
+        // Step 1 End: Initial upper bound (Theta*)
 
-        // Step 2: JPS
-        Memory.loadContext(jpsMemoryContext);
-        ReusableIndirectHeap.loadContext(jpsHeapContext);
-        IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength);
-
-        if (isRecording()) {
-            lowerBoundSearch.startRecording();
-            lowerBoundSearch.computePath();
-            //inheritSnapshotListFrom(lowerBoundSearch);
-        } else {
-            lowerBoundSearch.computePath();
-        }
-        
-        // Special case: start has LOS to goal.
-        if (graph.lineOfSight(sx, sy, ex, ey)) {
-            hasDirectPathToGoal = true;
-            return;
-        }
-        
-        visibilityGraph = new IVG(graph, sx, sy, ex, ey, upperBoundLength, lowerBoundSearch);
-        visibilityGraph.initialise();
-        losScanner = new LineOfSightScanner(graph);
-        visibilityGraph.findPointsReachableFromGoal(losScanner);
-
-        startIndex = visibilityGraph.startNode();
-        endIndex = visibilityGraph.endNode();
-
-        Memory.saveContext(jpsMemoryContext);
-        ReusableIndirectHeap.saveContext(jpsHeapContext);
-        
-        
-        // Step 3: Search
-        Memory.loadContext(ivgMemoryContext);
-        ReusableIndirectHeap.loadContext(ivgHeapContext);
-        
-        
-        initialiseMemory(visibilityGraph.size(), Float.POSITIVE_INFINITY, -1, false);
-        pq = new ReusableIndirectHeap(visibilityGraph.size());
-        initialise(startIndex);
-        
-        int start = pq.popMinIndex(); // pop start.
-        setVisited(start, true);
-        processStart(start);
-        
-        while (!pq.isEmpty()) {
-            int current = pq.popMinIndex();
-            setVisited(current, true);
-            
-            if (current == endIndex) {
-                break;
+        // Step 2: JPS Lower Bound Search
+        {
+            Memory.loadContext(jpsMemoryContext);
+            ReusableIndirectHeap.loadContext(jpsHeapContext);
+            IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength);
+    
+            if (isRecording()) {
+                lowerBoundSearch.startRecording();
+                lowerBoundSearch.computePath();
+                //inheritSnapshotListFrom(lowerBoundSearch);
+            } else {
+                lowerBoundSearch.computePath();
             }
-
-            process(current);
             
-            maybeSaveSearchSnapshot();
+            // Special case: start has LOS to goal.
+            if (graph.lineOfSight(sx, sy, ex, ey)) {
+                hasDirectPathToGoal = true;
+                return;
+            }
+            
+            visibilityGraph = new IVG(graph, sx, sy, ex, ey, upperBoundLength, lowerBoundSearch);
+            visibilityGraph.initialise();
+            losScanner = new LineOfSightScanner(graph);
+            visibilityGraph.findPointsReachableFromGoal(losScanner);
+    
+            startIndex = visibilityGraph.startNode();
+            endIndex = visibilityGraph.endNode();
+    
+            Memory.saveContext(jpsMemoryContext);
+            ReusableIndirectHeap.saveContext(jpsHeapContext);
         }
-
-        Memory.saveContext(ivgMemoryContext);
-        ReusableIndirectHeap.saveContext(ivgHeapContext);
+        // Step 2 End : JPS Lower Bound Search
+        
+        // Step 3: Incremental Visibility Graph Search
+        {
+            Memory.loadContext(ivgMemoryContext);
+            ReusableIndirectHeap.loadContext(ivgHeapContext);
+            
+            initialiseMemory(visibilityGraph.size(), Float.POSITIVE_INFINITY, -1, false);
+            pq = new ReusableIndirectHeap(visibilityGraph.size());
+            initialise(startIndex);
+            
+            int start = pq.popMinIndex(); // pop start.
+            setVisited(start, true);
+            processStart(start);
+            
+            while (!pq.isEmpty()) {
+                int current = pq.popMinIndex();
+                setVisited(current, true);
+                
+                if (current == endIndex) break;
+    
+                process(current);
+                
+                maybeSaveSearchSnapshot();
+            }
+    
+            Memory.saveContext(ivgMemoryContext);
+            ReusableIndirectHeap.saveContext(ivgHeapContext);
+        }
+        // Step 3 End: Incremental Visibility Graph Search
     }
     
     /**
@@ -160,6 +163,8 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             }
         }
         
+        // Has Line of Sight to goal. (handled as a separate edge case as LOSScanner doesn't detect non-corner vertex goals)
+        // Note / TODO: Might make multiple parallel edges to goal.
         if (visibilityGraph.isVisibleFromGoal(currX, currY)) {
             if (relax(index, endIndex, graph.distance(currX, currY, ex, ey))) {
                 pq.decreaseKey(endIndex, distance(endIndex) + visibilityGraph.lowerBoundRemainingDistance(ex, ey));
@@ -224,7 +229,6 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
 
     @Override
     public float getPathLength() {
-        // TODO Auto-generated method stub
         return 0;
     }
 

@@ -16,13 +16,13 @@ public class IVG {
     private boolean[] isVisibleFromGoal;
     private int nNodes;
     
-    private int startIndex;
-    private int endIndex;
 
     private final IVGJPS lowerBoundSearch;
     private final GridGraph graph;
     private final float upperBoundLength;
     private final int sx, sy, ex, ey;
+    private int startIndex;
+    private int endIndex;
 
     // Grid Ellipse Data Structure
     protected int[] xOffsets;
