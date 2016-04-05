@@ -4,7 +4,6 @@ import grid.GridGraph;
 
 import java.util.Arrays;
 
-import algorithms.datatypes.Point;
 import algorithms.sparsevgs.LineOfSightScanner;
 
 public class IVG {
@@ -14,6 +13,7 @@ public class IVG {
     private float[] heuristicList;
     private int[] nodesX;
     private int[] nodesY;
+    private boolean[] isVisibleFromGoal;
     private int nNodes;
     
     private int startIndex;
@@ -43,9 +43,11 @@ public class IVG {
         nodesX = new int[11];
         nodesY = new int[11];
         heuristicList = new float[11];
+        isVisibleFromGoal = new boolean[11];
         
         addNodes();
         addStartAndEnd(sx, sy, ex, ey);
+        computeHeuristics();
     }
 
     protected void addNodes() {
@@ -72,7 +74,7 @@ public class IVG {
         }
     }
     
-    protected void addStartAndEnd(int sx, int sy, int ex, int ey) {
+    private final void addStartAndEnd(int sx, int sy, int ex, int ey) {
         if (isNode(sx, sy)) {
             startIndex = indexOf(sx, sy);
         } else {
@@ -99,11 +101,38 @@ public class IVG {
         ++nNodes;
         return index;
     }
+    
+    private final void computeHeuristics() {
+        heuristicList = new float[nNodes];
+        isVisibleFromGoal = new boolean[nNodes];
+        for (int i=0;i<nNodes;++i) {
+            int x = nodesX[i];
+            int y = nodesY[i];
+            heuristicList[i] = computeHeuristic(x,y);
+        }
+    }
+    
+    public final void findPointsReachableFromGoal(LineOfSightScanner losScanner) {
+        losScanner.computeAllVisibleTautSuccessors(ex, ey);
+        int nSuccessors = losScanner.nSuccessors;
+        for (int i=0;i<nSuccessors;++i) {
+            int x = losScanner.successorsX[i];
+            int y = losScanner.successorsY[i];
+            int index = tryGetIndexOf(x,y);
+            if (index != -1) {
+                isVisibleFromGoal[index] = true;
+            }
+        }
+    }
+    
+    public final boolean isVisibleFromGoal(int x, int y) {
+        return isVisibleFromGoal[indexOf(x,y)];
+    }
 
-    private final float heuristic(int x, int y) {
+    private final float computeHeuristic(int x, int y) {
         float sld = graph.distance(x, y, ex, ey);
         float lowerBoundDistance = lowerBoundSearch.heuristicValue(x, y);
-        return Math.max(sld, lowerBoundDistance);
+        return sld < lowerBoundDistance ? lowerBoundDistance : sld; // Return max(sld, lowerBoundDistance);
     }
 
     public final float lowerBoundRemainingDistance(int x, int y) {

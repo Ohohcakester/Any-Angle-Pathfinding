@@ -185,11 +185,328 @@ public final class LineOfSightScanner {
      * dx > 0, dy < 0 : BL TR
      * dx < 0, dy < 0 : BR TL
      * dx < 0, dy > 0 : BL TR
-     *      
-     * dx = 0, dy < 0 : BR BL (TR TL) // We'll have to relook at horizontal / vertical cases.
-     * 
      */
-    private void generateIncrementalTautStartingStates(int sx, int sy, int dx, int dy) {
+    private final void generateIncrementalTautStartingStates(int sx, int sy, int dx, int dy) {
+        boolean rightwardsSearch = false;
+        boolean leftwardsSearch = false;
+        
+        if (dx > 0) {
+            // Moving rightwards
+            if (dy > 0) {
+                //    P
+                //   /
+                //  B
+                boolean brOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
+                boolean tlOfBlocked = graph.topLeftOfBlockedTile(sx, sy);
+                
+                int rightBound = rightUpExtent(sx,sy);
+                Fraction leftExtent;
+                Fraction rightExtent;
+                
+                if (brOfBlocked && tlOfBlocked) {
+                    //  |
+                    //  |___
+                    
+                    leftExtent = new Fraction(sx);
+                    rightExtent = new Fraction(rightBound);
+                    
+                    rightwardsSearch = true;
+                } else if (brOfBlocked) {
+                    //  | /
+                    //  |/
+                    
+                    leftExtent = new Fraction(sx);
+                    rightExtent = new Fraction(sx*dy + dx, dy);
+                    if (!rightExtent.isLessThanOrEqual(rightBound)) { // rightBound < rightExtent
+                        rightExtent = new Fraction(rightBound);
+                    }
+                    
+                } else { // tlOfBlocked
+                    //   /
+                    //  /__
+                    
+                    leftExtent = new Fraction(sx*dy + dx, dy);
+                    rightExtent = new Fraction(rightBound);
+                    
+                    rightwardsSearch = true;
+                }
+                
+                if (leftExtent.isLessThanOrEqual(rightExtent)) {
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+            } else if (dy < 0) {
+                //  B
+                //   \
+                //    P
+                boolean trOfBlocked = graph.topRightOfBlockedTile(sx, sy);
+                boolean blOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
+                
+                int rightBound = rightDownExtent(sx,sy);
+                Fraction leftExtent;
+                Fraction rightExtent;
+                
+                if (trOfBlocked && blOfBlocked) {
+                    //  ____
+                    //  |
+                    //  |
+                    
+                    leftExtent = new Fraction(sx);
+                    rightExtent = new Fraction(rightBound);
+                    
+                    rightwardsSearch = true;
+                } else if (trOfBlocked) {
+                    //  .
+                    //  |\
+                    //  | \
+                    
+                    leftExtent = new Fraction(sx);
+                    rightExtent = new Fraction(sx*-dy + dx, -dy);
+                    if (!rightExtent.isLessThanOrEqual(rightBound)) { // rightBound < rightExtent
+                        rightExtent = new Fraction(rightBound);
+                    }
+                    
+                } else { // blOfBlocked
+                    //  ___
+                    //  \
+                    //   \
+                    leftExtent = new Fraction(sx*-dy + dx, -dy);
+                    rightExtent = new Fraction(rightBound);
+                    
+                    rightwardsSearch = true;
+                }
+                
+                if (leftExtent.isLessThanOrEqual(rightExtent)) {
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+                
+            } else { // dy == 0
+                
+                // B--P
+
+                if (graph.bottomRightOfBlockedTile(sx, sy)) {
+                    // |
+                    // |___
+
+                    Fraction leftExtent = new Fraction(sx);
+                    Fraction rightExtent = new Fraction(rightUpExtent(sx,sy));
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                    
+                } else if (graph.topRightOfBlockedTile(sx, sy)) { // topRightOfBlockedTile
+                    // ____
+                    // |
+                    // |
+
+                    Fraction leftExtent = new Fraction(sx);
+                    Fraction rightExtent = new Fraction(rightDownExtent(sx,sy));
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+                rightwardsSearch = true;
+            }
+            
+        } else if (dx < 0) {
+            // Moving leftwards
+            
+            if (dy > 0) {
+                //  B
+                //   \
+                //    P
+                boolean blOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
+                boolean trOfBlocked = graph.topRightOfBlockedTile(sx, sy);
+                
+                int leftBound = leftUpExtent(sx,sy);
+                Fraction leftExtent;
+                Fraction rightExtent;
+                
+                if (blOfBlocked && trOfBlocked) {
+                    //     |
+                    //  ___|
+                    
+                    leftExtent = new Fraction(leftBound);
+                    rightExtent = new Fraction(sx);
+                    
+                    leftwardsSearch = true;
+                } else if (blOfBlocked) {
+                    //  \ |
+                    //   \|
+                    
+                    leftExtent = new Fraction(sx*dy + dx, dy);
+                    rightExtent = new Fraction(sx);
+                    if (leftExtent.isLessThan(leftBound)) { // leftExtent < leftBound
+                        leftExtent = new Fraction(leftBound);
+                    }
+                    
+                } else { // trOfBlocked
+                    //   \
+                    //  __\
+                    
+                    leftExtent = new Fraction(leftBound);
+                    rightExtent = new Fraction(sx*dy + dx, dy);
+                    
+                    leftwardsSearch = true;
+                }
+                
+                if (leftExtent.isLessThanOrEqual(rightExtent)) {
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+            } else if (dy < 0) {
+                //    B
+                //   /
+                //  P
+                boolean tlOfBlocked = graph.topLeftOfBlockedTile(sx, sy);
+                boolean brOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
+                
+                int leftBound = leftDownExtent(sx,sy);
+                Fraction leftExtent;
+                Fraction rightExtent;
+                
+                if (tlOfBlocked && brOfBlocked) {
+                    //  ____
+                    //     |
+                    //     |
+                    
+                    leftExtent = new Fraction(leftBound);
+                    rightExtent = new Fraction(sx);
+                    
+                    leftwardsSearch = true;
+                } else if (tlOfBlocked) {
+                    //   /|
+                    //  / |
+                    
+                    leftExtent = new Fraction(sx*-dy + dx, -dy);
+                    rightExtent = new Fraction(sx);
+                    if (leftExtent.isLessThan(leftBound)) { // leftExtent < leftBound
+                        leftExtent = new Fraction(leftBound);
+                    }
+                    
+                } else { // brOfBlocked
+                    //  ___
+                    //    /
+                    //   /
+                    
+                    leftExtent = new Fraction(leftBound);
+                    rightExtent = new Fraction(sx*-dy + dx, -dy);
+                    
+                    leftwardsSearch = true;
+                }
+                
+                if (leftExtent.isLessThanOrEqual(rightExtent)) {
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+                
+            } else { // dy == 0
+                
+                // P--B
+
+                if (graph.bottomLeftOfBlockedTile(sx, sy)) {
+                    //    |
+                    // ___|
+
+                    Fraction leftExtent = new Fraction(leftUpExtent(sx,sy));
+                    Fraction rightExtent = new Fraction(sx);
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                    
+                } else if (graph.topLeftOfBlockedTile(sx, sy)) {
+                    // ____
+                    //    |
+                    //    |
+
+                    Fraction leftExtent = new Fraction(leftDownExtent(sx,sy));
+                    Fraction rightExtent = new Fraction(sx);
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                }
+                
+                leftwardsSearch = true;
+                
+            }
+        } else { // dx == 0
+            // Direct upwards or direct downwards.
+            if (dy > 0) {
+                // Direct upwards
+                
+                //  P
+                //  |
+                //  B
+                
+                if (graph.topLeftOfBlockedTile(sx, sy)) {
+                    // |
+                    // |___
+
+                    Fraction leftExtent = new Fraction(sx);
+                    Fraction rightExtent = new Fraction(rightUpExtent(sx,sy));
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+
+                    rightwardsSearch = true;
+                    
+                } else if (graph.topRightOfBlockedTile(sx, sy)) {
+                    //    |
+                    // ___|
+
+                    Fraction leftExtent = new Fraction(leftUpExtent(sx,sy));
+                    Fraction rightExtent = new Fraction(sx);
+                    this.generateUpwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+
+                    leftwardsSearch = true;
+                    
+                } else {
+                    Fraction x = new Fraction(sx);
+                    stackPush(new LOSInterval(sy+1, x, x, LOSInterval.BOTH_INCLUSIVE));
+                }
+                
+            } else { // dy < 0
+                // Direct downwards
+                
+                //  B
+                //  |
+                //  P
+
+                if (graph.bottomLeftOfBlockedTile(sx, sy)) {
+                    // ____
+                    // |
+                    // |
+
+                    Fraction leftExtent = new Fraction(sx);
+                    Fraction rightExtent = new Fraction(rightDownExtent(sx,sy));
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+                    
+                    rightwardsSearch = true;
+                    
+                } else if (graph.bottomRightOfBlockedTile(sx, sy)) {
+                    // ____
+                    //    |
+                    //    |
+
+                    Fraction leftExtent = new Fraction(leftDownExtent(sx,sy));
+                    Fraction rightExtent = new Fraction(sx);
+                    this.generateDownwards(leftExtent, rightExtent, sx, sy, sy, true, true);
+
+                    leftwardsSearch = true;
+                    
+                } else {
+                    Fraction x = new Fraction(sx);
+                    stackPush(new LOSInterval(sy-1, x, x, LOSInterval.BOTH_INCLUSIVE));
+                }
+            }
+        }
+        
+        // Direct Search Left
+        if (leftwardsSearch) {
+            // Direct Search Left
+            // Assumption: Not blocked towards left.
+            addSuccessor(leftAnyExtent(sx, sy),sy); 
+        }
+        
+        if (rightwardsSearch) {
+            // Direct Search Right
+            // Assumption: Not blocked towards right.
+            addSuccessor(rightAnyExtent(sx, sy),sy);
+        }
+        
+        
         
     }
 

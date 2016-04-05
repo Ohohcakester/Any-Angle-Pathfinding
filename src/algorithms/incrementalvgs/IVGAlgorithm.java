@@ -4,7 +4,6 @@ import grid.GridGraph;
 import algorithms.BasicThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
-import algorithms.datatypes.Point;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 import algorithms.sparsevgs.LineOfSightScanner;
 
@@ -17,8 +16,12 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
     private static ReusableIndirectHeap.Context jpsHeapContext = new ReusableIndirectHeap.Context();
     private static ReusableIndirectHeap.Context ivgHeapContext = new ReusableIndirectHeap.Context();
     
+    int startIndex;
+    int endIndex;
+    
     float upperBoundLength;
     IVG visibilityGraph;
+    boolean hasDirectPathToGoal = false;
     
     ReusableIndirectHeap pq;
     LineOfSightScanner losScanner;
@@ -57,39 +60,50 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
         ReusableIndirectHeap.loadContext(jpsHeapContext);
         IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength);
 
-        Memory.saveContext(jpsMemoryContext);
-        ReusableIndirectHeap.saveContext(jpsHeapContext);
-        
-        // Step 3: Search
-        Memory.loadContext(ivgMemoryContext);
-        ReusableIndirectHeap.loadContext(ivgHeapContext);
-        
         if (isRecording()) {
             lowerBoundSearch.startRecording();
             lowerBoundSearch.computePath();
-            inheritSnapshotListFrom(lowerBoundSearch);
+            //inheritSnapshotListFrom(lowerBoundSearch);
         } else {
             lowerBoundSearch.computePath();
+        }
+        
+        // Special case: start has LOS to goal.
+        if (graph.lineOfSight(sx, sy, ex, ey)) {
+            hasDirectPathToGoal = true;
+            return;
         }
         
         visibilityGraph = new IVG(graph, sx, sy, ex, ey, upperBoundLength, lowerBoundSearch);
         visibilityGraph.initialise();
         losScanner = new LineOfSightScanner(graph);
+        visibilityGraph.findPointsReachableFromGoal(losScanner);
+
+        startIndex = visibilityGraph.startNode();
+        endIndex = visibilityGraph.endNode();
+
+        Memory.saveContext(jpsMemoryContext);
+        ReusableIndirectHeap.saveContext(jpsHeapContext);
+        
+        
+        // Step 3: Search
+        Memory.loadContext(ivgMemoryContext);
+        ReusableIndirectHeap.loadContext(ivgHeapContext);
+        
         
         initialiseMemory(visibilityGraph.size(), Float.POSITIVE_INFINITY, -1, false);
         pq = new ReusableIndirectHeap(visibilityGraph.size());
-        initialise(visibilityGraph.startNode());
+        initialise(startIndex);
         
         int start = pq.popMinIndex(); // pop start.
         setVisited(start, true);
         processStart(start);
         
-        int finish = visibilityGraph.endNode();
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             setVisited(current, true);
             
-            if (current == finish) {
+            if (current == endIndex) {
                 break;
             }
 
@@ -102,6 +116,9 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
         ReusableIndirectHeap.saveContext(ivgHeapContext);
     }
     
+    /**
+     * Assumption: Start vertex is not visible from the goal vertex.
+     */
     private final void processStart(int start) {
         int currX = visibilityGraph.xCoordinateOf(start);
         int currY = visibilityGraph.yCoordinateOf(start);
@@ -112,17 +129,42 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             int x = losScanner.successorsX[i];
             int y = losScanner.successorsY[i];
             int dest = visibilityGraph.tryGetIndexOf(x, y);
-            if (dest != -1 && relax(start, dest, graph.distance(sx, sy, x, y))) {
-                pq.decreaseKey(dest, distance(dest));
+            if (dest == -1) continue;
+            
+            float h = visibilityGraph.lowerBoundRemainingDistance(x, y);
+            if (h != Float.POSITIVE_INFINITY && relax(start, dest, graph.distance(sx, sy, x, y))) {
+                pq.decreaseKey(dest, distance(dest) + h);
             }
         }
     }
     
     private final void process(int index) {
+        int parentIndex = parent(index);
+        
         int currX = visibilityGraph.xCoordinateOf(index);
         int currY = visibilityGraph.yCoordinateOf(index);
+        int parX = visibilityGraph.xCoordinateOf(parentIndex);
+        int parY = visibilityGraph.yCoordinateOf(parentIndex);
         
+        losScanner.computeAllVisibleIncrementalTautSuccessors(currX, currY, currX-parX, currY-parY);
+        int nSuccessors = losScanner.nSuccessors;
+        for (int i=0;i<nSuccessors;++i) {
+            int x = losScanner.successorsX[i];
+            int y = losScanner.successorsY[i];
+            int dest = visibilityGraph.tryGetIndexOf(x, y);
+            if (dest == -1) continue;
+            
+            float h = visibilityGraph.lowerBoundRemainingDistance(x, y);
+            if (h != Float.POSITIVE_INFINITY && relax(index, dest, graph.distance(currX, currY, x, y))) {
+                pq.decreaseKey(dest, distance(dest) + h);
+            }
+        }
         
+        if (visibilityGraph.isVisibleFromGoal(currX, currY)) {
+            if (relax(index, endIndex, graph.distance(currX, currY, ex, ey))) {
+                pq.decreaseKey(endIndex, distance(endIndex) + visibilityGraph.lowerBoundRemainingDistance(ex, ey));
+            }
+        }
     }
 
     protected final boolean relax(int u, int v, float weightUV) {
@@ -144,7 +186,7 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
 
     private int pathLength() {
         int length = 0;
-        int current = visibilityGraph.endNode();
+        int current = endIndex;
         while (current != -1) {
             current = parent(current);
             length++;
@@ -154,9 +196,18 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
 
     @Override
     public int[][] getPath() {
+        if (visibilityGraph == null) {
+            if (hasDirectPathToGoal) {
+                return new int[][]{{sx,sy},{ex,ey}};
+            } else {
+                // No path to goal.
+                return new int[0][];
+            }
+        }
+        
         int length = pathLength();
         int[][] path = new int[length][];
-        int current = visibilityGraph.endNode();
+        int current = endIndex;
         
         int index = length-1;
         while (current != -1) {
@@ -183,7 +234,7 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
      */
     @Override
     protected int goalParentIndex() {
-        return visibilityGraph.endNode();
+        return endIndex;
     }
 
     @Override
