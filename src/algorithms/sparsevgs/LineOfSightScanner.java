@@ -417,7 +417,6 @@ public final class LineOfSightScanner {
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 int dy = currState.y - sy;
                 Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
-                //if (leftSuccessorAdded && !currState.xL.isEqualTo(sx)) leftProjection = leftProjection.plus(1,sizeY);
 
                 int leftBound = leftUpExtent(currState.xL.ceil(), currState.y);
                 if (currState.xL.isWholeNumber() && graph.bottomRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
@@ -429,7 +428,6 @@ public final class LineOfSightScanner {
 
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
-                //if (rightSuccessorAdded && !currState.xR.isEqualTo(sx)) rightProjection = rightProjection.minus(1,sizeY);
                 
                 int rightBound = rightUpExtent(currState.xR.floor(), currState.y);
                 if (currState.xR.isWholeNumber() && graph.bottomLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
@@ -515,7 +513,6 @@ public final class LineOfSightScanner {
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 int dy = sy - currState.y; 
                 Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
-                //if (leftSuccessorAdded && !currState.xL.isEqualTo(sx)) leftProjection = leftProjection.plus(1,sizeY);
                 
                 int leftBound = leftDownExtent(currState.xL.ceil(), currState.y);
                 if (currState.xL.isWholeNumber() && graph.topRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
@@ -527,7 +524,6 @@ public final class LineOfSightScanner {
 
                 // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
                 Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
-                //if (rightSuccessorAdded && !currState.xR.isEqualTo(sx)) rightProjection = rightProjection.minus(1,sizeY);
 
                 int rightBound = rightDownExtent(currState.xR.floor(), currState.y);
                 if (currState.xR.isWholeNumber() && graph.topLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
@@ -547,8 +543,6 @@ public final class LineOfSightScanner {
                     generateDownwards(leftProjection, rightProjection, sx, sy, currState.y, leftInclusive, rightInclusive);
                 }
             }
-            
-            
         }
     }
 
