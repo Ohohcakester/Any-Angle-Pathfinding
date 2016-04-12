@@ -105,7 +105,7 @@ public class TimeCounter {
     }
 
     private static double per(int value) {
-        return value / iterations;
+        return (double)value / iterations;
     }
 
     public static void print() {
