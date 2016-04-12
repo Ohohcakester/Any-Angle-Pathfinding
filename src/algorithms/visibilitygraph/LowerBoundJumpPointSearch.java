@@ -1,10 +1,13 @@
 package algorithms.visibilitygraph;
 
 import grid.GridGraph;
-import algorithms.JumpPointSearch;
+import algorithms.AStarStaticMemory;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 
-public class LowerBoundJumpPointSearch extends JumpPointSearch {
+public class LowerBoundJumpPointSearch extends AStarStaticMemory {
+    protected int[] neighboursdX;
+    protected int[] neighboursdY;
+    protected int neighbourCount;
     
     private static final float APPROXIMATION_RATIO = (float)Math.sqrt(4 - 2*Math.sqrt(2));
     private static final float BUFFER = 0.000001f;
@@ -61,7 +64,139 @@ public class LowerBoundJumpPointSearch extends JumpPointSearch {
         maybePostSmooth();
     }
 
-    @Override
+    protected final void computeNeighbours(int currentIndex, int cx, int cy) {
+        neighbourCount = 0;
+
+        int parentIndex = parent(currentIndex);
+        if (parentIndex == -1) {
+            // is start node.
+            for (int y=-1;y<=1;++y) {
+                for (int x=-1;x<=1;++x) {
+                    if (x == 0 && y == 0) continue;
+                    int px = cx+x;
+                    int py = cy+y;
+                    if (graph.neighbourLineOfSight(cx,cy,px,py)) {
+                        addNeighbour(x, y);
+                    }
+                }
+            }
+            return;
+        }
+
+        int dirX = cx - graph.toTwoDimX(parentIndex);
+        int dirY = cy - graph.toTwoDimY(parentIndex);
+
+        if (dirX < 0) {
+            if (dirY < 0) {
+                // down-left
+                if (!graph.isBlocked(cx-1, cy-1)) {
+                    addNeighbour(-1,-1);
+                    addNeighbour(-1,0);
+                    addNeighbour(0,-1);
+                } else {
+                    if (!graph.isBlocked(cx-1, cy)) addNeighbour(-1,0);
+                    if (!graph.isBlocked(cx, cy-1)) addNeighbour(0,-1);
+                }
+            } else if (dirY > 0) {
+                // up-left
+                if (!graph.isBlocked(cx-1, cy)) {
+                    addNeighbour(-1,1);
+                    addNeighbour(-1,0);
+                    addNeighbour(0,1);
+                } else {
+                    if (!graph.isBlocked(cx-1, cy-1)) addNeighbour(-1,0);
+                    if (!graph.isBlocked(cx, cy)) addNeighbour(0,1);
+                }
+            } else {
+                // left
+                if (graph.isBlocked(cx,cy)) {
+                    //assert !graph.isBlocked(cx-1, cy);
+                    addNeighbour(-1,1);
+                    addNeighbour(0,1);
+                    addNeighbour(-1,0);
+                } else {
+                    //assert graph.isBlocked(cx,cy-1);
+                    //assert !graph.isBlocked(cx-1, cy-1);
+                    addNeighbour(-1,-1);
+                    addNeighbour(0,-1);
+                    addNeighbour(-1,0);
+                }
+            }
+        } else if (dirX > 0) {
+            if (dirY < 0) {
+                // down-right
+                if (!graph.isBlocked(cx, cy-1)) {
+                    addNeighbour(1,-1);
+                    addNeighbour(1,0);
+                    addNeighbour(0,-1);
+                } else {
+                    if (!graph.isBlocked(cx, cy)) addNeighbour(1,0);
+                    if (!graph.isBlocked(cx-1, cy-1)) addNeighbour(0,-1);
+                }
+            } else if (dirY > 0) {
+                // up-right
+                if (!graph.isBlocked(cx, cy)) {
+                    addNeighbour(1,1);
+                    addNeighbour(1,0);
+                    addNeighbour(0,1);
+                } else {
+                    if (!graph.isBlocked(cx, cy-1)) addNeighbour(1,0);
+                    if (!graph.isBlocked(cx-1, cy)) addNeighbour(0,1);
+                }
+            } else {
+                // right
+                if (graph.isBlocked(cx-1,cy)) {
+                    //assert !graph.isBlocked(cx, cy);
+                    addNeighbour(1,1);
+                    addNeighbour(0,1);
+                    addNeighbour(1,0);
+                } else {
+                    //assert graph.isBlocked(cx-1,cy-1);
+                    //assert !graph.isBlocked(cx, cy-1);
+                    addNeighbour(1,-1);
+                    addNeighbour(0,-1);
+                    addNeighbour(1,0);
+                }
+            }
+        } else {
+            if (dirY < 0) {
+                // down
+                if (graph.isBlocked(cx,cy)) {
+                    //assert !graph.isBlocked(cx, cy-1);
+                    addNeighbour(1,-1);
+                    addNeighbour(1,0);
+                    addNeighbour(0,-1);
+                } else {
+                    //assert graph.isBlocked(cx-1,cy);
+                    //assert !graph.isBlocked(cx-1, cy-1);
+                    addNeighbour(-1,-1);
+                    addNeighbour(-1,0);
+                    addNeighbour(0,-1);
+                }
+            } else { //dirY > 0
+                // up
+                if (graph.isBlocked(cx,cy-1)) {
+                    //assert !graph.isBlocked(cx, cy);
+                    addNeighbour(1,1);
+                    addNeighbour(1,0);
+                    addNeighbour(0,1);
+                } else {
+                    //assert graph.isBlocked(cx-1,cy-1);
+                    //assert !graph.isBlocked(cx-1, cy);
+                    addNeighbour(-1,1);
+                    addNeighbour(-1,0);
+                    addNeighbour(0,1);
+                }
+            }
+        }
+    }
+    
+    private final void addNeighbour(int x, int y) {
+        neighboursdX[neighbourCount] = x;
+        neighboursdY[neighbourCount] = y;
+        neighbourCount++;
+    }
+    
     protected void tryRelax(int current, int currX, int currY, int destination) {
         if (visited(destination)) return;
         

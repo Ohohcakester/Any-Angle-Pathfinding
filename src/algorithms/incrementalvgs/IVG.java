@@ -16,8 +16,6 @@ public class IVG {
     private boolean[] isVisibleFromGoal;
     private int nNodes;
     
-
-    private final IVGJPS lowerBoundSearch;
     private final GridGraph graph;
     private final float upperBoundLength;
     private final int sx, sy, ex, ey;
@@ -28,15 +26,13 @@ public class IVG {
     protected int[] xOffsets;
     protected int yOffset;
     
-    public IVG(GridGraph graph, int sx, int sy,
-            int ex, int ey, float upperBoundLength, IVGJPS lowerBoundSearch) {
+    public IVG(GridGraph graph, int sx, int sy, int ex, int ey, float upperBoundLength) {
         this.graph = graph;
         this.sx = sx;
         this.sy = sy;
         this.ex = ex;
         this.ey = ey;
         this.upperBoundLength = upperBoundLength;
-        this.lowerBoundSearch = lowerBoundSearch;
     }
     
     public void initialise() {
@@ -47,7 +43,7 @@ public class IVG {
         
         addNodes();
         addStartAndEnd(sx, sy, ex, ey);
-        computeHeuristics();
+        initialiseHeuristics();
     }
 
     protected void addNodes() {
@@ -102,13 +98,13 @@ public class IVG {
         return index;
     }
     
-    private final void computeHeuristics() {
+    private final void initialiseHeuristics() {
         heuristicList = new float[nNodes];
         isVisibleFromGoal = new boolean[nNodes];
         for (int i=0;i<nNodes;++i) {
             int x = nodesX[i];
             int y = nodesY[i];
-            heuristicList[i] = computeHeuristic(x,y);
+            heuristicList[i] = Float.POSITIVE_INFINITY;
         }
     }
     
@@ -129,14 +125,24 @@ public class IVG {
         return isVisibleFromGoal[indexOf(x,y)];
     }
 
-    private final float computeHeuristic(int x, int y) {
-        float sld = graph.distance(x, y, ex, ey);
-        float lowerBoundDistance = lowerBoundSearch.heuristicValue(x, y);
-        return sld < lowerBoundDistance ? lowerBoundDistance : sld; // Return max(sld, lowerBoundDistance);
+    public final void strengthenHeuristics() {
+        for (int i=0;i<nNodes;++i) {
+            //assert heuristicList[i] != Float.POSITIVE_INFINITY;
+            float sld = graph.distance(nodesX[i], nodesY[i], ex, ey);
+            heuristicList[i] = heuristicList[i] < sld ? sld : heuristicList[i]; // max(sld, lowerBoundDistance);
+        }
+        heuristicList[endNode()] = 0;
     }
 
     public final float lowerBoundRemainingDistance(int x, int y) {
         return heuristicList[indexOf(x, y)];
+    }
+    
+    public final boolean isWithinEllipse(int x, int y) {
+        int yRel = y-yOffset;
+        if (yRel < 0 || yRel >= nodeIndex.length) return false;
+        int xRel = x-xOffsets[yRel];
+        return !(xRel < 0 || xRel >= nodeIndex[yRel].length);
     }
     
     /**
@@ -149,6 +155,24 @@ public class IVG {
         if (xRel < 0 || xRel >= nodeIndex[yRel].length) return -1;
         
         return nodeIndex[yRel][xRel];
+    }
+    
+    public final void tryUpdateHeuristic(int index, float newValue) {
+        heuristicList[index] = newValue < heuristicList[index] ? newValue : heuristicList[index];
+    }
+
+    public final void setHeuristic(int index, float newValue) {
+        heuristicList[index] = newValue;
+    }
+
+    public final int[] getXOffsets() {
+        return xOffsets;
+    }
+    public final int getYOffset() {
+        return yOffset;
+    }
+    public final int[][] getNodeIndexArray() {
+        return nodeIndex;
     }
     
     public final int indexOf(int x, int y) {
@@ -213,11 +237,18 @@ public class IVG {
 class GridEllipse {
     private static final float BUFFER = 0.001f;
     
-    public int yMin;
-    public int yMax;
-    public int[] xLeft;
-    public int[] xRight;
+    public final int yMin;
+    public final int yMax;
+    public final int[] xLeft;
+    public final int[] xRight;
 
+    private GridEllipse(int yMin, int yMax, int[] xLeft, int[] xRight) {
+        this.yMin = yMin;
+        this.yMax = yMax;
+        this.xLeft = xLeft;
+        this.xRight = xRight;
+    }
+    
     public GridEllipse(int sx, int sy, int ex, int ey, float pathLength) {
         double LSquare = (double)pathLength + BUFFER;
         LSquare *= LSquare;
@@ -276,12 +307,96 @@ class GridEllipse {
             }
         }
     }
+
+    public static GridEllipse looseEllipse(int sx, int sy, int ex, int ey, float pathLength) {
+        int yMin, yMax;
+        int[] xLeft, xRight;
+        
+        double LSquare = (double)pathLength + BUFFER;
+        LSquare *= LSquare;
+        int dy = ey-sy;
+        int dx = ex-sx;
+        
+        double m = (double)(dy)/dx;
+        double mSquare = m*m;
+        
+        double onePlusmSquare = 1+mSquare;
+        double cosSquare = 1/onePlusmSquare;
+        double sinSquare = mSquare/onePlusmSquare;
+        if (m == Double.POSITIVE_INFINITY || m == Double.NEGATIVE_INFINITY) {
+            cosSquare = 0;
+            sinSquare = 1;
+        }
+        
+        double DSquare = (dy*dy + dx*dx);
+        double aSquare = LSquare/4; // major axis radius
+        double bSquare = (LSquare - DSquare) / 4; // minor axis radius
+        
+        double A = cosSquare/aSquare + sinSquare/bSquare;
+
+        /*
+         * x = +/- sqrt( P - Qy^2 ) - Ry 
+         */        
+        double P = 1/A;
+        double Q = 1/(aSquare * bSquare * A*A);
+        double R = (m/onePlusmSquare) * (1/aSquare - 1/bSquare) / A;
+        if (m == Double.POSITIVE_INFINITY || m == Double.NEGATIVE_INFINITY) {
+            R = 0;
+        }
+        
+        double yHeight = 2*Math.sqrt(aSquare*sinSquare + bSquare*cosSquare);
+        
+        yMin = ceil( (sy+ey - yHeight)/2 );
+        yMax = floor( (sy+ey + yHeight)/2 );
+        int totalYs = yMax-yMin+1;
+        int[] xLeftExtents = new int[totalYs];
+        int[] xRightExtents = new int[totalYs];
+
+        double midX = (double)(sx + ex)/2;
+        double midY = (double)(sy + ey)/2;
+        for (int i=0; i<totalYs; i++) {
+            // x = +/- sqrt( P - Qy^2 ) - Ry
+            double y = yMin+i - midY;
+            double insideSqrt = P - Q*(y*y);
+            double Ry = R*y;
+            if (insideSqrt > 0) {
+                double sqrt = Math.sqrt(insideSqrt);
+                xLeftExtents[i] = floor(midX - sqrt - Ry);
+                xRightExtents[i] = ceil(midX + sqrt - Ry);
+            } else {
+                xLeftExtents[i] = floor(midX - Ry);
+                xRightExtents[i] = ceil(midX - Ry);
+            }
+        }
+
+        xLeft = new int[totalYs];
+        xRight = new int[totalYs];
+        for (int i=0; i<totalYs; ++i) {
+            // Each value xLeft[i] is min(xLeftExtents[i-1], xLeftExtents[i], xLeftExtents[i+1])
+            // Each value xRight[i] is max(xRightExtents[i-1], xRightExtents[i], xRightExtents[i+1])
+            
+            int l = xLeftExtents[i], r = xRightExtents[i];
+            if (i > 0) {
+                if (xLeftExtents[i-1] < l) l = xLeftExtents[i-1];
+                if (xRightExtents[i-1] > r) r = xRightExtents[i-1];
+            }
+            if (i < totalYs - 1) {
+                if (xLeftExtents[i+1] < l) l = xLeftExtents[i+1];
+                if (xRightExtents[i+1] > r) r = xRightExtents[i+1];
+            }
+            
+            xLeft[i] = l;
+            xRight[i] = r;
+        }
+        
+        return new GridEllipse(yMin,yMax,xLeft,xRight);
+    }
     
-    private int floor(double a) {
+    private static final int floor(double a) {
         return (int)a;
     }
     
-    private int ceil(double a) {
+    private static final int ceil(double a) {
         return (int)(Math.ceil(a));
     }   
 }

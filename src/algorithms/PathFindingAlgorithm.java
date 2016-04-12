@@ -98,15 +98,15 @@ public abstract class PathFindingAlgorithm {
     public void printStatistics() {
     }
     
-    protected int toOneDimIndex(int x, int y) {
+    protected final int toOneDimIndex(int x, int y) {
         return graph.toOneDimIndex(x, y);
     }
     
-    protected int toTwoDimX(int index) {
+    protected final int toTwoDimX(int index) {
         return graph.toTwoDimX(index);
     }
     
-    protected int toTwoDimY(int index) {
+    protected final int toTwoDimY(int index) {
         return graph.toTwoDimY(index);
     }
     

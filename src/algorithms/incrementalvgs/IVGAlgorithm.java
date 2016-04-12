@@ -2,6 +2,7 @@ package algorithms.incrementalvgs;
 
 import grid.GridGraph;
 import algorithms.BasicThetaStar;
+import algorithms.JumpPointSearch;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.priorityqueue.ReusableIndirectHeap;
@@ -32,11 +33,18 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
 
     @Override
     public void computePath() {
+        // Special case: start has LOS to goal.
+        if (graph.lineOfSight(sx, sy, ex, ey)) {
+            hasDirectPathToGoal = true;
+            return;
+        }
+
         // Step 1: Initial upper bound (Theta*)
         {
             Memory.loadContext(thetaMemoryContext);
             ReusableIndirectHeap.loadContext(thetaHeapContext);
-            PathFindingAlgorithm algo = new BasicThetaStar(graph, sx, sy, ex, ey);
+            //PathFindingAlgorithm algo = new BasicThetaStar(graph, sx, sy, ex, ey);
+            PathFindingAlgorithm algo = JumpPointSearch.repeatedPostSmooth(graph, sx, sy, ex, ey);
             //PathFindingAlgorithm algo = new StrictThetaStar(graph, sx, sy, ex, ey);
             
             if (isRecording()) {
@@ -58,29 +66,26 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
 
         // Step 2: JPS Lower Bound Search
         {
+            visibilityGraph = new IVG(graph, sx, sy, ex, ey, upperBoundLength);
+            losScanner = new LineOfSightScanner(graph);
+            visibilityGraph.initialise();
+            visibilityGraph.findPointsReachableFromGoal(losScanner);
+            
             Memory.loadContext(jpsMemoryContext);
             ReusableIndirectHeap.loadContext(jpsHeapContext);
-            IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength);
+            IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
+            //IVGBFS lowerBoundSearch = new IVGBFS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
     
             if (isRecording()) {
                 lowerBoundSearch.startRecording();
                 lowerBoundSearch.computePath();
-                //inheritSnapshotListFrom(lowerBoundSearch);
+                inheritSnapshotListFrom(lowerBoundSearch);
             } else {
                 lowerBoundSearch.computePath();
             }
             
-            // Special case: start has LOS to goal.
-            if (graph.lineOfSight(sx, sy, ex, ey)) {
-                hasDirectPathToGoal = true;
-                return;
-            }
+            visibilityGraph.strengthenHeuristics();
             
-            visibilityGraph = new IVG(graph, sx, sy, ex, ey, upperBoundLength, lowerBoundSearch);
-            visibilityGraph.initialise();
-            losScanner = new LineOfSightScanner(graph);
-            visibilityGraph.findPointsReachableFromGoal(losScanner);
-    
             startIndex = visibilityGraph.startNode();
             endIndex = visibilityGraph.endNode();
     
@@ -88,7 +93,7 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             ReusableIndirectHeap.saveContext(jpsHeapContext);
         }
         // Step 2 End : JPS Lower Bound Search
-        
+
         // Step 3: Incremental Visibility Graph Search
         {
             Memory.loadContext(ivgMemoryContext);
