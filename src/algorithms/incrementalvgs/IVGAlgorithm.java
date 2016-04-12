@@ -73,13 +73,13 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             
             Memory.loadContext(jpsMemoryContext);
             ReusableIndirectHeap.loadContext(jpsHeapContext);
-            IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
-            //IVGBFS lowerBoundSearch = new IVGBFS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
+            //IVGJPS lowerBoundSearch = new IVGJPS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
+            IVGBFS lowerBoundSearch = new IVGBFS(graph, ex ,ey, sx, sy, upperBoundLength, visibilityGraph);
     
             if (isRecording()) {
-                lowerBoundSearch.startRecording();
+                //lowerBoundSearch.startRecording();
                 lowerBoundSearch.computePath();
-                inheritSnapshotListFrom(lowerBoundSearch);
+                //inheritSnapshotListFrom(lowerBoundSearch);
             } else {
                 lowerBoundSearch.computePath();
             }
