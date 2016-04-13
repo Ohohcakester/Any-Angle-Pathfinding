@@ -630,14 +630,6 @@ public final class LineOfSightScanner {
             if (!(graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y))) {
                 addSuccessor(x,y);
             }
-            
-            /*int x = sx;
-            int y = sy;
-            while (true) {
-                x = leftAnyExtent(x,y);
-                if (graph.topRightOfBlockedTile(x, y) && graph.bottomRightOfBlockedTile(x, y)) break;
-                if (graph.topLeftOfBlockedTile(x, y) || graph.bottomLeftOfBlockedTile(x, y)) addSuccessor(x,y);
-            }*/
         }
 
         // Search rightwards
@@ -647,13 +639,6 @@ public final class LineOfSightScanner {
             if (!(graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y))) {
                 addSuccessor(x,y);
             }
-            /*int x = sx;
-            int y = sy;
-            while (true) {
-                x = rightAnyExtent(x,y);
-                if (graph.topLeftOfBlockedTile(x, y) && graph.bottomLeftOfBlockedTile(x, y)) break;
-                if (graph.topRightOfBlockedTile(x, y) || graph.bottomRightOfBlockedTile(x, y)) addSuccessor(x,y);
-            }*/
         }
     }
     
@@ -665,8 +650,6 @@ public final class LineOfSightScanner {
             //System.out.println("POP " + currState);
 
             boolean zeroLengthInterval = currState.xR.isEqualTo(currState.xL);
-            //boolean leftSuccessorAdded = false;
-            //boolean rightSuccessorAdded = false;
             
             if (currState.y > sy) {
                 // Upwards
