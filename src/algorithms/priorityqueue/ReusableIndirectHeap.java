@@ -296,6 +296,10 @@ public class ReusableIndirectHeap {
     }
     */
     
+    public final int size() {
+        return heapSize;
+    }
+    
     public final boolean isEmpty() {
         return heapSize <= 0;
     }
