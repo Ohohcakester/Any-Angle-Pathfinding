@@ -163,6 +163,10 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(47280928, 40, 40, 15, 24, 18, 0, 0); // Line of sight test 1
             case 35 :
                 return GraphImporter.importGraphFromFile("lineOfSightTest.txt", 14, 18, 0, 1);// Line of sight test 2
+            case 36 :
+                return DefaultGenerator.generateSeeded(211, 40, 40, 10, 4, 3, 36, 36); // Maze likely to cause wrapping in taut-path algorithms.
+            case 37 :
+                return DefaultGenerator.generateSeeded(327116666, 40, 40, 8, 4, 3, 36, 37); // Goal unreachable. Much wrapping
             default :
                 return null;
         }
