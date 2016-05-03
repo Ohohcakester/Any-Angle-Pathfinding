@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import main.utility.TimeCounter;
 import main.utility.Utility;
 import uiandio.CloseOnExitWindowListener;
 import algorithms.PathFindingAlgorithm;
@@ -45,10 +46,14 @@ public class Visualisation {
      */
     private static void displayAlgorithmOperation(AlgoFunction algo, GridGraph gridGraph, StartGoalPoints p) {
         GridLineSet gridLineSet = new GridLineSet();
-        
+        //Random r = new Random(2);
+        //for (int i=0;i<1000;++i)Utility.generatePath(algo, gridGraph, r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY), r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY));
         try {
+            long startT = System.nanoTime();
             int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
-            
+            long endT = System.nanoTime();
+            //TimeCounter.print();
+            System.out.println("Runtime: " + ((endT-startT)/1000000.));
             for (int i=0; i<path.length-1; i++) {
                 gridLineSet.addLine(path[i][0], path[i][1],
                         path[i+1][0], path[i+1][1], Color.BLUE);
