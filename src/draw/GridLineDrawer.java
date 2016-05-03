@@ -38,11 +38,11 @@ public class GridLineDrawer implements Drawer {
         Graphics2D g2 = (Graphics2D) g;
         g2.setStroke(new BasicStroke(LINE_THICKNESS));
 
-        for (GridLineSet.Line line : gridLineSet.getLineList()) {
-            drawLine(g, line);
-        }
         for (GridLineSet.FractionLine line : gridLineSet.getFractionLineList()) {
             drawFractionLine(g, line);
+        }
+        for (GridLineSet.Line line : gridLineSet.getLineList()) {
+            drawLine(g, line);
         }
         
         g2.setStroke(new BasicStroke(1));

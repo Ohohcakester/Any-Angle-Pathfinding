@@ -1004,7 +1004,9 @@ public class VertexAnyaNoExtents extends PathFindingAlgorithm {
             list.add(SnapshotItem.generate(line));
         }
         
-        return list;
+        List<SnapshotItem> list2 = super.computeSearchSnapshot();
+        list2.addAll(list);
+        return list2;
     }
 
 }
