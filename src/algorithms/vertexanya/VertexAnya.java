@@ -104,6 +104,7 @@ public class VertexAnya extends PathFindingAlgorithm {
         //System.out.println("RELAX " + x + ", " + y);
         // return true iff relaxation is done.
         int targetIndex = graph.toOneDimIndex(x, y);
+        if (memory.visited(targetIndex)) return;
         
         float newWeight = memory.distance(parentIndex) + graph.distance(parX, parY, x, y);
         if (newWeight < memory.distance(targetIndex)) {
@@ -333,9 +334,9 @@ public class VertexAnya extends PathFindingAlgorithm {
             // Moving leftwards
             
             if (dy > 0) {
-                //  B
+                //  P
                 //   \
-                //    P
+                //    B
                 boolean blOfBlocked = graph.bottomLeftOfBlockedTile(baseX, baseY);
                 boolean trOfBlocked = graph.topRightOfBlockedTile(baseX, baseY);
                 
