@@ -405,7 +405,31 @@ public class GridGraph {
         }
         return nBlocked;
     }
-    
+
+    public final boolean isOuterCorner(int x, int y) {
+        boolean a = isBlocked(x-1, y-1);
+        boolean b = isBlocked(x, y-1);
+        boolean c = isBlocked(x, y);
+        boolean d = isBlocked(x-1, y);
+        
+        return ((!a && !c) || (!d && !b)) && (a || b || c || d);
+        
+        /* NOTE
+         *   ___ ___
+         *  |   |||||
+         *  |...X'''| <-- this is considered a corner in the above definition
+         *  |||||___|
+         *  
+         *  The definition below excludes the above case.
+         */
+        
+        /*int results = 0;
+        if(a)results++;
+        if(b)results++;
+        if(c)results++;
+        if(d)results++;
+        return (results == 1);*/
+    }
 
     /**
      * Checks whether the path (x1,y1),(x2,y2),(x3,y3) is taut.
