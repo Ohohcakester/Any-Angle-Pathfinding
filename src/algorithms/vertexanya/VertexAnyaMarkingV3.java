@@ -20,6 +20,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
     private final Fraction LEFT_END;
     
     private ScanInterval[] states;
+    private int[] checkArray;
     private FastVariableSizeIndirectHeap statesPQ;
     private ReusableIndirectHeap vertexPQ;
     private Memory memory;
@@ -44,6 +45,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         vertexPQ = new ReusableIndirectHeap(totalSize);
         statesPQ = new FastVariableSizeIndirectHeap();
         states = new ScanInterval[11];
+        checkArray = new int[11];
         
         memory.setDistance(start, 0);
         memory.setParent(start, -1);
@@ -518,36 +520,6 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             rightAnyExtentMarking(baseX, baseY, memory.distance(current), current);
         }
     }
-
-    // post: return result >= xL
-    private final Fraction trimIntervalLeft(Fraction xL, int targetX, int targetY, int parX, int parY, float dg) {
-        // dg := g(parent) - g(target)
-        
-        float gvx = -dg - targetX;
-        float denominator = 2*(gvx+parX);
-        if (denominator <= 0) return RIGHT_END;
-        int dx = targetX-parX;
-        int dy = targetY-parY;
-        if ((dg < 0) && (dg*dg >= dx*dx+dy*dy)) return xL;
-        float trimAmount = (parX*parX + dy*dy - gvx*gvx) / denominator - targetX;
-        //assert trimAmount > -1;
-        return xL.plus((int)trimAmount);
-    }
-    
-    // post: return result <= xR
-    private final Fraction trimIntervalRight(Fraction xR, int targetX, int targetY, int parX, int parY, float dg) {
-        // dg := g(parent) - g(target)
-        
-        float gvx = dg - targetX;
-        float denominator = 2*(gvx+parX);
-        if (denominator >= 0) return LEFT_END;
-        int dx = targetX-parX;
-        int dy = targetY-parY;
-        if ((dg < 0) && (dg*dg >= dx*dx+dy*dy)) return xR;
-        float trimAmount = (parX*parX + dy*dy - gvx*gvx) / denominator - targetX;
-        //assert trimAmount < 1;
-        return xR.minus((int)-trimAmount);
-    }
     
     private final void exploreState(ScanInterval currState) {
         int baseX = currState.baseX;
@@ -661,15 +633,6 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         return xL;
     }
     
-    private final int leftAnyExtent(int xL, int y) {
-        boolean trVal = graph.topRightOfBlockedTile(xL, y);
-        boolean brVal = graph.bottomRightOfBlockedTile(xL, y);
-        do {
-            --xL;
-        } while (xL > 0 && (graph.topRightOfBlockedTile(xL, y) == trVal) && (graph.bottomRightOfBlockedTile(xL, y) == brVal));
-        return xL;
-    }
-    
     private final int leftAnyExtentMarking(int baseX, int y, float baseDistance, int baseIndex) {
         int xL = baseX;
         boolean trVal = graph.topRightOfBlockedTile(xL, y);
@@ -698,16 +661,6 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         return xR;
     }
 
-    private final int rightAnyExtent(int xR, int y) {
-        boolean tlVal = graph.topLeftOfBlockedTile(xR, y);
-        boolean blVal = graph.bottomLeftOfBlockedTile(xR, y);
-        do {
-            ++xR;
-        } while (xR > 0 && (graph.topLeftOfBlockedTile(xR, y) == tlVal) && (graph.bottomLeftOfBlockedTile(xR, y) == blVal));
-        return xR;
-    }
-
-    
     private final int rightAnyExtentMarking(int baseX, int y, float baseDistance, int baseIndex) {
         int xR = baseX;
         boolean tlVal = graph.topLeftOfBlockedTile(xR, y);
@@ -721,7 +674,8 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
     }
 
     private final void generateUpwards(Fraction leftBound, Fraction rightBound, int baseX, int baseY, int currY, boolean leftInclusive, boolean rightInclusive) {
-        generateAndSplitIntervals(
+        //generateAndSplitIntervals(
+        trimIntervals(
                 currY + 1, currY + 1,
                 baseX, baseY,
                 leftBound, rightBound,
@@ -729,11 +683,110 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
     }
 
     private final void generateDownwards(Fraction leftBound, Fraction rightBound, int baseX, int baseY, int currY, boolean leftInclusive, boolean rightInclusive) {
-        generateAndSplitIntervals(
+        //generateAndSplitIntervals(
+        trimIntervals(
                 currY - 2, currY - 1,
                 baseX, baseY,
                 leftBound, rightBound,
                 leftInclusive, rightInclusive);
+    }
+    
+
+    // post: return result >= xL
+    private final int getLocusIntersectionRight(int currX, int dx, int dy, float dg) {
+        // dg := g(parent) - g(target)
+        float denominator = 2*(dx-dg);
+        if (denominator <= 0) return sizeX + 1;
+        int sqDist = dx*dx+dy*dy;
+        if ((dg < 0) && (dg*dg >= sqDist)) return currX;
+        float trimAmount = (sqDist - dg*dg) / denominator;
+        //assert trimAmount > -1;
+        return currX + (int)trimAmount;
+    }
+    
+    // post: return result <= xR
+    private final int getLocusIntersectionLeft(int currX, int dx, int dy, float dg) {
+        // dg := g(parent) - g(target)
+        float denominator = 2*(dx+dg);
+        if (denominator >= 0) return -1;
+        int sqDist = dx*dx+dy*dy;
+        if ((dg < 0) && (dg*dg >= sqDist)) return currX;
+        float trimAmount = (sqDist - dg*dg) / denominator;
+        //assert trimAmount < 1;
+        return currX - (int)(-trimAmount);
+    }
+    
+    private final void trimIntervals(int checkY, int newY, int baseX, int baseY, Fraction leftBound, Fraction rightBound, boolean leftInclusive, boolean rightInclusive) {
+        int baseIndex = graph.toOneDimIndex(baseX, baseY);
+        float baseDistance = memory.distance(baseIndex);
+        int leftCeil = leftBound.ceil();
+        int rightFloor = rightBound.floor();
+        int arrayOffset = leftCeil - 1;
+        int rightEnd = rightFloor + 1;
+        int size = rightFloor - leftCeil + 1 + 2;
+        final int rightEndIndex = size - 1;
+        
+        { // Initialise checkArray. Original: checkArray = new int[size];
+            
+            // checkArray is used to mark intervals.
+            // Reinitialise checkArray. Note: we assume that checkArray is always filled with zeros.
+            // After using checkArray to mark intervals, we clean up after access by setting the entries back to 0. (See below)
+            
+            if (checkArray.length < size) {
+                // Use doubling to expand checkArray size for amortised runtime.
+                int targetSize = checkArray.length;
+                while (targetSize < size) targetSize *= 2;
+                checkArray = new int[targetSize];
+            }
+        }
+        
+                
+        for (int x = leftCeil; x <= rightFloor; ++x) {
+            int index = graph.toOneDimIndex(x, newY);
+            float dg = baseDistance - memory.distance(index);
+            int dx = baseX - x;
+            int dy = baseY - newY;
+            
+            int leftCut = getLocusIntersectionLeft(x, dx, dy, dg);
+            leftCut = (leftCut < arrayOffset) ? 0 : (leftCut - arrayOffset);
+            checkArray[leftCut]++;
+            
+            int rightCut = getLocusIntersectionRight(x, dx, dy, dg);
+            rightCut = (rightCut > rightEnd) ? rightEndIndex : (rightCut - arrayOffset);
+            checkArray[rightCut]--;
+        }
+        //System.out.println(Arrays.toString(checkArray));
+        
+        Fraction left = leftBound;
+        Fraction right;
+        boolean blocked = checkArray[0] != 0;
+        int intervalCount = checkArray[0];
+        checkArray[0] = 0; // clean up after yourself
+        
+        for (int i=1;i<rightEndIndex;++i) {
+            intervalCount += checkArray[i];
+            checkArray[i] = 0; // clean up after yourself.
+            //assert intervalCount >= 0;
+            if (intervalCount > 0) { // is blocked
+                if (!blocked) {
+                    blocked = true;
+                    right = new Fraction(i + arrayOffset);
+                    generateAndSplitIntervals(checkY, newY, baseX, baseY, left, right, leftInclusive, true);
+                }
+            } else {
+                if (blocked) {
+                    left = new Fraction(i + arrayOffset);
+                    leftInclusive = true;
+                }
+                blocked = false;
+            }
+        }
+        checkArray[rightEndIndex] = 0; // clean up after yourself
+
+        if (intervalCount == 0) { // unblocked
+            right = rightBound;
+            generateAndSplitIntervals(checkY, newY, baseX, baseY, left, right, leftInclusive, rightInclusive);
+        }
     }
     
     /**
