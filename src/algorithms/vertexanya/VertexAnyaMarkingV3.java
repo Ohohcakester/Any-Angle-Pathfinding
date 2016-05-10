@@ -76,7 +76,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         }
     }
 
-    private void addToOpen(int baseIndex, ScanInterval successor) {
+    private final void addToOpen(int baseIndex, ScanInterval successor) {
         //System.out.println("ADDTOOPEN " + successor);
         // set heuristic and f-value
         float hValue = heuristic(successor);
@@ -89,7 +89,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         states[handle] = successor;
     }
     
-    private float tryRelax(int parentIndex, int parX, int parY, int x, int y) {
+    private final void tryRelax(int parentIndex, int parX, int parY, int x, int y) {
         //System.out.println("RELAX " + x + ", " + y);
         // return true iff relaxation is done.
         int targetIndex = graph.toOneDimIndex(x, y);
@@ -789,7 +789,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         }
     }
     
-    private float heuristic(ScanInterval currState) {
+    private final float heuristic(ScanInterval currState) {
         int baseX = currState.baseX;
         int baseY = currState.baseY;
         Fraction xL = currState.xL;
