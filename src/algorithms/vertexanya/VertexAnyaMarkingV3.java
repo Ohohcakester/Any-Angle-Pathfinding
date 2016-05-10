@@ -544,8 +544,9 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             int dy = currState.y - baseY;
             Fraction leftProjection = xL.minus(baseX).multiplyDivide(dy+1, dy).plus(baseX);
 
-            int leftBound = leftUpExtent(xL.ceil(), currState.y);
+            int leftBound;
             if (xL.isWholeNumber() && graph.bottomRightOfBlockedTile(xL.n, currState.y)) leftBound = xL.n;
+            else leftBound = leftUpExtent(xL.ceil(), currState.y);
             
             if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
                 leftProjection = new Fraction(leftBound);
@@ -555,8 +556,9 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
             Fraction rightProjection = xR.minus(baseX).multiplyDivide(dy+1, dy).plus(baseX);
             
-            int rightBound = rightUpExtent(xR.floor(), currState.y);
+            int rightBound;
             if (xR.isWholeNumber() && graph.bottomLeftOfBlockedTile(xR.n, currState.y)) rightBound = xR.n;
+            else rightBound = rightUpExtent(xR.floor(), currState.y);
 
             if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
                 rightProjection = new Fraction(rightBound);
@@ -586,8 +588,9 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             int dy = baseY - currState.y; 
             Fraction leftProjection = currState.xL.minus(baseX).multiplyDivide(dy+1, dy).plus(baseX);
             
-            int leftBound = leftDownExtent(currState.xL.ceil(), currState.y);
+            int leftBound;
             if (currState.xL.isWholeNumber() && graph.topRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
+            else leftBound = leftDownExtent(currState.xL.ceil(), currState.y);
             
             if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
                 leftProjection = new Fraction(leftBound);
@@ -597,8 +600,9 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
             Fraction rightProjection = currState.xR.minus(baseX).multiplyDivide(dy+1, dy).plus(baseX);
 
-            int rightBound = rightDownExtent(currState.xR.floor(), currState.y);
+            int rightBound;
             if (currState.xR.isWholeNumber() && graph.topLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
+            else rightBound = rightDownExtent(currState.xR.floor(), currState.y);
             
             if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
                 rightProjection = new Fraction(rightBound);
@@ -639,7 +643,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         boolean brVal = graph.bottomRightOfBlockedTile(xL, y);
         do {
             --xL;
-            baseDistance += 1;
+            //baseDistance += 1;
             this.tryRelax(baseIndex, baseX, y, xL, y);
         } while (xL > 0 && (graph.topRightOfBlockedTile(xL, y) == trVal) && (graph.bottomRightOfBlockedTile(xL, y) == brVal));
         return xL;
@@ -667,7 +671,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         boolean blVal = graph.bottomLeftOfBlockedTile(xR, y);
         do {
             ++xR;
-            baseDistance += 1;
+            //baseDistance += 1;
             this.tryRelax(baseIndex, baseX, y, xR, y);
         } while (xR > 0 && (graph.topLeftOfBlockedTile(xR, y) == tlVal) && (graph.bottomLeftOfBlockedTile(xR, y) == blVal));
         return xR;
