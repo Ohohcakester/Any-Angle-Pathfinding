@@ -106,10 +106,6 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         }
     }
     
-   
-    private final void generateSuccessors(ScanInterval currState) {
-        exploreState(currState);
-    }
 
     private final void generateStartSuccessors() {
         boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
@@ -520,8 +516,8 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             rightAnyExtentMarking(baseX, baseY, memory.distance(current), current);
         }
     }
-    
-    private final void exploreState(ScanInterval currState) {
+
+    private final void generateSuccessors(ScanInterval currState) {
         int baseX = currState.baseX;
         int baseY = currState.baseY;
         boolean leftInclusive = (currState.inclusive & ScanInterval.LEFT_INCLUSIVE) != 0;

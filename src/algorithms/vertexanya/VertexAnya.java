@@ -113,12 +113,7 @@ public class VertexAnya extends PathFindingAlgorithm {
             vertexPQ.decreaseKey(targetIndex, newWeight + graph.distance(x, y, ex, ey));
         }
     }
-    
    
-    private final void generateSuccessors(ScanInterval currState) {
-        exploreState(currState);
-    }
-
     private final void generateStartSuccessors() {
         boolean bottomLeftOfBlocked = graph.bottomLeftOfBlockedTile(sx, sy);
         boolean bottomRightOfBlocked = graph.bottomRightOfBlockedTile(sx, sy);
@@ -549,8 +544,8 @@ public class VertexAnya extends PathFindingAlgorithm {
         }
     }
     
-    
-    private final void exploreState(ScanInterval currState) {
+
+    private final void generateSuccessors(ScanInterval currState) {
         int baseX = currState.baseX;
         int baseY = currState.baseY;
         int baseIndex = graph.toOneDimIndex(baseX, baseY);
