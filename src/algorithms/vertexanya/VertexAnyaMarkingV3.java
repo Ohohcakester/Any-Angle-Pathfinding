@@ -93,19 +93,15 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         //System.out.println("RELAX " + x + ", " + y);
         // return true iff relaxation is done.
         int targetIndex = graph.toOneDimIndex(x, y);
+        if (memory.visited(targetIndex)) return;
         
-        float parentDistance = memory.distance(parentIndex);
-        float targetDistance = memory.distance(targetIndex);
-        
-        float newWeight = parentDistance + graph.distance(parX, parY, x, y);
-        if (!memory.visited(targetIndex) && newWeight < targetDistance) {
-            memory.setDistance(targetIndex, newWeight);
+        float newWeight = memory.distance(parentIndex) + graph.distance(parX, parY, x, y);
+        if (newWeight < memory.distance(targetIndex)) {
             if (graph.isOuterCorner(x, y) || (y == ey && x == ex)) {
-                memory.setParent(targetIndex, parentIndex); // optional for non-outer-corners
+                memory.setParent(targetIndex, parentIndex);
                 vertexPQ.decreaseKey(targetIndex, newWeight + graph.distance(x, y, ex, ey));
             }
         }
-        return parentDistance - targetDistance;
     }
     
    
