@@ -150,6 +150,19 @@ public final class Fraction implements Comparable<Fraction> {
     private static final int gcdRecurse(int x, int y) {
         return x == 0 ? y : gcdRecurse(y%x, x);
     }
+    
+    /*
+     * I would switch to using this for GCD, but somehow the recursive version runs consistently faster. Compiler optimisation?
+     * See FractionTest.java
+     */
+    public static final int gcdIterative(int x, int y) {
+        while(true) {
+            if (x == 0) return y<0?-y:y;
+            y %= x;
+            if (y == 0) return x<0?-x:x;
+            x %= y;
+        }
+    }
 
     public static final float length(Fraction width, int height) {
         float fWidth = width.toFloat();
