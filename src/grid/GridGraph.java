@@ -99,11 +99,11 @@ public class GridGraph {
         int xDiff = x2 - x1;
         int yDiff = y2 - y1;
         
-        if (xDiff == 0) {
-            return (float)Math.abs(yDiff);
-        }
         if (yDiff == 0) {
             return (float)Math.abs(xDiff);
+        }
+        if (xDiff == 0) {
+            return (float)Math.abs(yDiff);
         }
         if (xDiff == yDiff || xDiff == -yDiff) {
             return SQRT_TWO*Math.abs(xDiff);
