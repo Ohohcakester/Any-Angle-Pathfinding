@@ -8,16 +8,25 @@ import java.util.Random;
 import algorithms.datatypes.Point;
 
 public class MazeAnalyser {
-    public final MazeAnalysis mazeAnalysis;
-    public final ArrayList<ProblemAnalysis> problemList;
+    private final GridGraph gridGraph;
+    private final ArrayList<TwoPoint> twoPointList;
+    
+    public ArrayList<ProblemAnalysis> problemList;
+    public MazeAnalysis mazeAnalysis;
 
     public MazeAnalyser(GridGraph gridGraph, int nProblems) {
         System.out.println("-Starting Maze Analysis: " +gridGraph.sizeX+"x"+gridGraph.sizeY);
         mazeAnalysis = new MazeAnalysis(gridGraph);
+        this.gridGraph = gridGraph;
 
         System.out.println("-Starting Problem Generation");
-        ArrayList<TwoPoint> twoPointList = generateProblems(mazeAnalysis, nProblems);
-
+        twoPointList = generateProblems(mazeAnalysis, nProblems);
+    }
+    
+    public void startProblemAnalysis() {
+        mazeAnalysis = null;
+        System.gc();
+        
         problemList = conductProblemAnalysis(gridGraph, twoPointList);
         
         System.out.println();
@@ -25,6 +34,9 @@ public class MazeAnalyser {
     }
 
     public MazeAnalyser(GridGraph gridGraph, ArrayList<TwoPoint> twoPointList, boolean analyseMaze) {
+        this.gridGraph = gridGraph;
+        this.twoPointList = twoPointList;
+        
         if (analyseMaze) {
             System.out.println("-Starting Maze Analysis: " +gridGraph.sizeX+"x"+gridGraph.sizeY);
             mazeAnalysis = new MazeAnalysis(gridGraph);
@@ -42,10 +54,10 @@ public class MazeAnalyser {
         System.out.println("-Starting Problem Analysis");
         ArrayList<ProblemAnalysis> list = new ArrayList<>();
         for (TwoPoint tp : twoPointList) {
-            ProblemAnalysis problem = new ProblemAnalysis(gridGraph,
-                    tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+            ProblemAnalysis problem = ProblemAnalysis.computeFast(gridGraph, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
             list.add(problem);
             System.out.print(tp + " | ");
+            System.gc();
         }
         return list;
     }

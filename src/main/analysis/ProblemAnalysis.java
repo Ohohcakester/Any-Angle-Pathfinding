@@ -2,13 +2,14 @@ package main.analysis;
 
 import grid.GridGraph;
 import main.utility.Utility;
+import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import algorithms.visibilitygraph.VisibilityGraph;
 
 public class ProblemAnalysis {
     
-
     public final int sx, sy, ex, ey;
     public final double shortestPathLength;
     public final double straightLineDistance;
@@ -18,29 +19,61 @@ public class ProblemAnalysis {
     
     public final int shortestPathHeadingChanges;
     public final int minHeadingChanges;
-    
-    
-    public ProblemAnalysis(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+
+    public ProblemAnalysis(int sx, int sy, int ex, int ey,
+            double shortestPathLength, double straightLineDistance,
+            double directness, double distanceCoverage, double minMapCoverage,
+            int shortestPathHeadingChanges, int minHeadingChanges) {
         this.sx = sx;
         this.sy = sy;
         this.ex = ex;
         this.ey = ey;
-        
+        this.shortestPathLength = shortestPathLength;
+        this.straightLineDistance = straightLineDistance;
+        this.directness = directness;
+        this.distanceCoverage = distanceCoverage;
+        this.minMapCoverage = minMapCoverage;
+        this.shortestPathHeadingChanges = shortestPathHeadingChanges;
+        this.minHeadingChanges = minHeadingChanges;
+    }
+    
+    public static ProblemAnalysis computeSlow(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         VisibilityGraphAlgorithm algo = VisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
         
-        shortestPathLength = Utility.computePathLength(gridGraph, path);
-        straightLineDistance = gridGraph.distance(sx, sy, ex, ey);
-        directness = computeDirectness(shortestPathLength, straightLineDistance);
-        distanceCoverage = computeDistanceCoverage(straightLineDistance, sizeX, sizeY);
-        minMapCoverage = computerMinMapCoverage(shortestPathLength, sizeX, sizeY);
+        double shortestPathLength = Utility.computePathLength(gridGraph, path);
+        double straightLineDistance = gridGraph.distance(sx, sy, ex, ey);
+        double directness = computeDirectness(shortestPathLength, straightLineDistance);
+        double distanceCoverage = computeDistanceCoverage(straightLineDistance, sizeX, sizeY);
+        double minMapCoverage = computerMinMapCoverage(shortestPathLength, sizeX, sizeY);
         
-        shortestPathHeadingChanges = path.length;
+        int shortestPathHeadingChanges = path.length;
         VisibilityGraph visibilityGraph = algo.getVisibilityGraph();
-        minHeadingChanges = computeMinHeadingChanges(gridGraph);
+        int minHeadingChanges = computeMinHeadingChanges(gridGraph,sx,sy,ex,ey);
+        
+        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges);
+    }
+    
+    public static ProblemAnalysis computeFast(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        int sizeX = gridGraph.sizeX;
+        int sizeY = gridGraph.sizeY;
+        
+        double shortestPathLength = Utility.computePathLength(gridGraph, path);
+        double straightLineDistance = gridGraph.distance(sx, sy, ex, ey);
+        double directness = computeDirectness(shortestPathLength, straightLineDistance);
+        double distanceCoverage = computeDistanceCoverage(straightLineDistance, sizeX, sizeY);
+        double minMapCoverage = computerMinMapCoverage(shortestPathLength, sizeX, sizeY);
+        
+        int shortestPathHeadingChanges = path.length;
+        int minHeadingChanges = -1;
+        
+        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges);
     }
 
     public static double computerMinMapCoverage(double shortestPathLength, int sizeX,
@@ -60,7 +93,7 @@ public class ProblemAnalysis {
         return shortestPathLength / straightLineDistance;
     }
 
-    public int computeMinHeadingChanges(GridGraph gridGraph) {
+    public static int computeMinHeadingChanges(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         BFSVisibilityGraph algo = BFSVisibilityGraph.graphReuse(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         return algo.getPath().length;
@@ -68,16 +101,16 @@ public class ProblemAnalysis {
 
     @Override
     public String toString() {
-        return "sx=" + sx + 
-                "\nsy=" + sy +
-                "\nex=" + ex +
-                "\ney=" + ey +
-                "\nshortestPathLength=" + shortestPathLength +
-                "\nstraightLineDistance=" + straightLineDistance +
-                "\ndirectness=" + directness +
-                "\ndistanceCoverage=" + distanceCoverage +
-                "\nminMapCoverage=" + minMapCoverage +
-                "\nshortestPathHeadingChanges=" + shortestPathHeadingChanges +
-                "\nminHeadingChanges=" + minHeadingChanges;
+        return "sx = " + sx + 
+                "\nsy = " + sy +
+                "\nex = " + ex +
+                "\ney = " + ey +
+                "\nshortestPathLength = " + shortestPathLength +
+                "\nstraightLineDistance = " + straightLineDistance +
+                "\ndirectness = " + directness +
+                "\ndistanceCoverage = " + distanceCoverage +
+                "\nminMapCoverage = " + minMapCoverage +
+                "\nshortestPathHeadingChanges = " + shortestPathHeadingChanges +
+                "\nminHeadingChanges = " + (minHeadingChanges==-1?"Not Computed":minHeadingChanges);
     }
 }

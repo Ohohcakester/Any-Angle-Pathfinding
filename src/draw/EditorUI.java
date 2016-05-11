@@ -87,7 +87,7 @@ public class EditorUI extends DrawCanvas {
 
     public void printPathAnalysis() {
         if (sx == -1 || ex == -1) return;
-        ProblemAnalysis problemAnalysis = new ProblemAnalysis(gridGraph, sx, sy, ex, ey);
+        ProblemAnalysis problemAnalysis = ProblemAnalysis.computeFast(gridGraph, sx, sy, ex, ey);
         System.out.println("=Problem Analysis:=================");
         System.out.println(problemAnalysis);
         System.out.println("-Problem Name:---------------------");

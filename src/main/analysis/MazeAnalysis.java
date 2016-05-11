@@ -2,10 +2,10 @@ package main.analysis;
 
 import grid.GridGraph;
 import grid.ReachableNodes;
+import grid.ReachableNodesFast;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 
 import algorithms.datatypes.Point;
 
@@ -29,7 +29,7 @@ public class MazeAnalysis {
         this.nBlocked = gridGraph.getNumBlocked();
         this.blockDensity = (float)nBlocked / (sizeX*sizeY);
         this.hasSqueezableCorners = checkHasSqueezableCorners(gridGraph);
-        this.connectedSets = findConnectedSets(gridGraph);
+        this.connectedSets = findConnectedSetsFast(gridGraph);
         this.largestConnectedSet = getLargestSet(connectedSets);
         this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
     }
@@ -40,7 +40,7 @@ public class MazeAnalysis {
         if (o.nBlocked) this.nBlocked = gridGraph.getNumBlocked();
         if (o.blockDensity) this.blockDensity = (float)nBlocked / (sizeX*sizeY);
         if (o.hasSqueezableCorners) this.hasSqueezableCorners = checkHasSqueezableCorners(gridGraph);
-        if (o.connectedSets) this.connectedSets = findConnectedSets(gridGraph);
+        if (o.connectedSets) this.connectedSets = findConnectedSetsFast(gridGraph);
         if (o.largestConnectedSet) this.largestConnectedSet = getLargestSet(connectedSets);
         if (o.averageOpenSpaceSize) this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
         this.options = o;
@@ -79,21 +79,40 @@ public class MazeAnalysis {
         
         return largestSet;
     }
-    
+
     public static ArrayList<ArrayList<Point>> findConnectedSets(GridGraph gridGraph) {
-        HashSet<Point> hashSet = new HashSet<>();
+        //HashSet<Point> hashSet = new HashSet<>();
+        boolean[] visited = new boolean[(gridGraph.sizeX+1)*(gridGraph.sizeY+1)];
         ArrayList<ArrayList<Point>> connectedSets = new ArrayList<>();
         
         for (int y=0; y<=gridGraph.sizeY; y++) {
             for (int x=0; x<=gridGraph.sizeX; x++) {
-                Point point = new Point(x, y);
-                if (!hashSet.contains(point)) {
-                    ArrayList<Point> list;
-                    list = ReachableNodes.computeReachable(gridGraph, x, y);
-                    hashSet.addAll(list);
-                    if (list.size() > 1) {
-                        connectedSets.add(list);
-                    }
+                if (visited[gridGraph.toOneDimIndex(x, y)]) continue;
+                ArrayList<Point> list;
+                list = ReachableNodes.computeReachable(gridGraph, x, y, visited);
+                if (list.size() > 1) {
+                    connectedSets.add(list);
+                }
+            }
+        }
+        // sort in descending order.
+        Collections.sort(connectedSets, (set1, set2) -> set2.size() - set1.size());
+        return connectedSets;
+    }
+    
+    public static ArrayList<ArrayList<Point>> findConnectedSetsFast(GridGraph gridGraph) {
+        //HashSet<Point> hashSet = new HashSet<>();
+        boolean[] visited = new boolean[(gridGraph.sizeX+1)*(gridGraph.sizeY+1)];
+        ArrayList<ArrayList<Point>> connectedSets = new ArrayList<>();
+        
+        ReachableNodesFast reachable = new ReachableNodesFast(gridGraph);
+        for (int y=0; y<=gridGraph.sizeY; y++) {
+            for (int x=0; x<=gridGraph.sizeX; x++) {
+                if (visited[gridGraph.toOneDimIndex(x, y)]) continue;
+                ArrayList<Point> list;
+                list = reachable.computeReachable(visited, x, y);
+                if (list.size() > 1) {
+                    connectedSets.add(list);
                 }
             }
         }
@@ -199,5 +218,13 @@ public class MazeAnalysis {
                 }
             }
         }
+    }
+
+    public ArrayList<Integer> computeConnectedSetSizeList() {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (ArrayList<Point> connectedSet : connectedSets) {
+            list.add(connectedSet.size());
+        }
+        return list;
     }
 }

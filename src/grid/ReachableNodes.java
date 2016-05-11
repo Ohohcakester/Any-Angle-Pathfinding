@@ -34,5 +34,24 @@ public class ReachableNodes extends BreadthFirstSearch {
         
         return list;
     }
+    
+    /**
+     * Similar to computeReachable, but this one also helps to mark the markVisited[] boolean array.
+     */
+    public static ArrayList<Point> computeReachable(GridGraph graph, int sx, int sy, boolean[] markVisited) {
+        ReachableNodes nodes = new ReachableNodes(graph, sx, sy, -10, -10);
+        ArrayList<Point> list = new ArrayList<>();
 
+        nodes.computePath();
+        for (int i=0; i<nodes.visited.length; i++) {
+            if (nodes.visited[i]) {
+                int x = nodes.toTwoDimX(i);
+                int y = nodes.toTwoDimY(i);
+                list.add(new Point(x, y));
+                markVisited[i] = true;
+            }
+        }
+        
+        return list;
+    }
 }

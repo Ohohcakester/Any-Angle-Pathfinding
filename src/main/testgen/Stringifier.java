@@ -14,6 +14,15 @@ public class Stringifier {
         sb.append(intToStr(unblockedRatio));
         return sb.toString();
     }
+
+    public static String defaultToStringReadable(int seed, int sizeX, int sizeY, int unblockedRatio) {
+        StringBuilder sb = new StringBuilder("gen_");
+        sb.append(sizeX).append("x");
+        sb.append(sizeY).append("_");
+        sb.append(unblockedRatio).append("_");
+        sb.append(intToStr(seed));
+        return sb.toString();
+    }
     
     public static int[] defaultToParameters(String input) {
         String[] args = input.split("_");

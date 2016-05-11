@@ -21,11 +21,12 @@ import algorithms.datatypes.Point;
 public class TestDataGenerator {
 
     public static void run() {
-        generateFromFolder("gamemaps/room32/", "room32");
+        /*generateFromFolder("gamemaps/room32/", "room32");
         generateFromFolder("gamemaps/corr16/", "corr16");
         generateFromFolder("gamemaps/obst40/", "obst40");
         generateFromFolder("gamemaps/obst10/", "obst10");
-        generateFromFolder("gamemaps/corr2/", "corr2");
+        generateFromFolder("gamemaps/corr2/", "corr2");*/
+        generateRandom();
     }
     
     /**
@@ -42,12 +43,20 @@ public class TestDataGenerator {
 
             GridGraph gridGraph = GraphImporter.importGraphFromFile(filePath);
             generateTestData(gridGraph, 20, name);
+            System.gc();
         }
     }
     
     public static void generateRandom() {
         int[] ratios = new int[]{7, 15, 50};
-        for (int ratio : ratios) generateRandomDefault(10,10,ratio);
+
+//        for (int ratio : ratios) generateRandomDefault(1000,1000,ratio);
+//        for (int ratio : ratios) generateRandomDefault(2000,2000,ratio);
+//        for (int ratio : ratios) generateRandomDefault(3000,3000,ratio);
+//        for (int ratio : ratios) generateRandomDefault(4000,4000,ratio);
+//        for (int ratio : ratios) generateRandomDefault(5000,5000,ratio);
+        
+        /*for (int ratio : ratios) generateRandomDefault(10,10,ratio);
         for (int ratio : ratios) generateRandomDefault(20,20,ratio);
         for (int ratio : ratios) generateRandomDefault(20,6,ratio);
         for (int ratio : ratios) generateRandomDefault(30,30,ratio);
@@ -59,7 +68,7 @@ public class TestDataGenerator {
         for (int ratio : ratios) generateRandomDefault(300,300,ratio);
         for (int ratio : ratios) generateRandomDefault(50,500,ratio);
         for (int ratio : ratios) generateRandomDefault(15,1000,ratio);
-        for (int ratio : ratios) generateRandomDefault(500,500,ratio);
+        for (int ratio : ratios) generateRandomDefault(500,500,ratio);*/
     }
     
     
@@ -67,7 +76,7 @@ public class TestDataGenerator {
         Random rand = new Random();
         int seed = rand.nextInt();
         GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, unblockedRatio);
-        String mazeName = Stringifier.defaultToString(seed, sizeX, sizeY, unblockedRatio);
+        String mazeName = Stringifier.defaultToStringReadable(seed, sizeX, sizeY, unblockedRatio);
         generateTestData(gridGraph, 50, mazeName);
     }
     
@@ -135,6 +144,8 @@ public class TestDataGenerator {
     
     private static void generateTestData(GridGraph gridGraph, int nProblems, String mazeName){
         String filePath = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/";
+        
+        // Maze analysis
         MazeAnalyser mazeAnalyser = new MazeAnalyser(gridGraph, nProblems);
 
         System.out.println("-Writing to folder: " + filePath);
@@ -142,6 +153,11 @@ public class TestDataGenerator {
         makeMazeFile(gridGraph, filePath);
         makePrettyMazeFile(gridGraph, filePath);
         makeAnalysisFile(mazeAnalyser.mazeAnalysis, filePath);
+        
+        // Problem analysis
+        mazeAnalyser.startProblemAnalysis();
+        
+        System.out.println("-Writing to folder: " + filePath);
         makeProblemFiles(mazeAnalyser.problemList, filePath);
         System.out.println("-Write complete.");
     }
@@ -175,10 +191,12 @@ public class TestDataGenerator {
         addParameter(fileIO, "averageOpenSpaceSize", analysis.averageOpenSpaceSize);
         addParameter(fileIO, "hasSqueezableCorners", analysis.hasSqueezableCorners);
         addParameter(fileIO, "largestConnectedSetSize", analysis.largestConnectedSet.size());
-        fileIO.writeLine("--connected sets--");
+        addParameter(fileIO, "numConnectedSets", analysis.connectedSets.size());
+        addParameter(fileIO, "connectedSetSizes", analysis.computeConnectedSetSizeList());
+        /*fileIO.writeLine("--connected sets--");
         for (ArrayList<Point> list : analysis.connectedSets) {
             fileIO.writeLine(list.toString());
-        }
+        }*/
         fileIO.close();
     }
     
@@ -197,7 +215,9 @@ public class TestDataGenerator {
             addParameter(fileIO, "distanceCoverage", problem.distanceCoverage);
             addParameter(fileIO, "minMapCoverage", problem.minMapCoverage);
             addParameter(fileIO, "shortestPathHeadingChanges", problem.shortestPathHeadingChanges);
-            addParameter(fileIO, "minHeadingChanges", problem.minHeadingChanges);
+            if (problem.minHeadingChanges != -1) {
+                addParameter(fileIO, "minHeadingChanges", problem.minHeadingChanges);
+            }
             fileIO.close();
         }
     }
