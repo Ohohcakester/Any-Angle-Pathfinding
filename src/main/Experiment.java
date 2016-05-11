@@ -124,13 +124,15 @@ public class Experiment {
         GridLineSet gridLineSet = new GridLineSet();;
         GridPointSet gridPointSet = new GridPointSet();
         
+        int dx, dy;
         Random rand = new Random();
         {
             int sx = rand.nextInt(gridGraph.sizeX+1);
             int sy = rand.nextInt(gridGraph.sizeY+1);
             sx = gridAndGoals.startGoalPoints.sx;
             sy = gridAndGoals.startGoalPoints.sy;
-            //sx = 0; sy = 5;
+            sx = 24; sy = 24;
+            dx = -1; dy = 2;
             
             LineOfSightScanner losScanner = new LineOfSightScanner(gridGraph);
             try {
@@ -146,8 +148,9 @@ public class Experiment {
                 System.out.println("Total Time: " + totalTime);
                 System.out.println("Per iteration time: " + (totalTime/iterations));
                 
-                losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
                 //losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();
             }
