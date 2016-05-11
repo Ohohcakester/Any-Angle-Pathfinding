@@ -6,6 +6,7 @@ public class IVGBFS {
     
     private static final float APPROXIMATION_RATIO = (float)Math.sqrt(2);
 
+    private final GridGraph graph;
     private final IVG visibilityGraph;
     private final int sx;
     private final int sy;
@@ -27,6 +28,7 @@ public class IVGBFS {
         this.sy = sy;
         this.ex = ex;
         this.ey = ey;
+        this.graph = graph;
         this.visibilityGraph = visibilityGraph;
         queueX = new int[11];
         queueY = new int[11];
@@ -50,8 +52,10 @@ public class IVGBFS {
     public void computePath() {
         enqueue(sx, sy, 0);
 
+        // LEFT, RIGHT, DOWN, UP
         int[] xNeighbours = new int[]{-1,1, 0,0};
         int[] yNeighbours = new int[]{ 0,0,-1,1};
+        boolean[] blocked = new boolean[4];
         
         while (queueStart != queueEnd) {
             int cx = queueX[queueStart];
@@ -59,7 +63,18 @@ public class IVGBFS {
             int distance = queueDist[queueStart] + 1;
             dequeue();
 
+            boolean blockedTL = graph.bottomRightOfBlockedTile(cx, cy);
+            boolean blockedTR = graph.bottomLeftOfBlockedTile(cx, cy);
+            boolean blockedBL = graph.topRightOfBlockedTile(cx, cy);
+            boolean blockedBR = graph.topLeftOfBlockedTile(cx, cy);
+
+            blocked[0] = blockedBL && blockedTL; // LEFT
+            blocked[1] = blockedBR && blockedTR; // RIGHT
+            blocked[2] = blockedBL && blockedBR; // DOWN
+            blocked[3] = blockedTL && blockedTR; // UP
+
             for (int i=0;i<4;++i) {
+                if (blocked[i]) continue;
                 int px = cx+xNeighbours[i];
                 int py = cy+yNeighbours[i];
 
