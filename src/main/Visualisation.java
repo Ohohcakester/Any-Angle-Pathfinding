@@ -34,6 +34,8 @@ public class Visualisation {
         AlgoFunction algo = AnyAnglePathfinding.setDefaultAlgoFunction();           // choose an algorithm (go into this method to choose)
         GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();   // choose a grid (go into this method to choose)
         
+        gridAndGoals.validateStartAndEndPoints();
+        
         // Call this to record and display the algorithm in operation.
         displayAlgorithmOperation(algo, gridAndGoals.gridGraph, gridAndGoals.startGoalPoints);
     }
