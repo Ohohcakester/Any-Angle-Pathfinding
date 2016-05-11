@@ -139,7 +139,7 @@ public class GraphImporter {
         for (File file : files) {
             TwoPoint tp = readProblem(file);
             String sp = readFile(file).get("shortestPathLength");
-            float shortestPath = Float.parseFloat(sp);
+            double shortestPath = Double.parseDouble(sp);
             list.add(new StartEndPointData(tp.p1, tp.p2, shortestPath));
         }
         return list;
