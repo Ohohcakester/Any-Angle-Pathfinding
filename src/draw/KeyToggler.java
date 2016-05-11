@@ -149,7 +149,7 @@ public class KeyToggler implements KeyListener {
 
                 // P: Go right one step + take screenshot, stop at end
             case KeyEvent.VK_P :
-                if (goRight(3, true))
+                if (goRight(1, true))
                     takeSnapShot();
                 break;
 

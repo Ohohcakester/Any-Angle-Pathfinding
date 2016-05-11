@@ -59,10 +59,11 @@ public class AStarStaticMemory extends PathFindingAlgorithm {
             
             int current = pq.popMinIndex();
             
-            if (Math.abs(dist - lastDist) > 0.01f) { maybeSaveSearchSnapshot(); lastDist = dist;}
+            //if (Math.abs(dist - lastDist) > 0.01f) { maybeSaveSearchSnapshot(); lastDist = dist;}
+            maybeSaveSearchSnapshot();
             
             if (current == finish || distance(current) == Float.POSITIVE_INFINITY) {
-                //maybeSaveSearchSnapshot();
+                maybeSaveSearchSnapshot();
                 break;
             }
             setVisited(current, true);
