@@ -15,7 +15,7 @@ public final class Fraction implements Comparable<Fraction> {
     }
     
     public Fraction(int n, int d) {
-        if (d == 0) throw new ArithmeticException("Invalid denominator");
+        //if (d == 0) throw new ArithmeticException("Invalid denominator");
         
         if (d < 0) {
             n = -n;
