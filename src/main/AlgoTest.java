@@ -220,6 +220,21 @@ public class AlgoTest {
       println("40%Density - 500x500");
       testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
 
+//        println("40%Density - 1000x1000");
+//        testOnMazeData("gen_1000x1000_7_i3WH4IJD", algo, testFunction_slow);
+        
+//        println("40%Density - 2000x2000");
+//        testOnMazeData("gen_2000x2000_7_iXT3AEED", algo, testFunction_slow);
+
+//        println("40%Density - 3000x3000");
+//        testOnMazeData("gen_3000x3000_7_iSR3L1J", algo, testFunction_slow);
+
+//        println("40%Density - 4000x4000");
+//        testOnMazeData("gen_4000x4000_7_iNUJNZ3", algo, testFunction_slow);
+        
+//        println("40%Density - 5000x5000");
+//        testOnMazeData("gen_5000x5000_7_iHOPN1S", algo, testFunction_slow);
+
       println("6%Density2 - 500x500");
       testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
       println("20%Density2 - 500x500");
