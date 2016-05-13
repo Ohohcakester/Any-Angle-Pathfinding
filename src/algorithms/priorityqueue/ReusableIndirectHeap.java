@@ -46,6 +46,7 @@ public class ReusableIndirectHeap {
         ReusableIndirectHeap.defaultKey = defaultKey;
         
         if (ticketCheck == null || ticketCheck.length != size) {
+            //System.out.println("REINITIALISE HEAP " + size);
             keyList = new float[size];
             inList = new int[size];
             outList = new int[size];

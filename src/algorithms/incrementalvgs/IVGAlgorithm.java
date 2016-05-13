@@ -38,6 +38,8 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             hasDirectPathToGoal = true;
             return;
         }
+        
+        int totalSize = (sizeX+1)*(sizeY+1);
 
         // Step 1: Initial upper bound (Theta*)
         {
@@ -99,8 +101,8 @@ public class IVGAlgorithm extends PathFindingAlgorithm {
             Memory.loadContext(ivgMemoryContext);
             ReusableIndirectHeap.loadContext(ivgHeapContext);
             
-            initialiseMemory(visibilityGraph.size(), Float.POSITIVE_INFINITY, -1, false);
-            pq = new ReusableIndirectHeap(visibilityGraph.size());
+            initialiseMemory(totalSize, Float.POSITIVE_INFINITY, -1, false);
+            pq = new ReusableIndirectHeap(visibilityGraph.size(), totalSize);
             initialise(startIndex);
             
             int start = pq.popMinIndex(); // pop start.
