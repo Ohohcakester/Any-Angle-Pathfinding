@@ -10,6 +10,7 @@ import main.testgen.StandardMazes;
 import main.testgen.StartEndPointData;
 import main.testgen.TestDataGenerator;
 import main.testgen.TestDataLibrary;
+import main.utility.TimeCounter;
 import main.utility.Utility;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
@@ -414,6 +415,8 @@ public class AlgoTest {
             int totalOptimalPaths = 0;
             
             int nResults = 0;
+
+            TimeCounter.reset();
             for (StartEndPointData problem : problems) {
                 TwoPoint tp = new TwoPoint(problem.start, problem.end);
                 TestResult testResult = testAlgorithm(gridGraph, algoFunction, tp, sampleSize, nTrials);
@@ -425,7 +428,9 @@ public class AlgoTest {
                 totalOptimalPaths += (Utility.isOptimal(testResult.pathLength, problem.shortestPath)?1:0);
                 
                 nResults++;
+                TimeCounter.iterations += nTrials*sampleSize;
             }
+            TimeCounter.printAverage();
             
             double mean = (double)sum / nResults;
             double secondMomentTimesN = (double)sumSquare;
@@ -448,13 +453,16 @@ public class AlgoTest {
 
             ArrayList<TwoPoint> twoPointList = new ArrayList<>();
             ArrayList<long[]> runningTimesList = new ArrayList<>();
-            
+
+            TimeCounter.reset();
             for (StartEndPointData problem : problems) {
                 TwoPoint tp = new TwoPoint(problem.start, problem.end);
                 long[] runningTimes = new long[sampleSize];
                 
+                TimeCounter.freeze();
                 // Do two blank runs first to increase consistency of results.
                 testAlgorithmTimeOnce(gridGraph, algoFunction, tp, 2);
+                TimeCounter.unfreeze();
                 
                 for (int i=0;i<sampleSize;++i) {
                     runningTimes[i] = testAlgorithmTimeOnce(gridGraph, algoFunction, tp, nTrials);
@@ -462,8 +470,8 @@ public class AlgoTest {
 
                 twoPointList.add(tp);
                 runningTimesList.add(runningTimes);
-                //println(tp + " " + Arrays.toString(runningTimes));
             }
+            TimeCounter.print();
 
             println("Maze Name: " + mazeName);
             println("Sample Size: " + sampleSize + " x " + nTrials + " trials");
@@ -552,7 +560,9 @@ public class AlgoTest {
 
     private static TestResult testAlgorithm(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int sampleSize, int nTrials) {
+        TimeCounter.freeze();
         TestResult pathLength = testAlgorithmPathLength(gridGraph,algoFunction,tp);
+        TimeCounter.unfreeze();
         TestResult time = testAlgorithmTime(gridGraph,algoFunction,tp,sampleSize,nTrials);
         return new TestResult(time.timesRan, time.time, time.timeSD, pathLength.pathLength, pathLength.isTaut);
     }
