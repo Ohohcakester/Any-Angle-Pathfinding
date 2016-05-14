@@ -25,6 +25,7 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
     @Override
     public void computePath() {
         PathFindingAlgorithm algo = new BasicThetaStar(graph, sx, sy, ex, ey);
+        //PathFindingAlgorithm algo = new StrictThetaStar(graph, sx, sy, ex, ey);
         
         if (isRecording()) {
             algo.startRecording();
@@ -423,10 +424,13 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
         float remainingDistance = pathLength - distance[curr];
         Point pDest = visibilityGraph.coordinateOf(dest);
         float pathLengthCurrDest = graph.distance(currX, currY, pDest.x, pDest.y);
-        float pathLengthDestGoal = visibilityGraph.lowerBoundRemainingDistance(pDest.x, pDest.y);
         boolean isEdgeOfEllipse = pathLengthCurrDest + graph.distance(pDest.x, pDest.y, ex, ey) <= remainingDistance + BUFFER;
         
+        // Check 2 - visited
+        if (visited[dest]) return isEdgeOfEllipse;
+
         // Check 1a - Lower bound distance
+        float pathLengthDestGoal = visibilityGraph.lowerBoundRemainingDistance(pDest.x, pDest.y);
         if (pathLengthCurrDest + pathLengthDestGoal > remainingDistance + BUFFER) return isEdgeOfEllipse;
         
         // Check 1b - Upper bound distance
@@ -435,8 +439,6 @@ public class StrictVisibilityGraphAlgorithmV2 extends AStar {
         //System.out.println(pathLengthCurrDest + " | " + (Math.abs(pathLengthDestGoal - pathLengthCurrGoal)));
         if (pathLengthCurrDest + BUFFER < Math.abs(pathLengthDestGoal - pathLengthCurrGoal)) return isEdgeOfEllipse;
         
-        // Check 2 - visited
-        if (visited[dest]) return isEdgeOfEllipse;
         
         // Check 3 - line of sight. (slowest?)
         if (!graph.lineOfSight(currX, currY, pDest.x, pDest.y)) return isEdgeOfEllipse;
