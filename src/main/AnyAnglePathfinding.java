@@ -177,6 +177,12 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(211, 40, 40, 10, 4, 3, 36, 36); // Maze likely to cause wrapping in taut-path algorithms.
             case 37 :
                 return DefaultGenerator.generateSeeded(327116666, 40, 40, 8, 4, 3, 36, 37); // Goal unreachable. Much wrapping
+            case 38 :
+                return DefaultGenerator.generateSeeded(579631, 60, 60, 6, 34, 8, 37, 19); // Very roundabout path to goal.
+            case 39 :
+                return DefaultGenerator.generateSeeded(3350874, 20, 15, 13, 3, 3, 17, 12); // Basic Theta* suboptimal
+            case 40 :
+                return DefaultGenerator.generateSeeded(873637608, 9, 35, 24, 9, 28, 1, 12); // Bug in Vertex Anya due to not marking vertices as visited.
             default :
                 return null;
         }
