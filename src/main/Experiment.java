@@ -465,10 +465,11 @@ private static void testAlgorithmOptimality() {
             double restPathLength = 0, normalPathLength = 0;
             try {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
+            //for (int iii=0;iii<100;++iii) Utility.generatePath(testAlgo, gridGraph, seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1),seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1));
             int[][] path = Utility.generatePath(testAlgo, gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
-
+            
             path = Utility.generatePath(refAlgo, gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             normalPathLength = Utility.computePathLength(gridGraph, path);
