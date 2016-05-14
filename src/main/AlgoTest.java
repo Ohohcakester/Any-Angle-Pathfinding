@@ -29,8 +29,18 @@ import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.incrementalvgs.IVGAlgorithm;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
+import algorithms.vertexanya.VertexAnya;
+import algorithms.vertexanya.VertexAnyaMarking;
+import algorithms.vertexanya.VertexAnyaMarkingV2;
+import algorithms.vertexanya.VertexAnyaMarkingV3;
+import algorithms.vertexanya.VertexAnyaNoExtents;
+import algorithms.vertexanya.VisibilityScanSearchEager;
+import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 
 public class AlgoTest {
     private static FileIO io;
@@ -57,15 +67,16 @@ public class AlgoTest {
         AlgoFunction basicThetaStarPS = BasicThetaStar::postSmooth;
         AlgoFunction aStarPS = AStar::postSmooth;
         AlgoFunction dijkstra = AStar::dijkstra;
-        AlgoFunction vgaReuse = VisibilityGraphAlgorithm::graphReuse;
-        AlgoFunction vga = VisibilityGraphAlgorithm::new;
         AlgoFunction accAStar = AcceleratedAStar::new;
         AlgoFunction anya = Anya::new;
 
-        AlgoFunction rVGA = (a,b,c,d,e) -> new RestrictedVisibilityGraphAlgorithm(a,b,c,d,e);
-        AlgoFunction vgReuse = (a,b,c,d,e) -> VisibilityGraphAlgorithm.graphReuse(a,b,c,d,e);
-        AlgoFunction sVGA = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithm(a,b,c,d,e);
-        AlgoFunction sVGAv2 = (a,b,c,d,e) -> new StrictVisibilityGraphAlgorithmV2(a,b,c,d,e);
+        AlgoFunction subgoalGraphs = SubgoalGraphsAlgorithm::new;
+
+        AlgoFunction vga = VisibilityGraphAlgorithm::new;
+        AlgoFunction vgaReuse = VisibilityGraphAlgorithm::graphReuse;
+        AlgoFunction rVGA = RestrictedVisibilityGraphAlgorithm::new;
+        AlgoFunction sVGA = StrictVisibilityGraphAlgorithm::new;
+        AlgoFunction sVGAv2 = StrictVisibilityGraphAlgorithmV2::new;
 
         AlgoFunction strictThetaStar = StrictThetaStar::new;
         AlgoFunction strictThetaStarPS = StrictThetaStar::postSmooth;
@@ -73,6 +84,15 @@ public class AlgoTest {
         AlgoFunction recStrictThetaStarPS = RecursiveStrictThetaStar::postSmooth;
         AlgoFunction recStrictThetaStar_2 = (a,b,c,d,e) -> RecursiveStrictThetaStar.depthLimit(a,b,c,d,e,2);
 
+        AlgoFunction sparseVGA = SparseVisibilityGraphAlgorithm::graphReuse;
+        AlgoFunction incrementalVGA = IVGAlgorithm::new;
+        AlgoFunction vertexAnya = VertexAnya::new;
+        AlgoFunction vertexAnyaNoExtents = VertexAnyaNoExtents::new;
+        AlgoFunction vertexAnyaMarking = VertexAnyaMarking::new;
+        AlgoFunction vertexAnyaMarkingV2 = VertexAnyaMarkingV2::new;
+        AlgoFunction vertexAnyaMarkingV3 = VertexAnyaMarkingV3::new;
+        AlgoFunction visibilityScanSearchEager = VisibilityScanSearchEager::new;
+        AlgoFunction visibilityScanSearchSemiEager = VisibilityScanSearchSemiEager::new;
 
         AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
 
@@ -88,13 +108,14 @@ public class AlgoTest {
 //            AlgoFunction algo = (a,b,c,d,e) -> StrictThetaStarV1.setBuffer(a,b,c,d,e,buffer);
 //            testSequence(algo, "StrictThetaStarV1_"+buffer);
 //        }
+//        testSequence(aStar, "AStar");
+//        testSequence(aStarPS, "AStarPS");
 //        testSequence(aStarStatic, "AStar SLD");
 //        testSequence(aStarOctile, "AStar Octile");
 //        testSequence(bfs, "BreadthFirstSearch");
 //        testSequence(jumpPointSearch, "JumpPointSearch");
-        testSequence(basicThetaStar, "BasicThetaStar");
-        testSequence(basicThetaStar, "BasicThetaStar");
-        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
+//        testSequence(basicThetaStar, "BasicThetaStar");
+//        testSequence(basicThetaStarPS, "BasicThetaStar_PS");
 //        testSequence(lazyThetaStar, "LazyThetaStar");
 //        testSequence(accAStar, "AcceleratedAStar");
 //        testSequence(aStarOctilePS, "AStarOctile PostSmooth");
@@ -103,16 +124,30 @@ public class AlgoTest {
 //        testSequence(vgaReuse, "VisibilityGraph Reuse");
 //        testSequence(vga, "VisibilityGraphs");
 //        testSequence(vga, "VISIBILITY GRAPHS PART 2");
-        testSequence(anya, "Anya");
+//        testSequence(anya, "Anya");
 
-        testSequence(recursiveThetaStar, "RecursiveThetaStar");
-        testSequence(strictThetaStar, "StrictThetaStar");
-        testSequence(strictThetaStarPS, "StrictThetaStarPS");
-        testSequence(recStrictThetaStar, "RecStrictThetaStar");
-        testSequence(recStrictThetaStarPS, "RecStrictThetaStarPS");
-      testSequence(recStrictThetaStar_2, "RecStrictThetaStar_2");
-//      testSequence(sVGA, "StrictVisibilityGraphs");
-//      testSequence(sVGAv2, "StrictVisibilityGraphsV2");
+//        testSequence(subgoalGraphs, "SubgoalGraphs");
+        
+//        testSequence(vertexAnya, "VertexAnya");
+//        testSequence(vertexAnyaNoExtents, "VertexAnyaNoExtents");
+//        testSequence(vertexAnyaMarking, "VertexAnyaMarking");
+//        testSequence(vertexAnyaMarkingV2, "VertexAnyaMarkingV2");
+//        testSequence(vertexAnyaMarkingV3, "VertexAnyaMarkingV3");
+//        testSequence(visibilityScanSearchEager, "VisibilityScanSearchEager");
+//        testSequence(visibilityScanSearchSemiEager, "VisibilityScanSearchSemiEager");
+
+//        testSequence(recursiveThetaStar, "RecursiveThetaStar");
+//        testSequence(strictThetaStar, "StrictThetaStar");
+//        testSequence(strictThetaStarPS, "StrictThetaStarPS");
+//        testSequence(recStrictThetaStar, "RecStrictThetaStar");
+//        testSequence(recStrictThetaStarPS, "RecStrictThetaStarPS");
+//        testSequence(recStrictThetaStar_2, "RecStrictThetaStar_2");
+//        testSequence(sVGA, "StrictVisibilityGraphs");
+        
+//        testSequence(sVGAv2, "StrictVisibilityGraphsV2");
+//        testSequence(sparseVGA, "SparseVisibilityGraphs");
+//        testSequence(incrementalVGA, "IncrementalVisibilityGraphs");
+        
 //        testSequence(rVGA, "RestrictedVisibilityGraphs");
 //        testSequence(vga, "VisibilityGraphs");
     }
