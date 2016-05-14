@@ -18,8 +18,18 @@ import algorithms.RestrictedVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.incrementalvgs.IVGAlgorithm;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
+import algorithms.vertexanya.VertexAnya;
+import algorithms.vertexanya.VertexAnyaMarking;
+import algorithms.vertexanya.VertexAnyaMarkingV2;
+import algorithms.vertexanya.VertexAnyaMarkingV3;
+import algorithms.vertexanya.VertexAnyaNoExtents;
+import algorithms.vertexanya.VisibilityScanSearchEager;
+import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 
 /**
@@ -252,14 +262,40 @@ public class AnyAnglePathfinding {
                 algoFunction = AStarStaticMemory::new;
                 break;
             case 25 :
-                break;
-            case 26 :
-                break;
-            case 27 :
                 algoFunction = StrictVisibilityGraphAlgorithmV2::new;
                 break;
-            case 28 :
+            case 26 :
                 algoFunction = RecursiveThetaStar::new;
+                break;
+            case 27 :
+                algoFunction = SparseVisibilityGraphAlgorithm::graphReuse;
+                break;
+            case 28 :
+                algoFunction = IVGAlgorithm::new;
+                break;
+            case 29 :
+                algoFunction = VertexAnya::new;
+                break;
+            case 30 :
+                algoFunction = VertexAnyaNoExtents::new;
+                break;
+            case 31 :
+                algoFunction = VisibilityScanSearchEager::new;
+                break;
+            case 32 :
+                algoFunction = VisibilityScanSearchSemiEager::new;
+                break;
+            case 33 :
+                algoFunction = VertexAnyaMarking::new;
+                break;
+            case 34 :
+                algoFunction = VertexAnyaMarkingV2::new;
+                break;
+            case 35 :
+                algoFunction = VertexAnyaMarkingV3::new;
+                break;
+            case 36 :
+                algoFunction = SubgoalGraphsAlgorithm::new;
                 break;
         }
         
