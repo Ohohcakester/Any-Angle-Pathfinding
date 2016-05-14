@@ -27,6 +27,7 @@ public class SnapshotItem {
     }
     
     public static void clearCached() {
+        if (cached == null) return;
         cached.clear();
         cached = null;
     }

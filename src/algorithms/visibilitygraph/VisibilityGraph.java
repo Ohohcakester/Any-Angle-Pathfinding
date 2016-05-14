@@ -281,6 +281,12 @@ public class VisibilityGraph {
         }
         return visibilityGraph;
     }
+
+    public static void clearMemory() {
+        storedVisibilityGraph = null;
+        storedGridGraph = null;
+        System.gc();
+    }
     
     
 }

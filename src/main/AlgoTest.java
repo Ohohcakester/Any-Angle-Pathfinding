@@ -313,6 +313,8 @@ public class AlgoTest {
     public static void testOnMazeData(String mazeName, AlgoFunction algoFunction, TestFunctionData test) {
         ArrayList<StartEndPointData> problems = GraphImporter.loadStoredMazeProblemData(mazeName);
         testOnMazeData(mazeName, problems, algoFunction, test);
+        
+        Utility.cleanUpPreallocatedMemory();
     }
     
     public static void testOnMazeData(String mazeName, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {

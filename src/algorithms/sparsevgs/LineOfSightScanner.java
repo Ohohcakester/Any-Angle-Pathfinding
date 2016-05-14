@@ -926,6 +926,17 @@ public final class LineOfSightScanner {
             }
         }
     }
+
+    public static void clearMemory() {
+        snapshotList.clear();
+        snapshots.clear();
+        rightDownExtents = null;
+        leftDownExtents = null;
+        intervalStack = null;
+        successorsX = null;
+        successorsY = null;
+        System.gc();
+    }
     
 }
 

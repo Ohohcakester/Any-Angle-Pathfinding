@@ -479,6 +479,12 @@ public class SparseVisibilityGraph {
             }
         }
     }
+
+    public static void clearMemory() {
+        storedVisibilityGraph = null;
+        storedGridGraph = null;
+        System.gc();
+    }
     
 }
 

@@ -7,9 +7,18 @@ import java.util.Arrays;
 
 import main.AlgoFunction;
 import main.testgen.StartEndPointData;
+import algorithms.Anya;
 import algorithms.PathFindingAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
+import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
+import algorithms.datatypes.SnapshotItem;
+import algorithms.priorityqueue.ReusableIndirectHeap;
+import algorithms.sparsevgs.LineOfSightScanner;
+import algorithms.sparsevgs.SparseVisibilityGraph;
+import algorithms.subgoalgraphs.SubgoalGraph;
+import algorithms.vertexanya.VertexAnya;
+import algorithms.visibilitygraph.VisibilityGraph;
 
 public class Utility {
 
@@ -96,5 +105,20 @@ public class Utility {
     public static boolean isOptimal(double length, double optimalLength) {
         //System.out.println(length + " | " + optimalLength + " | " + ((length - optimalLength) < 0.0001)); 
         return (length - optimalLength) < 0.0001;
+    }
+    
+    public static void cleanUpPreallocatedMemory() {
+        VertexAnya.clearMemory();
+        Anya.clearMemory();
+        VisibilityGraph.clearMemory();
+        SubgoalGraph.clearMemory();
+        SparseVisibilityGraph.clearMemory();
+        Memory.clearMemory();
+        ReusableIndirectHeap.clearMemory();
+        LineOfSightScanner.clearMemory();
+        SnapshotItem.clearCached();
+        //IVGAlgorithm.clearCached();
+        
+        System.gc(); System.gc();
     }
 }

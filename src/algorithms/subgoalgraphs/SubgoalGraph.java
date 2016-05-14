@@ -559,4 +559,10 @@ public class SubgoalGraph {
     
     public final int size() { return size; }
     public final int maxSize() { return originalSize + 2; }
+    
+    public static final void clearMemory() {
+        SubgoalGraph.graph = null;
+        SubgoalGraph.storedGraph = null;
+        System.gc();
+    }
 }

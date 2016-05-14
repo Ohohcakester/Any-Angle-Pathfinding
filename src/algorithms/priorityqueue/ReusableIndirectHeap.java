@@ -304,4 +304,12 @@ public class ReusableIndirectHeap {
     public final boolean isEmpty() {
         return heapSize <= 0;
     }
+
+    public static void clearMemory() {
+        keyList = null;
+        inList = null;
+        outList = null;
+        ticketCheck = null;
+        System.gc();
+    }
 }

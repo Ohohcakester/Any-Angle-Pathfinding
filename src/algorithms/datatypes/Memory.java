@@ -130,4 +130,12 @@ public final class Memory {
             visited[index] = value;
         }
     }
+
+    public static void clearMemory() {
+        distance = null;
+        parent = null;
+        visited = null;
+        ticketCheck = null;
+        System.gc();
+    }
 }

@@ -1022,6 +1022,12 @@ public class VertexAnya extends PathFindingAlgorithm {
         return list2;
     }
 
+    public static void clearMemory() {
+        rightDownExtents = null;
+        leftDownExtents = null;
+        System.gc();
+    }
+
 }
 
 

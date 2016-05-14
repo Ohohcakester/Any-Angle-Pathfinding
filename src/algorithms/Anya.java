@@ -890,6 +890,12 @@ public class Anya extends PathFindingAlgorithm {
         return list;
     }
 
+    public static void clearMemory() {
+        leftDownExtents = null;
+        rightDownExtents = null;
+        System.gc();
+    }
+
 }
 
 
