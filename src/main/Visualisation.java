@@ -54,7 +54,7 @@ public class Visualisation {
             long startT = System.nanoTime();
             int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
             long endT = System.nanoTime();
-            //TimeCounter.print();
+            TimeCounter.print();
             System.out.println("Runtime: " + ((endT-startT)/1000000.));
             for (int i=0; i<path.length-1; i++) {
                 gridLineSet.addLine(path[i][0], path[i][1],
