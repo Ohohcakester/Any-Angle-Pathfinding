@@ -99,6 +99,7 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
         
         float newWeight = memory.distance(parentIndex) + graph.distance(parX, parY, x, y);
         if (newWeight < memory.distance(targetIndex)) {
+            memory.setDistance(targetIndex, newWeight);
             if (graph.isOuterCorner(x, y) || (y == ey && x == ex)) {
                 memory.setParent(targetIndex, parentIndex);
                 vertexPQ.decreaseKey(targetIndex, newWeight + graph.distance(x, y, ex, ey));
@@ -782,6 +783,8 @@ public class VertexAnyaMarkingV3 extends PathFindingAlgorithm {
             }
         }
         checkArray[rightEndIndex] = 0; // clean up after yourself
+        
+        // Assert: checkArray has all entries == 0.
 
         if (intervalCount == 0) { // unblocked
             right = rightBound;
