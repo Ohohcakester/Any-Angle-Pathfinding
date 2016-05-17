@@ -75,7 +75,6 @@ public class HReachabilityChecker {
             
             c_carX = (dx < 0) ? 0 : -1;
             c_carY = c_diagY;
-            //maxCardinal = absdy;
             maxCardinal = absdy - absdx;
         } else {
             // Directions: (dx,dy) and (dx,0)
@@ -85,7 +84,6 @@ public class HReachabilityChecker {
             c_carX = c_diagX;
             c_carY = (dy < 0) ? 0 : -1;
             maxCardinal = absdx - absdy;
-            //maxCardinal = absdx;
         }
         
         while(curr < qSize) {
