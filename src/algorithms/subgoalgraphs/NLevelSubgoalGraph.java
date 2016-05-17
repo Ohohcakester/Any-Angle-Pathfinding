@@ -343,6 +343,8 @@ public class NLevelSubgoalGraph {
                             break;
                         }
                     }
+                    
+                    if (necessary) break; // double break out of for loop.
                 }
                 
                 if (!necessary) {
