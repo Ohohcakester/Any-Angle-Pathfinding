@@ -140,7 +140,7 @@ public class SubgoalGraph {
         }
     }
 
-    private void initialiseSubgoalNodes() {
+    private final void initialiseSubgoalNodes() {
         for (int y=0;y<yLength;++y) {
             int[] nodes = new int[xLength];
             Arrays.fill(nodes, -1);
@@ -246,7 +246,7 @@ public class SubgoalGraph {
         endIndex = -1;   // Not needed. Just to catch errors.
     }
 
-    private void markHasEdgeToGoal(boolean value) {
+    private final void markHasEdgeToGoal(boolean value) {
         int[] endNeighbours = neighbours[endIndex];
         int n = nNeighbours[endIndex];
         for (int i=0;i<n;++i) {

@@ -120,7 +120,7 @@ public class SubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         }
     }
 
-    private void initialise(int s) {
+    private final void initialise(int s) {
         Memory.setDistance(s, 0);
         pq.decreaseKey(s, 0);
     }
@@ -173,7 +173,7 @@ public class SubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         }
     }
 
-    private void tryRelax(int current, int currX, int currY, int target, int tarX, int tarY) {
+    private final void tryRelax(int current, int currX, int currY, int target, int tarX, int tarY) {
         float distance = Memory.distance(current) + graph.octileDistance(currX, currY, tarX, tarY);
         if (distance < Memory.distance(target)) {
             Memory.setDistance(target, distance);
@@ -182,7 +182,7 @@ public class SubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         }
     }
 
-    private int pathNumberOfHops() {
+    private final int pathNumberOfHops() {
         int length = 0;
         int current = endIndex;
         while (current != -1) {
@@ -211,7 +211,7 @@ public class SubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         return endIndex;
     }
     
-    boolean subgoalGraphSnapshotSaved = false;
+    private boolean subgoalGraphSnapshotSaved = false;
     @Override
     protected List<SnapshotItem> computeSearchSnapshot() {
         if (subgoalGraphSnapshotSaved) {
