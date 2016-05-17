@@ -152,7 +152,7 @@ public class NLevelSubgoalGraph {
         }
     }
 
-    private void initialiseSubgoalNodes() {
+    private final void initialiseSubgoalNodes() {
         for (int y=0;y<yLength;++y) {
             int[] nodes = new int[xLength];
             Arrays.fill(nodes, -1);
@@ -267,7 +267,7 @@ public class NLevelSubgoalGraph {
         endIndex = -1;   // Not needed. Just to catch errors.
     }
 
-    private void markRelevantSubgoals(int source, boolean value) {
+    private final void markRelevantSubgoals(int source, boolean value) {
         queue[0] = source;
         if (levels[source] < maxLevel) isRelevantSubgoal[source] = value;
         int current = 0;
@@ -294,7 +294,7 @@ public class NLevelSubgoalGraph {
         }
     }
 
-    private void markHasEdgeToGoal(boolean value) {
+    private final void markHasEdgeToGoal(boolean value) {
         int[] endNeighbours = neighbours[endIndex];
         int n = nNeighbours[endIndex];
         for (int i=0;i<n;++i) {
@@ -313,7 +313,7 @@ public class NLevelSubgoalGraph {
         pruneSubgoals();
     }
     
-    private void pruneSubgoals() {
+    private final void pruneSubgoals() {
         Arrays.fill(levels, maxLevel);
         ShortestPathChecker spChecker = new ShortestPathChecker(this, graph);
         
@@ -388,7 +388,7 @@ public class NLevelSubgoalGraph {
         initialiseRelevantSubgoals();
     }
     
-    private void initialiseRelevantSubgoals() {
+    private final void initialiseRelevantSubgoals() {
         for (int i=0;i<originalSize;++i) {
             isRelevantSubgoal[i] = (levels[i] == maxLevel);
         }

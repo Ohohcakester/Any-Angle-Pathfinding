@@ -125,7 +125,7 @@ public class NLevelSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         }
     }
 
-    private void initialise(int s) {
+    private final void initialise(int s) {
         Memory.setDistance(s, 0);
         pq.decreaseKey(s, 0);
     }
@@ -153,23 +153,13 @@ public class NLevelSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         }
     }
 
-    private void tryRelax(int current, int currX, int currY, int target, int tarX, int tarY) {
+    private final void tryRelax(int current, int currX, int currY, int target, int tarX, int tarY) {
         float distance = Memory.distance(current) + graph.octileDistance(currX, currY, tarX, tarY);
         if (distance < Memory.distance(target)) {
             Memory.setDistance(target, distance);
             Memory.setParent(target, current);
             pq.decreaseKey(target, distance + graph.octileDistance(tarX, tarY, ex, ey));
         }
-    }
-
-    private int pathNumberOfHops() {
-        int length = 0;
-        int current = endIndex;
-        while (current != -1) {
-            current = Memory.parent(current);
-            length++;
-        }
-        return length;
     }
 
     @Override

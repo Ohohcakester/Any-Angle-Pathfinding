@@ -34,14 +34,13 @@ public class HReachabilityChecker {
      * Note: uses the Memory class.
      * This function is horrible and I hate it.
      */
-    public boolean isHReachable(int n1, int n2) {
+    public final boolean isHReachable(int n1, int n2) {
         Memory.initialise(size, 0, 0, false);
         int x1 = xPositions[n1];
         int y1 = yPositions[n1];
         int x2 = xPositions[n2];
         int y2 = yPositions[n2];
         
-        // Direction 1 (diagonal)
         int absdx = Math.abs(x1-x2);
         int absdy = Math.abs(y1-y2);
         int dx = sign(x2-x1);
@@ -130,13 +129,12 @@ public class HReachabilityChecker {
      * This function is horrible and I hate it.
      * Appends the vertices to the path array. Returns the new size.
      */
-    public int appendHReachablePath(int n1, int n2, int[][] path, int length) {
+    public final int appendHReachablePath(int n1, int n2, int[][] path, int length) {
         int x1 = xPositions[n1];
         int y1 = yPositions[n1];
         int x2 = xPositions[n2];
         int y2 = yPositions[n2];
         
-        // Direction 1 (diagonal)
         int absdx = Math.abs(x1-x2);
         int absdy = Math.abs(y1-y2);
         int dx = sign(x2-x1);
