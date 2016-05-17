@@ -18,6 +18,7 @@ public class AnyAngleSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
     private int endIndex;
     private int[] xPositions;
     private int[] yPositions;
+    private boolean hasDirectPath;
 
     public AnyAngleSubgoalGraphsAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
