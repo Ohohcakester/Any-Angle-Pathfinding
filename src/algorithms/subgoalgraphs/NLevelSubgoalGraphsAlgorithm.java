@@ -6,28 +6,40 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.AlgoFunction;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 
 public class NLevelSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
-    NLevelSubgoalGraph subgoalGraph;
-    ReusableIndirectHeap pq;
-    int startIndex;
-    int endIndex;
-    int[][] path;
+    private final int maxLevel;
+    private NLevelSubgoalGraph subgoalGraph;
+    private ReusableIndirectHeap pq;
+    private int startIndex;
+    private int endIndex;
+    private int[][] path;
 
     public NLevelSubgoalGraphsAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
+        this.maxLevel = 999999;
     }
-
+    
+    private NLevelSubgoalGraphsAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey, int maxLevel) {
+        super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
+        this.maxLevel = maxLevel;
+    }
+    
+    public static AlgoFunction levels(int n) {
+        if (n <= 0) throw new UnsupportedOperationException("Number of levels must be at least 1.");
+        return (a,b,c,d,e) -> new NLevelSubgoalGraphsAlgorithm(a,b,c,d,e,n);
+    }
 
     @Override
     public void computePath() {
         //NLevelSubgoalGraph.clearMemory();
         //NLevelSubgoalGraph.snapshotFunction = ()->maybeSaveSearchSnapshot();
-        subgoalGraph = NLevelSubgoalGraph.initialiseNew(graph, 9999);
+        subgoalGraph = NLevelSubgoalGraph.initialiseNew(graph, maxLevel);
         //subgoalGraph.initialiseGraph();
         if (tryDirectPath()) {
             return;
