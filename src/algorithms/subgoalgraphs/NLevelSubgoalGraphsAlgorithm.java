@@ -191,7 +191,7 @@ public class NLevelSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         return endIndex;
     }
     
-    Color[] vertexColours = new Color[] {
+    private static final Color[] vertexColours = new Color[] {
         Color.BLACK,
         Color.RED,
         Color.YELLOW,
@@ -201,7 +201,7 @@ public class NLevelSubgoalGraphsAlgorithm extends PathFindingAlgorithm {
         Color.MAGENTA,
         Color.WHITE,
     };
-    int subgoalGraphSnapshotSaved = 2;
+    private int subgoalGraphSnapshotSaved = 2;
     @Override
     protected List<SnapshotItem> computeSearchSnapshot() {
         if (subgoalGraphSnapshotSaved <= 0) {
