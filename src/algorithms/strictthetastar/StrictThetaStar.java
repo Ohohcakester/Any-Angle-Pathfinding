@@ -135,11 +135,11 @@ public class StrictThetaStar extends BasicThetaStar {
     }
 
     private boolean relaxTarget(int v, int par, float newWeight) {
-        if (!isTaut(v, par)) {
-            newWeight += BUFFER_VALUE;
-            par += Integer.MIN_VALUE;
-        }
         if (newWeight < distance(v)) {
+            if (!isTaut(v, par)) {
+                newWeight += BUFFER_VALUE;
+                par += Integer.MIN_VALUE;
+            }
             setDistance(v, newWeight);
             setParent(v, par);
             return true;
