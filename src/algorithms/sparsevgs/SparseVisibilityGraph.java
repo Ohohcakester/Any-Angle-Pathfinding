@@ -325,7 +325,6 @@ final class SVGNode {
     float[] edgeWeights;
     int nEdges = 0;
     
-    int level = 0;
     boolean hasEdgeToGoal = false;
     
     public SVGNode(int x, int y) {
