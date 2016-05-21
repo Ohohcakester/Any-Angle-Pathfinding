@@ -41,6 +41,14 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
         initialise(visibilityGraph.startNode());
         int finish = visibilityGraph.endNode();
 
+        if (graph.lineOfSight(sx, sy, ex, ey)) {
+            // There is a direct path from (sx, sy) to (ex, ey).
+            if (sx != ex || sy != ey) {
+                setParent(finish, visibilityGraph.startNode());
+            }
+            return;
+        }
+
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             setVisited(current, true);
@@ -63,7 +71,13 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
                     int destX = visibilityGraph.xCoordinateOf(dest);
                     int destY = visibilityGraph.yCoordinateOf(dest);
                     
-                    pq.decreaseKey(dest, distance(dest) + heuristic(destX, destY));
+                    pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));
+                }
+            }
+            if (node.hasEdgeToGoal) {
+                float weight = graph.distance(node.x, node.y, ex, ey);
+                if (relax(current, finish, weight)) {
+                    pq.decreaseKey(finish, distance(finish));
                 }
             }
             
@@ -73,17 +87,17 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
 
     protected void setupVisibilityGraph() {
         if (reuseGraph) {
-            visibilityGraph = SparseVisibilityGraph.getStoredGraph(graph, sx, sy, ex, ey);
+            visibilityGraph = SparseVisibilityGraph.getStoredGraph(graph);
         } else {
-            visibilityGraph = new SparseVisibilityGraph(graph, sx, sy, ex, ey);
+            visibilityGraph = new SparseVisibilityGraph(graph);
         }
         
         if (isRecording()) {
             visibilityGraph.setSaveSnapshotFunction(()->saveVisibilityGraphSnapshot());
-            visibilityGraph.initialise();
+            visibilityGraph.initialise(sx, sy, ex, ey);
             saveVisibilityGraphSnapshot();
         } else {
-            visibilityGraph.initialise();
+            visibilityGraph.initialise(sx, sy, ex, ey);
         }
     }
 
