@@ -68,9 +68,6 @@ public final class ShortestPathChecker {
         Memory.setDistance(n1, 0);
         pq.decreaseKey(n1, 0);
         
-        int n2x = xPositions[n2];
-        int n2y = yPositions[n2];
-
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             Memory.setVisited(current, true);
@@ -96,7 +93,7 @@ public final class ShortestPathChecker {
                 float distance = Memory.distance(current) + graph.octileDistance(currX, currY, targetX, targetY);
                 if (distance < Memory.distance(target)) {
                     Memory.setDistance(target, distance);
-                    pq.decreaseKey(target, distance + graph.octileDistance(targetX, targetY, n2x, n2y));
+                    pq.decreaseKey(target, distance + graph.octileDistance(targetX, targetY, x2, y2));
                 }
             }
         }
@@ -124,9 +121,6 @@ public final class ShortestPathChecker {
         Memory.setDistance(n1, 0);
         pq.decreaseKey(n1, 0);
         
-        int n2x = xPositions[n2];
-        int n2y = yPositions[n2];
-
         while (!pq.isEmpty()) {
             int current = pq.popMinIndex();
             Memory.setVisited(current, true);
@@ -152,7 +146,7 @@ public final class ShortestPathChecker {
                 float distance = Memory.distance(current) + graph.distance(currX, currY, targetX, targetY);
                 if (distance < Memory.distance(target)) {
                     Memory.setDistance(target, distance);
-                    pq.decreaseKey(target, distance + graph.distance(targetX, targetY, n2x, n2y));
+                    pq.decreaseKey(target, distance + graph.distance(targetX, targetY, x2, y2));
                 }
             }
         }
