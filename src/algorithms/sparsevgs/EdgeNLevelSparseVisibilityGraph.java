@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class EdgeNLevelSparseVisibilityGraph {
 
-    public static int LEVEL_W = Integer.MAX_INT;
+    public static int LEVEL_W = Integer.MAX_VALUE;
 
     private static EdgeNLevelSparseVisibilityGraph storedVisibilityGraph;
     private static GridGraph storedGridGraph;
@@ -24,12 +24,13 @@ public class EdgeNLevelSparseVisibilityGraph {
     //private SVGNode[] nodes;
     private int nNodes;
 
-    private int[] startStoredNeighbours;
-    private float[] startStoredWeights;
-    private int startStoredNumNeighbours;
-    private int[] endStoredNeighbours;
-    private float[] endStoredWeights;
-    private int endStoredNumNeighbours;
+    private int startOriginalSize;
+    private int endOriginalSize;
+
+    private int[] queue;
+    private int queueSize;
+
+    private int originalNEdges;
 
     
     // Nodes: Indexed by node Index.
@@ -38,6 +39,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     public int[] nOutgoingEdgess;          // value: number of outgoingEdges.
     public int[][] outgoingEdgess;         // value: nodeIndex of destination
     public int[][] outgoingEdgeIndexess;   // value: edgeIndex of edge to destination.
+    public boolean[] hasEdgeToGoal;
 
     public int[] nSkipEdgess;                            // value: number of outgoing skip-edges.
     public int[][] outgoingSkipEdgess;                   // value: nodeIndex of destination
@@ -49,6 +51,8 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Edges: Indexed by edge Index (only for non-skip-edges)
     public int nEdges;
     public int[] edgeLevels;
+    public int[] edgeEndpoint1;   // value: one of the two node endpoints of the edge
+    public int[] edgeEndpoint2;   // value: one of the two node endpoints of the edge
     public float[] edgeWeights;
     public int[] isMarkedIndex;   // value: index to check in the isMarked array to see whether the edge is marked.
                                   //        note: for all non-level-W edges, isMarkedIndex[i] == i.
@@ -67,7 +71,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     public final void initialise(int sx, int sy, int ex, int ey) {
         // Check if graph already initialised
-        if (nodes == null) {
+        if (xPositions == null) {
             constructGraph();
         }
 
@@ -82,13 +86,15 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     private final void constructGraph() {
         losScanner = new LineOfSightScanner(graph);
-        
+        queue = new int[11];
+
+        queueSize = 0;
 
         // STEP 1: Construct SVG (Strict Visibility Graph)
         
         // Initialise SVG Vertices
-        xPositions = new xPositions[11];
-        yPositions = new yPositions[11];
+        xPositions = new int[11];
+        yPositions = new int[11];
         nNodes = 0;
         addNodes();
         
@@ -98,13 +104,14 @@ public class EdgeNLevelSparseVisibilityGraph {
         maxSize = nNodes + 2;
         xPositions = Arrays.copyOf(xPositions, maxSize);
         yPositions = Arrays.copyOf(yPositions, maxSize);
-        nOutgoingEdgess = new int[maxSize][];
+        hasEdgeToGoal = new boolean[maxSize];
+        nOutgoingEdgess = new int[maxSize];
         outgoingEdgess = new int[maxSize][];
         outgoingEdgeIndexess = new int[maxSize][];
         for (int i=0;i<originalSize;++i) {
-            nEdges[i] = 0;
+            nOutgoingEdgess[i] = 0;
             outgoingEdgess[i] = new int[11];
-            outgoingEdgeIndexess = new int[11];
+            outgoingEdgeIndexess[i] = new int[11];
         }
         
 
@@ -115,12 +122,13 @@ public class EdgeNLevelSparseVisibilityGraph {
 
         // Now all the edges, indexes and weights should be correctly initialise.
         //  Now we initialise the rest of the edge data.
-        edgeWeights = Arrays.copyOf(edgeWeights, nEdges);
-        edgeLevels = new int[nEdges];
+        int maxPossibleNEdges = nEdges + nNodes*2;
+        edgeWeights = Arrays.copyOf(edgeWeights, maxPossibleNEdges);
+        edgeLevels = new int[maxPossibleNEdges];
         Arrays.fill(edgeLevels, LEVEL_W);
-        isMarkedIndex = new int[nEdges];
+        isMarkedIndex = new int[maxPossibleNEdges];
         for (int i=0;i<isMarkedIndex.length;++i) isMarkedIndex[i] = i;
-        isMarked = new boolean[nEdges];
+        isMarked = new boolean[maxPossibleNEdges];
         //Arrays.fill(isMarked, false); // default initialises to false anyway.
 
         // STEP 2: Label edge levels in SVG.
@@ -187,6 +195,8 @@ public class EdgeNLevelSparseVisibilityGraph {
     private final void addEdge(int v1, int v2, float weight) {
         if (nEdges >= edgeWeights.length) {
             edgeWeights = Arrays.copyOf(edgeWeights, edgeWeights.length*2);
+            edgeEndpoint1 = Arrays.copyOf(edgeEndpoint1, edgeEndpoint1.length*2);
+            edgeEndpoint2 = Arrays.copyOf(edgeEndpoint2, edgeEndpoint2.length*2);
         }
         int edgeIndex = nEdges;
 
@@ -197,7 +207,7 @@ public class EdgeNLevelSparseVisibilityGraph {
                 outgoingEdgess[v1] = Arrays.copyOf(outgoingEdgess[v1], outgoingEdgess[v1].length*2);
                 outgoingEdgeIndexess[v1] = Arrays.copyOf(outgoingEdgeIndexess[v1], outgoingEdgeIndexess[v1].length*2);
             }
-            outgoingEdges[v1][index] = v2;
+            outgoingEdgess[v1][index] = v2;
             outgoingEdgeIndexess[v1][index] = edgeIndex;
         }
 
@@ -208,11 +218,13 @@ public class EdgeNLevelSparseVisibilityGraph {
                 outgoingEdgess[v2] = Arrays.copyOf(outgoingEdgess[v2], outgoingEdgess[v2].length*2);
                 outgoingEdgeIndexess[v2] = Arrays.copyOf(outgoingEdgeIndexess[v2], outgoingEdgeIndexess[v2].length*2);
             }
-            outgoingEdges[v2][index] = v1;
+            outgoingEdgess[v2][index] = v1;
             outgoingEdgeIndexess[v2][index] = edgeIndex;
         }
 
         edgeWeights[nEdges] = weight;
+        edgeEndpoint1[nEdges] = v1;
+        edgeEndpoint2[nEdges] = v2;
         ++nEdges;
     }
 
@@ -258,7 +270,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     // Checks whether there is a taut exist in the graph, considering only unmarked edges.
     // Note: unmarked edges are edges whose level >= currentLevel.
-    private final void hasTautExit(int vFrom, int vTo, int currentLevel) {
+    private final boolean hasTautExit(int vFrom, int vTo, int currentLevel) {
         int x1 = xPositions[vFrom];
         int y1 = yPositions[vFrom];
         int x2 = xPositions[vTo];
@@ -312,7 +324,7 @@ public class EdgeNLevelSparseVisibilityGraph {
             int[] nextNodes = new int[nLevelWNeighbours];
             int[] edgeIndexes = new int[nLevelWNeighbours];
             float[] weights = new float[nLevelWNeighbours];
-            int destinations = new int[nLevelWNeighbours];
+            int[] destinations = new int[nLevelWNeighbours];
             int current = 0;
             for (int j=0;j<nOutgoingEdges;++j) {
                 int edgeIndex = outgoingEdgeIndexes[j];
@@ -323,7 +335,7 @@ public class EdgeNLevelSparseVisibilityGraph {
                 }
             }
 
-            outgoingSkipEdgess = destinations;
+            outgoingSkipEdgess[i] = destinations;
             outgoingSkipEdgeNextNodess[i] = nextNodes;
             outgoingSkipEdgeNextNodeEdgeIndexess[i] = edgeIndexes;
             outgoingSkipEdgeWeightss[i] = weights;
@@ -436,6 +448,126 @@ public class EdgeNLevelSparseVisibilityGraph {
         endIndex = -1;
     }
 
+    // NEW IMPLEMENTATION
+    public final void restoreOriginalGraph() {
+        markEdgesFrom(endIndex, false);
+        markEdgesFrom(startIndex, false);
+        markHasEdgeToGoal(false);
+        nOutgoingEdgess[endIndex] = endOriginalSize;
+        nOutgoingEdgess[startIndex] = startOriginalSize;
+        nEdges = originalNEdges;
+
+        // TODO: Remove
+        /*for (int i=0;i<nVerticesWithAddedEdges;++i) {
+            nOutgoingEdgess[verticesWithAddedEdges[i]] = vertexOriginalNEdges[i];
+        }
+        nVerticesWithAddedEdges = 0;*/
+        nNodes = originalSize;
+        startIndex = -1;
+        endIndex = -1;
+    }
+
+    // NEW IMPLEMENTATION
+    // Assumption: No edge between start and end.
+    // Uses Memory
+    public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
+        // START:
+        if (nodeIndex[sy][sx] == -1) {
+            startIndex = nNodes;
+            nOutgoingEdgess[startIndex] = 0;
+            ++nNodes;
+        } else {
+            startIndex = nodeIndex[sy][sx];
+        }
+        startOriginalSize = nOutgoingEdgess[startIndex];
+        addTempEdgesToVisibleNeighbours(startIndex, sx, sy);
+
+        // END:
+        if (nodeIndex[ey][ex] == -1) {
+            endIndex = nNodes;
+            nOutgoingEdgess[endIndex] = 0;
+            ++nNodes;
+        } else {
+            endIndex = nodeIndex[ey][ex];
+        }
+        endOriginalSize = nOutgoingEdgess[endIndex];
+        addTempEdgesToVisibleNeighbours(endIndex, ex, ey);
+        markHasEdgeToGoal(true);
+
+        // WIP HERE!
+        markEdgesFrom(startIndex, true);
+        markEdgesFrom(endIndex, true);
+    }
+
+    // Uses Memory
+    private final int addTempEdgesToVisibleNeighbours(int index, int x, int y) {
+        Memory.initialise((graph.sizeX+1)*(graph.sizeY+1));
+        {
+            int nOutgoingEdges = nOutgoingEdgess[index];
+            int[] outgoingEdges = outgoingEdgess[index];
+            for (int i=0;i<nOutgoingEdges;++i) {
+                Memory.setVisited(outgoingEdges[i]);
+            }
+        }
+
+
+        losScanner.computeAllVisibleTautSuccessors(x, y);
+        int nSuccessors = losScanner.nSuccessors;
+        for (int i=0;i<nSuccessors;++i) {
+            int toX = losScanner.successorsX[i];
+            int toY = losScanner.successorsY[i];
+            int targetIndex = nodeIndex[toY][toX];
+            if (Memory.visited(targetIndex)) continue;
+
+            float weight = graph.distance(x, y, toX, toY);
+            addTemporaryEdge(index, targetIndex, weight);
+        }
+        
+        return index;
+    }
+
+
+    // Adds an edge from node v1 to node v2
+    private final void addTemporaryEdge(int v1, int v2, float weight) {
+        // We assume that expansion is never needed.
+        /*if (nEdges >= edgeWeights.length) {
+            edgeWeights = Arrays.copyOf(edgeWeights, edgeWeights.length*2);
+            edgeLevels = Arrays.copyOf(edgeLevels, edgeLevels.length*2);
+            isMarkedIndex = Arrays.copyOf(isMarkedIndex, isMarkedIndex.length*2);
+        }*/
+        int edgeIndex = nEdges;
+
+        // add edge to v1
+        {
+            int index = nOutgoingEdgess[v1];
+            if (index >= outgoingEdgess[v1].length) {
+                outgoingEdgess[v1] = Arrays.copyOf(outgoingEdgess[v1], outgoingEdgess[v1].length*2);
+                outgoingEdgeIndexess[v1] = Arrays.copyOf(outgoingEdgeIndexess[v1], outgoingEdgeIndexess[v1].length*2);
+            }
+            outgoingEdges[v1][index] = v2;
+            outgoingEdgeIndexess[v1][index] = edgeIndex;
+        }
+
+        edgeWeights[nEdges] = weight;
+        edgeLevels[nEdges] = 0;
+        isMarkedIndex[nEdges] = nEdges;
+        ++nEdges;
+    }
+
+    // TODO: REMOVE
+    /*private final void saveVertexOriginalEdgesToStack(int v) {
+        if (Memory.visited(v)) return;
+
+        int index = nVerticesWithAddedEdges;
+        if (index >= verticesWithAddedEdges.length) {
+            verticesWithAddedEdges = Arrays.copyOf(verticesWithAddedEdges, verticesWithAddedEdges.length*2);
+            vertexOriginalNEdgess = Arrays.copyOf(vertexOriginalNEdgess, vertexOriginalNEdgess.length*2);
+        }
+        verticesWithAddedEdges[index] = v;
+        vertexOriginalNEdgess[index] = nOutgoingEdgess[v];
+        Memory.setVisited(v, true);
+    }*/
+
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
         
         // START:
@@ -444,9 +576,14 @@ public class EdgeNLevelSparseVisibilityGraph {
             ++nNodes;
             
             nodeIndex[sy][sx] = startIndex;
-            nodes[startIndex] = new SVGNode(sx, sy);
+            xPositions[startIndex] = sx;
+            yPositions[startIndex] = sy;
+            nOutgoingEdgess[startIndex] = 0;
+
         } else {
             startIndex = nodeIndex[sy][sx];
+
+
             SVGNode startNode = nodes[startIndex];
             startStoredNeighbours = startNode.outgoingEdges;
             startStoredWeights = startNode.edgeWeights;
@@ -481,27 +618,29 @@ public class EdgeNLevelSparseVisibilityGraph {
         markHasEdgeToGoal(true);
     }
 
-    private final int addEdgesToVisibleNeighbours(int index, int x, int y) {
-        losScanner.computeAllVisibleTautSuccessors(x, y);
-        int nSuccessors = losScanner.nSuccessors;
-        for (int i=0;i<nSuccessors;++i) {
-            int toX = losScanner.successorsX[i];
-            int toY = losScanner.successorsY[i];
-            int targetIndex = nodeIndex[toY][toX];
-
-            float weight = graph.distance(x, y, toX, toY);
-            addEdge(index, targetIndex, weight);
+    private final void markHasEdgeToGoal(boolean value) {
+        int[] outgoingEdges = outgoingEdgess[endIndex];
+        int nOutgoingEdges = nOutgoingEdgess[endIndex];
+        for (int i=0;i<nOutgoingEdges;++i) {
+            hasEdgeToGoal[outgoingEdges[i]] = value;
         }
-        
-        return index;
     }
 
-    private final void markHasEdgeToGoal(boolean value) {
-        int[] endNeighbours = nodes[endIndex].outgoingEdges;
-        int n = nodes[endIndex].nEdges;
-        for (int i=0;i<n;++i) {
-            nodes[endNeighbours[i]].hasEdgeToGoal = value;
+    private final void markEdgesFrom(int source, boolean value) {
+        // We use the queue to store edgeIndexes.
+        // Add all neighbouring edges of source.
+        queue[0] = source;
+        // WIP: the queue needs to store level... how?
+
+        int current = 0;
+    }
+
+    private final void addToQueue(int x) {
+        if (queueSize >= queue.length) {
+            queue = Arrays.copyOf(queue, queue.length*2);
         }
+        queue[queueSize] = x;
+        queueSize++;
     }
 
     /// \\\ /// \\\ /// \\\ /// \\\ ///
