@@ -4,6 +4,8 @@ import grid.GridGraph;
 
 import java.util.Arrays;
 
+import algorithms.datatypes.Memory;
+
 public class EdgeNLevelSparseVisibilityGraph {
 
     public static int LEVEL_W = Integer.MAX_VALUE;
@@ -61,7 +63,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     // we do thise so that all Level-W edges in a set can be marked together as one.
     public boolean[] isMarked;
     
-    public EdgeNLevelSparseVisibilityGraph(GridGraph graph) {
+    private EdgeNLevelSparseVisibilityGraph(GridGraph graph) {
         this.graph = graph;
     }
 
@@ -69,14 +71,15 @@ public class EdgeNLevelSparseVisibilityGraph {
         this.saveSnapshot = saveSnapshot;
     }
 
-    public final void initialise(int sx, int sy, int ex, int ey) {
-        // Check if graph already initialised
-        if (xPositions == null) {
-            constructGraph();
+    public static final EdgeNLevelSparseVisibilityGraph initialiseNew(GridGraph graph) {
+        if (EdgeNLevelSparseVisibilityGraph.storedGridGraph == graph) {
+            storedVisibilityGraph.restoreOriginalGraph();
+            return storedVisibilityGraph;
         }
-
-        restoreOriginalGraph();
-        addStartAndEnd(sx,sy,ex,ey);
+        EdgeNLevelSparseVisibilityGraph.storedGridGraph = graph;
+        EdgeNLevelSparseVisibilityGraph vGraph = EdgeNLevelSparseVisibilityGraph.storedVisibilityGraph = new EdgeNLevelSparseVisibilityGraph(graph);
+        vGraph.constructGraph();
+        return vGraph;
     }
     
 
@@ -389,7 +392,8 @@ public class EdgeNLevelSparseVisibilityGraph {
                         DEBUG_ASSERT_WILL_RUN = true; // TODO: DEBUG CODE
                         previous = current;
                         current = next;
-                        nextNodes[j] = current;
+
+                        outgoingSkipEdges[j] = current;
                         skipWeights[j] += edgeWeights[edgeIndex];
                         isMarkedIndex[edgeIndex] = indexGroup;
                         break;
@@ -409,47 +413,11 @@ public class EdgeNLevelSparseVisibilityGraph {
     /// \\\ /// \\\ /// \\\ /// \\\ ///
     ///  REPURPOSING PHASE - START  ///
     /// \\\ /// \\\ /// \\\ /// \\\ ///
-    
+
     private final void restoreOriginalGraph() {
-        // Safeguard against multiple restores.
+        // Safeguard against multiple restores
         if (startIndex == -1) return;
         
-        // Reset hasEdgeToGoal array.
-        markHasEdgeToGoal(false);
-        // PostCondition: hasEdgeToGoal has all values == false.
-        if (endIndex >= originalSize) {
-            SVGNode e = nodes[endIndex];
-            nodeIndex[e.y][e.x] = -1;
-        } else {
-            SVGNode endNode = nodes[endIndex];
-            endNode.outgoingEdges = endStoredNeighbours;
-            endNode.edgeWeights = endStoredWeights;
-            endNode.nEdges = endStoredNumNeighbours;
-            endStoredNeighbours = null;
-            endStoredWeights = null;
-        }
-        
-        if (startIndex >= originalSize) {
-            SVGNode s = nodes[startIndex];
-            nodeIndex[s.y][s.x] = -1;
-        } else {
-            SVGNode startNode = nodes[startIndex];
-            startNode.outgoingEdges = startStoredNeighbours;
-            startNode.edgeWeights = startStoredWeights;
-            startNode.nEdges = startStoredNumNeighbours;
-            startStoredNeighbours = null;
-            startStoredWeights = null;
-        }
-
-        // Reset size.
-        nNodes = originalSize;
-        
-        startIndex = -1;
-        endIndex = -1;
-    }
-
-    // NEW IMPLEMENTATION
-    public final void restoreOriginalGraph() {
         markEdgesFrom(endIndex, false);
         markEdgesFrom(startIndex, false);
         markHasEdgeToGoal(false);
@@ -467,7 +435,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         endIndex = -1;
     }
 
-    // NEW IMPLEMENTATION
     // Assumption: No edge between start and end.
     // Uses Memory
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
@@ -494,19 +461,18 @@ public class EdgeNLevelSparseVisibilityGraph {
         addTempEdgesToVisibleNeighbours(endIndex, ex, ey);
         markHasEdgeToGoal(true);
 
-        // WIP HERE!
         markEdgesFrom(startIndex, true);
         markEdgesFrom(endIndex, true);
     }
 
     // Uses Memory
     private final int addTempEdgesToVisibleNeighbours(int index, int x, int y) {
-        Memory.initialise((graph.sizeX+1)*(graph.sizeY+1));
+        Memory.initialise((graph.sizeX+1)*(graph.sizeY+1), Float.POSITIVE_INFINITY, -1, false);
         {
             int nOutgoingEdges = nOutgoingEdgess[index];
             int[] outgoingEdges = outgoingEdgess[index];
             for (int i=0;i<nOutgoingEdges;++i) {
-                Memory.setVisited(outgoingEdges[i]);
+                Memory.setVisited(outgoingEdges[i], true);
             }
         }
 
@@ -544,7 +510,7 @@ public class EdgeNLevelSparseVisibilityGraph {
                 outgoingEdgess[v1] = Arrays.copyOf(outgoingEdgess[v1], outgoingEdgess[v1].length*2);
                 outgoingEdgeIndexess[v1] = Arrays.copyOf(outgoingEdgeIndexess[v1], outgoingEdgeIndexess[v1].length*2);
             }
-            outgoingEdges[v1][index] = v2;
+            outgoingEdgess[v1][index] = v2;
             outgoingEdgeIndexess[v1][index] = edgeIndex;
         }
 
@@ -568,56 +534,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         Memory.setVisited(v, true);
     }*/
 
-    public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
-        
-        // START:
-        if (nodeIndex[sy][sx] == -1) {
-            startIndex = nNodes;
-            ++nNodes;
-            
-            nodeIndex[sy][sx] = startIndex;
-            xPositions[startIndex] = sx;
-            yPositions[startIndex] = sy;
-            nOutgoingEdgess[startIndex] = 0;
-
-        } else {
-            startIndex = nodeIndex[sy][sx];
-
-
-            SVGNode startNode = nodes[startIndex];
-            startStoredNeighbours = startNode.outgoingEdges;
-            startStoredWeights = startNode.edgeWeights;
-            startStoredNumNeighbours = startNode.nEdges;
-            startNode.outgoingEdges = new int[11];
-            startNode.edgeWeights = new float[11];
-            startNode.nEdges = 0;
-        }
-        addEdgesToVisibleNeighbours(startIndex, sx, sy);
-        
-        // END:
-        if (nodeIndex[ey][ex] == -1) {
-            endIndex = nNodes;
-            ++nNodes;
-
-            nodeIndex[ey][ex] = endIndex;
-            nodes[endIndex] = new SVGNode(ex, ey);
-            
-        } else {
-            endIndex = nodeIndex[ey][ex];
-            SVGNode endNode = nodes[endIndex];
-            endStoredNeighbours = endNode.outgoingEdges;
-            endStoredWeights = endNode.edgeWeights;
-            endStoredNumNeighbours = endNode.nEdges;
-            endNode.outgoingEdges = new int[11];
-            endNode.edgeWeights = new float[11];
-            endNode.nEdges = 0;
-        }
-        addEdgesToVisibleNeighbours(endIndex, ex, ey);
-        
-        // Mark all hasEdgeToGoal vertices.
-        markHasEdgeToGoal(true);
-    }
-
     private final void markHasEdgeToGoal(boolean value) {
         int[] outgoingEdges = outgoingEdgess[endIndex];
         int nOutgoingEdges = nOutgoingEdgess[endIndex];
@@ -626,13 +542,39 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
     }
 
+    /**
+     * Mark all edges reachable with a path of edges of increasing level from the source.
+     */
     private final void markEdgesFrom(int source, boolean value) {
         // We use the queue to store edgeIndexes.
         // Add all neighbouring edges of source.
-        queue[0] = source;
+        markSurroundingEdgesAndAddToQueue(source, -1, value);
         // WIP: the queue needs to store level... how?
 
         int current = 0;
+        while (current < queueSize) {
+            int edgeIndex = queue[current];
+            int currentLevel = edgeLevels[edgeIndex];
+            markSurroundingEdgesAndAddToQueue(edgeEndpoint1[edgeIndex], currentLevel, value);
+            markSurroundingEdgesAndAddToQueue(edgeEndpoint2[edgeIndex], currentLevel, value);
+            ++current;
+        }
+    }
+
+    private final void markSurroundingEdgesAndAddToQueue(int v, int currentLevel, boolean value) {
+        int nOutgoingEdges = nOutgoingEdgess[v];
+        int[] outgoingEdges = outgoingEdgess[v];
+        int[] outgoingEdgeIndexes = outgoingEdgeIndexess[v];
+
+        for (int i=0;i<nOutgoingEdges;++i) {
+            int edgeIndex = outgoingEdgeIndexes[i];
+            if (edgeLevels[edgeIndex] <= currentLevel) continue;
+            int markIndex = isMarkedIndex[edgeIndex];
+            if (isMarked[markIndex] != value) {
+                isMarked[markIndex] = value;
+                addToQueue(edgeIndex);
+            }
+        }
     }
 
     private final void addToQueue(int x) {
@@ -655,10 +597,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         return maxSize;
     }
     
-    public final SVGNode getOutgoingEdges(int source) {
-        return nodes[source];
-    }
-
     public final int startNode() {
         return startIndex;
     }
@@ -671,53 +609,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         if (saveSnapshot != null) saveSnapshot.run();
     }
     
-    
-    private static final EdgeNLevelSparseVisibilityGraph repurpose(EdgeNLevelSparseVisibilityGraph oldGraph) {
-        EdgeNLevelSparseVisibilityGraph newGraph = new EdgeNLevelSparseVisibilityGraph(oldGraph.graph);
-        newGraph.nodeIndex = oldGraph.nodeIndex;
-        newGraph.startIndex = oldGraph.startIndex;
-        newGraph.endIndex = oldGraph.endIndex;
-        newGraph.nodes = oldGraph.nodes;
-        newGraph.nNodes = oldGraph.nNodes;
-        newGraph.originalSize = oldGraph.originalSize;
-        newGraph.maxSize = oldGraph.maxSize;
-        newGraph.losScanner = oldGraph.losScanner;
-
-        newGraph.startStoredNeighbours = oldGraph.startStoredNeighbours;
-        newGraph.startStoredWeights = oldGraph.startStoredWeights;
-        newGraph.startStoredNumNeighbours = oldGraph.startStoredNumNeighbours;
-        newGraph.endStoredNeighbours = oldGraph.endStoredNeighbours;
-        newGraph.endStoredWeights = oldGraph.endStoredWeights;
-        newGraph.endStoredNumNeighbours = oldGraph.endStoredNumNeighbours;
-        
-        return newGraph;
-    }
-    
-    public static final EdgeNLevelSparseVisibilityGraph getStoredGraph(GridGraph graph) {
-        EdgeNLevelSparseVisibilityGraph visibilityGraph = null;
-        if (storedGridGraph != graph || storedVisibilityGraph == null) {
-            //("Get new graph");
-            visibilityGraph = new EdgeNLevelSparseVisibilityGraph(graph);
-            storedVisibilityGraph = visibilityGraph;
-            storedGridGraph = graph;
-        } else {
-            //("Reuse graph");
-            visibilityGraph = repurpose(storedVisibilityGraph);
-            storedVisibilityGraph = visibilityGraph;
-        }
-        return visibilityGraph;
-    }
-
-    private final void printAllEdges() {
-        for (int i=0;i<nNodes;++i) {
-            SVGNode node = nodes[i];
-            System.out.println("Node " + i + " : " + node.nEdges + " edges");
-            for (int j=0;j<node.nEdges;++j) {
-                System.out.println(i + " -> " + node.outgoingEdges[j]);
-            }
-        }
-    }
-
     public static void clearMemory() {
         storedVisibilityGraph = null;
         storedGridGraph = null;
