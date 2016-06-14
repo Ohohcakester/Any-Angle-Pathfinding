@@ -449,7 +449,7 @@ public class EdgeNLevelSparseVisibilityGraph {
      * Uses Memory.
      */
     private void pruneParallelSkipEdges() {
-        Memory.initialise(nNodes, Float.POSITIVE_INFINITY, -1, false);
+        Memory.initialise(maxSize, Float.POSITIVE_INFINITY, -1, false);
         
         int maxDegree = 0;
         for (int i=0;i<nNodes;++i) {
@@ -620,7 +620,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     // Uses Memory
     private final int addTempEdgesToVisibleNeighbours(int index, int x, int y) {
-        Memory.initialise((graph.sizeX+1)*(graph.sizeY+1), Float.POSITIVE_INFINITY, -1, false);
+        Memory.initialise(maxSize, Float.POSITIVE_INFINITY, -1, false);
         {
             int nOutgoingEdges = nOutgoingEdgess[index];
             int[] outgoingEdges = outgoingEdgess[index];
