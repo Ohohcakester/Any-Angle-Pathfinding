@@ -70,7 +70,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 if (visibilityGraph.isMarked[visibilityGraph.isMarkedIndex[edgeIndex]] &&
                         !Memory.visited(dest) &&
                         relax(current, dest, weight)) {
-
+                    
                     int destX = visibilityGraph.xPositions[dest];
                     int destY = visibilityGraph.yPositions[dest];
                     
@@ -107,6 +107,8 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
             
             maybeSaveSearchSnapshot();
         }
+        
+        resolveFinalPath();
     }
 
     protected void setupVisibilityGraph() {
@@ -117,29 +119,33 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
             visibilityGraph = EdgeNLevelSparseVisibilityGraph.initialiseNew(graph);
         }
         
-        /*if (isRecording()) {
+        if (isRecording()) {
             visibilityGraph.setSaveSnapshotFunction(()->saveVisibilityGraphSnapshot(false));
-            visibilityGraph.initialise(sx, sy, ex, ey);
+            saveVisibilityGraphSnapshot(false);
+            visibilityGraph.addStartAndEnd(sx, sy, ex, ey);
             saveVisibilityGraphSnapshot(false);
             saveVisibilityGraphSnapshot(true);
         } else {
-            visibilityGraph.initialise(sx, sy, ex, ey);
-        }*/
+            visibilityGraph.addStartAndEnd(sx, sy, ex, ey);
+        }
     }
 
     protected final boolean relax(int u, int v, float weightUV) {
         // return true iff relaxation is done.
         float newWeight = distance(u) + weightUV;
+        
         if (newWeight < distance(v)) {
             int p = parent(u);
             if (p != -1) {
+                int[] xPositions = visibilityGraph.xPositions;
+                int[] yPositions = visibilityGraph.yPositions;
                 p = getNextNodeIndex(p);
-                int x1 = visibilityGraph.xPositions[p];
-                int y1 = visibilityGraph.yPositions[p];
-                int x2 = visibilityGraph.xPositions[u];
-                int y2 = visibilityGraph.yPositions[u];
-                int x3 = visibilityGraph.xPositions[v];
-                int y3 = visibilityGraph.yPositions[v];
+                int x1 = xPositions[p];
+                int y1 = yPositions[p];
+                int x2 = xPositions[u];
+                int y2 = yPositions[u];
+                int x3 = xPositions[v];
+                int y3 = yPositions[v];
                 
                 if (!graph.isTaut(x1,y1,x2,y2,x3,y3)) return false;
             }
@@ -189,7 +195,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 if (!graph.isTaut(x1,y1,x2,y2,x3,y3)) return false;
             }
             setDistance(v, newWeight);
-            setParent(v, u + Integer.MAX_VALUE);
+            setParent(v, u + Integer.MIN_VALUE);
             return true;
         }
         return false;
@@ -198,12 +204,13 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     private final void resolveSkipEdgeNextNode(int v) {
         int parent = Memory.parent(v);
         if (parent >= -1) return;
-        parent -= Integer.MAX_VALUE;
+        parent -= Integer.MIN_VALUE;
         int nSkipEdges = visibilityGraph.nSkipEdgess[v];
         int[] outgoingSkipEdges = visibilityGraph.outgoingSkipEdgess[v];
+
         for (int i=0;i<nSkipEdges;++i) {
             if (outgoingSkipEdges[i] == parent) {
-                Memory.setParent(v, visibilityGraph.outgoingSkipEdgeNextNodess[v][i] + Integer.MAX_VALUE);
+                Memory.setParent(v, visibilityGraph.outgoingSkipEdgeNextNodess[v][i] + Integer.MIN_VALUE);
                 return;
             }
         }
@@ -211,7 +218,44 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     }
     
     private final int getNextNodeIndex(int p) {
-        return (p >= -1) ? p : p - Integer.MAX_VALUE;
+        return (p >= -1) ? p : (p - Integer.MIN_VALUE);
+    }
+    
+    private void resolveFinalPath() {
+        int current = visibilityGraph.endNode();
+        int previous = -1;
+        int[] edgeLevels = visibilityGraph.edgeLevels;
+        
+        while (current != -1) {
+            if (current < -1) {
+                current -= Integer.MIN_VALUE;
+                Memory.setParent(previous, current);
+                
+                if (visibilityGraph.nSkipEdgess[current] != 0) {
+                    previous = current;
+                    current = Memory.parent(current);
+                    continue;
+                }
+                
+                int nOutgoingEdges = visibilityGraph.nOutgoingEdgess[current];
+                int[] outgoingEdges = visibilityGraph.outgoingEdgess[current];
+                int[] outgoingEdgeIndexes = visibilityGraph.outgoingEdgeIndexess[current];
+                
+                boolean done = false;
+                for (int i=0;i<nOutgoingEdges;++i) {
+                    if (edgeLevels[outgoingEdgeIndexes[i]] != EdgeNLevelSparseVisibilityGraph.LEVEL_W) continue;
+                    if (outgoingEdges[i] == previous) continue;
+                    
+                    int next = outgoingEdges[i];
+                    Memory.setParent(current, next + Integer.MIN_VALUE);
+                    done = true;
+                    break;
+                }
+                if (!done) throw new UnsupportedOperationException("SS");
+            }
+            previous = current;
+            current = Memory.parent(current);
+        }
     }
     
 
@@ -256,6 +300,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
         int startIndex = parent(endIndex);
+        startIndex = getNextNodeIndex(startIndex);
         edge[0] = visibilityGraph.xPositions[startIndex];
         edge[1] = visibilityGraph.yPositions[startIndex];
         edge[2] = visibilityGraph.xPositions[endIndex];
@@ -275,22 +320,26 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     }
 
     protected void saveVisibilityGraphSnapshot(boolean showMarked) {
-        /*int size = visibilityGraph.size();
+        int size = visibilityGraph.size();
         List<SnapshotItem> snapshotItemList = new ArrayList<>(size);
 
+        int[] xPositions = visibilityGraph.xPositions;
+        int[] yPositions = visibilityGraph.yPositions;
+        
+        
         for (int i=0;i<size;i++) {
-            VertexNLevelSVGNode curr = visibilityGraph.getOutgoingEdges(i);
-            int x1 = curr.x;
-            int y1 = curr.y;
+            int x1 = xPositions[i];
+            int y1 = yPositions[i];
+
+            int nOutgoingEdges = visibilityGraph.nOutgoingEdgess[i];
+            int[] outgoingEdges = visibilityGraph.outgoingEdgess[i];
+            int[] outgoingEdgeIndexes = visibilityGraph.outgoingEdgeIndexess[i];
             
-            int[] neighbours = curr.outgoingEdges;
-            int nNeighbours = curr.nEdges;
-            
-            for (int j=0;j<nNeighbours;++j) {
-                int neighbour = neighbours[j];
-                VertexNLevelSVGNode next = visibilityGraph.getOutgoingEdges(neighbour);
-                int x2 = next.x;
-                int y2 = next.y;
+            for (int j=0;j<nOutgoingEdges;++j) {
+                int neighbour = outgoingEdges[j];
+                int edgeIndex = outgoingEdgeIndexes[j];
+                int x2 = xPositions[neighbour];
+                int y2 = yPositions[neighbour];
                 
                 Integer[] path = new Integer[4];
                 path[0] = x1;
@@ -298,7 +347,11 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 path[2] = x2;
                 path[3] = y2;
                 
-                Color color = vertexColours[Math.min(Math.min(curr.level, next.level), vertexColours.length-1)];
+                int colourIndex = Math.min(visibilityGraph.edgeLevels[edgeIndex], vertexColours.length-1);
+                if (showMarked && visibilityGraph.isMarked[visibilityGraph.isMarkedIndex[edgeIndex]]) {
+                    colourIndex = 0;
+                }
+                Color color = vertexColours[colourIndex];
                 SnapshotItem snapshotItem = SnapshotItem.generate(path, color);
                 snapshotItemList.add(snapshotItem);
             }
@@ -308,19 +361,40 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
             vert[1] = y1;
 
             SnapshotItem snapshotItem = null;
-            if (showMarked) {
-                int index = Math.min(curr.level, vertexColours.length-1);
-                if (visibilityGraph.isRelevantVertex[i]) index = 0;
-                snapshotItem = SnapshotItem.generate(vert, vertexColours[index]);
+            if (visibilityGraph.nSkipEdgess[i] == 0) {
+                // Regular vertex.
+                snapshotItem = SnapshotItem.generate(vert, Color.BLUE);
             }
             else {
-                int index = Math.min(curr.level, vertexColours.length-1);
-                snapshotItem = SnapshotItem.generate(vert, vertexColours[index]);
+                snapshotItem = SnapshotItem.generate(vert, Color.WHITE);
             }
             snapshotItemList.add(snapshotItem);
         }
 
-        addSnapshot(snapshotItemList);*/
+        for (int i=0;i<size;i++) {
+            int x1 = xPositions[i];
+            int y1 = yPositions[i];
+
+            int nSkipEdges = visibilityGraph.nSkipEdgess[i];
+            int[] outgoingSkipEdges = visibilityGraph.outgoingSkipEdgess[i];
+            
+            for (int j=0;j<nSkipEdges;++j) {
+                int neighbour = outgoingSkipEdges[j];
+                int x2 = xPositions[neighbour];
+                int y2 = yPositions[neighbour];
+                
+                Integer[] path = new Integer[4];
+                path[0] = x1;
+                path[1] = y1;
+                path[2] = x2;
+                path[3] = y2;
+                
+                SnapshotItem snapshotItem = SnapshotItem.generate(path, skipEdgeColour);
+                snapshotItemList.add(snapshotItem);
+            }
+        }
+
+        addSnapshot(snapshotItemList);
     }
     
     @Override
@@ -329,26 +403,29 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         System.out.println("Edges (Directed): " + visibilityGraph.computeSumDegrees());*/
     }
 
+    private static final Color skipEdgeColour = new Color(191,191,0);
     private static final Color[] vertexColours = new Color[] {
         Color.BLACK,
         Color.RED,
-        new Color(191,0,0),
-        new Color(255,127,0),
+        //new Color(191,0,0),
+        //new Color(255,127,0),
         Color.YELLOW,
-        new Color(191,191,0),
-        new Color(127,255,0),
+        //new Color(191,191,0),
+        //new Color(127,255,0),
         Color.GREEN,
-        new Color(0,191,0),
-        new Color(0,255,127),
+        //new Color(0,191,0),
+        //new Color(0,255,127),
         Color.CYAN,
-        new Color(0,191,191),
-        new Color(0,127,255),
+        //new Color(0,191,191),
+        //new Color(0,127,255),
         Color.BLUE,
-        new Color(0,0,191),
-        new Color(127,0,255),
+        //new Color(0,0,191),
+        //new Color(127,0,255),
         Color.MAGENTA,
-        new Color(191,0,191),
-        new Color(255,0,127),
+
+        new Color(127, 127, 255),
+        //new Color(191,0,191),
+        /*new Color(255,0,127),
         new Color(127,127,127),
         new Color(160,160,160),
         new Color(191,191,191),
@@ -358,6 +435,6 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         new Color(224,224,224),
         new Color(224,224,224),
         new Color(224,224,224),
-        Color.WHITE,
+        Color.WHITE,*/
     };
 }
