@@ -5,8 +5,6 @@ A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 
 [My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/AnyAnglePathfindingPresentation.pdf)
 
-[Algorithm Videos](http://ohoh.byethost7.com/?page=anyanglepathfinding#media)
-
 [Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
 Features
