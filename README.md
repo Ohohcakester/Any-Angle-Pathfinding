@@ -5,6 +5,8 @@ A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 
 [My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/AnyAnglePathfindingPresentation.pdf)
 
+[Slides for Strict Theta* - ICAPS 2016](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/StrictTheta_ICAPS16.pdf)
+
 [Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
 Features
@@ -12,14 +14,17 @@ Features
 1.	Visualisations of the [implemented algorithms](https://github.com/Ohohcakester/Any-Angle-Pathfinding/tree/master/src/algorithms):
     *	Breadth-First Search
     * Dijkstra’s Algorithm
-    * A* Search Algorithm with Post-Smoothing
-    * Jump Point Search Algorithm (with Post-Smoothing)
+    * A* Search Algorithm (optionally with Post-Smoothing)
+    * Jump Point Search Algorithm (optionally with Post-Smoothing)
       * http://users.cecs.anu.edu.au/~dharabor/data/papers/harabor-grastien-aaai11.pdf
     * Theta* Algorithm
       * http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf
     * Lazy Theta* Algorithm
       * http://aigamedev.com/open/tutorial/lazy-theta-star/
-    * Accelerated A*
+    * Strict Theta* Algorithm
+      * ICAPS 2016
+    * Accelerated A* Algorithm
+      * Note: not very well  optimised.
       * https://agents.felk.cvut.cz/publications/download/76
     * Visibility Graph Algorithm
       * gives optimal solutions, but very slow
@@ -27,6 +32,7 @@ Features
     * Anya
       * gives optimal solutions. Much faster than Visibility Graphs.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
+      * Implementation based on [this paper](http://idm-lab.org/bib/abstracts/papers/socs15a.pdf)
 
 2.	Testing functions that test computed path lengths and running times.
 
