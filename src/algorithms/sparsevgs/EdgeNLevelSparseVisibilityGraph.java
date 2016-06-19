@@ -765,6 +765,14 @@ public class EdgeNLevelSparseVisibilityGraph {
         return endIndex;
     }
     
+    public final int computeNumSkipEdges() {
+        int sumdegrees = 0;
+        for (int i=0;i<nNodes;++i) {
+            sumdegrees += nSkipEdgess[i];
+        }
+        return sumdegrees/2;
+    }
+    
     private final void maybeSaveSnapshot() {
         if (saveSnapshot != null) saveSnapshot.run();
     }

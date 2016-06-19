@@ -399,8 +399,9 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     
     @Override
     public void printStatistics() {
-        /*System.out.println("Nodes: " + visibilityGraph.size());
-        System.out.println("Edges (Directed): " + visibilityGraph.computeSumDegrees());*/
+        System.out.println("Nodes: " + visibilityGraph.size());
+        System.out.println("Edges: " + visibilityGraph.nEdges);
+        System.out.println("Skip Edges: " + visibilityGraph.computeNumSkipEdges());
     }
 
     private static final Color skipEdgeColour = new Color(191,191,0);
