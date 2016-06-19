@@ -410,7 +410,6 @@ public class EdgeNLevelSparseVisibilityGraph {
                     int[] outgoingEdges = outgoingEdgess[current];
                     int[] outgoingEdgeIndexes = outgoingEdgeIndexess[current];
 
-                    boolean DEBUG_ASSERT_WILL_RUN = false; // TODO: DEBUG CODE
                     for (int k=0;k<nOutgoingEdges;++k) {
                         int edgeIndex = outgoingEdgeIndexes[k];
                         if (edgeLevels[edgeIndex] != LEVEL_W) continue;
@@ -418,8 +417,6 @@ public class EdgeNLevelSparseVisibilityGraph {
                         if (next == previous) continue;
 
                         // now next == the next node in the list.
-                        // TODO: ASSERT: THIS MUST RUN.
-                        DEBUG_ASSERT_WILL_RUN = true; // TODO: DEBUG CODE
                         previous = current;
                         current = next;
 
@@ -428,7 +425,6 @@ public class EdgeNLevelSparseVisibilityGraph {
                         isMarkedIndex[edgeIndex] = indexGroup;
                         break;
                     }
-                    assert DEBUG_ASSERT_WILL_RUN; // TODO: DEBUG CODE
                 }
                 // now all the edges along that subpath will be of the same index group.
             }
@@ -583,11 +579,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         nOutgoingEdgess[startIndex] = startOriginalSize;
         nEdges = originalNEdges;
 
-        // TODO: Remove
-        /*for (int i=0;i<nVerticesWithAddedEdges;++i) {
-            nOutgoingEdgess[verticesWithAddedEdges[i]] = vertexOriginalNEdges[i];
-        }
-        nVerticesWithAddedEdges = 0;*/
         nNodes = originalSize;
         startIndex = -1;
         endIndex = -1;
@@ -689,20 +680,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         ++nEdges;
     }
 
-    // TODO: REMOVE
-    /*private final void saveVertexOriginalEdgesToStack(int v) {
-        if (Memory.visited(v)) return;
-
-        int index = nVerticesWithAddedEdges;
-        if (index >= verticesWithAddedEdges.length) {
-            verticesWithAddedEdges = Arrays.copyOf(verticesWithAddedEdges, verticesWithAddedEdges.length*2);
-            vertexOriginalNEdgess = Arrays.copyOf(vertexOriginalNEdgess, vertexOriginalNEdgess.length*2);
-        }
-        verticesWithAddedEdges[index] = v;
-        vertexOriginalNEdgess[index] = nOutgoingEdgess[v];
-        Memory.setVisited(v, true);
-    }*/
-
     private final void markHasEdgeToGoal(boolean value) {
         int[] outgoingEdges = outgoingEdgess[endIndex];
         int nOutgoingEdges = nOutgoingEdgess[endIndex];
@@ -772,7 +749,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     }
     
     /**
-     * Mark all edges reachable with a path of edges of increasing level from the source.
+     * TODO: REMOVE
      */
     private final void markEdgesFrom_OLD(int source, boolean value) {
         // We use the queue to store edgeIndexes.
@@ -790,6 +767,9 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
     }
 
+    /**
+     * TODO: REMOVE
+     */
     private final void markSurroundingEdgesAndAddToQueue(int v, int currentLevel, boolean value) {
         int nOutgoingEdges = nOutgoingEdgess[v];
         int[] outgoingEdges = outgoingEdgess[v];
@@ -806,6 +786,9 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
     }
 
+    /**
+     * TODO: REMOVE
+     */
     private final void addToQueue(int x) {
         if (queueSize >= queue.length) {
             queue = Arrays.copyOf(queue, queue.length*2);
