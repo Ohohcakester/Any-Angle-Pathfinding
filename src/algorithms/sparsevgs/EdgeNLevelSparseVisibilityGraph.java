@@ -449,6 +449,10 @@ public class EdgeNLevelSparseVisibilityGraph {
      * Uses Memory.
      */
     private void pruneParallelSkipEdges() {
+        // TODO: IF THERE ARE MULTIPLE EDGES WITH THE SAME EDGE WEIGHT, WE ARBITRARILY PICK THE FIRST EDGE TO KEEP
+        //       THE ORDERING MAY BE DIFFERENT FROM BOTH SIDES OF THE EDGE, WHICH CAN LEAD TO A NONSYMMETRIC GRAPH
+        //       However, no issues have cropped up yet. Perhaps the ordering happens to be the same for both sides,
+        //         due to how the graph is constructed. This is not good to rely upon, however.
         Memory.initialise(maxSize, Float.POSITIVE_INFINITY, -1, false);
         
         int maxDegree = 0;
