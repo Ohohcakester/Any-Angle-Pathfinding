@@ -218,6 +218,6 @@ public class SparseVisibilityGraphAlgorithm extends AStarStaticMemory {
     @Override
     public void printStatistics() {
         System.out.println("Nodes: " + visibilityGraph.size());
-        System.out.println("Edges (Directed): " + visibilityGraph.computeSumDegrees());
+        System.out.println("Edges: " + (visibilityGraph.computeSumDegrees()/2));
     }
 }
