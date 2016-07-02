@@ -364,6 +364,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 }
                 Color color = vertexColours[colourIndex];
                 SnapshotItem snapshotItem = SnapshotItem.generate(path, color);
+                if (colourIndex != 1)
                 snapshotItemList.add(snapshotItem);
             }
             
