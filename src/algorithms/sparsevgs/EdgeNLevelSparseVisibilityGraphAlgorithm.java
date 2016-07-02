@@ -415,7 +415,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         System.out.println("Skip Edges: " + visibilityGraph.computeNumSkipEdges());
     }
 
-    private static final Color skipEdgeColour = new Color(191,191,0);
+    private static final Color skipEdgeColour = new Color(255,127,127);
     private static final Color[] vertexColours = new Color[] {
         Color.BLACK,
         Color.RED,
