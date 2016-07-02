@@ -11,7 +11,7 @@ import draw.GridLineSet.FractionLine;
 
 public class GridLineDrawer implements Drawer {
     
-    private static final int LINE_THICKNESS = 3;
+    private static final int LINE_THICKNESS = 2;
     
     private final GridLineSet gridLineSet;
     private final GridGraph gridGraph;
