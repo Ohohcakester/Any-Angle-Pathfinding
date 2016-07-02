@@ -1,6 +1,8 @@
 package main;
 
+import grid.GridAndGoals;
 import grid.GridGraph;
+import grid.StartGoalPoints;
 
 import java.util.ArrayList;
 
@@ -31,23 +33,32 @@ public class GridGraphVisualiser {
         int dot = mazeFileName.lastIndexOf('.');
         String mazeName = classification + "_" + mazeFileName.substring(0, dot);
         
-        setupMainFrame(gridGraph, mazeName);
+        setupMainFrame(gridGraph, mazeName, null);
     }
 
     
     public static void loadExisting(String mazeName) {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
-        setupMainFrame(gridGraph, mazeName);
+        setupMainFrame(gridGraph, mazeName, null);
+    }
+
+    
+    public static void loadDefault(String mazeName) {
+        GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
+        GridGraph gridGraph = gridAndGoals.gridGraph;
+        StartGoalPoints startGoalPoints = gridAndGoals.startGoalPoints;
+        setupMainFrame(gridGraph, mazeName, startGoalPoints);
     }
     
 
     /**
      * Spawns the editor visualisation window.
+     * @param startGoalPoints 
      */
-    private static void setupMainFrame(GridGraph gridGraph, String mazeName) {
-        ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSets(gridGraph);
+    private static void setupMainFrame(GridGraph gridGraph, String mazeName, StartGoalPoints startGoalPoints) {
+        ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
         
-        EditorUI editorUI = new EditorUI(gridGraph, connectedSets, mazeName);
+        EditorUI editorUI = new EditorUI(gridGraph, connectedSets, mazeName, startGoalPoints);
         VisualiserMouseControls mouseControls =
                 new VisualiserMouseControls(gridGraph, editorUI);
         VisualiserKeyboardControls keyboardControls =
