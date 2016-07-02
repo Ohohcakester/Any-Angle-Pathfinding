@@ -48,9 +48,11 @@ public class Visualisation {
      */
     private static void displayAlgorithmOperation(AlgoFunction algo, GridGraph gridGraph, StartGoalPoints p) {
         GridLineSet gridLineSet = new GridLineSet();
-        //Random r = new Random(2);
-        //for (int i=0;i<1000;++i)Utility.generatePath(algo, gridGraph, r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY), r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY));
         try {
+            {Random r = new Random(2);
+            //for (int i=0;i<1000;++i)Utility.generatePath(algo, gridGraph, r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY), r.nextInt(gridGraph.sizeX), r.nextInt(gridGraph.sizeY));
+            TimeCounter.reset();}
+            
             long startT = System.nanoTime();
             int[][] path = Utility.generatePath(algo, gridGraph, p.sx, p.sy, p.ex, p.ey);
             long endT = System.nanoTime();
