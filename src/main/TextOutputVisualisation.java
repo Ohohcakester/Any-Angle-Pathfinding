@@ -1,5 +1,6 @@
 package main;
 
+import grid.GridAndGoals;
 import grid.GridGraph;
 import grid.StartGoalPoints;
 
@@ -17,7 +18,8 @@ import draw.GridObjects;
 public class TextOutputVisualisation {
 
     public static void run() {
-        loadFromFile("anyacont2b.txt");
+        loadDefault();
+        //loadFromFile("anyacont2b.txt");
     }
 
     private static void loadFromFile(String mazeFileName) {
@@ -25,6 +27,15 @@ public class TextOutputVisualisation {
 
         GridGraph gridGraph = GraphImporter.importGraphFromFile(mazeFileName);
         StartGoalPoints p = new StartGoalPoints(0,0,0,0);
+        displayTextVisualisation(gridGraph, p, textData);
+    }
+
+    private static void loadDefault() {
+        String textData = readStandardInput();
+
+        GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
+        GridGraph gridGraph = gridAndGoals.gridGraph;
+        StartGoalPoints p = gridAndGoals.startGoalPoints;
         displayTextVisualisation(gridGraph, p, textData);
     }
     
