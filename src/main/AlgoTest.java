@@ -157,19 +157,23 @@ public class AlgoTest {
         if (writeToFile) io = new FileIO(path);
 
         boolean pathLengthOnly = false;
-        boolean runningTimeOnly = true;
+        boolean runningTimeOnly = false;
+        boolean tnitialisationTime = false;
 
-        TestFunctionData testFunction_slow = printAverageData(20,20);
+        TestFunctionData testFunction_slow = printAverageData(50,5);
         TestFunctionData testFunction_fast = printAverageData(50,30);
         if (pathLengthOnly) {
-            //testFunction_slow = testPathLengthOnly;
-            //testFunction_fast = testPathLengthOnly;
-            testFunction_slow = analyseIndividualPaths;
-            testFunction_fast = analyseIndividualPaths;
+            testFunction_slow = testPathLengthOnly;
+            testFunction_fast = testPathLengthOnly;
+            //testFunction_slow = analyseIndividualPaths;
+            //testFunction_fast = analyseIndividualPaths;
         }
         if (runningTimeOnly) {
-            testFunction_slow = testIndividualRunningTimes(3,150);
-            testFunction_fast = testIndividualRunningTimes(3,150);   
+            testFunction_slow = testIndividualRunningTimes(20,1);
+            testFunction_fast = testIndividualRunningTimes(50,5);   
+        }
+        if (tnitialisationTime) {
+            testFunction_slow = testInitialisationTime;
         }
         
         println("=== Testing " + name + " ===");
@@ -525,6 +529,22 @@ public class AlgoTest {
             println();
         };
     }
+
+    private static final TestFunctionData testInitialisationTime = (mazeName, gridGraph, problems, algoFunction) -> {
+        StartEndPointData problem = problems.get(0);
+        Point p1 = problem.start;
+        Point p2 = problem.end;
+        TimeCounter.reset();
+        long startTime = System.nanoTime();
+        Utility.generatePath(algoFunction, gridGraph, p1.x, p1.y, p2.x, p2.y);
+        long endTime = System.nanoTime();
+        double timeTaken = (endTime-startTime)/1000000.0;
+        TimeCounter.printAverage();
+        
+        println("Initialisation Time: " + timeTaken);
+        println();
+    };
+
 
     private static long testAlgorithmTimeOnce(GridGraph gridGraph,
             AlgoFunction algoFunction, TwoPoint tp, int nTrials) {
