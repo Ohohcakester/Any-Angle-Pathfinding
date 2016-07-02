@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -68,7 +69,7 @@ public class Visualisation {
             boolean isTaut = Utility.isPathTaut(gridGraph, path);
             System.out.println("Is Taut: " + (isTaut ? "YES" : "NO"));
         
-            System.out.println(Arrays.deepToString(path));
+            //System.out.println(Arrays.deepToString(path));
         } catch (Exception e) {
             System.out.println("Exception occurred during algorithm operation!");
             e.printStackTrace();
