@@ -163,7 +163,7 @@ public abstract class PathFindingAlgorithm {
         Set<Integer> finalPathSet = null;
         if (getParent(current) >= 0) {
             finalPathSet = new HashSet<Integer>();
-            while (current != -1) {
+            while (current >= 0) {
                 finalPathSet.add(current);
                 current = getParent(current);
             }
