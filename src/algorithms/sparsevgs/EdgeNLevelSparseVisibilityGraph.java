@@ -42,8 +42,17 @@ public class EdgeNLevelSparseVisibilityGraph {
     public int[] nOutgoingEdgess;          // value: number of outgoingEdges.
     public int[][] outgoingEdgess;         // value: nodeIndex of destination
     public int[][] outgoingEdgeIndexess;   // value: edgeIndex of edge to destination.
+    public int[][] outgoingEdgeOppositeIndexess;   // value: index within outgoingEdgess of the opposite edge.
     public boolean[] hasEdgeToGoal;
     private boolean[][] outgoingEdgeIsMarkeds;
+    
+    // Used to iterate through the Level-W edges quickly
+    public int[] nLevelWNeighbourss;
+    public int[][] levelWEdgeOutgoingIndexess;    // value: index of edge in outgoingEdges array.
+    
+    // Used to iterate through the marked edges quickly
+    public int[] nMarkedEdgess;
+    public int[][] outgoingMarkedEdgeIndexess;   // value: index of edge in outgoingEdges array.
 
     public int[] nSkipEdgess;                            // value: number of outgoing skip-edges.
     public int[][] outgoingSkipEdgess;                   // value: nodeIndex of destination
@@ -120,14 +129,15 @@ public class EdgeNLevelSparseVisibilityGraph {
         nOutgoingEdgess = new int[maxSize];
         outgoingEdgess = new int[maxSize][];
         outgoingEdgeIndexess = new int[maxSize][];
+        outgoingEdgeOppositeIndexess = new int[maxSize][];
         outgoingEdgeIsMarkeds = new boolean[maxSize][];
         for (int i=0;i<maxSize;++i) {
             nOutgoingEdgess[i] = 0;
             outgoingEdgess[i] = new int[11];
             outgoingEdgeIndexess[i] = new int[11];
+            outgoingEdgeOppositeIndexess[i] = new int[11];
             outgoingEdgeIsMarkeds[i] = new boolean[11];
         }
-        
 
         // Initialise SVG Edges + edgeWeights
         edgeWeights = new float[11];
@@ -136,6 +146,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         nEdges = 0;
         addAllEdges();
 
+        
         // Now all the edges, indexes and weights should be correctly initialise.
         //  Now we initialise the rest of the edge data.
         originalNEdges = nEdges;
@@ -149,9 +160,26 @@ public class EdgeNLevelSparseVisibilityGraph {
         for (int i=0;i<isMarkedIndex.length;++i) isMarkedIndex[i] = i;
         isMarked = new boolean[maxPossibleNEdges];
         //Arrays.fill(isMarked, false); // default initialises to false anyway.
+        
+        
+        // Reserve space in level w edge and marked edge arrays.
+        nLevelWNeighbourss = new int[maxSize];
+        levelWEdgeOutgoingIndexess = new int[maxSize][];
+        nMarkedEdgess = new int[maxSize];
+        outgoingMarkedEdgeIndexess = new int[maxSize][];
+        for (int i=0;i<nNodes;++i) {
+            levelWEdgeOutgoingIndexess[i] = new int[nOutgoingEdgess[i]];
+            outgoingMarkedEdgeIndexess[i] = new int[nOutgoingEdgess[i]];
+        }
+        for (int i=nNodes;i<maxSize;++i) {
+            levelWEdgeOutgoingIndexess[i] = new int[11];
+            outgoingMarkedEdgeIndexess[i] = new int[11];
+        }
 
+        
         // STEP 2: Label edge levels in SVG.
         computeAllEdgeLevels();
+        addLevelWEdgesToLevelWEdgesArray();
 
         nSkipEdgess = new int[maxSize];
         outgoingSkipEdgess = new int[maxSize][];
@@ -163,7 +191,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         setupSkipEdges();
         
         pruneParallelSkipEdges();
-    }
+   }
 
     private final void addNodes() {
         nodeIndex = new int[graph.sizeY+1][];
@@ -226,33 +254,40 @@ public class EdgeNLevelSparseVisibilityGraph {
         int edgeIndex = nEdges;
 
         // add edge to v1
+        int v1Index;
         {
-            int index = nOutgoingEdgess[v1];
-            if (index >= outgoingEdgess[v1].length) {
+            v1Index = nOutgoingEdgess[v1];
+            if (v1Index >= outgoingEdgess[v1].length) {
                 int newLength = outgoingEdgess[v1].length*2;
                 outgoingEdgess[v1] = Arrays.copyOf(outgoingEdgess[v1], newLength);
                 outgoingEdgeIndexess[v1] = Arrays.copyOf(outgoingEdgeIndexess[v1], newLength);
                 outgoingEdgeIsMarkeds[v1] = Arrays.copyOf(outgoingEdgeIsMarkeds[v1], newLength);
+                outgoingEdgeOppositeIndexess[v1] = Arrays.copyOf(outgoingEdgeOppositeIndexess[v1], newLength);
             }
-            outgoingEdgess[v1][index] = v2;
-            outgoingEdgeIndexess[v1][index] = edgeIndex;
+            outgoingEdgess[v1][v1Index] = v2;
+            outgoingEdgeIndexess[v1][v1Index] = edgeIndex;
             nOutgoingEdgess[v1]++;
         }
 
         // add edge to v2
+        int v2Index;
         {
-            int index = nOutgoingEdgess[v2];
-            if (index >= outgoingEdgess[v2].length) {
+            v2Index = nOutgoingEdgess[v2];
+            if (v2Index >= outgoingEdgess[v2].length) {
                 int newLength = outgoingEdgess[v2].length*2;
                 outgoingEdgess[v2] = Arrays.copyOf(outgoingEdgess[v2], newLength);
                 outgoingEdgeIndexess[v2] = Arrays.copyOf(outgoingEdgeIndexess[v2], newLength);
                 outgoingEdgeIsMarkeds[v2] = Arrays.copyOf(outgoingEdgeIsMarkeds[v2], newLength);
+                outgoingEdgeOppositeIndexess[v2] = Arrays.copyOf(outgoingEdgeOppositeIndexess[v2], newLength);
             }
-            outgoingEdgess[v2][index] = v1;
-            outgoingEdgeIndexess[v2][index] = edgeIndex;
+            outgoingEdgess[v2][v2Index] = v1;
+            outgoingEdgeIndexess[v2][v2Index] = edgeIndex;
             nOutgoingEdgess[v2]++;
         }
 
+        outgoingEdgeOppositeIndexess[v1][v1Index] = v2Index;
+        outgoingEdgeOppositeIndexess[v2][v2Index] = v1Index;
+        
         edgeWeights[nEdges] = weight;
         edgeEndpoint1[nEdges] = v1;
         edgeEndpoint2[nEdges] = v2;
@@ -319,6 +354,23 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
         return false;
     }
+    
+    // For each vertex, add all the level-w edges to the level-w edges array for easy access.
+    private void addLevelWEdgesToLevelWEdgesArray() {
+        for (int i=0;i<nNodes;++i) {
+            int nOutgoingEdges = nOutgoingEdgess[i];
+            int[] outgoingEdgeIndexes = outgoingEdgeIndexess[i];
+            int[] outgoingLevelWEdgeIndexes = levelWEdgeOutgoingIndexess[i]; 
+            
+            for (int j=0;j<nOutgoingEdges;++j) {
+                int edgeIndex = outgoingEdgeIndexes[j];
+                if (edgeLevels[edgeIndex] == LEVEL_W) {
+                    outgoingLevelWEdgeIndexes[nLevelWNeighbourss[i]] = j;
+                    ++nLevelWNeighbourss[i];
+                }
+            }
+        }
+    }
 
     // We start from the graph of all Level-W edges.
     // We setup skip edges to reduce the graph to one where every vertex has degree >2.
@@ -342,19 +394,10 @@ public class EdgeNLevelSparseVisibilityGraph {
         int nSkipVertices = 0;
         
         for (int i=0;i<nNodes;++i) {
-            int nOutgoingEdges = nOutgoingEdgess[i];
-            int[] outgoingEdgeIndexes = outgoingEdgeIndexess[i];
-
-            int nLevelWNeighbours = 0;
-            for (int j=0;j<nOutgoingEdges;++j) {
-                int edgeIndex = outgoingEdgeIndexes[j];
-                if (edgeLevels[edgeIndex] == LEVEL_W) ++nLevelWNeighbours;
-            }
+            int nLevelWNeighbours = nLevelWNeighbourss[i];
             
             // Skip vertices must have at most 1 or at least 3 level-W neighbours.
             if (nLevelWNeighbours == 0 || nLevelWNeighbours == 2) continue;
-
-            int[] outgoingEdges = outgoingEdgess[i];
 
             // Else, i is a skip-vertex.
             nSkipEdgess[i] = nLevelWNeighbours;
@@ -362,14 +405,15 @@ public class EdgeNLevelSparseVisibilityGraph {
             int[] edgeIndexes = new int[nLevelWNeighbours];
             float[] weights = new float[nLevelWNeighbours];
             int[] destinations = new int[nLevelWNeighbours];
-            int current = 0;
-            for (int j=0;j<nOutgoingEdges;++j) {
-                int edgeIndex = outgoingEdgeIndexes[j];
-                if (edgeLevels[edgeIndex] == LEVEL_W) {
-                    nextNodes[current] = outgoingEdges[j];
-                    edgeIndexes[current] = edgeIndex; 
-                    current++;
-                }
+
+            int[] outgoingEdges = outgoingEdgess[i];
+            int[] outgoingEdgeIndexes = outgoingEdgeIndexess[i];
+            int[] levelWEdgeOutgoingIndexes = levelWEdgeOutgoingIndexess[i];
+            
+            for (int j=0;j<nLevelWNeighbours;++j) {
+                int index = levelWEdgeOutgoingIndexes[j];
+                nextNodes[j] = outgoingEdges[index];
+                edgeIndexes[j] = outgoingEdgeIndexes[index];
             }
 
             outgoingSkipEdgess[i] = destinations;
@@ -412,17 +456,19 @@ public class EdgeNLevelSparseVisibilityGraph {
                 // initially, skipWeights[j] = weight(v1, nextNodes[j])
 
                 while (nSkipEdgess[current] == 0) {
+                    int nLevelWNeighbours = nLevelWNeighbourss[current];
+                    int[] levelWEdgeOutgoingIndexes = levelWEdgeOutgoingIndexess[current];
+                    
                     // While current is still not yet a skip vertex,
                     // Else continue expanding.
-                    int nOutgoingEdges = nOutgoingEdgess[current];
                     int[] outgoingEdges = outgoingEdgess[current];
-                    int[] outgoingEdgeIndexes = outgoingEdgeIndexess[current];
 
-                    for (int k=0;k<nOutgoingEdges;++k) {
-                        int edgeIndex = outgoingEdgeIndexes[k];
-                        if (edgeLevels[edgeIndex] != LEVEL_W) continue;
-                        int next = outgoingEdges[k];
+                    for (int k=0;k<nLevelWNeighbours; ++k) {
+                        int index = levelWEdgeOutgoingIndexes[k];
+                        int next = outgoingEdges[index];
                         if (next == previous) continue;
+                        
+                        int edgeIndex = outgoingEdgeIndexess[current][index];
 
                         // now next == the next node in the list.
                         previous = current;
@@ -580,8 +626,8 @@ public class EdgeNLevelSparseVisibilityGraph {
         // Safeguard against multiple restores
         if (startIndex == -1) return;
         
-        markEdgesFrom(endIndex, false);
         markEdgesFrom(startIndex, false);
+        markEdgesFrom(endIndex, false);
         markHasEdgeToGoal(false);
         nOutgoingEdgess[endIndex] = endOriginalSize;
         nOutgoingEdgess[startIndex] = startOriginalSize;
@@ -595,6 +641,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Assumption: No edge between start and end.
     // Uses Memory
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
+        
         // START:
         if (nodeIndex[sy][sx] == -1) {
             startIndex = nNodes;
@@ -622,8 +669,9 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
         endOriginalSize = nOutgoingEdgess[endIndex];
         addTempEdgesToVisibleNeighbours(endIndex, ex, ey);
+        
         markHasEdgeToGoal(true);
-
+        
         markEdgesFrom(startIndex, true);
         markEdgesFrom(endIndex, true);
     }
@@ -650,6 +698,13 @@ public class EdgeNLevelSparseVisibilityGraph {
 
             float weight = graph.distance(x, y, toX, toY);
             addTemporaryEdge(index, targetIndex, weight);
+        }
+        
+        
+        if (nSuccessors > outgoingMarkedEdgeIndexess[index].length) {
+            int newLength = Math.max(outgoingMarkedEdgeIndexess[index].length, 11);
+            while (newLength < nSuccessors) newLength *= 2;
+            outgoingMarkedEdgeIndexess[index] = Arrays.copyOf(outgoingMarkedEdgeIndexess[index], newLength);
         }
         
         return index;
@@ -705,10 +760,27 @@ public class EdgeNLevelSparseVisibilityGraph {
             int nOutgoingEdges = nOutgoingEdgess[source];
             int[] outgoingEdgeIndexes = outgoingEdgeIndexess[source];
             boolean[] outgoingEdgeIsMarked = outgoingEdgeIsMarkeds[source];
+            //int[] outgoingEdgeOppositeIndexes = outgoingEdgeOppositeIndexess[source];
+            //int[] outgoingEdges = outgoingEdgess[source];
             
             for (int i=0;i<nOutgoingEdges;++i) {
                 if (outgoingEdgeIsMarked[i] == value) continue;
                 outgoingEdgeIsMarked[i] = value;
+                
+                int edgeIndex = outgoingEdgeIndexes[i];
+                if (isMarked[isMarkedIndex[edgeIndex]] != value) {
+                    isMarked[isMarkedIndex[edgeIndex]] = value;
+                    if (value) {
+                        if (edgeLevels[edgeIndex] != LEVEL_W) {
+                            addToMarkedEdges(source, i);
+                            //addToMarkedEdges(outgoingEdges[i], outgoingEdgeOppositeIndexes[i]);
+                        }
+                    }
+                    else {
+                        clearMarkedEdges(source);
+                        //clearMarkedEdges(outgoingEdges[i]);
+                    }
+                }
                 isMarked[isMarkedIndex[outgoingEdgeIndexes[i]]] = value;
                 addPairToQueue(source, i);
             }
@@ -733,17 +805,42 @@ public class EdgeNLevelSparseVisibilityGraph {
             int[] outgoingEdges = outgoingEdgess[curr];
             int[] outgoingEdgeIndexes = outgoingEdgeIndexess[curr];
             boolean[] outgoingEdgeIsMarked = outgoingEdgeIsMarkeds[curr];
+            int[] outgoingEdgeOppositeIndexes = outgoingEdgeOppositeIndexess[curr];
             
             for (int i=0;i<nOutgoingEdges;++i) {
                 if ((outgoingEdgeIsMarked[i] == value) || edgeLevels[outgoingEdgeIndexes[i]] <= currLevel) continue;
                 int next = outgoingEdges[i];
                 if (!graph.isTaut(parX, parY, currX, currY, xPositions[next], yPositions[next])) continue;
                 outgoingEdgeIsMarked[i] = value;
+             
+                int edgeIndex = outgoingEdgeIndexes[i];
+                if (isMarked[isMarkedIndex[edgeIndex]] != value) {
+                    isMarked[isMarkedIndex[edgeIndex]] = value;
+                    if (value) {
+                        if (edgeLevels[edgeIndex] != LEVEL_W) {
+                            addToMarkedEdges(curr, i);
+                            addToMarkedEdges(next, outgoingEdgeOppositeIndexes[i]);
+                        }
+                    }
+                    else {
+                        clearMarkedEdges(curr);
+                        clearMarkedEdges(next);
+                    }
+                }
                 isMarked[isMarkedIndex[outgoingEdgeIndexes[i]]] = value;
                 
                 addPairToQueue(curr, i);
             }
         }
+    }
+
+    private final void addToMarkedEdges(int current, int outgoingIndex) {
+        outgoingMarkedEdgeIndexess[current][nMarkedEdgess[current]] = outgoingIndex;
+        ++nMarkedEdgess[current];
+    }
+    
+    private final void clearMarkedEdges(int current) {
+        nMarkedEdgess[current] = 0;
     }
     
     private final void addPairToQueue(int parent, int parentOutgoingIndex) {
@@ -754,55 +851,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         ++queueSize;
         queue[queueSize] = parentOutgoingIndex;
         ++queueSize;
-    }
-    
-    /**
-     * TODO: REMOVE
-     */
-    private final void markEdgesFrom_OLD(int source, boolean value) {
-        // We use the queue to store edgeIndexes.
-        // Add all neighbouring edges of source.
-        queueSize = 0;
-        markSurroundingEdgesAndAddToQueue(source, -1, value);
-
-        int current = 0;
-        while (current < queueSize) {
-            int edgeIndex = queue[current];
-            int currentLevel = edgeLevels[edgeIndex];
-            markSurroundingEdgesAndAddToQueue(edgeEndpoint1[edgeIndex], currentLevel, value);
-            markSurroundingEdgesAndAddToQueue(edgeEndpoint2[edgeIndex], currentLevel, value);
-            ++current;
-        }
-    }
-
-    /**
-     * TODO: REMOVE
-     */
-    private final void markSurroundingEdgesAndAddToQueue(int v, int currentLevel, boolean value) {
-        int nOutgoingEdges = nOutgoingEdgess[v];
-        int[] outgoingEdges = outgoingEdgess[v];
-        int[] outgoingEdgeIndexes = outgoingEdgeIndexess[v];
-
-        for (int i=0;i<nOutgoingEdges;++i) {
-            int edgeIndex = outgoingEdgeIndexes[i];
-            if (edgeLevels[edgeIndex] <= currentLevel) continue;
-            int markIndex = isMarkedIndex[edgeIndex];
-            if (isMarked[markIndex] != value) {
-                isMarked[markIndex] = value;
-                addToQueue(edgeIndex);
-            }
-        }
-    }
-
-    /**
-     * TODO: REMOVE
-     */
-    private final void addToQueue(int x) {
-        if (queueSize >= queue.length) {
-            queue = Arrays.copyOf(queue, queue.length*2);
-        }
-        queue[queueSize] = x;
-        queueSize++;
     }
 
     /// \\\ /// \\\ /// \\\ /// \\\ ///
@@ -843,4 +891,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         System.gc();
     }
     
+    private String vertexToStr(int index) {
+        return xPositions[index] + ", " + yPositions[index];
+    }
 }

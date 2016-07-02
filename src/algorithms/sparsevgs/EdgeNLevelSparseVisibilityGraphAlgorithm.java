@@ -69,26 +69,47 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
             if (current == finish) {
                 break;
             }
-
-            int nOutgoingEdges = visibilityGraph.nOutgoingEdgess[current];
+            
             int[] outgoingEdges = visibilityGraph.outgoingEdgess[current];
             int[] outgoingEdgeIndexes = visibilityGraph.outgoingEdgeIndexess[current];
+
+            // Scan through marked edges to neighbours
+            int nMarkedEdges = visibilityGraph.nMarkedEdgess[current];
+            int[] outgoingMarkedEdgeIndexes = visibilityGraph.outgoingMarkedEdgeIndexess[current];
             
-            for (int i=0;i<nOutgoingEdges;++i) {
-                int dest = outgoingEdges[i];
-                int edgeIndex = outgoingEdgeIndexes[i];
+            for (int i=0;i<nMarkedEdges;++i) {
+                int index = outgoingMarkedEdgeIndexes[i];
+                int dest = outgoingEdges[index];
+                int edgeIndex = outgoingEdgeIndexes[index];
+                float weight = visibilityGraph.edgeWeights[edgeIndex];
+                if (!Memory.visited(dest) && relax(current, dest, weight)) {
+                    int destX = visibilityGraph.xPositions[dest];
+                    int destY = visibilityGraph.yPositions[dest];
+                    
+                    pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
+                }
+            }
+
+            // Scan through level-W edges to neighbours
+            int nLevelWNeighbours = visibilityGraph.nLevelWNeighbourss[current];
+            int[] levelWEdgeOutgoingIndexes = visibilityGraph.levelWEdgeOutgoingIndexess[current];
+
+            for (int i=0;i<nLevelWNeighbours;++i) {
+                int index = levelWEdgeOutgoingIndexes[i];
+                int dest = outgoingEdges[index];
+                int edgeIndex = outgoingEdgeIndexes[index];
                 float weight = visibilityGraph.edgeWeights[edgeIndex];
                 if (visibilityGraph.isMarked[visibilityGraph.isMarkedIndex[edgeIndex]] &&
                         !Memory.visited(dest) &&
                         relax(current, dest, weight)) {
-                    
                     int destX = visibilityGraph.xPositions[dest];
                     int destY = visibilityGraph.yPositions[dest];
                     
-                    pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));
+                    pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
                 }
             }
             
+            // Scan through skip edges to neighbours
             int nSkipEdges = visibilityGraph.nSkipEdgess[current];
             int[] outgoingSkipEdges = visibilityGraph.outgoingSkipEdgess[current];
             float[] outgoingSkipEdgeWeights = visibilityGraph.outgoingSkipEdgeWeightss[current];
@@ -105,7 +126,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                     pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));
                 }
             }
-            
+
             if (visibilityGraph.hasEdgeToGoal[current]) {
                 int currX = visibilityGraph.xPositions[current];
                 int currY = visibilityGraph.yPositions[current];
@@ -118,7 +139,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
             
             maybeSaveSearchSnapshot();
         }
-        
+
         resolveFinalPath();
     }
 
