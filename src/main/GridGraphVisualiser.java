@@ -19,8 +19,11 @@ import draw.VisualiserMouseControls;
 public class GridGraphVisualiser {
 
     public static void run() {
+        //loadExisting("sc1_EbonLakes");
+        loadDefault("default");
         //loadMaze("custommaze2.txt", "custom");
-        loadMaze("lineOfSightTest.txt", "custom");
+        //loadMaze("lineOfSightTest.txt", "custom");
+        //loadExisting("sc2_blisteringsands");
         //loadExisting("sc2_losttemple");
         //loadExisting("baldursgate_AR0402SR");
         //loadExisting("corr2_maze512-2-5");
