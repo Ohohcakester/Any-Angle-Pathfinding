@@ -413,6 +413,33 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     public void printStatistics() {
         System.out.println("Nodes: " + visibilityGraph.size());
         System.out.println("Edges: " + visibilityGraph.nEdges);
+        
+        { // Print edge distribution.
+            int[] edgeLevels = visibilityGraph.edgeLevels;
+            
+            int maxLevel = 0;
+            for (int i=0;i<visibilityGraph.nEdges;++i) {
+                int level = edgeLevels[i];
+                if (level != visibilityGraph.LEVEL_W && level > maxLevel) maxLevel = level;
+            }
+            
+            int countLevelW = 0;
+            int[] counts = new int[maxLevel+1];
+            for (int i=0;i<visibilityGraph.nEdges;++i) {
+                int level = edgeLevels[i];
+
+                if (level == visibilityGraph.LEVEL_W) {
+                    countLevelW++;
+                } else {
+                    counts[level]++;
+                }
+            }
+            
+            for (int i=0;i<=maxLevel;++i) {
+                System.out.println("Level " + i + " : " + counts[i]);
+            }
+            System.out.println("Level W : " + countLevelW);
+        }
         System.out.println("Skip Edges: " + visibilityGraph.computeNumSkipEdges());
     }
 
