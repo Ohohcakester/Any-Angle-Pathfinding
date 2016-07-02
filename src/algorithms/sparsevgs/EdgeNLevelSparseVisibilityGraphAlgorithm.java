@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.AlgoFunction;
 import algorithms.AStarStaticMemory;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.SnapshotItem;
@@ -13,8 +14,9 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 
 
 public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory {
-    protected EdgeNLevelSparseVisibilityGraph visibilityGraph;
-    protected boolean reuseGraph = false;
+    private EdgeNLevelSparseVisibilityGraph visibilityGraph;
+    private boolean reuseGraph = false;
+    private int levelLimit = Integer.MAX_VALUE;
     
     private EdgeNLevelSparseVisibilityGraphAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, sx, sy, ex, ey);
@@ -24,6 +26,15 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         EdgeNLevelSparseVisibilityGraphAlgorithm algo = new EdgeNLevelSparseVisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
         algo.reuseGraph = true;
         return algo;
+    }
+    
+    public static AlgoFunction withLevelLimit(int levelLimit) {
+        return (GridGraph graph, int sx, int sy, int ex, int ey) -> {
+            EdgeNLevelSparseVisibilityGraphAlgorithm algo = new EdgeNLevelSparseVisibilityGraphAlgorithm(graph, sx, sy, ex, ey);
+            algo.reuseGraph = true;
+            algo.levelLimit = levelLimit;
+            return algo;
+        };
     }
 
     public EdgeNLevelSparseVisibilityGraph getVisibilityGraph() {
@@ -113,10 +124,10 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
 
     protected void setupVisibilityGraph() {
         if (reuseGraph) {
-            visibilityGraph = EdgeNLevelSparseVisibilityGraph.initialiseNew(graph);
+            visibilityGraph = EdgeNLevelSparseVisibilityGraph.initialiseNew(graph, levelLimit);
         } else {
             EdgeNLevelSparseVisibilityGraph.clearMemory();
-            visibilityGraph = EdgeNLevelSparseVisibilityGraph.initialiseNew(graph);
+            visibilityGraph = EdgeNLevelSparseVisibilityGraph.initialiseNew(graph, levelLimit);
         }
         
         if (isRecording()) {

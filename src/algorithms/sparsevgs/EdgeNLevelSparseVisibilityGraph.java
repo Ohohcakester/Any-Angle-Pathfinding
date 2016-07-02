@@ -3,7 +3,6 @@ package algorithms.sparsevgs;
 import grid.GridGraph;
 
 import java.util.Arrays;
-
 import algorithms.datatypes.Memory;
 
 public class EdgeNLevelSparseVisibilityGraph {
@@ -12,6 +11,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     private static EdgeNLevelSparseVisibilityGraph storedVisibilityGraph;
     private static GridGraph storedGridGraph;
+    private static int storedLevelLimit;
     
     private final GridGraph graph;
     private LineOfSightScanner losScanner;
@@ -34,6 +34,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     private int originalNEdges;
 
+    public int levelLimit;
     
     // Nodes: Indexed by node Index.
     public int[] xPositions;
@@ -72,8 +73,8 @@ public class EdgeNLevelSparseVisibilityGraph {
         this.saveSnapshot = saveSnapshot;
     }
 
-    public static final EdgeNLevelSparseVisibilityGraph initialiseNew(GridGraph graph) {
-        if (EdgeNLevelSparseVisibilityGraph.storedGridGraph == graph) {
+    public static final EdgeNLevelSparseVisibilityGraph initialiseNew(GridGraph graph, int levelLimit) {
+        if (EdgeNLevelSparseVisibilityGraph.storedGridGraph == graph && levelLimit == storedLevelLimit) {
             storedVisibilityGraph.restoreOriginalGraph();
             return storedVisibilityGraph;
         }
@@ -81,6 +82,8 @@ public class EdgeNLevelSparseVisibilityGraph {
         
         EdgeNLevelSparseVisibilityGraph.storedGridGraph = graph;
         EdgeNLevelSparseVisibilityGraph vGraph = EdgeNLevelSparseVisibilityGraph.storedVisibilityGraph = new EdgeNLevelSparseVisibilityGraph(graph);
+        EdgeNLevelSparseVisibilityGraph.storedLevelLimit = levelLimit;
+        vGraph.levelLimit = levelLimit;
         vGraph.constructGraph();
         
         long _ed = System.nanoTime();
@@ -263,7 +266,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
         // Runs in time linesr on the number of edges per iteration.
         // The number of iterations will be the max level of any edge.
-        while(hasChanged) {
+        while(hasChanged && currentLevel < levelLimit) {
             currentLevel++;
             hasChanged = false;
 
@@ -347,9 +350,9 @@ public class EdgeNLevelSparseVisibilityGraph {
                 int edgeIndex = outgoingEdgeIndexes[j];
                 if (edgeLevels[edgeIndex] == LEVEL_W) ++nLevelWNeighbours;
             }
-
-            // Skip vertices must have at least 3 level-W neighbours.
-            if (nLevelWNeighbours <= 2) continue;
+            
+            // Skip vertices must have at most 1 or at least 3 level-W neighbours.
+            if (nLevelWNeighbours == 0 || nLevelWNeighbours == 2) continue;
 
             int[] outgoingEdges = outgoingEdgess[i];
 
@@ -384,7 +387,7 @@ public class EdgeNLevelSparseVisibilityGraph {
      * 1. Connects the previously marked skip vertices to form a graph of skip-edges.
      * 2. set up isMarkedIndex groups for each of the sets of Level-W edges.
      */
-    void connectSkipEdgesAndGroupLevelWEdges() {
+    private final void connectSkipEdgesAndGroupLevelWEdges() {
         for (int v1=0;v1<nNodes;++v1) {
             int nSkipEdges = nSkipEdgess[v1];
             // Loop through only skip vertices.
@@ -437,7 +440,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     }
     
 
-    private void groupAllLevelWEdgesTogether() {
+    private final void groupAllLevelWEdgesTogether() {
         int markIndex = -1;
         for (int i=0;i<nEdges;++i) {
             if (edgeLevels[i] == LEVEL_W) {
@@ -456,7 +459,7 @@ public class EdgeNLevelSparseVisibilityGraph {
      *   
      * Uses Memory.
      */
-    private void pruneParallelSkipEdges() {
+    private final void pruneParallelSkipEdges() {
         // TODO: IF THERE ARE MULTIPLE EDGES WITH THE SAME EDGE WEIGHT, WE ARBITRARILY PICK THE FIRST EDGE TO KEEP
         //       THE ORDERING MAY BE DIFFERENT FROM BOTH SIDES OF THE EDGE, WHICH CAN LEAD TO A NONSYMMETRIC GRAPH
         //       However, no issues have cropped up yet. Perhaps the ordering happens to be the same for both sides,
@@ -540,7 +543,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
     }
 
-    private void swapSkipEdges(int v, int i1, int i2) {
+    private final void swapSkipEdges(int v, int i1, int i2) {
         int temp;
         {
             temp = outgoingSkipEdgess[v][i1];
