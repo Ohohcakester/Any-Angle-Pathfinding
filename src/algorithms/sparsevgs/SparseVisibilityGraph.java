@@ -40,6 +40,7 @@ public class SparseVisibilityGraph {
     public final void initialise(int sx, int sy, int ex, int ey) {
         // Check if graph already initialised
         if (nodes == null) {
+            long _st = System.nanoTime();
             losScanner = new LineOfSightScanner(graph);
             
             nodes = new SVGNode[11];
@@ -52,6 +53,9 @@ public class SparseVisibilityGraph {
             nodes = Arrays.copyOf(nodes, maxSize);
             
             addAllEdges();
+            
+            long _ed = System.nanoTime();
+            System.out.println("Construction Time: " + (_ed-_st)/1000000.);
         }
 
         restoreOriginalGraph();

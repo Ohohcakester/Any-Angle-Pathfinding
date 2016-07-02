@@ -77,9 +77,14 @@ public class EdgeNLevelSparseVisibilityGraph {
             storedVisibilityGraph.restoreOriginalGraph();
             return storedVisibilityGraph;
         }
+        long _st = System.nanoTime();
+        
         EdgeNLevelSparseVisibilityGraph.storedGridGraph = graph;
         EdgeNLevelSparseVisibilityGraph vGraph = EdgeNLevelSparseVisibilityGraph.storedVisibilityGraph = new EdgeNLevelSparseVisibilityGraph(graph);
         vGraph.constructGraph();
+        
+        long _ed = System.nanoTime();
+        System.out.println("Construction Time: " + (_ed-_st)/1000000.);
         return vGraph;
     }
     
