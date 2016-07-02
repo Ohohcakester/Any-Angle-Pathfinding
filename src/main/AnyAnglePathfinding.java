@@ -1,8 +1,4 @@
 package main;
-import grid.GridAndGoals;
-import main.graphgeneration.DefaultGenerator;
-import main.testgen.TestDataGenerator;
-import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
@@ -31,6 +27,11 @@ import algorithms.vertexanya.VertexAnyaNoExtents;
 import algorithms.vertexanya.VisibilityScanSearchEager;
 import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
+import grid.GridAndGoals;
+import main.graphgeneration.AutomataGenerator;
+import main.graphgeneration.DefaultGenerator;
+import main.testgen.TestDataGenerator;
+import uiandio.GraphImporter;
 
 /**
  * Instructions: Look for the main method.
@@ -183,6 +184,33 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(3350874, 20, 15, 13, 3, 3, 17, 12); // Basic Theta* suboptimal
             case 40 :
                 return DefaultGenerator.generateSeeded(873637608, 9, 35, 24, 9, 28, 1, 12); // Bug in Vertex Anya due to not marking vertices as visited.
+            case 41 :
+                return GraphImporter.loadStoredMaze("sc2_blisteringsands", "20-93_119-84");
+            case 42:
+                return DefaultGenerator.generateSeeded(-387131321, 20, 17, 9, 14, 1, 15, 7); // Indirect path with lots of wrapping for Anya
+            case 43:
+                return DefaultGenerator.generateSeeded(-387213321, 5000, 4999, 7, 114, 4791, 4715, 17); // 5000x4999 dense map
+            case 44:
+                return DefaultGenerator.generateSeeded(-387213321, 2000, 1999, 7, 114, 1791, 1715, 17); // 2000x1999 dense map
+            case 45:
+                return GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120");
+            case 46:
+                return GraphImporter.loadStoredMaze("sc1_EbonLakes", "139-13_321-470");
+            case 47 : { // SEEDED
+                int unblockedRatio = 5;       // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int iterations = 5;           // number of iterations for cellular automata
+                int cutoffOffset = 0;         // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
+                int seed = -174123322;        // seed for the random.
+
+                int sizeX = 303;               // x-axis size of grid
+                int sizeY = 204;               // y-axis size of grid
+                int sx = 14;                   // y-coordinate of start point
+                int sy = 77;                   // x-coordinate of start point
+                int ex = 287;                  // y-coordinate of goal point
+                int ey = 21;                   // x-coordinate of goal point
+
+                return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, cutoffOffset, sx, sy, ex, ey);
+            }
             default :
                 return null;
         }
