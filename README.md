@@ -22,7 +22,7 @@ Features
     * Lazy Theta* Algorithm
       * http://aigamedev.com/open/tutorial/lazy-theta-star/
     * Strict Theta* Algorithm
-      * ICAPS 2016
+      * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13049/12685
     * Accelerated A* Algorithm
       * Note: not very well  optimised.
       * https://agents.felk.cvut.cz/publications/download/76
