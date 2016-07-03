@@ -23,7 +23,6 @@ public class EdgeNLevelSparseVisibilityGraph {
 
     private int originalSize;
     private int maxSize;
-    //private SVGNode[] nodes;
     private int nNodes;
 
     private int startOriginalSize;
@@ -67,11 +66,6 @@ public class EdgeNLevelSparseVisibilityGraph {
     public int[] edgeEndpoint1;   // value: one of the two node endpoints of the edge
     public int[] edgeEndpoint2;   // value: one of the two node endpoints of the edge
     public float[] edgeWeights;
-    public int[] isMarkedIndex;   // value: index to check in the isMarked array to see whether the edge is marked.
-                                  //        note: for all non-level-W edges, isMarkedIndex[i] == i.
-
-    // Edge Marking Groups: Indexed by isMarkedIndex.
-    // we do this so that all Level-W edges in a set can be marked together as one.
     public boolean[] isMarked;
     
     private EdgeNLevelSparseVisibilityGraph(GridGraph graph) {
@@ -156,8 +150,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         edgeEndpoint2 = Arrays.copyOf(edgeEndpoint2, maxPossibleNEdges);
         edgeLevels = new int[maxPossibleNEdges];
         Arrays.fill(edgeLevels, LEVEL_W);
-        isMarkedIndex = new int[maxPossibleNEdges];
-        for (int i=0;i<isMarkedIndex.length;++i) isMarkedIndex[i] = i;
         isMarked = new boolean[maxPossibleNEdges];
         //Arrays.fill(isMarked, false); // default initialises to false anyway.
         
@@ -377,9 +369,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Note: we can prove that the set of Level-W edges has no edge of degree 1.
     private final void setupSkipEdges() {
         int nSkipVertices = markSkipVertices();
-        if (nSkipVertices == 0) {
-            groupAllLevelWEdgesTogether();
-        } else {
+        if (nSkipVertices > 0) {
             connectSkipEdgesAndGroupLevelWEdges();
         }
     }
@@ -427,9 +417,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     }
 
     /**
-     * This does two things:
-     * 1. Connects the previously marked skip vertices to form a graph of skip-edges.
-     * 2. set up isMarkedIndex groups for each of the sets of Level-W edges.
+     * Connects the previously marked skip vertices to form a graph of skip-edges.
      */
     private final void connectSkipEdgesAndGroupLevelWEdges() {
         for (int v1=0;v1<nNodes;++v1) {
@@ -448,7 +436,6 @@ public class EdgeNLevelSparseVisibilityGraph {
                 int firstEdgeIndex = nextNodeEdgeIndexes[j];
                 outgoingSkipEdges[j] = current;
                 skipWeights[j] = edgeWeights[firstEdgeIndex];
-                int indexGroup = isMarkedIndex[firstEdgeIndex];
 
                 // invariants:
                 // 1. outgoingSkipEdges[j] == current.
@@ -476,22 +463,10 @@ public class EdgeNLevelSparseVisibilityGraph {
 
                         outgoingSkipEdges[j] = current;
                         skipWeights[j] += edgeWeights[edgeIndex];
-                        isMarkedIndex[edgeIndex] = indexGroup;
                         break;
                     }
                 }
                 // now all the edges along that subpath will be of the same index group.
-            }
-        }
-    }
-    
-
-    private final void groupAllLevelWEdgesTogether() {
-        int markIndex = -1;
-        for (int i=0;i<nEdges;++i) {
-            if (edgeLevels[i] == LEVEL_W) {
-                if (markIndex == -1) markIndex = isMarkedIndex[i];
-                isMarkedIndex[i] = markIndex;
             }
         }
     }
@@ -641,7 +616,6 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Assumption: No edge between start and end.
     // Uses Memory
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
-        
         // START:
         if (nodeIndex[sy][sx] == -1) {
             startIndex = nNodes;
@@ -739,7 +713,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         edgeEndpoint2[edgeIndex] = v2;
         edgeWeights[edgeIndex] = weight;
         edgeLevels[edgeIndex] = 0;
-        isMarkedIndex[edgeIndex] = nEdges;
+        isMarked[edgeIndex] = false;
         ++nEdges;
     }
 
@@ -768,20 +742,18 @@ public class EdgeNLevelSparseVisibilityGraph {
                 outgoingEdgeIsMarked[i] = value;
                 
                 int edgeIndex = outgoingEdgeIndexes[i];
-                if (isMarked[isMarkedIndex[edgeIndex]] != value) {
-                    isMarked[isMarkedIndex[edgeIndex]] = value;
+                if (isMarked[edgeIndex] != value) {
+                    isMarked[edgeIndex] = value;
                     if (value) {
-                        if (edgeLevels[edgeIndex] != LEVEL_W) {
-                            addToMarkedEdges(source, i);
-                            //addToMarkedEdges(outgoingEdges[i], outgoingEdgeOppositeIndexes[i]);
-                        }
+                        addToMarkedEdges(source, i);
+                        //addToMarkedEdges(outgoingEdges[i], outgoingEdgeOppositeIndexes[i]);
                     }
                     else {
                         clearMarkedEdges(source);
                         //clearMarkedEdges(outgoingEdges[i]);
                     }
                 }
-                isMarked[isMarkedIndex[outgoingEdgeIndexes[i]]] = value;
+                isMarked[outgoingEdgeIndexes[i]] = value;
                 addPairToQueue(source, i);
             }
         }
@@ -808,28 +780,30 @@ public class EdgeNLevelSparseVisibilityGraph {
             int[] outgoingEdgeOppositeIndexes = outgoingEdgeOppositeIndexess[curr];
             
             for (int i=0;i<nOutgoingEdges;++i) {
-                if ((outgoingEdgeIsMarked[i] == value) || edgeLevels[outgoingEdgeIndexes[i]] <= currLevel) continue;
+                int nextLevel = edgeLevels[outgoingEdgeIndexes[i]];
+                if ((outgoingEdgeIsMarked[i] == value) || (nextLevel != LEVEL_W && nextLevel <= currLevel)) continue;
                 int next = outgoingEdges[i];
                 if (!graph.isTaut(parX, parY, currX, currY, xPositions[next], yPositions[next])) continue;
                 outgoingEdgeIsMarked[i] = value;
              
                 int edgeIndex = outgoingEdgeIndexes[i];
-                if (isMarked[isMarkedIndex[edgeIndex]] != value) {
-                    isMarked[isMarkedIndex[edgeIndex]] = value;
+                if (isMarked[edgeIndex] != value) {
+                    isMarked[edgeIndex] = value;
                     if (value) {
-                        if (edgeLevels[edgeIndex] != LEVEL_W) {
-                            addToMarkedEdges(curr, i);
-                            addToMarkedEdges(next, outgoingEdgeOppositeIndexes[i]);
-                        }
+                        addToMarkedEdges(curr, i);
+                        addToMarkedEdges(next, outgoingEdgeOppositeIndexes[i]);
                     }
                     else {
                         clearMarkedEdges(curr);
                         clearMarkedEdges(next);
                     }
                 }
-                isMarked[isMarkedIndex[outgoingEdgeIndexes[i]]] = value;
+                isMarked[outgoingEdgeIndexes[i]] = value;
                 
-                addPairToQueue(curr, i);
+                // Only continue marking forward if not a skip vertex.
+                if (nextLevel != LEVEL_W || nSkipEdgess[next] == 0) {
+                    addPairToQueue(curr, i);
+                }
             }
         }
     }

@@ -90,25 +90,6 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 }
             }
 
-            // Scan through level-W edges to neighbours
-            int nLevelWNeighbours = visibilityGraph.nLevelWNeighbourss[current];
-            int[] levelWEdgeOutgoingIndexes = visibilityGraph.levelWEdgeOutgoingIndexess[current];
-
-            for (int i=0;i<nLevelWNeighbours;++i) {
-                int index = levelWEdgeOutgoingIndexes[i];
-                int dest = outgoingEdges[index];
-                int edgeIndex = outgoingEdgeIndexes[index];
-                float weight = visibilityGraph.edgeWeights[edgeIndex];
-                if (visibilityGraph.isMarked[visibilityGraph.isMarkedIndex[edgeIndex]] &&
-                        !Memory.visited(dest) &&
-                        relax(current, dest, weight)) {
-                    int destX = visibilityGraph.xPositions[dest];
-                    int destY = visibilityGraph.yPositions[dest];
-                    
-                    pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
-                }
-            }
-            
             // Scan through skip edges to neighbours
             int nSkipEdges = visibilityGraph.nSkipEdgess[current];
             int[] outgoingSkipEdges = visibilityGraph.outgoingSkipEdgess[current];
@@ -380,7 +361,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 path[3] = y2;
                 
                 int colourIndex = Math.min(visibilityGraph.edgeLevels[edgeIndex], vertexColours.length-1);
-                if (showMarked && visibilityGraph.isMarked[visibilityGraph.isMarkedIndex[edgeIndex]]) {
+                if (showMarked && visibilityGraph.isMarked[edgeIndex]) {
                     colourIndex = 0;
                 }
                 Color color = vertexColours[colourIndex];
