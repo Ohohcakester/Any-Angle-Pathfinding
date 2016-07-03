@@ -63,8 +63,6 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Edges: Indexed by edge Index (only for non-skip-edges)
     public int nEdges;
     public int[] edgeLevels;
-    public int[] edgeEndpoint1;   // value: one of the two node endpoints of the edge
-    public int[] edgeEndpoint2;   // value: one of the two node endpoints of the edge
     public float[] edgeWeights;
     public boolean[] isMarked;
     
@@ -135,8 +133,6 @@ public class EdgeNLevelSparseVisibilityGraph {
 
         // Initialise SVG Edges + edgeWeights
         edgeWeights = new float[11];
-        edgeEndpoint1 = new int[11];
-        edgeEndpoint2 = new int[11];
         nEdges = 0;
         addAllEdges();
 
@@ -146,8 +142,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         originalNEdges = nEdges;
         int maxPossibleNEdges = nEdges + nNodes*2;
         edgeWeights = Arrays.copyOf(edgeWeights, maxPossibleNEdges);
-        edgeEndpoint1 = Arrays.copyOf(edgeEndpoint1, maxPossibleNEdges);
-        edgeEndpoint2 = Arrays.copyOf(edgeEndpoint2, maxPossibleNEdges);
         edgeLevels = new int[maxPossibleNEdges];
         Arrays.fill(edgeLevels, LEVEL_W);
         isMarked = new boolean[maxPossibleNEdges];
@@ -240,8 +234,6 @@ public class EdgeNLevelSparseVisibilityGraph {
     private final void addEdge(int v1, int v2, float weight) {
         if (nEdges >= edgeWeights.length) {
             edgeWeights = Arrays.copyOf(edgeWeights, edgeWeights.length*2);
-            edgeEndpoint1 = Arrays.copyOf(edgeEndpoint1, edgeEndpoint1.length*2);
-            edgeEndpoint2 = Arrays.copyOf(edgeEndpoint2, edgeEndpoint2.length*2);
         }
         int edgeIndex = nEdges;
 
@@ -281,8 +273,6 @@ public class EdgeNLevelSparseVisibilityGraph {
         outgoingEdgeOppositeIndexess[v2][v2Index] = v1Index;
         
         edgeWeights[nEdges] = weight;
-        edgeEndpoint1[nEdges] = v1;
-        edgeEndpoint2[nEdges] = v2;
         ++nEdges;
     }
 
@@ -709,8 +699,6 @@ public class EdgeNLevelSparseVisibilityGraph {
             nOutgoingEdgess[v1]++;
         }
 
-        edgeEndpoint1[edgeIndex] = v1;
-        edgeEndpoint2[edgeIndex] = v2;
         edgeWeights[edgeIndex] = weight;
         edgeLevels[edgeIndex] = 0;
         isMarked[edgeIndex] = false;
