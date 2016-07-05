@@ -379,18 +379,25 @@ public class Experiment {
     }
 
     private static void findStrictThetaStarIssues() {
-//        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
-//        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStarV1(gridGraph, sx, sy, ex, ey);
-        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.4f);
-        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.2f);
+        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> new BasicThetaStar(gridGraph, sx, sy, ex, ey);;
+        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> new StrictThetaStar(gridGraph, sx, sy, ex, ey);
+//        AlgoFunction basicThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.4f);
+//        AlgoFunction strictThetaStar = (gridGraph, sx, sy, ex, ey) -> RecursiveStrictThetaStar.setBuffer(gridGraph, sx, sy, ex, ey, 0.2f);
+//        AlgoFunction basicThetaStar = AnyAngleSubgoalGraphsAlgorithm::new;
+//        AlgoFunction strictThetaStar = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
 
+        double sumBasic = 0;
+        double sumStrict = 0;
+        
         int wins = 0;
         int ties = 0;
-        Random seedRand = new Random(192213);
+        int losses = 0;
+        
+        Random seedRand = new Random(-4418533);
         int initial = seedRand.nextInt();
         for (int i=0; i<500000; i++) {
-            int sizeX = seedRand.nextInt(5) + 8;
-            int sizeY = seedRand.nextInt(5) + 8;
+            int sizeX = seedRand.nextInt(60) + 8;
+            int sizeY = seedRand.nextInt(60) + 8;
             int seed = i+initial;
             int ratio = seedRand.nextInt(40) + 5;
             
@@ -412,18 +419,24 @@ public class Experiment {
 
             path = Utility.generatePath(strictThetaStar, gridGraph, sx, sy, ex, ey);
             double strictPathLength = Utility.computePathLength(gridGraph, path);
-            
+
+            sumBasic += basicPathLength;
+            sumStrict += strictPathLength;
             if (basicPathLength < strictPathLength-0.01f) {
+                losses += 1;
+                
                 System.out.println("============");
                 System.out.println("Discrepancy Discovered!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 System.out.println("Start = " + sx + "," + sy + "  End = " + ex + "," + ey);
                 System.out.println("Basic: " + basicPathLength + " , Strict: " + strictPathLength);
                 System.out.println("============");
-                System.out.println("WINS: " + wins + ", TIES: " + ties);
-                throw new UnsupportedOperationException("DISCREPANCY!!");
+                System.out.println("WINS: " + wins + ", TIES: " + ties + ", LOSSES: " + losses);
+                System.out.println("BASIC: " + sumBasic + ", STRICT: " + sumStrict);
+                System.out.println("Result: " + (sumBasic - sumStrict)/ (wins+losses+ties));
+                //throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
-                System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
+                //System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                 if (strictPathLength < basicPathLength - 0.01f) {
                     wins += 1;
                 } else {
