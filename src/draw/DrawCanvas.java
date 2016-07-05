@@ -99,4 +99,9 @@ public class DrawCanvas extends JPanel {
         repaint();
     }
 
+    public void changeSet(GridLineSet gridLineSet) {
+        gridLineDrawer = new GridLineDrawer(gridGraph, gridLineSet, resX, resY);
+        repaint();
+    }
+    
 }

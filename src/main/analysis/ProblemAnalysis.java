@@ -1,12 +1,13 @@
 package main.analysis;
 
-import grid.GridGraph;
-import main.utility.Utility;
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
+import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import algorithms.visibilitygraph.VisibilityGraph;
+import grid.GridGraph;
+import main.utility.Utility;
 
 public class ProblemAnalysis {
     
@@ -19,11 +20,13 @@ public class ProblemAnalysis {
     
     public final int shortestPathHeadingChanges;
     public final int minHeadingChanges;
+    
+    public final int[][] path;
 
     public ProblemAnalysis(int sx, int sy, int ex, int ey,
             double shortestPathLength, double straightLineDistance,
             double directness, double distanceCoverage, double minMapCoverage,
-            int shortestPathHeadingChanges, int minHeadingChanges) {
+            int shortestPathHeadingChanges, int minHeadingChanges, int[][] path) {
         this.sx = sx;
         this.sy = sy;
         this.ex = ex;
@@ -35,6 +38,7 @@ public class ProblemAnalysis {
         this.minMapCoverage = minMapCoverage;
         this.shortestPathHeadingChanges = shortestPathHeadingChanges;
         this.minHeadingChanges = minHeadingChanges;
+        this.path = path;
     }
     
     public static ProblemAnalysis computeSlow(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
@@ -54,7 +58,7 @@ public class ProblemAnalysis {
         VisibilityGraph visibilityGraph = algo.getVisibilityGraph();
         int minHeadingChanges = computeMinHeadingChanges(gridGraph,sx,sy,ex,ey);
         
-        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges);
+        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges, path);
     }
     
     public static ProblemAnalysis computeFast(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
@@ -73,7 +77,24 @@ public class ProblemAnalysis {
         int shortestPathHeadingChanges = path.length;
         int minHeadingChanges = -1;
         
-        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges);
+        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges, path);
+    }
+    
+    public static ProblemAnalysis computePathOnly(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        
+        double shortestPathLength = Utility.computePathLength(gridGraph, path);
+        double straightLineDistance = -1;
+        double directness = -1;
+        double distanceCoverage = -1;
+        double minMapCoverage = -1;
+        
+        int shortestPathHeadingChanges = -1;
+        int minHeadingChanges = -1;
+        
+        return new ProblemAnalysis(sx, sy, ex, ey, shortestPathLength, straightLineDistance, directness, distanceCoverage, minMapCoverage, shortestPathHeadingChanges, minHeadingChanges, path);
     }
 
     public static double computerMinMapCoverage(double shortestPathLength, int sizeX,

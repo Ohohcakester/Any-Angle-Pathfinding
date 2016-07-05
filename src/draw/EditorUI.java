@@ -23,6 +23,7 @@ public class EditorUI extends DrawCanvas {
     private final GridPointSet pointSet;
     private final ArrayList<ArrayList<Point>> connectedSets;
     private final String mazeName;
+    private GridLineSet lineSet;
 
     public EditorUI(GridGraph gridGraph, ArrayList<ArrayList<Point>> connectedSets, String mazeName, StartGoalPoints startGoalPoints) {
         super(gridGraph);
@@ -48,12 +49,14 @@ public class EditorUI extends DrawCanvas {
     public void addStartPoint(int x, int y) {
         sx = x;
         sy = y;
+        clearPath();
         refreshPoints();
     }
 
     public void addEndPoint(int x, int y) {
         ex = x;
         ey = y;
+        clearPath();
         refreshPoints();
     }
 
@@ -62,7 +65,7 @@ public class EditorUI extends DrawCanvas {
         if (startEndConnected()) {
             pointSet.addPoint(sx, sy, Color.ORANGE);
             pointSet.addPoint(ex, ey, Color.YELLOW);
-            
+            autoComputePath();
         } else {
             if (sx != -1) {
                 pointSet.addPoint(sx, sy, Color.ORANGE);
@@ -72,6 +75,26 @@ public class EditorUI extends DrawCanvas {
             }
         }
         this.changeSet(pointSet);
+    }
+    
+    private void autoComputePath() {
+        ProblemAnalysis pathOnly = ProblemAnalysis.computePathOnly(gridGraph, sx, sy, ex, ey);
+        drawPath(pathOnly.path);
+    }
+
+    private void drawPath(int[][] path) {
+        lineSet = new GridLineSet();
+        for (int i=1;i<path.length;++i) {
+            int[] prev = path[i-1];
+            int[] curr = path[i];
+            lineSet.addLine(prev[0], prev[1], curr[0], curr[1], Color.BLUE);
+        }
+        this.changeSet(lineSet);
+    }
+    
+    private void clearPath() {
+        lineSet = null;
+        this.changeSet(lineSet);
     }
     
     private boolean startEndConnected() {
@@ -108,6 +131,7 @@ public class EditorUI extends DrawCanvas {
         System.out.println(problemAnalysis);
         System.out.println("-Problem Name:---------------------");
         System.out.println(Stringifier.makeProblemName(sx, sy, ex, ey));
+        drawPath(problemAnalysis.path);
     }
 
     public void generateScen() {
