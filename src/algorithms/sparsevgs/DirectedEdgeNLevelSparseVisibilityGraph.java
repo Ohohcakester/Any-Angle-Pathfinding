@@ -65,6 +65,8 @@ public class DirectedEdgeNLevelSparseVisibilityGraph {
     public float[] edgeWeights;
     public boolean[] isMarked;
     
+    // Used by the algorithm. Stored here as static memory.
+    public boolean[] cameFromLevelWEdge;
     
     private DirectedEdgeNLevelSparseVisibilityGraph(GridGraph graph) {
         this.graph = graph;
@@ -182,9 +184,10 @@ public class DirectedEdgeNLevelSparseVisibilityGraph {
         
         pruneParallelSkipEdges();
         
-
+        // Used by algorithm.
         nVerticesConnectedToEnd = 0;
         verticesConnectedToEnd = new int[11];
+        cameFromLevelWEdge = new boolean[maxSize];
    }
 
     private final void addNodes() {

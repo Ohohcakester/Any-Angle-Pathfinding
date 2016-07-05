@@ -64,6 +64,8 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
                     float distance = graph.distance(sx, sy, destX, destY);
                     setDistance(dest, distance);
                     setParent(dest, start);
+                    
+                    visibilityGraph.cameFromLevelWEdge[dest] = false;
                     pq.decreaseKey(dest, distance + graph.distance(destX, destY, ex, ey));;
                 }
             }
@@ -82,7 +84,7 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
             int[] outgoingEdgeIndexes = visibilityGraph.outgoingEdgeIndexess[current];
 
             // Scan through directed edges to neighbours
-            {
+            if (!visibilityGraph.cameFromLevelWEdge[current] || visibilityGraph.nSkipEdgess[current] == 0) {
                 int nDirectedNeighbours = visibilityGraph.nDirectedNeighbourss[current];
                 int[] directedNeighbourOutgoingIndexes = visibilityGraph.directedNeighbourOutgoingIndexess[current];
                 
@@ -95,6 +97,7 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
                         int destX = visibilityGraph.xPositions[dest];
                         int destY = visibilityGraph.yPositions[dest];
                         
+                        visibilityGraph.cameFromLevelWEdge[dest] = false;
                         pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
                     }
                 }
@@ -114,6 +117,7 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
                         int destX = visibilityGraph.xPositions[dest];
                         int destY = visibilityGraph.yPositions[dest];
                         
+                        visibilityGraph.cameFromLevelWEdge[dest] = true;
                         pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
                     }
                 }
@@ -133,6 +137,7 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
                         int destX = visibilityGraph.xPositions[dest];
                         int destY = visibilityGraph.yPositions[dest];
                         
+                        visibilityGraph.cameFromLevelWEdge[dest] = true;
                         pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));;
                     }
                 }
@@ -153,6 +158,8 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
                     if (!Memory.visited(dest) && relaxViaSkipEdge(current, dest, nextNode, edgeWeight)) {
                         int destX = visibilityGraph.xPositions[dest];
                         int destY = visibilityGraph.yPositions[dest];
+                        
+                        visibilityGraph.cameFromLevelWEdge[dest] = true;
                         pq.decreaseKey(dest, distance(dest) + graph.distance(destX, destY, ex, ey));
                     }
                 }
