@@ -67,7 +67,7 @@ public class EditorUI extends DrawCanvas {
             if (sx != -1) {
                 pointSet.addPoint(sx, sy, Color.ORANGE);
             }
-            if (sy != -1) {
+            if (ex != -1) {
                 pointSet.addPoint(ex, ey, Color.RED);
             }
         }
