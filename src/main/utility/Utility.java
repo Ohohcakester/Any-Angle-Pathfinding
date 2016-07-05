@@ -9,7 +9,6 @@ import main.AlgoFunction;
 import main.testgen.StartEndPointData;
 import algorithms.Anya;
 import algorithms.PathFindingAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
@@ -18,6 +17,7 @@ import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.subgoalgraphs.SubgoalGraph;
 import algorithms.vertexanya.VertexAnya;
+import algorithms.vertexanya.VertexAnyaMarking;
 import algorithms.visibilitygraph.VisibilityGraph;
 
 public class Utility {
@@ -37,7 +37,7 @@ public class Utility {
     
     public static double computeOptimalPathLength(GridGraph gridGraph, Point start, Point end) {
         // Optimal algorithm.
-        PathFindingAlgorithm algo = new StrictVisibilityGraphAlgorithmV2(gridGraph, start.x, start.y, end.x, end.y);
+        PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, start.x, start.y, end.x, end.y);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
