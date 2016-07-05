@@ -5,6 +5,7 @@ import grid.StartGoalPoints;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import main.AnyAnglePathfinding;
 import main.analysis.ProblemAnalysis;
@@ -21,14 +22,14 @@ public class EditorUI extends DrawCanvas {
     private int ex;
     private int ey;
     private final GridPointSet pointSet;
-    private final ArrayList<ArrayList<Point>> connectedSets;
+    private final int[][] connectedComponentIndex;
     private final String mazeName;
     private GridLineSet lineSet;
 
     public EditorUI(GridGraph gridGraph, ArrayList<ArrayList<Point>> connectedSets, String mazeName, StartGoalPoints startGoalPoints) {
         super(gridGraph);
         this.mazeName = mazeName;
-        this.connectedSets = connectedSets;
+        this.connectedComponentIndex = generateConnectedComponentIndexes(connectedSets);
         pointSet = new GridPointSet();
         pointSet.setMinCircleSize();
         
@@ -46,6 +47,25 @@ public class EditorUI extends DrawCanvas {
         refreshPoints();
     }
     
+    private final int[][] generateConnectedComponentIndexes(ArrayList<ArrayList<Point>> connectedSets) {
+        int xCount = gridGraph.sizeX+1;
+        int yCount = gridGraph.sizeY+1;
+        
+        int[][] indexes = new int[yCount][];
+        for (int y=0;y<indexes.length;++y) {
+            int[] row = new int[xCount];
+            Arrays.fill(row, -1);
+            indexes[y] = row;
+        }
+        
+        for (int i=0;i<connectedSets.size();++i) {
+            for (Point p : connectedSets.get(i)) {
+                indexes[p.y][p.x] = i;
+            }
+        }
+        return indexes;
+    }
+
     public void addStartPoint(int x, int y) {
         sx = x;
         sy = y;
@@ -98,19 +118,9 @@ public class EditorUI extends DrawCanvas {
     }
     
     private boolean startEndConnected() {
-        if (sx == -1 || sy == -1) return false;
-        
-        Point start = new Point(sx, sy);
-        Point end = new Point(ex, ey);
-        for (int i=0; i<connectedSets.size(); i++) {
-            ArrayList<Point> currentSet = connectedSets.get(i);
-            if (currentSet.contains(start)) {
-                return currentSet.contains(end);
-            } else if (currentSet.contains(end)) {
-                return false;
-            }
-        }
-        return false;
+        if (sx == -1 || ey == -1) return false;
+        if (connectedComponentIndex[sy][sx] == -1 || connectedComponentIndex[ey][ex] == -1) return false;
+        return (connectedComponentIndex[sy][sx] == connectedComponentIndex[ey][ex]);
     }
 
     public void generatePath() {
@@ -135,7 +145,6 @@ public class EditorUI extends DrawCanvas {
     }
 
     public void generateScen() {
-        // TODO Auto-generated method stub
         String filePath = AnyAnglePathfinding.PATH_ANALYSISDATA;
         String mapName = mazeName;
         double shortestPath = Utility.computeOptimalPathLength(gridGraph, new Point(sx,sy), new Point(ex,ey));
