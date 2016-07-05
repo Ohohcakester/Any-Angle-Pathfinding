@@ -1,11 +1,12 @@
 package draw;
-import grid.GridGraph;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
+
+import grid.GridGraph;
 
 
 public class DrawCanvas extends JPanel {
@@ -23,6 +24,7 @@ public class DrawCanvas extends JPanel {
     public final int resY;
     public final int resX;
     
+    private BufferedImage cachedGridGraphImage;
     private final Drawer gridGraphDrawer;
     private Drawer gridLineDrawer;
     private Drawer gridPointDrawer;
@@ -68,8 +70,14 @@ public class DrawCanvas extends JPanel {
         
         clearToColor(g);
         
-        g.setColor(BLOCKEDTILE_COLOR);
-        gridGraphDrawer.draw(g);
+        if (cachedGridGraphImage == null) {
+            cachedGridGraphImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics g2 = cachedGridGraphImage.getGraphics();
+            g2.setColor(BLOCKEDTILE_COLOR);
+            gridGraphDrawer.draw(g2);
+        }
+        g.drawImage(cachedGridGraphImage, 0, 0, this);
+        
         
         if (gridLineDrawer != null) {
             gridLineDrawer.draw(g);
