@@ -25,6 +25,7 @@ public class EditorUI extends DrawCanvas {
     private final int[][] connectedComponentIndex;
     private final String mazeName;
     private GridLineSet lineSet;
+    private boolean isRealTimePathfinding;
 
     public EditorUI(GridGraph gridGraph, ArrayList<ArrayList<Point>> connectedSets, String mazeName, StartGoalPoints startGoalPoints) {
         super(gridGraph);
@@ -189,8 +190,19 @@ public class EditorUI extends DrawCanvas {
         }
         
         System.out.println("-Write complete.");
-        
-        
+    }
+    
+    public void onRealTimePathfind() {
+        isRealTimePathfinding = true;
+    }
+    
+    public void offRealTimePathfind() {
+        isRealTimePathfinding = false;
+    }
+
+    public void realTimePathfindUpdate(int x, int y) {
+        if (!isRealTimePathfinding) return;
+        addStartPoint(x, y);
     }
 
 }

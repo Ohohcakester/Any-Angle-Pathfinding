@@ -1,11 +1,12 @@
 package draw;
 
-import grid.GridGraph;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
-public class VisualiserMouseControls implements MouseListener {
+import grid.GridGraph;
+
+public class VisualiserMouseControls implements MouseListener, MouseMotionListener {
     private final GridGraph gridGraph;
     private final EditorUI editorUI;
     
@@ -54,13 +55,25 @@ public class VisualiserMouseControls implements MouseListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        int x = toPointX(e.getX());
+        int y = toPointY(e.getY());
+        editorUI.realTimePathfindUpdate(x, y);
     }
 
 }

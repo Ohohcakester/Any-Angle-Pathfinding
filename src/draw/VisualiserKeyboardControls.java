@@ -6,31 +6,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class VisualiserKeyboardControls implements KeyListener {
-    private final HashMap<Integer,Runnable> functions;
+    private final HashMap<Integer,Runnable> functionsRelease;
+    private final HashMap<Integer,Runnable> functionsPress;
     private final ArrayList<String> descriptions;
     private final EditorUI editorUI;
     
     public VisualiserKeyboardControls(EditorUI editorUI) {
         super();
         this.editorUI = editorUI;
-        functions = new HashMap<>();
+        functionsRelease = new HashMap<>();
+        functionsPress = new HashMap<>();
         descriptions = new ArrayList<>();
         initialiseFunctions();
     }
     
     private void initialiseFunctions() {
         add(KeyEvent.VK_C, "C: Generates the path file from the currently selected points.",
-                () -> editorUI.generatePath());
+                editorUI::generatePath);
         add(KeyEvent.VK_A, "A: Generates the maze analysis for the maze.",
-                () -> editorUI.generateMazeAnalysis());
+                editorUI::generateMazeAnalysis);
         add(KeyEvent.VK_P, "P: Prints the path analysis for the current selected.",
-                () -> editorUI.printPathAnalysis());
-        add(KeyEvent.VK_S, "S: Generates a .map and a .scen file from the maze..",
-                () -> editorUI.generateScen());
+                editorUI::printPathAnalysis);
+        add(KeyEvent.VK_S, "S: Generates a .map and a .scen file from the maze.",
+                editorUI::generateScen);
+        addHold(KeyEvent.VK_V, "V: Hold down for real-time pathfinding to mouse location",
+                editorUI::onRealTimePathfind, editorUI::offRealTimePathfind);
     }
     
     private void add(int keyCode, String description, Runnable function) {
-        functions.put(keyCode, function);
+        functionsRelease.put(keyCode, function);
+        descriptions.add(description);
+    }
+    
+    private void addHold(int keyCode, String description, Runnable press, Runnable release) {
+        functionsPress.put(keyCode, press);
+        functionsRelease.put(keyCode, release);
         descriptions.add(description);
     }
 
@@ -42,13 +52,13 @@ public class VisualiserKeyboardControls implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // TODO Auto-generated method stub
-        
+        Runnable function = functionsPress.get(e.getKeyCode());
+        if (function != null) function.run();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        Runnable function = functions.get(e.getKeyCode());
+        Runnable function = functionsRelease.get(e.getKeyCode());
         if (function != null)
             function.run();
         else
