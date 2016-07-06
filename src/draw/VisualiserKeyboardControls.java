@@ -21,6 +21,8 @@ public class VisualiserKeyboardControls implements KeyListener {
     }
     
     private void initialiseFunctions() {
+        add(KeyEvent.VK_ESCAPE, "ESC: Close the window.",
+                () -> System.exit(0));
         add(KeyEvent.VK_C, "C: Generates the path file from the currently selected points.",
                 editorUI::generatePath);
         add(KeyEvent.VK_A, "A: Generates the maze analysis for the maze.",
