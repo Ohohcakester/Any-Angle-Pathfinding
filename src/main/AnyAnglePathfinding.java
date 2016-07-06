@@ -198,19 +198,20 @@ public class AnyAnglePathfinding {
             case 46:
                 return GraphImporter.loadStoredMaze("sc1_EbonLakes", "139-13_321-470");
             case 47 : { // SEEDED
-                int unblockedRatio = 5;       // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int iterations = 5;           // number of iterations for cellular automata
-                int cutoffOffset = 0;         // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
-                int seed = -174123322;        // seed for the random.
+                int unblockedRatio = 5;          // chance of spawning a blocked tile is 1 in unblockedRatio.
+                int iterations = 4;              // number of iterations for cellular automata
+                int cutoffOffset = -1;           // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
+                float resolution = 1.f;          // (Larger -> bigger islands)
+                int seed = -435891213;           // seed for the random.
 
-                int sizeX = 303;               // x-axis size of grid
-                int sizeY = 204;               // y-axis size of grid
-                int sx = 14;                   // y-coordinate of start point
-                int sy = 77;                   // x-coordinate of start point
-                int ex = 287;                  // y-coordinate of goal point
-                int ey = 21;                   // x-coordinate of goal point
+                int sizeX = 10323;               // x-axis size of grid
+                int sizeY = 10084;               // y-axis size of grid
+                int sx = 14;                     // y-coordinate of start point
+                int sy = 13;                     // x-coordinate of start point
+                int ex = 96;                     // y-coordinate of goal point
+                int ey = 71;                     // x-coordinate of goal point
 
-                return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, cutoffOffset, sx, sy, ex, ey);
+                return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, sx, sy, ex, ey);
             }
             default :
                 return null;

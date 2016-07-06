@@ -7,22 +7,22 @@ import grid.GridGraph;
 
 public class AutomataGenerator {
 
-    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int iterations, int cutoffOffset, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, iterations, cutoffOffset);
+    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
-    public static GridAndGoals generateSeeded(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, int cutoffOffset, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, cutoffOffset);
+    public static GridAndGoals generateSeeded(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
     
-    public static GridGraph generateSeededGraphOnly(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, int cutoffOffset) {
-        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, cutoffOffset);
+    public static GridGraph generateSeededGraphOnly(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
         return gridGraph;
     }
 
-    private static GridGraph generate(boolean seededRandom, long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, int cutoffOffset) {
+    private static GridGraph generate(boolean seededRandom, long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset) {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
 
         Random rand = new Random();
@@ -34,7 +34,7 @@ public class AutomataGenerator {
         }
         rand = new Random(seed);
         
-        generateRandomMap(rand, gridGraph, unblockedRatio, iterations, cutoffOffset);
+        generateRandomMap(rand, gridGraph, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
         
         return gridGraph;
     }
@@ -44,10 +44,10 @@ public class AutomataGenerator {
      * Generates a truly random map for the gridGraph.
      * No longer used as this does not generate very good or realistic grids.
      */
-    private static void generateRandomMap(Random rand, GridGraph gridGraph, int frequency, int iterations, int cutoffOffset) {
+    private static void generateRandomMap(Random rand, GridGraph gridGraph, int frequency, int iterations, float resolutionMultiplier, int cutoffOffset) {
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
-        int resolution = Math.max((sizeX+sizeY)/150, 1);
+        int resolution = Math.max((int)((sizeX+sizeY)*resolutionMultiplier/150), 1);
         int cutoff = (int)(0.8f*resolution*resolution + 1.75f*resolution + 0.8f) + cutoffOffset;
 
         System.out.println("Resolution " + resolution + ", Cutoff " + cutoff);
