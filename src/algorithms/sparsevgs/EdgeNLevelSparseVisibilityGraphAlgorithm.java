@@ -1,16 +1,16 @@
 package algorithms.sparsevgs;
 
-import grid.GridGraph;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
-import main.AlgoFunction;
 import algorithms.AStarStaticMemory;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
+import grid.GridGraph;
+import main.AlgoFunction;
 
 
 public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory {
@@ -313,7 +313,19 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
     protected Integer[] snapshotEdge(int endIndex) {
         Integer[] edge = new Integer[4];
         int startIndex = parent(endIndex);
-        startIndex = getNextNodeIndex(startIndex);
+        //startIndex = getNextNodeIndex(startIndex);
+        if (startIndex < -1) {
+            startIndex -= Integer.MIN_VALUE;
+            int nSkipEdges = visibilityGraph.nSkipEdgess[endIndex];
+            int[] outgoingSkipEdgeNextNodes = visibilityGraph.outgoingSkipEdgeNextNodess[endIndex];
+            for (int i=0;i<nSkipEdges;++i) {
+                if (outgoingSkipEdgeNextNodes[i] == startIndex) {
+                    startIndex = visibilityGraph.outgoingSkipEdgess[endIndex][i];
+                    break;
+                }
+            }
+        }
+        
         edge[0] = visibilityGraph.xPositions[startIndex];
         edge[1] = visibilityGraph.yPositions[startIndex];
         edge[2] = visibilityGraph.xPositions[endIndex];
@@ -339,7 +351,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         int[] xPositions = visibilityGraph.xPositions;
         int[] yPositions = visibilityGraph.yPositions;
         
-        
+        TreeMap<Integer, ArrayList<SnapshotItem>> sortedSnapshots = new TreeMap<>(); 
         for (int i=0;i<size;i++) {
             int x1 = xPositions[i];
             int y1 = yPositions[i];
@@ -360,14 +372,27 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 path[2] = x2;
                 path[3] = y2;
                 
-                int colourIndex = Math.min(visibilityGraph.edgeLevels[edgeIndex], vertexColours.length-1);
+                Color color;
+                int colourIndex;
+                
                 if (showMarked && visibilityGraph.isMarked[edgeIndex]) {
                     colourIndex = 0;
+                    color = vertexColours[colourIndex];
+                } else if (visibilityGraph.edgeLevels[edgeIndex] == visibilityGraph.LEVEL_W) {
+                    colourIndex = vertexColours.length;
+                    color = levelWColour;
+                } else {
+                    colourIndex = Math.min(visibilityGraph.edgeLevels[edgeIndex], vertexColours.length-1);
+                    color = vertexColours[colourIndex];
+                    //color = Color.GREEN;
                 }
-                Color color = vertexColours[colourIndex];
+
                 SnapshotItem snapshotItem = SnapshotItem.generate(path, color);
-                if (colourIndex != 1)
-                snapshotItemList.add(snapshotItem);
+                if (!sortedSnapshots.containsKey(colourIndex)) {
+                    sortedSnapshots.put(colourIndex, new ArrayList<>());
+                }
+                if ( colourIndex == 0)
+                sortedSnapshots.get(colourIndex).add(snapshotItem);
             }
             
             Integer[] vert = new Integer[2];
@@ -383,6 +408,17 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 snapshotItem = SnapshotItem.generate(vert, Color.WHITE);
             }
             snapshotItemList.add(snapshotItem);
+        }
+        
+        {
+            ArrayList<SnapshotItem> transfer = sortedSnapshots.remove(0);
+            sortedSnapshots.put(vertexColours.length+1, transfer);
+        }
+        for (ArrayList<SnapshotItem> list : sortedSnapshots.values()) {
+            if (list == null) continue;
+            for (SnapshotItem item : list) {
+                snapshotItemList.add(item);
+            }
         }
 
         for (int i=0;i<size;i++) {
@@ -445,27 +481,36 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
         System.out.println("Skip Edges: " + visibilityGraph.computeNumSkipEdges());
     }
 
-    private static final Color skipEdgeColour = new Color(255,127,127);
+    private static final Color skipEdgeColour = new Color(255,0,255);
+    private static final Color levelWColour = new Color(0,0,255);
     private static final Color[] vertexColours = new Color[] {
         Color.BLACK,
-        Color.RED,
-        //new Color(191,0,0),
-        //new Color(255,127,0),
-        Color.YELLOW,
-        //new Color(191,191,0),
+        new Color(127,255,127),
+        //Color.GREEN,
+        //new Color(64,255,0),
         //new Color(127,255,0),
-        Color.GREEN,
-        //new Color(0,191,0),
-        //new Color(0,255,127),
-        Color.CYAN,
+        //new Color(191,255,0),
+        Color.YELLOW,
+//        new Color(255,224,0),
+//        new Color(255,191,0),
+//        new Color(255,160,0),
+        new Color(255,127,0),
+//        new Color(255,96,0),
+        new Color(255,64,0),
+//        new Color(255,32,0),
+        Color.RED,
+//        new Color(224,0,0),
+        new Color(191,0,0),
+//        new Color(0,255,127),
+//        Color.CYAN,
         //new Color(0,191,191),
-        //new Color(0,127,255),
-        Color.BLUE,
+//        new Color(0,127,255),
+//        Color.BLUE,
         //new Color(0,0,191),
         //new Color(127,0,255),
-        Color.MAGENTA,
+        //Color.MAGENTA,
 
-        new Color(127, 127, 255),
+        //new Color(127, 127, 255),
         //new Color(191,0,191),
         /*new Color(255,0,127),
         new Color(127,127,127),
