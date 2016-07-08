@@ -72,6 +72,7 @@ public class GridGraphVisualiser {
         mainFrame.add(editorUI);
         mainFrame.addWindowListener(new CloseOnExitWindowListener());
         mainFrame.getContentPane().addMouseListener(mouseControls);
+        mainFrame.getContentPane().addMouseMotionListener(mouseControls);
         mainFrame.addKeyListener(keyboardControls);
         mainFrame.setResizable(false);
         mainFrame.pack();
