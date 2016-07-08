@@ -494,38 +494,9 @@ public class DirectedEdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStati
         System.out.println("Skip Edges: " + visibilityGraph.computeNumSkipEdges());
     }
 
-    private static final Color skipEdgeColour = new Color(255,127,127);
+    private static final Color skipEdgeColour = new Color(255,0,255);
     private static final Color[] vertexColours = new Color[] {
         Color.BLACK,
-        Color.RED,
-        //new Color(191,0,0),
-        //new Color(255,127,0),
-        Color.YELLOW,
-        //new Color(191,191,0),
-        //new Color(127,255,0),
         Color.GREEN,
-        //new Color(0,191,0),
-        //new Color(0,255,127),
-        Color.CYAN,
-        //new Color(0,191,191),
-        //new Color(0,127,255),
-        Color.BLUE,
-        //new Color(0,0,191),
-        //new Color(127,0,255),
-        Color.MAGENTA,
-
-        new Color(127, 127, 255),
-        //new Color(191,0,191),
-        /*new Color(255,0,127),
-        new Color(127,127,127),
-        new Color(160,160,160),
-        new Color(191,191,191),
-        new Color(224,224,224),
-        new Color(224,224,224),
-        new Color(224,224,224),
-        new Color(224,224,224),
-        new Color(224,224,224),
-        new Color(224,224,224),
-        Color.WHITE,*/
     };
 }
