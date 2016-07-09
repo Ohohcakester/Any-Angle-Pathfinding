@@ -27,17 +27,30 @@ public final class Fraction implements Comparable<Fraction> {
         this.d = d/gcd;
     }
     
+    private Fraction(long n, long d) {
+        //if (d == 0) throw new ArithmeticException("Invalid denominator");
+        
+        if (d < 0) {
+            n = -n;
+            d = -d;
+        }
+        long gcd = gcd(n,d);
+        
+        this.n = (int)(n/gcd);
+        this.d = (int)(d/gcd);
+    }
+    
     public final boolean isWholeNumber() {
         //assert gcd(n,d) == 1;
         return (d == 1);
     }
     
     public final boolean isLessThanOrEqual(Fraction o) {
-        return this.compareTo(o) <= 0;
+        return (long)n*o.d - (long)o.n*d <= 0; // n1d2 - n2d1
     }
     
     public final boolean isLessThan(Fraction o) {
-        return this.compareTo(o) < 0;
+        return (long)n*o.d - (long)o.n*d < 0; // n1d2 - n2d1
     }
     
     public final boolean isLessThanOrEqual(int x) {
@@ -49,7 +62,7 @@ public final class Fraction implements Comparable<Fraction> {
     }
     
     public final Fraction multiplyDivide(int multiply, int divide) {
-        return new Fraction(n*multiply, d*divide);
+        return new Fraction((long)n*multiply, (long)d*divide);
     }
     
     public final Fraction multiply(Fraction o) {
@@ -148,6 +161,16 @@ public final class Fraction implements Comparable<Fraction> {
     }
     
     private static final int gcdRecurse(int x, int y) {
+        return x == 0 ? y : gcdRecurse(y%x, x);
+    }
+
+    
+    public static final long gcd(long x, long y) {
+        long result = gcdRecurse(x,y);
+        return result<0 ? -result : result;
+    }
+    
+    private static final long gcdRecurse(long x, long y) {
         return x == 0 ? y : gcdRecurse(y%x, x);
     }
     
