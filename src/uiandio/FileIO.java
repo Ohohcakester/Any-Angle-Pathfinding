@@ -17,13 +17,19 @@ public class FileIO {
     public static boolean makeDirs(String path) {
         return (new File(path)).mkdirs();
     }
-    
+
     public FileIO(String filename) {
         try {
             printWriter = new PrintWriter(filename);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static FileIO csv(String filename) {
+        FileIO fileIO = new FileIO(filename);
+        fileIO.SEPARATOR_COLUMN = ",";
+        return fileIO;
     }
     
     public void writeLine(String string) {
