@@ -1,20 +1,11 @@
 package main;
 
-import grid.GridAndGoals;
-import grid.GridGraph;
-import grid.ReachableNodes;
-import grid.StartGoalPoints;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import main.graphgeneration.DefaultGenerator;
-import main.utility.Utility;
-import uiandio.FileIO;
-import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.Anya;
 import algorithms.BasicThetaStar;
@@ -24,6 +15,7 @@ import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.sparsevgs.LineOfSightScanner;
+import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.visibilitygraph.VisibilityGraph;
@@ -31,6 +23,14 @@ import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
 import draw.GridPointSet;
+import grid.GridAndGoals;
+import grid.GridGraph;
+import grid.ReachableNodes;
+import grid.StartGoalPoints;
+import main.graphgeneration.DefaultGenerator;
+import main.utility.Utility;
+import uiandio.FileIO;
+import uiandio.GraphImporter;
 
 public class Experiment {
     
@@ -277,28 +277,35 @@ public class Experiment {
      * The results are output to the file VisibilityGraphSizes.txt.
      */
     private static void testVisibilityGraphSize() {
-        FileIO fileIO = new FileIO(AnyAnglePathfinding.PATH_TESTDATA + "VisibilityGraphSizes.txt");
-        Random seedGenerator = new Random();
+        FileIO fileIO = FileIO.csv(AnyAnglePathfinding.PATH_ANALYSISDATA + "VisibilityGraphSizes.csv");
+        Random seedGenerator = new Random(9191);
         
-        fileIO.writeRow("Seed", "Size", "%Blocked", "Vertices", "Edges (Directed)");
-        for (int i=0; i<30; i++) {
+        fileIO.writeRow("Seed", "Size", "UnblockedRatio", "%Blocked", "VG Vertices", "VG Edges (Directed)", "SVG Vertices", "SVG Edges (Directed)");
+        for (int i=0; i<50; i++) {
+            int currentSize = 10 + i*10;
             for (int r=0; r<3; r++) {
                 int currentRatio = (r == 0 ? 7 : (r == 1 ? 15 : 50));
-                        
-                int currentSize = 10 + i*10;
+                
                 int currentSeed = seedGenerator.nextInt();
                 
                 GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(currentSeed, currentSize, currentSize, currentRatio, 0, 0, currentSize, currentSize);
-                VisibilityGraph vGraph = new VisibilityGraph(gridGraph, 0, 0, currentSize, currentSize);
-                vGraph.initialise();
                 
                 String seedString = currentSeed + "";
                 String sizeString = currentSize + "";
-                String ratioString = gridGraph.getPercentageBlocked()*100f + "";
+                String ratioString = currentRatio + "";
+                String perBlockedString = gridGraph.getPercentageBlocked()*100f + "";
+                
+                VisibilityGraph vGraph = new VisibilityGraph(gridGraph, 0, 0, currentSize, currentSize);
+                vGraph.initialise();
                 String verticesString = vGraph.size() + "";
                 String edgesString = vGraph.computeSumDegrees() + "";
                 
-                fileIO.writeRow(seedString, sizeString, ratioString, verticesString, edgesString);
+                SparseVisibilityGraph svGraph = new SparseVisibilityGraph(gridGraph);
+                svGraph.initialise(0, 0, currentSize, currentSize);
+                String sverticesString = svGraph.size() + "";
+                String sedgesString = svGraph.computeSumDegrees() + "";
+                
+                fileIO.writeRow(seedString, sizeString, ratioString, perBlockedString, verticesString, edgesString, sverticesString, sedgesString);
                 fileIO.flush();
             }
         }
