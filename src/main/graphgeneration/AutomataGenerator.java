@@ -7,22 +7,22 @@ import grid.GridGraph;
 
 public class AutomataGenerator {
 
-    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
+    public static GridAndGoals generateUnseeded(int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset, bordersAreBlocked);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
-    public static GridAndGoals generateSeeded(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
+    public static GridAndGoals generateSeeded(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset, bordersAreBlocked);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
     
-    public static GridGraph generateSeededGraphOnly(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset) {
-        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
+    public static GridGraph generateSeededGraphOnly(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset, bordersAreBlocked);
         return gridGraph;
     }
 
-    private static GridGraph generate(boolean seededRandom, long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset) {
+    private static GridGraph generate(boolean seededRandom, long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
 
         Random rand = new Random();
@@ -34,7 +34,7 @@ public class AutomataGenerator {
         }
         rand = new Random(seed);
         
-        generateRandomMap(rand, gridGraph, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset);
+        generateRandomMap(rand, gridGraph, unblockedRatio, iterations, resolutionMultiplier, cutoffOffset, bordersAreBlocked);
         
         return gridGraph;
     }
@@ -44,7 +44,7 @@ public class AutomataGenerator {
      * Generates a truly random map for the gridGraph.
      * No longer used as this does not generate very good or realistic grids.
      */
-    private static void generateRandomMap(Random rand, GridGraph gridGraph, int frequency, int iterations, float resolutionMultiplier, int cutoffOffset) {
+    private static void generateRandomMap(Random rand, GridGraph gridGraph, int frequency, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
         int resolution = Math.max((int)((sizeX+sizeY)*resolutionMultiplier/150), 1);
@@ -65,112 +65,8 @@ public class AutomataGenerator {
         }
         
         for (int itr=0;itr<iterations;++itr) {
-            /*
-             * Note: for brevity, the following code:
-             * nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-             * 
-             * Is a shortened version of:
-             * if (px < 0 || py < 0 || px >= sizeX || py >= sizeY) {
-             *     nBlocked++;
-             * } else {
-             *     nBlocked += grid[py][px] ? 1 : 0;
-             * }
-             */
-            
-            { // Base case: y = 0
-                int y = 0;
-                { // Base case: x = 0
-                    int x = 0;
-                    int nBlocked = 0;
-                    for (int i=-resolution;i<=resolution;++i) {
-                        for (int j=-resolution;j<=resolution;++j) {
-                            int px = x + i;
-                            int py = y + j;
-                            nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                        }
-                    }
-                    
-                    count[y][x] = nBlocked;
-                }
-
-                // y = 0, x > 0
-                for (int x=1;x<sizeX;++x) {
-                    int nBlocked = count[y][x-1];
-
-                    { // subtract for (x-1-r,?)
-                        int px = x - resolution - 1;
-                        for (int j=-resolution;j<=resolution;++j) {
-                            int py = y + j;
-                            nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                        }
-                    }
-                    
-                    { // add for (x+r,?)
-                        int px = x + resolution;
-                        for (int j=-resolution;j<=resolution;++j) {
-                            int py = y + j;
-                            nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                        }
-                    }
-                    
-                    count[y][x] = nBlocked;
-                }
-            }
-
-            // y > 0
-            for (int y=1;y<sizeY;++y) {
-                // y > 0, x = 0
-                {
-                    int x = 0;
-                    int nBlocked = count[y-1][x];
-
-                    { // subtract for (?,y-1-r)
-                        int py = y - resolution - 1;
-                        for (int i=-resolution;i<=resolution;++i) {
-                            int px = x + i;
-                            nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                        }
-                    }
-                    
-                    { // add for (?,y+r)
-                        int py = y + resolution;
-                        for (int i=-resolution;i<=resolution;++i) {
-                            int px = x + i;
-                            nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                        }
-                    }
-
-                    count[y][x] = nBlocked;
-                }
-                
-                // y > 0, x > 0
-                for (int x=1;x<sizeX;++x) {
-                    int nBlocked = count[y-1][x] + count[y][x-1] - count[y-1][x-1];
-
-                    { // add (x-1-r,y-1-r)
-                        int px = x - resolution - 1;
-                        int py = y - resolution - 1;
-                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                    }
-                    { // add (x+r,y+r)
-                        int px = x + resolution;
-                        int py = y + resolution;
-                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                    }
-                    { // subtract (x-1-r,y+r)
-                        int px = x - resolution - 1;
-                        int py = y + resolution;
-                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                    }
-                    { // subtract (x+r,y-1-r)
-                        int px = x + resolution;
-                        int py = y - resolution - 1;
-                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
-                    }
-                    
-                    count[y][x] = nBlocked;
-                }
-            }
+            if (bordersAreBlocked) runAutomataIterationBlockedBorders(sizeX, sizeY, resolution, grid, count);
+            else runAutomataIterationUnblockedBorders(sizeX, sizeY, resolution, grid, count);
             
             for (int y=0;y<sizeY;++y) {
                 for (int x=0;x<sizeX;++x) {
@@ -182,6 +78,224 @@ public class AutomataGenerator {
         for (int y=0;y<sizeY;++y) {
             for (int x=0;x<sizeX;++x) {
                 gridGraph.setBlocked(x, y, grid[y][x]);
+            }
+        }
+    }
+
+    private static void runAutomataIterationUnblockedBorders(int sizeX, int sizeY, int resolution, boolean[][] grid, int[][] count) {
+        /*
+         * Note: for brevity, the following code:
+         * nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+         * 
+         * Is a shortened version of:
+         * if (px < 0 || py < 0 || px >= sizeX || py >= sizeY) {
+         *     nBlocked++;
+         * } else {
+         *     nBlocked += grid[py][px] ? 1 : 0;
+         * }
+         */
+        
+        { // Base case: y = 0
+            int y = 0;
+            { // Base case: x = 0
+                int x = 0;
+                int nBlocked = 0;
+                for (int i=-resolution;i<=resolution;++i) {
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int px = x + i;
+                        int py = y + j;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                    }
+                }
+                
+                count[y][x] = nBlocked;
+            }
+
+            // y = 0, x > 0
+            for (int x=1;x<sizeX;++x) {
+                int nBlocked = count[y][x-1];
+
+                { // subtract for (x-1-r,?)
+                    int px = x - resolution - 1;
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int py = y + j;
+                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                    }
+                }
+                
+                { // add for (x+r,?)
+                    int px = x + resolution;
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int py = y + j;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                    }
+                }
+                
+                count[y][x] = nBlocked;
+            }
+        }
+
+        // y > 0
+        for (int y=1;y<sizeY;++y) {
+            // y > 0, x = 0
+            {
+                int x = 0;
+                int nBlocked = count[y-1][x];
+
+                { // subtract for (?,y-1-r)
+                    int py = y - resolution - 1;
+                    for (int i=-resolution;i<=resolution;++i) {
+                        int px = x + i;
+                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                    }
+                }
+                
+                { // add for (?,y+r)
+                    int py = y + resolution;
+                    for (int i=-resolution;i<=resolution;++i) {
+                        int px = x + i;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                    }
+                }
+
+                count[y][x] = nBlocked;
+            }
+            
+            // y > 0, x > 0
+            for (int x=1;x<sizeX;++x) {
+                int nBlocked = count[y-1][x] + count[y][x-1] - count[y-1][x-1];
+
+                { // add (x-1-r,y-1-r)
+                    int px = x - resolution - 1;
+                    int py = y - resolution - 1;
+                    nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                }
+                { // add (x+r,y+r)
+                    int px = x + resolution;
+                    int py = y + resolution;
+                    nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                }
+                { // subtract (x-1-r,y+r)
+                    int px = x - resolution - 1;
+                    int py = y + resolution;
+                    nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                }
+                { // subtract (x+r,y-1-r)
+                    int px = x + resolution;
+                    int py = y - resolution - 1;
+                    nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || !grid[py][px]) ? 0 : 1;
+                }
+                
+                count[y][x] = nBlocked;
+            }
+        }
+    }
+
+    private static void runAutomataIterationBlockedBorders(int sizeX, int sizeY, int resolution, boolean[][] grid, int[][] count) {
+        /*
+         * Note: for brevity, the following code:
+         * nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+         * 
+         * Is a shortened version of:
+         * if (px < 0 || py < 0 || px >= sizeX || py >= sizeY) {
+         *     nBlocked++;
+         * } else {
+         *     nBlocked += grid[py][px] ? 1 : 0;
+         * }
+         */
+        
+        { // Base case: y = 0
+            int y = 0;
+            { // Base case: x = 0
+                int x = 0;
+                int nBlocked = 0;
+                for (int i=-resolution;i<=resolution;++i) {
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int px = x + i;
+                        int py = y + j;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                    }
+                }
+                
+                count[y][x] = nBlocked;
+            }
+
+            // y = 0, x > 0
+            for (int x=1;x<sizeX;++x) {
+                int nBlocked = count[y][x-1];
+
+                { // subtract for (x-1-r,?)
+                    int px = x - resolution - 1;
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int py = y + j;
+                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                    }
+                }
+                
+                { // add for (x+r,?)
+                    int px = x + resolution;
+                    for (int j=-resolution;j<=resolution;++j) {
+                        int py = y + j;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                    }
+                }
+                
+                count[y][x] = nBlocked;
+            }
+        }
+
+        // y > 0
+        for (int y=1;y<sizeY;++y) {
+            // y > 0, x = 0
+            {
+                int x = 0;
+                int nBlocked = count[y-1][x];
+
+                { // subtract for (?,y-1-r)
+                    int py = y - resolution - 1;
+                    for (int i=-resolution;i<=resolution;++i) {
+                        int px = x + i;
+                        nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                    }
+                }
+                
+                { // add for (?,y+r)
+                    int py = y + resolution;
+                    for (int i=-resolution;i<=resolution;++i) {
+                        int px = x + i;
+                        nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                    }
+                }
+
+                count[y][x] = nBlocked;
+            }
+            
+            // y > 0, x > 0
+            for (int x=1;x<sizeX;++x) {
+                int nBlocked = count[y-1][x] + count[y][x-1] - count[y-1][x-1];
+
+                { // add (x-1-r,y-1-r)
+                    int px = x - resolution - 1;
+                    int py = y - resolution - 1;
+                    nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                }
+                { // add (x+r,y+r)
+                    int px = x + resolution;
+                    int py = y + resolution;
+                    nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                }
+                { // subtract (x-1-r,y+r)
+                    int px = x - resolution - 1;
+                    int py = y + resolution;
+                    nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                }
+                { // subtract (x+r,y-1-r)
+                    int px = x + resolution;
+                    int py = y - resolution - 1;
+                    nBlocked -= (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;
+                }
+                
+                count[y][x] = nBlocked;
             }
         }
     }

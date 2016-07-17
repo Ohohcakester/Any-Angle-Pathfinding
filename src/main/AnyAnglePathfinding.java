@@ -197,25 +197,36 @@ public class AnyAnglePathfinding {
                 return GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120");
             case 46:
                 return GraphImporter.loadStoredMaze("sc1_EbonLakes", "139-13_321-470");
-            case 47 : { // SEEDED
+            case 47: { // SEEDED
                 int unblockedRatio = 5;          // chance of spawning a blocked tile is 1 in unblockedRatio.
-                int iterations = 4;              // number of iterations for cellular automata
+                int iterations = 3;              // number of iterations for cellular automata
                 int cutoffOffset = -1;           // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
-                float resolution = 1.f;          // (Larger -> bigger islands)
-                int seed = -435891213;           // seed for the random.
+                float resolution = 1f;          // (Larger -> bigger islands)
+                boolean bordersAreBlocked = false;
+                int seed = -44556930;           // seed for the random.
 
-                int sizeX = 10323;               // x-axis size of grid
-                int sizeY = 10084;               // y-axis size of grid
-                int sx = 14;                     // y-coordinate of start point
-                int sy = 13;                     // x-coordinate of start point
-                int ex = 96;                     // y-coordinate of goal point
-                int ey = 71;                     // x-coordinate of goal point
+                int sizeX = 600;               // x-axis size of grid
+                int sizeY = 600;               // y-axis size of grid
+                int sx = 19;                     // y-coordinate of start point
+                int sy = 148;                     // x-coordinate of start point
+                int ex = 203;                     // y-coordinate of goal point
+                int ey = 145;                     // x-coordinate of goal point
 
-                return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, sx, sy, ex, ey);
+                return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked, sx, sy, ex, ey);
             }
-            default :
+            case 48:
+                return GraphImporter.loadStoredMaze("sc1_GreenerPastures", "210-327_722-43");
+            case 49:
+                return DefaultGenerator.generateSeeded(-1089290968, 50, 50, 7, 9, 6, 40, 46); // Good, mid-size indirect path map
+            case 50:
+                return DefaultGenerator.generateSeeded(-63381719, 19, 13, 10, 15, 1, 9, 11); // Counterexample maze that shows that you need to consider finite-level edges even after encountering skip-vertices in ENLSVGs.
+            case 51:
+                return AutomataGenerator.generateSeeded(-44556930, 223, 164, 5, 3, 2.4f, -1, true, 19, 148, 203, 145);
+            default:
                 return null;
         }
+        
+
     }
     
     /**
