@@ -142,6 +142,18 @@ public final class LineOfSightScanner {
     /**
      * Stores results in successorsX, successorsY and nSuccessors. 
      */
+    public final void computeAllVisibleSuccessors(int sx, int sy) {
+        snapshot_sx=sx;snapshot_sy=sy;
+        clearSuccessors();
+        clearStack();
+
+        generateStartingStates(sx, sy);
+        exploreStatesNonTaut(sx, sy);
+    }
+
+    /**
+     * Stores results in successorsX, successorsY and nSuccessors. 
+     */
     public final void computeAllVisibleTautSuccessors(int sx, int sy) {
         snapshot_sx=sx;snapshot_sy=sy;
         clearSuccessors();
@@ -850,6 +862,183 @@ public final class LineOfSightScanner {
             }
         }
     }
+    
+    
+
+    private final void exploreStatesNonTaut(int sx, int sy) {
+        while (intervalStackSize > 0) {
+            LOSInterval currState = stackPop();
+            boolean leftInclusive = (currState.inclusive & LOSInterval.LEFT_INCLUSIVE) != 0;
+            boolean rightInclusive = (currState.inclusive & LOSInterval.RIGHT_INCLUSIVE) != 0;
+            //System.out.println("POP " + currState);
+
+            boolean zeroLengthInterval = currState.xR.isEqualTo(currState.xL);
+            
+            if (currState.y > sy) {
+                // Upwards
+                
+                // Insert endpoints if integer.
+                if (leftInclusive && currState.xL.isWholeNumber()) {
+                    /* The two cases   _
+                     *  _             |X|
+                     * |X|'.           ,'
+                     *      '.       ,'
+                     *        B     B
+                     */
+                    
+                    int x = currState.xL.n;
+                    int y = currState.y;
+                    
+                    if (graph.isOuterCorner(x, y)) {
+                        addSuccessor(x, y);
+                        //leftInclusive = false;
+                    }
+                }
+                if (rightInclusive && currState.xR.isWholeNumber()) {
+                    /*   _   The two cases
+                     *  |X|             _
+                     *  '.           ,'|X|
+                     *    '.       ,'
+                     *      B     B
+                     */
+                    
+                    int x = currState.xR.n;
+                    int y = currState.y;
+                    
+                    if (graph.isOuterCorner(x, y)) {
+                        addSuccessor(x, y);
+                        //rightInclusive = false;
+                    }
+                }
+                
+                
+                
+                // Generate Upwards
+                /*
+                 * =======      =====    =====
+                 *  \   /       / .'      '. \
+                 *   \ /   OR  /.'    OR    '.\
+                 *    B       B                B
+                 */
+
+                // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                int dy = currState.y - sy;
+                Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+
+                int leftBound = leftUpExtent(currState.xL.ceil(), currState.y);
+                if (currState.xL.isWholeNumber() && graph.bottomRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
+                
+                if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                    leftProjection = new Fraction(leftBound);
+                    leftInclusive = true;
+                }
+
+                // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+                
+                int rightBound = rightUpExtent(currState.xR.floor(), currState.y);
+                if (currState.xR.isWholeNumber() && graph.bottomLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
+
+                if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                    rightProjection = new Fraction(rightBound);
+                    rightInclusive = true;
+                }
+
+                // Call Generate
+                if (leftInclusive && rightInclusive) {
+                    if (leftProjection.isLessThanOrEqual(rightProjection)) {
+                        generateUpwards(leftProjection, rightProjection, sx, sy, currState.y, true, true);
+                    }
+                }
+                else if (leftProjection.isLessThan(rightProjection)) {
+                    generateUpwards(leftProjection, rightProjection, sx, sy, currState.y, leftInclusive, rightInclusive);
+                }
+            }
+            else {
+                // Upwards
+                
+                // Insert endpoints if integer.
+                if (leftInclusive && currState.xL.isWholeNumber()) {
+                    /* The two cases
+                     *        B     B
+                     *  _   ,'       '.
+                     * |X|.'           '.
+                     *                |X|
+                     */
+                    
+                    int x = currState.xL.n;
+                    int y = currState.y;
+                    
+                    if (graph.isOuterCorner(x, y)) {
+                        addSuccessor(x, y);
+                        //leftInclusive = false;
+                    }
+                }
+                if (rightInclusive && currState.xR.isWholeNumber()) {
+                    /*       The two cases
+                     *      B     B
+                     *    .'       '.   _
+                     *  .'           '.|X|
+                     *  |X|
+                     */
+                    
+                    int x = currState.xR.n;
+                    int y = currState.y;
+                    if (graph.isOuterCorner(x, y)) {
+                        addSuccessor(x, y);
+                        //rightInclusive = false;
+                    }
+                }
+
+
+                
+                // Generate downwards
+                /*
+                 *    B       B                B
+                 *   / \   OR  \'.    OR    .'/
+                 *  /   \       \ '.      .' /
+                 * =======      =====    =====
+                 */
+
+                // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                int dy = sy - currState.y; 
+                Fraction leftProjection = currState.xL.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+                
+                int leftBound = leftDownExtent(currState.xL.ceil(), currState.y);
+                if (currState.xL.isWholeNumber() && graph.topRightOfBlockedTile(currState.xL.n, currState.y)) leftBound = currState.xL.n;
+                
+                if (leftProjection.isLessThan(leftBound)) { // leftProjection < leftBound
+                    leftProjection = new Fraction(leftBound);
+                    leftInclusive = true;
+                }
+
+                // (Px-Bx)*(Py-By+1)/(Py-By) + Bx
+                Fraction rightProjection = currState.xR.minus(sx).multiplyDivide(dy+1, dy).plus(sx);
+
+                int rightBound = rightDownExtent(currState.xR.floor(), currState.y);
+                if (currState.xR.isWholeNumber() && graph.topLeftOfBlockedTile(currState.xR.n, currState.y)) rightBound = currState.xR.n;
+                
+                if (!rightProjection.isLessThanOrEqual(rightBound)) { // rightBound < rightProjection
+                    rightProjection = new Fraction(rightBound);
+                    rightInclusive = true;
+                }
+
+                // Call Generate
+                if (leftInclusive && rightInclusive) {
+                    if (leftProjection.isLessThanOrEqual(rightProjection)) {
+                        generateDownwards(leftProjection, rightProjection, sx, sy, currState.y, true, true);
+                    }
+                }
+                else if (leftProjection.isLessThan(rightProjection)) {
+                    generateDownwards(leftProjection, rightProjection, sx, sy, currState.y, leftInclusive, rightInclusive);
+                }
+            }
+        }
+    }
+    
+    
+    
+    
 
     private final int leftUpExtent(int xL, int y) {
         return xL > sizeX ? sizeX : leftDownExtents[y+1][xL];
