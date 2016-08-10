@@ -189,6 +189,8 @@ public class TestDataGenerator {
         addParameter(fileIO, "nBlocked", analysis.nBlocked);
         addParameter(fileIO, "blockDensity", analysis.blockDensity);
         addParameter(fileIO, "averageOpenSpaceSize", analysis.averageOpenSpaceSize);
+        addParameter(fileIO, "averageBlockedIslandSize", analysis.averageBlockedIslandSize);
+        addParameter(fileIO, "averageFloatingBlockedIslandSize", analysis.averageFloatingBlockedIslandSize);
         addParameter(fileIO, "hasSqueezableCorners", analysis.hasSqueezableCorners);
         addParameter(fileIO, "largestConnectedSetSize", analysis.largestConnectedSet.size());
         addParameter(fileIO, "numConnectedSets", analysis.connectedSets.size());

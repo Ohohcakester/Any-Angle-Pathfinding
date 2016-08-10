@@ -1,13 +1,13 @@
 package main.analysis;
 
-import grid.GridGraph;
-import grid.ReachableNodes;
-import grid.ReachableNodesFast;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
 import algorithms.datatypes.Point;
+import grid.BlockedIslandSearch;
+import grid.GridGraph;
+import grid.ReachableNodes;
+import grid.ReachableNodesFast;
 
 public class MazeAnalysis {
     
@@ -16,6 +16,8 @@ public class MazeAnalysis {
     public int nBlocked;
     public float blockDensity;
     public float averageOpenSpaceSize;
+    public float averageBlockedIslandSize;
+    public float averageFloatingBlockedIslandSize;
     
     public boolean hasSqueezableCorners;
     public ArrayList<ArrayList<Point>> connectedSets;
@@ -32,8 +34,10 @@ public class MazeAnalysis {
         this.connectedSets = findConnectedSetsFast(gridGraph);
         this.largestConnectedSet = getLargestSet(connectedSets);
         this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
+        this.averageBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, true);
+        this.averageFloatingBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, false);
     }
-    
+
     private MazeAnalysis(GridGraph gridGraph, Options o) {
         if (o.sizeX) this.sizeX = gridGraph.sizeX;
         if (o.sizeY) this.sizeY = gridGraph.sizeY;
@@ -43,6 +47,8 @@ public class MazeAnalysis {
         if (o.connectedSets) this.connectedSets = findConnectedSetsFast(gridGraph);
         if (o.largestConnectedSet) this.largestConnectedSet = getLargestSet(connectedSets);
         if (o.averageOpenSpaceSize) this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
+        if (o.averageBlockedIslandSize) this.averageBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, true);
+        if (o.averageFloatingBlockedIslandSize) this.averageFloatingBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, false);
         this.options = o;
     }
     
@@ -141,6 +147,30 @@ public class MazeAnalysis {
         return (float)((double)total/count);
     }
 
+    private static float computeAverageBlockedIslandSize(GridGraph gridGraph, boolean acceptBorderIslands) {
+
+        boolean[] visited = new boolean[gridGraph.sizeX*gridGraph.sizeY];
+        int nIslands = 0;
+        int totalIslandSizes = 0;
+        
+        BlockedIslandSearch reachable = new BlockedIslandSearch(gridGraph);
+        int sizeX = gridGraph.sizeX;
+        int sizeY = gridGraph.sizeY;
+        for (int y=0; y<sizeY; y++) {
+            for (int x=0; x<sizeX; x++) {
+                if (visited[y*sizeX + x]) continue;
+                int islandSize = reachable.computeIslandSize(visited, x, y, acceptBorderIslands);
+                
+                if (islandSize == 0) continue;
+                totalIslandSizes += islandSize;
+                nIslands++;
+            }
+        }
+
+        if (nIslands == 0) return 0;
+        return (float)totalIslandSizes / nIslands;
+    }
+
     /**
      * <pre>
      * returns the size of the max square at (x,y). can possibly return 0.
@@ -193,6 +223,28 @@ public class MazeAnalysis {
     private static int checkUpperBoundNew(int[][] maxRange, int i, int j, int k) {
         return maxRange[i][j + k] - k;
     }
+    
+    public void addParameter(StringBuilder sb, String name, Object value){
+        sb.append(name + ": " + value.toString()).append("\n");
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        addParameter(sb, "sizeX", sizeX);
+        addParameter(sb, "sizeY", sizeY);
+        addParameter(sb, "nTiles", sizeX*sizeY);
+        addParameter(sb, "nBlocked", nBlocked);
+        addParameter(sb, "blockDensity", blockDensity);
+        addParameter(sb, "averageOpenSpaceSize", averageOpenSpaceSize);
+        addParameter(sb, "averageBlockedIslandSize", averageBlockedIslandSize);
+        addParameter(sb, "averageFloatingBlockedIslandSize", averageFloatingBlockedIslandSize);
+        addParameter(sb, "hasSqueezableCorners", hasSqueezableCorners);
+        addParameter(sb, "largestConnectedSetSize", largestConnectedSet.size());
+        addParameter(sb, "numConnectedSets", connectedSets.size());
+        addParameter(sb, "connectedSetSizes", computeConnectedSetSizeList());
+        return sb.toString();
+    }
 
     public static class Options {
         public boolean sizeX;
@@ -203,6 +255,8 @@ public class MazeAnalysis {
         public boolean hasSqueezableCorners;
         public boolean connectedSets;
         public boolean largestConnectedSet;
+        public boolean averageBlockedIslandSize;
+        public boolean averageFloatingBlockedIslandSize;
         
         public Options (String...options) {
             for (String option : options) {
@@ -215,6 +269,8 @@ public class MazeAnalysis {
                     case "hassqueezablecorners": hasSqueezableCorners=true;break;
                     case "connectedsets": connectedSets=true;break;
                     case "largestconnectedset": largestConnectedSet=true;break;
+                    case "averageBlockedIslandSize": averageBlockedIslandSize=true;break;
+                    case "averageFloatingBlockedIslandSize": averageFloatingBlockedIslandSize=true;break;
                 }
             }
         }

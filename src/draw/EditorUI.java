@@ -1,20 +1,20 @@
 package draw;
 
-import grid.GridGraph;
-import grid.StartGoalPoints;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import algorithms.datatypes.Point;
+import grid.GridGraph;
+import grid.StartGoalPoints;
 import main.AnyAnglePathfinding;
+import main.analysis.MazeAnalysis;
 import main.analysis.ProblemAnalysis;
 import main.analysis.TwoPoint;
 import main.testgen.Stringifier;
 import main.testgen.TestDataGenerator;
 import main.utility.Utility;
 import uiandio.FileIO;
-import algorithms.datatypes.Point;
 
 public class EditorUI extends DrawCanvas {
     private int sx;
@@ -133,6 +133,12 @@ public class EditorUI extends DrawCanvas {
     public void generateMazeAnalysis() {
         ArrayList<TwoPoint> tpList = new ArrayList<>();
         TestDataGenerator.generateTestData(gridGraph, tpList, mazeName, true);
+    }
+
+    public void printMazeAnalysis() {
+        MazeAnalysis mazeAnalysis = new MazeAnalysis(gridGraph);
+        System.out.println("=Maze Analysis:=================");
+        System.out.println(mazeAnalysis);
     }
 
     public void printPathAnalysis() {
