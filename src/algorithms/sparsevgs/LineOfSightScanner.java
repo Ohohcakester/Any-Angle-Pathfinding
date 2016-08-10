@@ -16,6 +16,8 @@ import algorithms.datatypes.SnapshotItem;
 public final class LineOfSightScanner {
     public static ArrayList<List<SnapshotItem>> snapshotList = new ArrayList<>();
     private static ArrayList<SnapshotItem> snapshots = new ArrayList<>();
+    private static int snapshot_sx;
+    private static int snapshot_sy;
     
     private final GridGraph graph;
     private final int sizeX;
@@ -70,7 +72,7 @@ public final class LineOfSightScanner {
     }
     
     private static final void addToSnapshot(LOSInterval interval) {
-        snapshots.add(SnapshotItem.generate(new Integer[]{interval.y, interval.xL.n, interval.xL.d, interval.xR.n, interval.xR.d}, Color.GREEN));
+        snapshots.add(SnapshotItem.generate(new Integer[]{interval.y, interval.xL.n, interval.xL.d, interval.xR.n, interval.xR.d, snapshot_sx, snapshot_sy}, Color.GREEN));
         snapshotList.add(new ArrayList<SnapshotItem>(snapshots));
     }
     
@@ -141,6 +143,7 @@ public final class LineOfSightScanner {
      * Stores results in successorsX, successorsY and nSuccessors. 
      */
     public final void computeAllVisibleTautSuccessors(int sx, int sy) {
+        snapshot_sx=sx;snapshot_sy=sy;
         clearSuccessors();
         clearStack();
 
@@ -152,6 +155,7 @@ public final class LineOfSightScanner {
      * Stores results in successorsX, successorsY and nSuccessors. 
      */
     public final void computeAllVisibleTwoWayTautSuccessors(int sx, int sy) {
+        snapshot_sx=sx;snapshot_sy=sy;
         clearSuccessors();
         clearStack();
 
@@ -164,6 +168,7 @@ public final class LineOfSightScanner {
      * We are moving in direction dx, dy
      */
     public final void computeAllVisibleIncrementalTautSuccessors(int sx, int sy, int dx, int dy) {
+        snapshot_sx=sx;snapshot_sy=sy;
         clearSuccessors();
         clearStack();
 
