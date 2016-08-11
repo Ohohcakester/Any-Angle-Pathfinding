@@ -24,6 +24,21 @@ public class TwoPoint {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        // Symmetric. Switching p1 and p2 should give the same hash code.
+        final int prime = 31;
+        int result = 1;
+        int v1 = (p1 == null) ? 0 : p1.hashCode();
+        int v2 = (p2 == null) ? 0 : p2.hashCode();
+        int sum = v1 + v2;
+        int diff = Math.abs(v1 - v2);
+        
+        result = prime * result + sum;
+        result = prime * result + diff;
+        return result;
+    }
     
     @Override
     public String toString() {

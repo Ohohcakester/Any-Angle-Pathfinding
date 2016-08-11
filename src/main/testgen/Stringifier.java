@@ -14,6 +14,19 @@ public class Stringifier {
         sb.append(intToStr(unblockedRatio));
         return sb.toString();
     }
+    
+    public static String automataToString(long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
+        StringBuilder sb = new StringBuilder("gen_");
+        sb.append(sizeX).append("x");
+        sb.append(sizeY).append("_");
+        sb.append(unblockedRatio).append("_");
+        sb.append(iterations).append("_");
+        sb.append((int)(resolutionMultiplier*100)).append("_");
+        sb.append(cutoffOffset).append("_");
+        sb.append(bordersAreBlocked ? "T" : "F").append("_");
+        sb.append(longToStr(seed));
+        return sb.toString();
+    }
 
     public static String defaultToStringReadable(int seed, int sizeX, int sizeY, int unblockedRatio) {
         StringBuilder sb = new StringBuilder("gen_");
@@ -34,11 +47,20 @@ public class Stringifier {
         }
         return pars;
     }
-    
+
     public static String intToStr(int i) {
         StringBuilder sb = new StringBuilder("i");
         while (i != 0) {
             sb.append(digitToChar((i%32+32)%32));
+            i = i>>>5;
+        }
+        return sb.toString();
+    }
+    
+    public static String longToStr(long i) {
+        StringBuilder sb = new StringBuilder("i");
+        while (i != 0) {
+            sb.append(digitToChar((int)(i%32+32)%32));
             i = i>>>5;
         }
         return sb.toString();

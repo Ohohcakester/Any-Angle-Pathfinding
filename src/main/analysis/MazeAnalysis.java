@@ -38,10 +38,10 @@ public class MazeAnalysis {
         this.averageFloatingBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, false);
     }
 
-    private MazeAnalysis(GridGraph gridGraph, Options o) {
+    public MazeAnalysis(GridGraph gridGraph, Options o) {
         if (o.sizeX) this.sizeX = gridGraph.sizeX;
         if (o.sizeY) this.sizeY = gridGraph.sizeY;
-        if (o.nBlocked) this.nBlocked = gridGraph.getNumBlocked();
+        if (o.nBlocked||o.blockDensity) this.nBlocked = gridGraph.getNumBlocked();
         if (o.blockDensity) this.blockDensity = (float)nBlocked / (sizeX*sizeY);
         if (o.hasSqueezableCorners) this.hasSqueezableCorners = checkHasSqueezableCorners(gridGraph);
         if (o.connectedSets) this.connectedSets = findConnectedSetsFast(gridGraph);

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import main.analysis.MazeAnalysis;
+import main.mazes.MazeAndTestCases;
+import main.mazes.StoredTestMazes;
 import uiandio.CloseOnExitWindowListener;
 import uiandio.GraphImporter;
 import algorithms.datatypes.Point;
@@ -20,7 +22,9 @@ public class GridGraphVisualiser {
 
     public static void run() {
         //loadExisting("sc1_EbonLakes");
-        loadDefault("default");
+        //loadExisting("sc1_GreenerPastures");
+        //loadDefault("default");
+        loadStored(StoredTestMazes.loadAutomataMaze(0, 9));
         //loadMaze("custommaze2.txt", "custom");
         //loadMaze("lineOfSightTest.txt", "custom");
         //loadExisting("sc2_blisteringsands");
@@ -45,6 +49,13 @@ public class GridGraphVisualiser {
         setupMainFrame(gridGraph, mazeName, null);
     }
 
+
+    private static void loadStored(MazeAndTestCases mazeAndTestCases) {
+        GridGraph gridGraph = mazeAndTestCases.gridGraph;
+        String mazeName = mazeAndTestCases.mazeName;
+        
+        setupMainFrame(gridGraph, mazeName, null);
+    }
     
     public static void loadDefault(String mazeName) {
         GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();

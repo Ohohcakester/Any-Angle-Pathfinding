@@ -1,19 +1,7 @@
 package main;
 
-import grid.GridGraph;
-
 import java.util.ArrayList;
 
-import main.analysis.TwoPoint;
-import main.testgen.PathLengthClass;
-import main.testgen.StandardMazes;
-import main.testgen.StartEndPointData;
-import main.testgen.TestDataGenerator;
-import main.testgen.TestDataLibrary;
-import main.utility.TimeCounter;
-import main.utility.Utility;
-import uiandio.FileIO;
-import uiandio.GraphImporter;
 import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
@@ -41,6 +29,20 @@ import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.vertexanya.VertexAnyaNoExtents;
 import algorithms.vertexanya.VisibilityScanSearchEager;
 import algorithms.vertexanya.VisibilityScanSearchSemiEager;
+import grid.GridGraph;
+import main.analysis.MazeAnalysis;
+import main.analysis.TwoPoint;
+import main.mazes.MazeAndTestCases;
+import main.mazes.StoredTestMazes;
+import main.testgen.PathLengthClass;
+import main.testgen.StandardMazes;
+import main.testgen.StartEndPointData;
+import main.testgen.TestDataGenerator;
+import main.testgen.TestDataLibrary;
+import main.utility.TimeCounter;
+import main.utility.Utility;
+import uiandio.FileIO;
+import uiandio.GraphImporter;
 
 public class AlgoTest {
     private static FileIO io;
@@ -319,6 +321,27 @@ public class AlgoTest {
         if (writeToFile) io.close();
     }
 
+    public static void printMazeDetails(String mazeName, GridGraph gridGraph) {
+        MazeAnalysis.Options options = new MazeAnalysis.Options();
+        
+        options.sizeX = true;
+        options.sizeY = true;
+        options.averageBlockedIslandSize = true;
+        options.averageFloatingBlockedIslandSize = true;
+        options.blockDensity = true;
+        
+        MazeAnalysis an = new MazeAnalysis(gridGraph, options);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(mazeName);
+        sb.append(" - ").append(an.sizeX).append("x").append(an.sizeY);
+        sb.append(" - ").append(an.blockDensity);
+        sb.append(" - ").append(an.averageBlockedIslandSize);
+        sb.append(" - ").append(an.averageFloatingBlockedIslandSize);
+        
+        println(sb.toString());
+    }
+
     private static void println(Object line) {
         if (writeToFile) {
             io.writeLine(line.toString());
@@ -341,15 +364,31 @@ public class AlgoTest {
         testOnMaze(mazeName, problems, algoFunction, test);
     }
     
-    public static void testOnMaze(String mazeName, ArrayList<TwoPoint> problems, AlgoFunction algoFunction, TestFunction test) {
+    public static void testOnMaze(String mazeName, ArrayList<TwoPoint> problems, AlgoFunction algoFunction,
+            TestFunction test) {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
         test.test(mazeName, gridGraph, problems, algoFunction);
     }
     
-    public static void testOnGraph(GridGraph gridGraph, ArrayList<TwoPoint> problems, AlgoFunction algoFunction, TestFunction test) {
+    public static void testOnGraph(GridGraph gridGraph, ArrayList<TwoPoint> problems, AlgoFunction algoFunction,
+            TestFunction test) {
         test.test("undefined", gridGraph, problems, algoFunction);
     }
     
+    public static void testOnStoredMaze(MazeAndTestCases mazeAndTestCases, AlgoFunction algoFunction, TestFunctionData test) {
+        {
+            ArrayList<StartEndPointData> problems = mazeAndTestCases.problems;
+            GridGraph gridGraph = mazeAndTestCases.gridGraph;
+            String mazeName = mazeAndTestCases.mazeName;
+
+            printMazeDetails(mazeName, gridGraph);
+            
+            test.test(mazeName, gridGraph, problems, algoFunction);
+            mazeAndTestCases = null;
+        }
+        Utility.cleanUpPreallocatedMemory();
+    }
+
     public static void testOnMazeData(String mazeName, AlgoFunction algoFunction, TestFunctionData test) {
         ArrayList<StartEndPointData> problems = GraphImporter.loadStoredMazeProblemData(mazeName);
         testOnMazeData(mazeName, problems, algoFunction, test);
