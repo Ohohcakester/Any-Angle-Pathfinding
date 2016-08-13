@@ -1,24 +1,27 @@
 package main.utility;
 
-import grid.GridGraph;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import main.AlgoFunction;
-import main.testgen.StartEndPointData;
 import algorithms.Anya;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
+import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraph;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
+import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraph;
+import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.subgoalgraphs.SubgoalGraph;
 import algorithms.vertexanya.VertexAnya;
 import algorithms.vertexanya.VertexAnyaMarking;
 import algorithms.visibilitygraph.VisibilityGraph;
+import grid.GridGraph;
+import main.AlgoFunction;
+import main.testgen.StartEndPointData;
 
 public class Utility {
 
@@ -116,6 +119,10 @@ public class Utility {
         Memory.clearMemory();
         ReusableIndirectHeap.clearMemory();
         LineOfSightScanner.clearMemory();
+        VertexNLevelSparseVisibilityGraph.clearMemory();
+        EdgeNLevelSparseVisibilityGraph.clearMemory();
+        DirectedEdgeNLevelSparseVisibilityGraph.clearMemory();
+        VisibilityGraphOptimised.clearMemory();
         SnapshotItem.clearCached();
         //IVGAlgorithm.clearCached();
         
