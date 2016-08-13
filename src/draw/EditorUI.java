@@ -3,10 +3,15 @@ package draw;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Point;
+import algorithms.datatypes.SnapshotItem;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
 import grid.GridGraph;
 import grid.StartGoalPoints;
+import main.AlgoFunction;
 import main.AnyAnglePathfinding;
 import main.analysis.MazeAnalysis;
 import main.analysis.ProblemAnalysis;
@@ -17,18 +22,29 @@ import main.utility.Utility;
 import uiandio.FileIO;
 
 public class EditorUI extends DrawCanvas {
+    
+    public enum PathComputeMode {
+        NO_COMPUTE,
+        PATH_ONLY,
+        SEARCH_TREE,
+    }
+    
     private int sx;
     private int sy;
     private int ex;
     private int ey;
     private final GridPointSet pointSet;
+    private final AlgoFunction algoFunction;
     private final int[][] connectedComponentIndex;
     private final String mazeName;
     private GridLineSet lineSet;
     private boolean isRealTimePathfinding;
+    private PathComputeMode pathComputeMode = PathComputeMode.NO_COMPUTE;
+    
 
-    public EditorUI(GridGraph gridGraph, ArrayList<ArrayList<Point>> connectedSets, String mazeName, StartGoalPoints startGoalPoints) {
+    public EditorUI(GridGraph gridGraph, AlgoFunction algoFunction, ArrayList<ArrayList<Point>> connectedSets, String mazeName, StartGoalPoints startGoalPoints) {
         super(gridGraph);
+        this.algoFunction = algoFunction;
         this.mazeName = mazeName;
         this.connectedComponentIndex = generateConnectedComponentIndexes(connectedSets);
         pointSet = new GridPointSet();
@@ -86,7 +102,7 @@ public class EditorUI extends DrawCanvas {
         if (startEndConnected()) {
             pointSet.addPoint(sx, sy, Color.ORANGE);
             pointSet.addPoint(ex, ey, Color.YELLOW);
-            autoComputePath();
+            updatePath();
         } else {
             if (sx != -1) {
                 pointSet.addPoint(sx, sy, Color.ORANGE);
@@ -98,9 +114,41 @@ public class EditorUI extends DrawCanvas {
         this.changeSet(pointSet);
     }
     
+    public void setPathComputeMode(PathComputeMode mode) {
+        this.pathComputeMode = mode;
+        refreshPoints();
+    }
+    
+    private void updatePath() {
+        switch(pathComputeMode) {
+            case NO_COMPUTE:
+                clearPath();
+                return;
+            case PATH_ONLY:
+                autoComputePath();
+                return;
+            case SEARCH_TREE:
+                autoComputeSearchTree();
+                return;
+        }
+    }
+    
     private void autoComputePath() {
-        ProblemAnalysis pathOnly = ProblemAnalysis.computePathOnly(gridGraph, sx, sy, ex, ey);
-        drawPath(pathOnly.path);
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        
+        drawPath(path);
+    }
+    
+    private void autoComputeSearchTree() {
+        PathFindingAlgorithm algo = algoFunction.getAlgo(gridGraph, sx, sy, ex, ey);
+        algo.computePath();
+        List<SnapshotItem> snapshot = algo.getCurrentSearchSnapshot();
+        GridObjects gridObjects = GridObjects.create(snapshot);
+        this.lineSet = gridObjects.gridLineSet;
+        
+        this.changeSet(lineSet);
     }
 
     private void drawPath(int[][] path) {
@@ -200,6 +248,9 @@ public class EditorUI extends DrawCanvas {
     
     public void onRealTimePathfind() {
         isRealTimePathfinding = true;
+        if (pathComputeMode == PathComputeMode.NO_COMPUTE) {
+            setPathComputeMode(PathComputeMode.PATH_ONLY);
+        }
     }
     
     public void offRealTimePathfind() {

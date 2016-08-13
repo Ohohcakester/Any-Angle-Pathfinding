@@ -119,6 +119,10 @@ public abstract class PathFindingAlgorithm {
         }
     }
     
+    public List<SnapshotItem> getCurrentSearchSnapshot() {
+        return computeSearchSnapshot();
+    }
+    
     protected final boolean isRecording() {
         return recordingMode;
     }

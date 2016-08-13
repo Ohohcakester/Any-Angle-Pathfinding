@@ -5,6 +5,8 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import draw.EditorUI.PathComputeMode;
+
 public class VisualiserKeyboardControls implements KeyListener {
     private final HashMap<Integer,Runnable> functionsRelease;
     private final HashMap<Integer,Runnable> functionsPress;
@@ -33,6 +35,12 @@ public class VisualiserKeyboardControls implements KeyListener {
                 editorUI::printPathAnalysis);
         add(KeyEvent.VK_S, "S: Generates a .map and a .scen file from the maze.",
                 editorUI::generateScen);
+        add(KeyEvent.VK_Z, "Z: Switch mode: Automatically display path between points.",
+                () -> editorUI.setPathComputeMode(PathComputeMode.PATH_ONLY));
+        add(KeyEvent.VK_X, "X: Switch mode: Automatically display search tree between points.",
+                () -> editorUI.setPathComputeMode(PathComputeMode.SEARCH_TREE));
+        add(KeyEvent.VK_C, "C: Switch mode: Disable path computation.",
+                () -> editorUI.setPathComputeMode(PathComputeMode.NO_COMPUTE));
         addHold(KeyEvent.VK_V, "V: Hold down for real-time pathfinding to mouse location",
                 editorUI::onRealTimePathfind, editorUI::offRealTimePathfind);
     }

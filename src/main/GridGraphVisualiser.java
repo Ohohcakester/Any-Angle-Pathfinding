@@ -70,9 +70,10 @@ public class GridGraphVisualiser {
      * @param startGoalPoints 
      */
     private static void setupMainFrame(GridGraph gridGraph, String mazeName, StartGoalPoints startGoalPoints) {
+        AlgoFunction algoFunction = AnyAnglePathfinding.setDefaultAlgoFunction();
         ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
         
-        EditorUI editorUI = new EditorUI(gridGraph, connectedSets, mazeName, startGoalPoints);
+        EditorUI editorUI = new EditorUI(gridGraph, algoFunction, connectedSets, mazeName, startGoalPoints);
         VisualiserMouseControls mouseControls =
                 new VisualiserMouseControls(gridGraph, editorUI);
         VisualiserKeyboardControls keyboardControls =
