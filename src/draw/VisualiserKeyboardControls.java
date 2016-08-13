@@ -27,7 +27,7 @@ public class VisualiserKeyboardControls implements KeyListener {
                 editorUI::generatePath);
         add(KeyEvent.VK_0, "0: Generates the maze analysis for the maze.",
                 editorUI::generateMazeAnalysis);
-        add(KeyEvent.VK_A, "P: Prints the maze analysis for the maze.",
+        add(KeyEvent.VK_A, "A: Prints the maze analysis for the maze.",
                 editorUI::printMazeAnalysis);
         add(KeyEvent.VK_P, "P: Prints the path analysis for the current selected path.",
                 editorUI::printPathAnalysis);
