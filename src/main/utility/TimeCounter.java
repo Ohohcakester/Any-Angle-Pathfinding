@@ -107,39 +107,57 @@ public class TimeCounter {
     private static double per(int value) {
         return (double)value / iterations;
     }
+    
+    private static void println(StringBuilder sb, String line) {
+        sb.append(line).append('\n');
+    }
 
     public static void print() {
-        tryRetrieveFrozenValues();
-        
-        if (timeA != 0) System.out.println("Time A: " + toSecs(timeA));
-        if (timeB != 0) System.out.println("Time B: " + toSecs(timeB));
-        if (timeC != 0) System.out.println("Time C: " + toSecs(timeC));
-        if (timeD != 0) System.out.println("Time D: " + toSecs(timeD));
-        if (timeE != 0) System.out.println("Time E: " + toSecs(timeE));
-        if (counterA != 0) System.out.println("Count A: " + counterA);
-        if (counterB != 0) System.out.println("Count B: " + counterB);
-        if (counterC != 0) System.out.println("Count C: " + counterC);
-        if (counterD != 0) System.out.println("Count D: " + counterD);
-        if (counterE != 0) System.out.println("Count E: " + counterE);
-
-        System.out.println("Iterations: " + iterations);
+        System.out.println(getPrintString());
     }
 
     public static void printAverage() {
+        System.out.println(getPrintAverageString());
+    }
+
+    public static String getPrintString() {
         tryRetrieveFrozenValues();
         
-        if (timeA != 0) System.out.println("Time A: " + toSecsPer(timeA));
-        if (timeB != 0) System.out.println("Time B: " + toSecsPer(timeB));
-        if (timeC != 0) System.out.println("Time C: " + toSecsPer(timeC));
-        if (timeD != 0) System.out.println("Time D: " + toSecsPer(timeD));
-        if (timeE != 0) System.out.println("Time E: " + toSecsPer(timeE));
-        if (counterA != 0) System.out.println("Count A: " + per(counterA));
-        if (counterB != 0) System.out.println("Count B: " + per(counterB));
-        if (counterC != 0) System.out.println("Count C: " + per(counterC));
-        if (counterD != 0) System.out.println("Count D: " + per(counterD));
-        if (counterE != 0) System.out.println("Count E: " + per(counterE));
+        StringBuilder sb = new StringBuilder();
+        if (timeA != 0) println(sb, "Time A: " + toSecs(timeA));
+        if (timeB != 0) println(sb, "Time B: " + toSecs(timeB));
+        if (timeC != 0) println(sb, "Time C: " + toSecs(timeC));
+        if (timeD != 0) println(sb, "Time D: " + toSecs(timeD));
+        if (timeE != 0) println(sb, "Time E: " + toSecs(timeE));
+        if (counterA != 0) println(sb, "Count A: " + counterA);
+        if (counterB != 0) println(sb, "Count B: " + counterB);
+        if (counterC != 0) println(sb, "Count C: " + counterC);
+        if (counterD != 0) println(sb, "Count D: " + counterD);
+        if (counterE != 0) println(sb, "Count E: " + counterE);
 
-        System.out.println("Iterations: " + iterations);
+        println(sb, "Iterations: " + iterations);
+
+        return sb.toString();
+    }
+
+    public static String getPrintAverageString() {
+        tryRetrieveFrozenValues();
+        
+        StringBuilder sb = new StringBuilder();
+        if (timeA != 0) println(sb, "Time A: " + toSecsPer(timeA));
+        if (timeB != 0) println(sb, "Time B: " + toSecsPer(timeB));
+        if (timeC != 0) println(sb, "Time C: " + toSecsPer(timeC));
+        if (timeD != 0) println(sb, "Time D: " + toSecsPer(timeD));
+        if (timeE != 0) println(sb, "Time E: " + toSecsPer(timeE));
+        if (counterA != 0) println(sb, "Count A: " + per(counterA));
+        if (counterB != 0) println(sb, "Count B: " + per(counterB));
+        if (counterC != 0) println(sb, "Count C: " + per(counterC));
+        if (counterD != 0) println(sb, "Count D: " + per(counterD));
+        if (counterE != 0) println(sb, "Count E: " + per(counterE));
+
+        println(sb, "Iterations: " + iterations);
+
+        return sb.toString();
     }
     
     

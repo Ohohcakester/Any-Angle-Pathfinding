@@ -583,7 +583,8 @@ public class AlgoTest {
                 nResults++;
                 TimeCounter.iterations += nTrials * sampleSize;
             }
-            TimeCounter.printAverage();
+            //TimeCounter.printAverage();
+            println(TimeCounter.getPrintAverageString());
 
             double mean = (double) sum / nResults;
             double secondMomentTimesN = (double) sumSquare;
