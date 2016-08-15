@@ -21,7 +21,7 @@ public class Stringifier {
         sb.append(sizeY).append("_");
         sb.append(unblockedRatio).append("_");
         sb.append(iterations).append("_");
-        sb.append((int)(resolutionMultiplier*100)).append("_");
+        sb.append((int)(resolutionMultiplier*1000)).append("_");
         sb.append(cutoffOffset).append("_");
         sb.append(bordersAreBlocked ? "T" : "F").append("_");
         sb.append(longToStr(seed));
