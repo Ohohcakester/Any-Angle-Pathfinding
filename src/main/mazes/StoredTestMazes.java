@@ -21,11 +21,13 @@ public class StoredTestMazes {
 
         int sizeX, sizeY;
         switch (sizeIndex) {
-            case 0: sizeX = sizeY = 1000; break;
-            case 1: sizeX = sizeY = 2000; break;
-            case 2: sizeX = sizeY = 3000; break;
+            case 0: sizeX = sizeY = 2000; break;
+            case 1: sizeX = sizeY = 3000; break;
+            case 2: sizeX = sizeY = 4000; break;
             case 3: sizeX = sizeY = 5000; break;
-            case 4: sizeX = sizeY = 8000; break;
+            case 4: sizeX = sizeY = 6000; break;
+            case 5: sizeX = sizeY = 7000; break;
+            case 6: sizeX = sizeY = 8000; break;
             default: throw new UnsupportedOperationException("Invalid sizeIndex: " + sizeIndex);
         }
 
@@ -43,6 +45,8 @@ public class StoredTestMazes {
             case 9: resolution = 5f; break;
             default: throw new UnsupportedOperationException("Invalid resolutionIndex: " + resolutionIndex);
         }
+        // Standardise resolution.
+        resolution = resolution * 1000 / sizeX;
 
         int seed = sizeIndex + 577*(resolutionIndex+1);
         int problemSeed = resolutionIndex + 9127*(sizeIndex+1);
@@ -51,7 +55,7 @@ public class StoredTestMazes {
         int iterations = 3;
         int cutoffOffset = 0;
         boolean bordersAreBlocked = false;
-        int nProblems = 50;
+        int nProblems = 100;
 
         GridGraph gridGraph = AutomataGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked);
         ArrayList<StartEndPointData> problems = generateProblems(gridGraph, nProblems, problemSeed); 
