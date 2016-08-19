@@ -30,6 +30,7 @@ import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
 import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
+import main.graphgeneration.UpscaledMapGenerator;
 import main.mazes.StoredTestMazes;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
