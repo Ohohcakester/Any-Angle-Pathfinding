@@ -15,9 +15,18 @@ import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.incrementalvgs.IVGAlgorithm;
+import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
+import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
+import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
+import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
+import algorithms.subgoalgraphs.RecursiveStrictAnyAngleSubgoalGraphsAlgorithm;
+import algorithms.subgoalgraphs.StrictAnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
 import algorithms.vertexanya.VertexAnya;
 import algorithms.vertexanya.VertexAnyaMarking;
@@ -359,6 +368,33 @@ public class AnyAnglePathfinding {
                 break;
             case 36 :
                 algoFunction = SubgoalGraphsAlgorithm::new;
+                break;
+            case 37 :
+                algoFunction = NLevelSubgoalGraphsAlgorithm::new;
+                break;
+            case 38 :
+                algoFunction = AnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 39 :
+                algoFunction = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
+                break;
+            case 40 :
+                algoFunction = StrictAnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 41 :
+                algoFunction = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 42 :
+                algoFunction = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+                break;
+            case 43 :
+                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+                break;
+            case 44 :
+                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
+                break;
+            case 45 :
+                algoFunction = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
                 break;
         }
         
