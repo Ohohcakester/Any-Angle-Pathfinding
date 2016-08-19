@@ -30,6 +30,7 @@ import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
 import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
+import main.mazes.StoredTestMazes;
 import main.testgen.TestDataGenerator;
 import uiandio.GraphImporter;
 
@@ -222,6 +223,18 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateSeeded(-63381719, 19, 13, 10, 15, 1, 9, 11); // Counterexample maze that shows that you need to consider finite-level edges even after encountering skip-vertices in ENLSVGs.
             case 51:
                 return AutomataGenerator.generateSeeded(-44556930, 223, 164, 5, 3, 2.4f, -1, true, 19, 148, 203, 145);
+            case 52:
+                return GraphImporter.importGraphFromFile("cropped.txt", 445, 2845, 1705, 77);
+            case 53:
+                return GraphImporter.importGraphFromFile("fatobstaclemaze.txt", 10, 10, 990, 990); // Maze with large, roughly convex obstacles
+            case 54:
+                return GraphImporter.importGraphFromFile("circleobstaclemaze.txt", 10, 10, 990, 990); // Maze with one large circular obstacle
+            case 55:
+                return GraphImporter.importGraphFromFile("threeislands.txt", 10, 10, 390, 390); // Maze with large, roughly convex obstacles
+            case 56:
+                return AutomataGenerator.generateSeeded(694392, 24, 20, 5, 3, 3f, 0, false, 5, 5, 19, 5); // A maze used to demo edge marking
+            case 57:
+                return StoredTestMazes.loadAutomataMaze(0, 7).gridAndGoals(0);
             default:
                 return null;
         }

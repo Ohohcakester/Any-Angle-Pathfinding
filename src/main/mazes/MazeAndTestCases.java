@@ -2,6 +2,7 @@ package main.mazes;
 
 import java.util.ArrayList;
 
+import grid.GridAndGoals;
 import grid.GridGraph;
 import main.testgen.StartEndPointData;
 
@@ -14,5 +15,10 @@ public class MazeAndTestCases {
         this.mazeName = mazeName;
         this.gridGraph = gridGraph;
         this.problems = problems;
+    }
+    
+    public GridAndGoals gridAndGoals(int problemIndex) {
+        StartEndPointData problem = problems.get(problemIndex);
+        return new GridAndGoals(gridGraph, problem.start.x, problem.start.y, problem.end.x, problem.end.y);
     }
 }
