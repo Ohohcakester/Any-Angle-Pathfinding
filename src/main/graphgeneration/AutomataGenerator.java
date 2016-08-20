@@ -82,7 +82,7 @@ public class AutomataGenerator {
         }
     }
 
-    private static void runAutomataIterationUnblockedBorders(int sizeX, int sizeY, int resolution, boolean[][] grid, int[][] count) {
+    protected static void runAutomataIterationUnblockedBorders(int sizeX, int sizeY, int resolution, boolean[][] grid, int[][] count) {
         /*
          * Note: for brevity, the following code:
          * nBlocked += (px < 0 || py < 0 || px >= sizeX || py >= sizeY || grid[py][px]) ? 1 : 0;

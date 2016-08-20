@@ -246,7 +246,7 @@ public class AnyAnglePathfinding {
             case 57:
                 return StoredTestMazes.loadAutomataMaze(0, 7).gridAndGoals(0);
             case 58:
-                return UpscaledMapGenerator.upscale(GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120"), 1);
+                return UpscaledMapGenerator.upscale(GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120"), 9, true);
             default:
                 return null;
         }
