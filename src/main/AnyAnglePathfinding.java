@@ -37,8 +37,10 @@ import algorithms.vertexanya.VisibilityScanSearchEager;
 import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
+import grid.GridGraph;
 import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
+import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
 import main.mazes.StoredTestMazes;
 import main.testgen.TestDataGenerator;
@@ -247,6 +249,15 @@ public class AnyAnglePathfinding {
                 return StoredTestMazes.loadAutomataMaze(0, 7).gridAndGoals(0);
             case 58:
                 return UpscaledMapGenerator.upscale(GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120"), 9, true);
+            case 59:
+                return TiledMapGenerator.mergeMapsDefault(new GridGraph[] {
+                        GraphImporter.loadStoredMaze("wc3_gardenofwar"),
+                        GraphImporter.loadStoredMaze("sc1_EbonLakes"),
+                        GraphImporter.loadStoredMaze("wc3_gardenofwar"),
+                        GraphImporter.loadStoredMaze("sc1_EbonLakes"),
+                        GraphImporter.loadStoredMaze("wc3_gardenofwar"),
+                        GraphImporter.loadStoredMaze("sc1_EbonLakes"),
+                }, 3, 2);
             default:
                 return null;
         }
