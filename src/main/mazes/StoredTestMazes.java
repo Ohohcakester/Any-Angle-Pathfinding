@@ -11,6 +11,7 @@ import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
 import main.graphgeneration.AutomataGenerator;
+import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
 import main.testgen.StartEndPointData;
 import main.testgen.Stringifier;
@@ -84,8 +85,73 @@ public class StoredTestMazes {
         String newMazeName = mazeName + "_x" + multiplier;
         return new MazeAndTestCases(newMazeName, newGridGraph, scaledProblems);
     }
+
+    public static MazeAndTestCases loadTiledMaze(int mazePoolIndex, int size) {
+        int nTiles = size*size;
+        GridGraph[] mazePool = getMazePool(mazePoolIndex);
+        GridGraph[] mazes = new GridGraph[nTiles];
+        for (int i=0;i<nTiles;++i) {
+            mazes[i] = mazePool[i%mazePool.length];
+        }
+        
+        GridGraph newGridGraph = TiledMapGenerator.mergeMaps(mazes, size, size);
+        
+        int nProblems = 50;
+        int seed = size*787+(mazePoolIndex+1)*23;
+        
+        ArrayList<StartEndPointData> newProblems = generateProblems(newGridGraph, nProblems, seed);
+        
+        String newMazeName = "tiled_" + mazePoolIndex + "_" + size;
+        
+        return new MazeAndTestCases(newMazeName, newGridGraph, newProblems);
+    }
     
     
+    
+    private static GridGraph[] getMazePool(int mazePoolIndex) {
+        switch (mazePoolIndex) {
+            case 0:
+                return loadMazesFromNames(new String[] {
+                    "sc1_BigGameHunters",
+                    "sc1_RedCanyons",
+                    "sc1_Eruption",
+                });
+            case 1:
+                return loadMazesFromNames(new String[] {
+                    "sc1_HotZone",
+                    "sc1_Isolation",
+                    "sc1_SpaceAtoll",
+                    "sc1_Ramparts",
+                    "sc1_OrbitalGully",
+                });
+            case 2:
+                return loadMazesFromNames(new String[] {
+                    "wc3_bootybay",
+                    "wc3_darkforest",
+                    "wc3_icecrown",
+                });
+            case 3:
+                return loadMazesFromNames(new String[] {
+                    "wc3_hillsofglory",
+                    "wc3_nighthaven",
+                    "wc3_theglaive",
+                    "wc3_battleground",
+                    "wc3_deadwaterdrop",
+                });
+        }
+        
+        throw new UnsupportedOperationException("Invalid maze pool index: " + mazePoolIndex);
+    }
+    
+    private static GridGraph[] loadMazesFromNames(String[] mazeNames) {
+        GridGraph[] gridGraphs = new GridGraph[mazeNames.length];
+        for (int i=0;i<mazeNames.length;++i) {
+            gridGraphs[i] = GraphImporter.loadStoredMaze(mazeNames[i]);
+        }
+        return gridGraphs;
+    }
+
+
     private static ArrayList<StartEndPointData> generateProblems(GridGraph gridGraph, int nProblems, int seed) {
         ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
         Random rand = new Random(seed);
