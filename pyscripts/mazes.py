@@ -371,6 +371,7 @@ def parseConditions(args):
 
 
 def meetsConditions(attrs, conditions):
+    if attrs == None: return False
     for condition in conditions:
         if not condition(attrs):
             return False
