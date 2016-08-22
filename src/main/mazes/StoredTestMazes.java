@@ -11,9 +11,11 @@ import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
 import main.graphgeneration.AutomataGenerator;
+import main.graphgeneration.UpscaledMapGenerator;
 import main.testgen.StartEndPointData;
 import main.testgen.Stringifier;
 import main.utility.Utility;
+import uiandio.GraphImporter;
 
 public class StoredTestMazes {
     
@@ -63,6 +65,27 @@ public class StoredTestMazes {
         return new MazeAndTestCases(mazeName, gridGraph, problems);
     }
     
+
+    public static MazeAndTestCases loadScaledMaze(String mazeName, int multiplier) {
+        ArrayList<StartEndPointData> problems = GraphImporter.loadStoredMazeProblemData(mazeName);
+        GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
+
+        GridGraph newGridGraph = UpscaledMapGenerator.upscale(gridGraph, multiplier, true);
+        ArrayList<StartEndPointData> scaledProblems = new ArrayList<>();
+        for (StartEndPointData p : problems) {
+            int sx = p.start.x*multiplier;
+            int sy = p.start.y*multiplier;
+            int ex = p.end.x*multiplier;
+            int ey = p.end.y*multiplier;
+            
+            scaledProblems.add(computeStartEndPointData(gridGraph, new Point(sx,sy), new Point(ex,ey)));
+        }
+        
+        String newMazeName = mazeName + "_x" + multiplier;
+        return new MazeAndTestCases(newMazeName, newGridGraph, scaledProblems);
+    }
+    
+    
     private static ArrayList<StartEndPointData> generateProblems(GridGraph gridGraph, int nProblems, int seed) {
         ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
         Random rand = new Random(seed);
@@ -78,14 +101,19 @@ public class StoredTestMazes {
             }
             chosenProblems.add(tp);
             
-            PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
-            algo.computePath();
-            int[][] path = algo.getPath();
-            double shortestPathLength = Utility.computePathLength(gridGraph, path);
-            problemList.add(new StartEndPointData(tp.p1, tp.p2, shortestPathLength));
+            problemList.add(computeStartEndPointData(gridGraph, tp.p1, tp.p2));
         }
         
         return problemList;
+    }
+
+
+    private static StartEndPointData computeStartEndPointData(GridGraph gridGraph, Point p1, Point p2) {
+        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, p1.x, p1.y, p2.x, p2.y);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        double shortestPathLength = Utility.computePathLength(gridGraph, path);
+        return new StartEndPointData(p1, p2, shortestPathLength);
     }
     
     private static TwoPoint generateProblem(Random rand, ArrayList<ArrayList<Point>> connectedSets) {
