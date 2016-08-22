@@ -78,7 +78,7 @@ public class StoredTestMazes {
             int ex = p.end.x*multiplier;
             int ey = p.end.y*multiplier;
             
-            scaledProblems.add(computeStartEndPointData(gridGraph, new Point(sx,sy), new Point(ex,ey)));
+            scaledProblems.add(computeStartEndPointData(newGridGraph, new Point(sx,sy), new Point(ex,ey)));
         }
         
         String newMazeName = mazeName + "_x" + multiplier;
