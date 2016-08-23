@@ -23,8 +23,7 @@ public class GridGraphVisualiser {
     public static void run() {
         //loadExisting("sc1_EbonLakes");
         //loadExisting("sc1_GreenerPastures");
-        //loadDefault("default");
-        loadStored(StoredTestMazes.loadAutomataMaze(0, 9));
+        loadDefault("default");
         //loadMaze("custommaze2.txt", "custom");
         //loadMaze("lineOfSightTest.txt", "custom");
         //loadExisting("sc2_blisteringsands");
