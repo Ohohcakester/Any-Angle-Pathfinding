@@ -383,7 +383,24 @@ public class AlgoTest {
         //     for (int scaleIndex=0; scaleIndex<7; ++scaleIndex) {
         //         testOnStoredMaze(StoredTestMazes.loadAutomataMaze(scaleIndex, resolutionIndex), algo, testFunction_slow);
         //         System.gc();System.gc();
-        //         try {Thread.sleep(1000);}
+        //         try {Thread.sleep(2000);}
+        //         catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+        //         System.gc();System.gc();
+        //     }
+        // }
+        
+        // testScaledMazes("sc1_NovaStation", algo, testFunction_slow);
+        // testScaledMazes("wc3_darkforest", algo, testFunction_slow);
+        // testScaledMazes("sc1_RedCanyons", algo, testFunction_slow);
+        // testScaledMazes("wc3_swampofsorrows", algo, testFunction_slow);
+        // testScaledMazes("sc1_Triskelion", algo, testFunction_slow);
+        // testScaledMazes("wc3_theglaive", algo, testFunction_slow);
+        
+        // for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
+        //     for (int size = 4; size <= 12; ++size) {
+        //         testOnStoredMaze(StoredTestMazes.loadTiledMaze(mazePoolIndex, size), algo, testFunction_slow);
+        //         System.gc();System.gc();
+        //         try {Thread.sleep(2000);}
         //         catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
         //         System.gc();System.gc();
         //     }
@@ -393,6 +410,16 @@ public class AlgoTest {
         println();
 
         if (writeToFile) io.close();
+    }
+    
+    public static void testScaledMazes(String mazeName, AlgoFunction algo, TestFunctionData testFunction) {
+        for (int scale = 2; scale <= 12; scale += 2) {
+            testOnStoredMaze(StoredTestMazes.loadScaledMaze(mazeName,scale), algo, testFunction);
+            System.gc();System.gc();
+            try {Thread.sleep(2000);}
+            catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+            System.gc();System.gc();
+        }
     }
 
     public static void printMazeDetails(String mazeName, GridGraph gridGraph) {
