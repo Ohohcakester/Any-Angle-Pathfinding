@@ -68,22 +68,16 @@ public class StoredTestMazes {
     
 
     public static MazeAndTestCases loadScaledMaze(String mazeName, int multiplier) {
-        ArrayList<StartEndPointData> problems = GraphImporter.loadStoredMazeProblemData(mazeName);
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
-
         GridGraph newGridGraph = UpscaledMapGenerator.upscale(gridGraph, multiplier, true);
-        ArrayList<StartEndPointData> scaledProblems = new ArrayList<>();
-        for (StartEndPointData p : problems) {
-            int sx = p.start.x*multiplier;
-            int sy = p.start.y*multiplier;
-            int ex = p.end.x*multiplier;
-            int ey = p.end.y*multiplier;
-            
-            scaledProblems.add(computeStartEndPointData(newGridGraph, new Point(sx,sy), new Point(ex,ey)));
-        }
+        
+        int nProblems = 50;
+        int seed = mazeName.hashCode()+(multiplier+1)*31;
+        
+        ArrayList<StartEndPointData> newProblems = generateProblems(newGridGraph, nProblems, seed);
         
         String newMazeName = mazeName + "_x" + multiplier;
-        return new MazeAndTestCases(newMazeName, newGridGraph, scaledProblems);
+        return new MazeAndTestCases(newMazeName, newGridGraph, newProblems);
     }
 
     public static MazeAndTestCases loadTiledMaze(int mazePoolIndex, int size) {
