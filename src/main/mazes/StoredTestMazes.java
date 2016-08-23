@@ -19,6 +19,8 @@ import main.utility.Utility;
 import uiandio.GraphImporter;
 
 public class StoredTestMazes {
+
+    private static final int NUM_TEST_PROBLEMS = 50;
     
     public static MazeAndTestCases loadAutomataMaze(int sizeIndex, int resolutionIndex) {
 
@@ -58,7 +60,7 @@ public class StoredTestMazes {
         int iterations = 3;
         int cutoffOffset = 0;
         boolean bordersAreBlocked = false;
-        int nProblems = 50;
+        int nProblems = NUM_TEST_PROBLEMS;
 
         GridGraph gridGraph = AutomataGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked);
         ArrayList<StartEndPointData> problems = generateProblems(gridGraph, nProblems, problemSeed); 
@@ -71,7 +73,7 @@ public class StoredTestMazes {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
         GridGraph newGridGraph = UpscaledMapGenerator.upscale(gridGraph, multiplier, true);
         
-        int nProblems = 50;
+        int nProblems = NUM_TEST_PROBLEMS;
         int seed = mazeName.hashCode()+(multiplier+1)*31;
         
         ArrayList<StartEndPointData> newProblems = generateProblems(newGridGraph, nProblems, seed);
@@ -90,7 +92,7 @@ public class StoredTestMazes {
         
         GridGraph newGridGraph = TiledMapGenerator.mergeMaps(mazes, size, size);
         
-        int nProblems = 50;
+        int nProblems = NUM_TEST_PROBLEMS;
         int seed = size*787+(mazePoolIndex+1)*23;
         
         ArrayList<StartEndPointData> newProblems = generateProblems(newGridGraph, nProblems, seed);
