@@ -258,6 +258,23 @@ public class AnyAnglePathfinding {
                         GraphImporter.loadStoredMaze("wc3_gardenofwar"),
                         GraphImporter.loadStoredMaze("sc1_EbonLakes"),
                 }, 3, 2);
+            case 60: { // SEEDED
+                float initialPercentBlocked = 0.5f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
+                int iterations = 5;                  // number of iterations for cellular automata
+                float cutoffScale = 1;                  // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
+                float resolution = 0.5f;              // (Larger -> bigger islands)
+                boolean bordersAreBlocked = true;
+                int seed = 34142;           // seed for the random.
+
+                int sizeX = 2000;               // x-axis size of grid
+                int sizeY = 1400;               // y-axis size of grid
+                int sx = 5;                     // y-coordinate of start point
+                int sy = 5;                     // x-coordinate of start point
+                int ex = 19;                     // y-coordinate of goal point
+                int ey = 5;                     // x-coordinate of goal point
+
+                return AutomataGenerator.generateSeededDynamicCutoff(seed, sizeX, sizeY, initialPercentBlocked, iterations, resolution, cutoffScale, bordersAreBlocked, sx, sy, ex, ey);
+            }
             default:
                 return null;
         }

@@ -22,6 +22,21 @@ public class AutomataGenerator {
         return gridGraph;
     }
 
+    public static GridAndGoals generateUnseededDynamicCutoff(int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generateDynamicCutoff(false, 0, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+
+    public static GridAndGoals generateSeededDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+    
+    public static GridGraph generateSeededGraphOnlyDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
+        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+        return gridGraph;
+    }
+
     private static GridGraph generate(boolean seededRandom, long seed, int sizeX, int sizeY, int unblockedRatio, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
 
@@ -38,12 +53,25 @@ public class AutomataGenerator {
         
         return gridGraph;
     }
-    
 
-    /**
-     * Generates a truly random map for the gridGraph.
-     * No longer used as this does not generate very good or realistic grids.
-     */
+    private static GridGraph generateDynamicCutoff(boolean seededRandom, long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
+        GridGraph gridGraph = new GridGraph(sizeX, sizeY);
+
+        Random rand = new Random();
+        if (!seededRandom) {
+            seed = rand.nextInt();
+            System.out.println("Starting random with random seed = " + seed);
+        } else {
+            System.out.println("Starting random with predefined seed = " + seed);
+        }
+        rand = new Random(seed);
+        
+        generateRandomMapDynamicCutoff(rand, gridGraph, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+        
+        return gridGraph;
+    }
+    
+    
     private static void generateRandomMap(Random rand, GridGraph gridGraph, int frequency, int iterations, float resolutionMultiplier, int cutoffOffset, boolean bordersAreBlocked) {
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
@@ -82,6 +110,51 @@ public class AutomataGenerator {
         }
     }
 
+
+    private static void generateRandomMapDynamicCutoff(Random rand, GridGraph gridGraph, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
+        int sizeX = gridGraph.sizeX;
+        int sizeY = gridGraph.sizeY;
+        int resolution = Math.max((int)((sizeX+sizeY)*resolutionMultiplier/150), 1);
+        double cutoffExpScale = Math.pow(1.01f, cutoffScale);
+
+        boolean[][] grid = new boolean[sizeY][];
+        // Count: used for DP computation of number of blocked neighbours.
+        //  Note: count includes the current tile as well. We subtract it when we compare with cutoff.
+        int[][] count = new int[sizeY][];
+        for (int y=0;y<sizeY;++y) {
+            grid[y] = new boolean[sizeX];
+            count[y] = new int[sizeX];
+            for (int x=0;x<sizeX;++x) {
+                grid[y][x] = rand.nextFloat() < initialPercentBlocked;
+            }
+        }
+        
+        for (int itr=0;itr<iterations;++itr) {
+            if (bordersAreBlocked) runAutomataIterationBlockedBorders(sizeX, sizeY, resolution, grid, count);
+            else runAutomataIterationUnblockedBorders(sizeX, sizeY, resolution, grid, count);
+            
+            float averageCount = 0;
+            for (int y=0;y<sizeY;++y) {
+                for (int x=0;x<sizeX;++x) {
+                    averageCount += (count[y][x] - (grid[y][x] ? 1 : 0));
+                }
+            }
+            int cutoff = (int)(averageCount / (sizeX*sizeY) * cutoffExpScale);
+            
+            for (int y=0;y<sizeY;++y) {
+                for (int x=0;x<sizeX;++x) {
+                    grid[y][x] = (count[y][x] - (grid[y][x] ? 1 : 0) > cutoff);
+                }
+            }
+        }
+        
+        for (int y=0;y<sizeY;++y) {
+            for (int x=0;x<sizeX;++x) {
+                gridGraph.setBlocked(x, y, grid[y][x]);
+            }
+        }
+    }
+    
     protected static void runAutomataIterationUnblockedBorders(int sizeX, int sizeY, int resolution, boolean[][] grid, int[][] count) {
         /*
          * Note: for brevity, the following code:
