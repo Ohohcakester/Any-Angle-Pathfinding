@@ -2,7 +2,6 @@ package main.analysis;
 
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import algorithms.visibilitygraph.VisibilityGraph;
