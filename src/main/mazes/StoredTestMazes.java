@@ -58,7 +58,7 @@ public class StoredTestMazes {
         int iterations = 3;
         int cutoffOffset = 0;
         boolean bordersAreBlocked = false;
-        int nProblems = 100;
+        int nProblems = 50;
 
         GridGraph gridGraph = AutomataGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked);
         ArrayList<StartEndPointData> problems = generateProblems(gridGraph, nProblems, problemSeed); 
