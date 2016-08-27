@@ -22,18 +22,18 @@ public class AutomataGenerator {
         return gridGraph;
     }
 
-    public static GridAndGoals generateUnseededDynamicCutoff(int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generateDynamicCutoff(false, 0, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+    public static GridAndGoals generateUnseededDynamicCutoff(int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generateDynamicCutoff(false, 0, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, bordersAreBlocked);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
-    public static GridAndGoals generateSeededDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+    public static GridAndGoals generateSeededDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, bordersAreBlocked);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
     
-    public static GridGraph generateSeededGraphOnlyDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
-        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+    public static GridGraph generateSeededGraphOnlyDynamicCutoff(long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked) {
+        GridGraph gridGraph = generateDynamicCutoff(true, seed, sizeX, sizeY, initialPercentBlocked, iterations, resolutionMultiplier, bordersAreBlocked);
         return gridGraph;
     }
 
@@ -54,7 +54,7 @@ public class AutomataGenerator {
         return gridGraph;
     }
 
-    private static GridGraph generateDynamicCutoff(boolean seededRandom, long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
+    private static GridGraph generateDynamicCutoff(boolean seededRandom, long seed, int sizeX, int sizeY, float initialPercentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked) {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
 
         Random rand = new Random();
@@ -66,7 +66,7 @@ public class AutomataGenerator {
         }
         rand = new Random(seed);
         
-        generateRandomMapDynamicCutoff(rand, gridGraph, initialPercentBlocked, iterations, resolutionMultiplier, cutoffScale, bordersAreBlocked);
+        generateRandomMapDynamicCutoff(rand, gridGraph, initialPercentBlocked, iterations, resolutionMultiplier, bordersAreBlocked);
         
         return gridGraph;
     }
@@ -111,11 +111,10 @@ public class AutomataGenerator {
     }
 
 
-    private static void generateRandomMapDynamicCutoff(Random rand, GridGraph gridGraph, float initialPercentBlocked, int iterations, float resolutionMultiplier, float cutoffScale, boolean bordersAreBlocked) {
+    private static void generateRandomMapDynamicCutoff(Random rand, GridGraph gridGraph, float percentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked) {
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
         int resolution = Math.max((int)((sizeX+sizeY)*resolutionMultiplier/150), 1);
-        double cutoffExpScale = Math.pow(1.01f, cutoffScale);
 
         boolean[][] grid = new boolean[sizeY][];
         // Count: used for DP computation of number of blocked neighbours.
@@ -125,25 +124,69 @@ public class AutomataGenerator {
             grid[y] = new boolean[sizeX];
             count[y] = new int[sizeX];
             for (int x=0;x<sizeX;++x) {
-                grid[y][x] = rand.nextFloat() < initialPercentBlocked;
+                grid[y][x] = rand.nextFloat() < percentBlocked;
             }
         }
+        
+        int maxCount = (resolution*2+1);
+        maxCount = maxCount*maxCount - 1;
         
         for (int itr=0;itr<iterations;++itr) {
             if (bordersAreBlocked) runAutomataIterationBlockedBorders(sizeX, sizeY, resolution, grid, count);
             else runAutomataIterationUnblockedBorders(sizeX, sizeY, resolution, grid, count);
             
-            float averageCount = 0;
+            // Adjust counts to exclude the center.
             for (int y=0;y<sizeY;++y) {
                 for (int x=0;x<sizeX;++x) {
-                    averageCount += (count[y][x] - (grid[y][x] ? 1 : 0));
+                    count[y][x] = (count[y][x] - (grid[y][x] ? 1 : 0));
                 }
             }
-            int cutoff = (int)(averageCount / (sizeX*sizeY) * cutoffExpScale);
+            
+            // Compute mean.
+            long totalCount = 0;
+            for (int y=0;y<sizeY;++y) {
+                for (int x=0;x<sizeX;++x) {
+                    totalCount += count[y][x];
+                }
+            }
+            float mean = (float)totalCount / (sizeX*sizeY);
+            
+            // Compute approximately the value at the pth percentile. (where p = percentBlocked)
+            int nBins = (int)Math.sqrt(sizeX*sizeY);
+            
+            // bin 0: <= low
+            // bin n+1: >= low+range
+            // bin i: low + d*(i-1) < x < low + d*(i)
+            int[] bins = new int[nBins+2];
+            float[] binAverage = new float[nBins+2];
+            
+            float low = mean*0.5f;
+            float range = (mean + maxCount)/2 - low;
+            float d = range/nBins;
+            for (int y=0;y<sizeY;++y) {
+                for (int x=0;x<sizeX;++x) {
+                    int bin = (int)((count[y][x] - low)*nBins / range) + 1;
+                    bin = Math.max(Math.min(bin, nBins+1), 0); // Clamp bin to [0,n+1]
+                    binAverage[bin] = (binAverage[bin]*bins[bin] + count[y][x]) / (bins[bin]+1);
+                    bins[bin]++;
+                }
+            }
+            
+            // cutoff = value at pth percentile (similar to median)
+            // using the value at the pth percentile allows us to maintain the same percentageBlocked each iteration.
+            int remainingCumSum = (int)(sizeX*sizeY * (1-percentBlocked));
+            float cutoff = -1;
+            for (int i=0;i<bins.length;++i) {
+                remainingCumSum -= bins[i];
+                if (remainingCumSum < 0) {
+                    cutoff = binAverage[i];
+                    break;
+                }
+            }
             
             for (int y=0;y<sizeY;++y) {
                 for (int x=0;x<sizeX;++x) {
-                    grid[y][x] = (count[y][x] - (grid[y][x] ? 1 : 0) > cutoff);
+                    grid[y][x] = count[y][x] >= cutoff;
                 }
             }
         }
