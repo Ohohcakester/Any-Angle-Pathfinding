@@ -27,6 +27,9 @@ import grid.GridAndGoals;
 import grid.GridGraph;
 import grid.ReachableNodes;
 import grid.StartGoalPoints;
+import main.analysis.MazeAnalyser;
+import main.analysis.MazeAnalysis;
+import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
 import main.utility.Utility;
 import uiandio.FileIO;
@@ -35,6 +38,7 @@ import uiandio.GraphImporter;
 public class Experiment {
     
     public static void run() {
+        findMapsWithLargeMainConnectedSets();
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
@@ -43,7 +47,7 @@ public class Experiment {
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
-        testLOSScan();
+//        testLOSScan();
     }
     
     /**
@@ -619,4 +623,43 @@ private static void testAlgorithmOptimality() {
         }
     }
     
+    private static void findMapsWithLargeMainConnectedSets() {
+
+        float percentBlocked = 0.45f;
+        float resolution = 0.2f;
+        int iterations = 5;
+        int size = 2000;
+        boolean bordersAreBlocked = false;
+
+        int seed = findSuitableSeed(percentBlocked, resolution, iterations, bordersAreBlocked, size);
+        
+        System.out.println("percentBlocked, resolution, iterations, size, bordersAreBlocked, seed");
+        System.out.println(percentBlocked + ", " + resolution + ", " + iterations + ", " + size + ", " + bordersAreBlocked + ", " + seed);
+    }
+
+    private static int findSuitableSeed(float percentBlocked, float resolution, int iterations, boolean bordersAreBlocked, int size) {
+        // the ratio of the size of the largest connected set to the
+        // total size of the remaining connected sets must be at least this value.
+        float cutoffLargestRatioToRemaining = 10.0f;
+        
+        // Starting seed.
+        int seed = 0;
+        
+        int sizeX = size;
+        int sizeY = size;
+        
+        boolean passed = false;
+        while (!passed) {
+            ++seed;        
+            GridGraph gridGraph = AutomataGenerator.generateSeededGraphOnlyDynamicCutoff(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked);
+            MazeAnalysis.Options options = new MazeAnalysis.Options();
+            options.largestRatioToSecond = true;
+            options.largestRatioToRemaining = true;
+            MazeAnalysis mazeAnalysis = new MazeAnalysis(gridGraph, options);
+            System.out.println(mazeAnalysis.largestRatioToRemaining + " " + mazeAnalysis.largestRatioToSecond);
+            passed = mazeAnalysis.largestRatioToRemaining >= cutoffLargestRatioToRemaining;
+        }
+        
+        return seed;
+    }
 }
