@@ -18,6 +18,8 @@ public class MazeAnalysis {
     public float averageOpenSpaceSize;
     public float averageBlockedIslandSize;
     public float averageFloatingBlockedIslandSize;
+    public float largestRatioToSecond;
+    public float largestRatioToRemaining;
     
     public boolean hasSqueezableCorners;
     public ArrayList<ArrayList<Point>> connectedSets;
@@ -33,19 +35,24 @@ public class MazeAnalysis {
         this.hasSqueezableCorners = checkHasSqueezableCorners(gridGraph);
         this.connectedSets = findConnectedSetsFast(gridGraph);
         this.largestConnectedSet = getLargestSet(connectedSets);
+        this.largestRatioToSecond = getLargestComponentRatioToSecondLargest(connectedSets);
+        this.largestRatioToRemaining = getLargestComponentRatioToRemaining(connectedSets);
         this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
         this.averageBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, true);
         this.averageFloatingBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, false);
     }
 
     public MazeAnalysis(GridGraph gridGraph, Options o) {
+        
         if (o.sizeX) this.sizeX = gridGraph.sizeX;
         if (o.sizeY) this.sizeY = gridGraph.sizeY;
         if (o.nBlocked||o.blockDensity) this.nBlocked = gridGraph.getNumBlocked();
         if (o.blockDensity) this.blockDensity = (float)nBlocked / (sizeX*sizeY);
         if (o.hasSqueezableCorners) this.hasSqueezableCorners = checkHasSqueezableCorners(gridGraph);
-        if (o.connectedSets) this.connectedSets = findConnectedSetsFast(gridGraph);
+        if (o.connectedSets||o.largestConnectedSet||o.largestRatioToSecond||o.largestRatioToRemaining) this.connectedSets = findConnectedSetsFast(gridGraph);
         if (o.largestConnectedSet) this.largestConnectedSet = getLargestSet(connectedSets);
+        if (o.largestRatioToSecond) this.largestRatioToSecond = getLargestComponentRatioToSecondLargest(connectedSets);
+        if (o.largestRatioToRemaining) this.largestRatioToRemaining = getLargestComponentRatioToRemaining(connectedSets);
         if (o.averageOpenSpaceSize) this.averageOpenSpaceSize = computeAverageMaxSquare(gridGraph);
         if (o.averageBlockedIslandSize) this.averageBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, true);
         if (o.averageFloatingBlockedIslandSize) this.averageFloatingBlockedIslandSize = computeAverageBlockedIslandSize(gridGraph, false);
@@ -84,6 +91,41 @@ public class MazeAnalysis {
         }
         
         return largestSet;
+    }
+    
+    public static float getLargestComponentRatioToSecondLargest(ArrayList<ArrayList<Point>> sets) {
+        int largestSize = 0;
+        int secondLargestSize = 0;
+        
+        for (ArrayList<Point> set : sets) {
+            int size = set.size();
+            if (size > secondLargestSize) {
+                if (size > largestSize) {
+                    secondLargestSize = largestSize;
+                    largestSize = size;
+                } else {
+                    secondLargestSize = size;
+                }
+            }
+        }
+        
+        return (float)largestSize / secondLargestSize;
+    }
+
+    
+    public static float getLargestComponentRatioToRemaining(ArrayList<ArrayList<Point>> sets) {
+        int totalSize = 0;
+        int largestSize = 0;
+        
+        for (ArrayList<Point> set : sets) {
+            int size = set.size();
+            if (size > largestSize) {
+                largestSize = size;
+            }
+            totalSize += size;
+        }
+        
+        return (float)largestSize / (totalSize-largestSize);
     }
 
     public static ArrayList<ArrayList<Point>> findConnectedSets(GridGraph gridGraph) {
@@ -239,6 +281,8 @@ public class MazeAnalysis {
         addParameter(sb, "averageOpenSpaceSize", averageOpenSpaceSize);
         addParameter(sb, "averageBlockedIslandSize", averageBlockedIslandSize);
         addParameter(sb, "averageFloatingBlockedIslandSize", averageFloatingBlockedIslandSize);
+        addParameter(sb, "largestRatioToSecond", largestRatioToSecond);
+        addParameter(sb, "largestRatioToRemaining", largestRatioToRemaining);
         addParameter(sb, "hasSqueezableCorners", hasSqueezableCorners);
         addParameter(sb, "largestConnectedSetSize", largestConnectedSet.size());
         addParameter(sb, "numConnectedSets", connectedSets.size());
@@ -257,6 +301,8 @@ public class MazeAnalysis {
         public boolean largestConnectedSet;
         public boolean averageBlockedIslandSize;
         public boolean averageFloatingBlockedIslandSize;
+        public boolean largestRatioToSecond;
+        public boolean largestRatioToRemaining;
         
         public Options (String...options) {
             for (String option : options) {
@@ -271,9 +317,12 @@ public class MazeAnalysis {
                     case "largestconnectedset": largestConnectedSet=true;break;
                     case "averageBlockedIslandSize": averageBlockedIslandSize=true;break;
                     case "averageFloatingBlockedIslandSize": averageFloatingBlockedIslandSize=true;break;
+                    case "largestRatioToSecond": largestRatioToSecond=true;break;
+                    case "largestRatioToRemaining": largestRatioToRemaining=true;break;
                 }
             }
         }
+        
     }
 
     public ArrayList<Integer> computeConnectedSetSizeList() {
