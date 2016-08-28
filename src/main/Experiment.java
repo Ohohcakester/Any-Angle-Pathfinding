@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.Random;
 
 import algorithms.AStar;
-import algorithms.Anya;
 import algorithms.BasicThetaStar;
 import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
+import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
+import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.visibilitygraph.VisibilityGraph;
+import algorithms.vertexanya.VertexAnya;
 import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
@@ -457,21 +457,20 @@ public class Experiment {
     }
     
 private static void testAlgorithmOptimality() {
-        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new RestrictedVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new VisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        //AlgoFunction rVGA = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
-        AlgoFunction testAlgo = Anya::new;
-        AlgoFunction refAlgo = StrictVisibilityGraphAlgorithmV2::new;
-        //AlgoFunction VGA = (gridGraph, sx, sy, ex, ey) -> VisibilityGraphAlgorithm.graphReuseNoHeuristic(gridGraph, sx, sy, ex, ey);
+    AlgoFunction refAlgo = VertexAnya::new;
+//    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
+//    AlgoFunction testAlgo = VertexAnyaMarkingV3::new;
+//    AlgoFunction testAlgo = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+    AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
         
         //printSeed = false; // keep this commented out.
-        Random seedRand = new Random(-2059321351);
+        Random seedRand = new Random(-373603124);
         int initial = seedRand.nextInt();
         for (int i=0; i<50000000; i++) {
-            int sizeX = seedRand.nextInt(300) + 10;
-            int sizeY = seedRand.nextInt(300) + 10;
+            int sizeX = seedRand.nextInt(500) + 5;
+            int sizeY = seedRand.nextInt(500) + 5;
             int seed = i+initial;
-            int ratio = seedRand.nextInt(50) + 10;
+            int ratio = seedRand.nextInt(50) + 5;
             
             int max = (sizeX+1)*(sizeY+1);
             int p1 = seedRand.nextInt(max);
@@ -488,7 +487,7 @@ private static void testAlgorithmOptimality() {
             double restPathLength = 0, normalPathLength = 0;
             try {
             GridGraph gridGraph = DefaultGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, ratio);
-            //for (int iii=0;iii<100;++iii) Utility.generatePath(testAlgo, gridGraph, seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1),seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1));
+            for (int iii=0;iii<300;++iii) Utility.generatePath(testAlgo, gridGraph, seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1),seedRand.nextInt(sizeX+1),seedRand.nextInt(sizeY+1));
             int[][] path = Utility.generatePath(testAlgo, gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
