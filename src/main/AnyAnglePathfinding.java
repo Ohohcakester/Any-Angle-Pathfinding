@@ -322,7 +322,8 @@ public class AnyAnglePathfinding {
                 algoFunction = AcceleratedAStar::new;
                 break;
             case 12 :
-                algoFunction = VisibilityGraphAlgorithm::graphReuse;
+                //algoFunction = VisibilityGraphAlgorithm::graphReuse;
+                algoFunction = VisibilityGraphAlgorithmOptimised::graphReuse;
                 break;
             case 13 :
                 algoFunction = AdjustmentThetaStar::new;
