@@ -149,8 +149,9 @@ public class Experiment {
                 System.out.println("Per iteration time: " + (totalTime/iterations));
                 
                 //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
+                losScanner.computeAllVisibleSuccessors(sx, sy);
                 //losScanner.computeAllVisibleTautSuccessors(sx, sy);
-                losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
+                //losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();
             }
