@@ -282,10 +282,12 @@ public class Experiment {
         Random seedGenerator = new Random(9191);
         
         fileIO.writeRow("Seed", "Size", "UnblockedRatio", "%Blocked", "VG Vertices", "VG Edges (Directed)", "SVG Vertices", "SVG Edges (Directed)");
-        for (int i=0; i<50; i++) {
-            int currentSize = 10 + i*10;
+        for (int i=7; i<50; i++) {
+            int currentRatio = i;
+            int currentSize = 300;
+            //int currentSize = 10 + i*10;
             for (int r=0; r<3; r++) {
-                int currentRatio = (r == 0 ? 7 : (r == 1 ? 15 : 50));
+                //int currentRatio = (r == 0 ? 7 : (r == 1 ? 15 : 50));
                 
                 int currentSeed = seedGenerator.nextInt();
                 
@@ -296,8 +298,8 @@ public class Experiment {
                 String ratioString = currentRatio + "";
                 String perBlockedString = gridGraph.getPercentageBlocked()*100f + "";
                 
-                VisibilityGraph vGraph = new VisibilityGraph(gridGraph, 0, 0, currentSize, currentSize);
-                vGraph.initialise();
+                VisibilityGraphOptimised vGraph = new VisibilityGraphOptimised(gridGraph);
+                vGraph.initialise(0, 0, currentSize, currentSize);
                 String verticesString = vGraph.size() + "";
                 String edgesString = vGraph.computeSumDegrees() + "";
                 
