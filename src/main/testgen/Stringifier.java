@@ -27,6 +27,18 @@ public class Stringifier {
         sb.append(longToStr(seed));
         return sb.toString();
     }
+    
+    public static String automataDCToString(long seed, int sizeX, int sizeY, float percentBlocked, int iterations, float resolutionMultiplier, boolean bordersAreBlocked) {
+        StringBuilder sb = new StringBuilder("autodc_");
+        sb.append(sizeX).append("x");
+        sb.append(sizeY).append("_");
+        sb.append((int)(percentBlocked*1000)).append("_");
+        sb.append(iterations).append("_");
+        sb.append((int)(resolutionMultiplier*1000)).append("_");
+        sb.append(bordersAreBlocked ? "T" : "F").append("_");
+        sb.append(longToStr(seed));
+        return sb.toString();
+    }
 
     public static String defaultToStringReadable(int seed, int sizeX, int sizeY, int unblockedRatio) {
         StringBuilder sb = new StringBuilder("gen_");

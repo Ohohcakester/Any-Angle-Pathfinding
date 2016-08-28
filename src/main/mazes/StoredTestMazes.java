@@ -67,7 +67,62 @@ public class StoredTestMazes {
         String mazeName = Stringifier.automataToString(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked);
         return new MazeAndTestCases(mazeName, gridGraph, problems);
     }
-    
+
+    public static MazeAndTestCases loadAutomataDCMaze(int sizeIndex, int resolutionIndex) {
+
+        int sizeX, sizeY;
+        switch (sizeIndex) {
+            case 0: sizeX = sizeY = 2000; break;
+            case 1: sizeX = sizeY = 3000; break;
+            case 2: sizeX = sizeY = 4000; break;
+            case 3: sizeX = sizeY = 5000; break;
+            case 4: sizeX = sizeY = 6000; break;
+            case 5: sizeX = sizeY = 7000; break;
+            case 6: sizeX = sizeY = 8000; break;
+            default: throw new UnsupportedOperationException("Invalid sizeIndex: " + sizeIndex);
+        }
+
+        float resolution;
+        switch (resolutionIndex) {
+            case 0: resolution = 0.2f; break;
+            case 1: resolution = 0.4f; break;
+            case 2: resolution = 0.6f; break;
+            case 3: resolution = 0.8f; break;
+            case 4: resolution = 1.0f; break;
+            default: throw new UnsupportedOperationException("Invalid resolutionIndex: " + resolutionIndex);
+        }
+        // Standardise resolution.
+        resolution = resolution * 2000 / sizeX;
+
+        // These seeds are carefully chosen so that the largest connected size is at least 10x the combined size of the remaining connected components.
+        // These are chosen for 0 <= sizeIndex <= 6 and 0 <= resolutionIndex <= 4.
+        int seed = (sizeIndex+1)*31 + 577*(resolutionIndex+1);
+        if (sizeIndex >= 4) seed += 3;
+        if (sizeIndex >= 5) seed += 2;
+        if (sizeIndex >= 6) seed += 3;
+        if (sizeIndex == 6 && resolutionIndex == 1) seed = 3926;
+        
+        int problemSeed = (resolutionIndex+1)*47 + 9127*(sizeIndex+1);
+
+        float percentBlocked = 0.45f;
+        int iterations = 5;
+        boolean bordersAreBlocked = false;
+        int nProblems = NUM_TEST_PROBLEMS;
+
+        GridGraph gridGraph = AutomataGenerator.generateSeededGraphOnlyDynamicCutoff(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked);
+        
+        // Validation code for largest connected set size.
+        /*if (Utility.validateMazeConnectedSetSize(gridGraph, 10f)) {
+            System.out.println("Valid");
+        } else {
+            throw new UnsupportedOperationException("INVALID");
+        }
+        if ("".isEmpty()) return null;*/
+
+        ArrayList<StartEndPointData> problems = generateProblemsInLargestSet(gridGraph, nProblems, problemSeed); 
+        String mazeName = Stringifier.automataDCToString(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked);
+        return new MazeAndTestCases(mazeName, gridGraph, problems);
+    }
 
     public static MazeAndTestCases loadScaledMaze(String mazeName, int multiplier) {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
@@ -169,6 +224,29 @@ public class StoredTestMazes {
         return problemList;
     }
 
+    private static ArrayList<StartEndPointData> generateProblemsInLargestSet(GridGraph gridGraph, int nProblems, int seed) {
+        ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
+        ArrayList<Point> largestSet = MazeAnalysis.getLargestSet(connectedSets);
+        
+        
+        Random rand = new Random(seed);
+        ArrayList<StartEndPointData> problemList = new ArrayList<>();
+        HashSet<TwoPoint> chosenProblems = new HashSet<>();
+        
+        int chances = nProblems; // prevent infinite loop        
+        for (int i=0; i<nProblems; i++) {
+            TwoPoint tp = generateProblemInSet(rand, largestSet);
+            while (chances > 0 && chosenProblems.contains(tp)) {
+                tp = generateProblemInSet(rand, largestSet);
+                --chances;
+            }
+            chosenProblems.add(tp);
+            
+            problemList.add(computeStartEndPointData(gridGraph, tp.p1, tp.p2));
+        }
+        
+        return problemList;
+    }
 
     private static StartEndPointData computeStartEndPointData(GridGraph gridGraph, Point p1, Point p2) {
         PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, p1.x, p1.y, p2.x, p2.y);
@@ -203,6 +281,18 @@ public class StoredTestMazes {
         
         Point p1 = list.get(index);
         Point p2 = list.get(index2);
+        return new TwoPoint(p1, p2);
+    }
+    
+    private static TwoPoint generateProblemInSet(Random rand, ArrayList<Point> largestSet) {
+        int index = rand.nextInt(largestSet.size());
+        int index2 = rand.nextInt(largestSet.size()-1);
+        if (index2 == index) {
+            index2 = largestSet.size()-1;
+        }
+        
+        Point p1 = largestSet.get(index);
+        Point p2 = largestSet.get(index2);
         return new TwoPoint(p1, p2);
     }
 }
