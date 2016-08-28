@@ -21,6 +21,8 @@ import algorithms.vertexanya.VertexAnyaMarking;
 import algorithms.visibilitygraph.VisibilityGraph;
 import grid.GridGraph;
 import main.AlgoFunction;
+import main.analysis.MazeAnalysis;
+import main.graphgeneration.AutomataGenerator;
 import main.testgen.StartEndPointData;
 
 public class Utility {
@@ -108,6 +110,15 @@ public class Utility {
     public static boolean isOptimal(double length, double optimalLength) {
         //System.out.println(length + " | " + optimalLength + " | " + ((length - optimalLength) < 0.0001)); 
         return (length - optimalLength) < 0.0001;
+    }
+    
+    public static boolean validateMazeConnectedSetSize(GridGraph gridGraph, float cutoffLargestRatioToRemaining) {
+        MazeAnalysis.Options options = new MazeAnalysis.Options();
+        options.largestRatioToSecond = true;
+        options.largestRatioToRemaining = true;
+        MazeAnalysis mazeAnalysis = new MazeAnalysis(gridGraph, options);
+        System.out.println(mazeAnalysis.largestRatioToRemaining + " " + mazeAnalysis.largestRatioToSecond);
+        return mazeAnalysis.largestRatioToRemaining >= cutoffLargestRatioToRemaining;
     }
     
     public static void cleanUpPreallocatedMemory() {
