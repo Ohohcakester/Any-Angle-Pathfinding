@@ -247,8 +247,9 @@ public class AnyAnglePathfinding {
                 return AutomataGenerator.generateSeeded(694392, 24, 20, 5, 3, 3f, 0, false, 5, 5, 19, 5); // A maze used to demo edge marking
             case 57:
                 //return StoredTestMazes.loadAutomataMaze(0, 7).gridAndGoals(0);
+                return StoredTestMazes.loadAutomataDCMaze(2, 3).gridAndGoals(0);
                 //return StoredTestMazes.loadScaledMaze("sc2_blisteringsands", 10).gridAndGoals(0);
-                return StoredTestMazes.loadTiledMaze(1, 7).gridAndGoals(0);
+                //return StoredTestMazes.loadTiledMaze(1, 7).gridAndGoals(0);
             case 58:
                 return UpscaledMapGenerator.upscale(GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120"), 9, true);
             case 59:
