@@ -391,7 +391,7 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithm extends AStarStaticMemory 
                 if (!sortedSnapshots.containsKey(colourIndex)) {
                     sortedSnapshots.put(colourIndex, new ArrayList<>());
                 }
-                if ( colourIndex == 0)
+                //if ( colourIndex == 0)
                 sortedSnapshots.get(colourIndex).add(snapshotItem);
             }
             
