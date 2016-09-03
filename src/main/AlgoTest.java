@@ -392,6 +392,9 @@ public class AlgoTest {
         options.averageBlockedIslandSize = true;
         options.averageFloatingBlockedIslandSize = true;
         options.blockDensity = true;
+        options.averageOpenSpaceSize = true;
+        options.largestRatioToSecond = true;
+        options.largestRatioToRemaining = true;
         
         MazeAnalysis an = new MazeAnalysis(gridGraph, options);
         
@@ -401,6 +404,9 @@ public class AlgoTest {
         sb.append(" - ").append(an.blockDensity);
         sb.append(" - ").append(an.averageBlockedIslandSize);
         sb.append(" - ").append(an.averageFloatingBlockedIslandSize);
+        sb.append(" - ").append(an.averageOpenSpaceSize);
+        sb.append(" - ").append(an.largestRatioToSecond);
+        sb.append(" - ").append(an.largestRatioToRemaining);
         
         println(sb.toString());
     }
