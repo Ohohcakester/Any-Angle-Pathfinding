@@ -229,152 +229,114 @@ public class AlgoTest {
         println("=== Testing " + name + " ===");
         println("<< GAME MAPS >>");
 
-        // println("sc2_steppesofwar - 164x164");// - spacious");
         // testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
-        // println("sc2_losttemple - 132x131");
         // testOnMazeData("sc2_losttemple", algo, testFunction_slow);
-        // println("sc2_extinction - 164x164");// - less spacious");
         // testOnMazeData("sc2_extinction", algo, testFunction_slow);
         //
-        // println("baldursgate_AR0070SR - 124x134");
         // testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
-        // println("baldursgate_AR0705SR - 100x86");// - less spacious");
         // testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
-        // println("baldursgate_AR0418SR - 84x75");// - spacious");
         // testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
         //
-        // println("sc1_TheFrozenSea - 1024x1024");
         // testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
-        // println("sc1_SpaceDebris - 512x512");
         // testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
         //
-        // println("wc3_icecrown - 512x512");// (spacious)");
         // testOnMazeData("wc3_icecrown", algo, testFunction_slow);
-        // println("wc3_dragonfire - 512x512");// (less spacious)");
         // testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
         //
-        // println("sc1_Legacy - 512x512");
         // testOnMazeData("sc1_Legacy", algo, testFunction_slow);
         //
-        // println("sc1_GreenerPastures - 768x512");
         // testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
         //
-        // println("baldursgate_AR0603SR - 512x512");
         // testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
         //
-        // println("wc3_mysticisles - 512x512");
         // testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
         //
-        // println("wc3_petrifiedforest - 512x512");
         // testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
 
         println("<< GENERATED MAPS >>");
         //
-        // println("Low Density - 6% - 50x50");
+        // // Low Density - 6% - 50x50
         // testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, testFunction_slow);
-        // println("Medium Density - 20% - 50x50");
+        // // Medium Density - 20% - 50x50
         // testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, testFunction_slow);
-        // println("High Density - 40% - 50x50");
+        // // High Density - 40% - 50x50
         // testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, testFunction_slow);
         //
-        // println("Low Density - 6% - 300x300");
+        // // Low Density - 6% - 300x300
         // testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // println("Medium Density - 20% - 300x300");
+        // // Medium Density - 20% - 300x300
         // testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, testFunction_slow);
-        // println("High Density - 40% - 300x300");
+        // // High Density - 40% - 300x300
         // testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, testFunction_slow);
         //
-        // println("Low Density - 6% - 500x500");
+        // // Low Density - 6% - 500x500
         // testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
-        // println("Medium Density - 20% - 500x500");
+        // // Medium Density - 20% - 500x500
         // testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
         //
-        // println("LowDensity2 - 6% - 300x300");
+        // // LowDensity2 - 6% - 300x300
         // testOnMazeData("def_iMJWB0QC_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // println("MediumDensity2 - 20% - 300x300");
+        // // MediumDensity2 - 20% - 300x300
         // testOnMazeData("def_iBCA5SS_iMJ_iMJ_iP", algo, testFunction_slow);
-        // println("HighDensity2 - 40% - 300x300");
+        // // HighDensity2 - 40% - 300x300
         // testOnMazeData("def_i11AHREB_iMJ_iMJ_iH", algo, testFunction_slow);
         //
-        // println("LowDensity3 - 6% - 300x300");
+        // // LowDensity3 - 6% - 300x300
         // testOnMazeData("def_iOH1TZ0D_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // println("MediumDensity3 - 20% - 300x300");
+        // // MediumDensity3 - 20% - 300x300
         // testOnMazeData("def_iAN3IE0C_iMJ_iMJ_iP", algo, testFunction_slow);
-        // println("HighDensity3 - 40% - 300x300");
+        // // HighDensity3 - 40% - 300x300
         // testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
         //
-        // println("6%Density - 500x500");
+        // // 6%Density - 500x500
         // testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
-        // println("20%Density - 500x500");
+        // // 20%Density - 500x500
         // testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
-        // println("40%Density - 500x500");
+        // // 40%Density - 500x500
         // testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
         //
-        // println("6%Density - 1000x1000");
-        // testOnMazeData("gen_1000x1000_50_iY5U5GAC", algo, testFunction_slow);
-        // println("20%Density - 1000x1000");
-        // testOnMazeData("gen_1000x1000_15_iFTBETRD", algo, testFunction_slow);
-        // println("40%Density - 1000x1000");
-        // testOnMazeData("gen_1000x1000_7_i3WH4IJD", algo, testFunction_slow);
-        //
-        // println("6%Density - 2000x2000");
-        // testOnMazeData("gen_2000x2000_50_iK54OY1C", algo, testFunction_slow);
-        // println("20%Density - 2000x2000");
-        // testOnMazeData("gen_2000x2000_15_i4Z44NPC", algo, testFunction_slow);
-        // println("40%Density - 2000x2000");
-        // testOnMazeData("gen_2000x2000_7_iXT3AEED", algo, testFunction_slow);
-        //
-        // println("6%Density - 3000x3000");
-        // testOnMazeData("gen_3000x3000_50_iUE2IRAD", algo, testFunction_slow);
-        // println("20%Density - 3000x3000");
-        // testOnMazeData("gen_3000x3000_15_iGUM1R2C", algo, testFunction_slow);
-        // println("40%Density - 3000x3000");
-        // testOnMazeData("gen_3000x3000_7_iSR3L1J", algo, testFunction_slow);
-        //
-        // println("6%Density - 4000x4000");
-        // testOnMazeData("gen_4000x4000_50_i0GHV1UD", algo, testFunction_slow);
-        // println("20%Density - 4000x4000");
-        // testOnMazeData("gen_4000x4000_15_iNK5KHO", algo, testFunction_slow);
-        // println("40%Density - 4000x4000");
-        // testOnMazeData("gen_4000x4000_7_iNUJNZ3", algo, testFunction_slow);
-        //
-        // println("6%Density - 5000x5000");
-        // testOnMazeData("gen_5000x5000_50_iCFL2G3B", algo, testFunction_slow);
-        // println("20%Density - 5000x5000");
-        // testOnMazeData("gen_5000x5000_15_i0BTXUD", algo, testFunction_slow);
-        // println("40%Density - 5000x5000");
-        // testOnMazeData("gen_5000x5000_7_iHOPN1S", algo, testFunction_slow);
-        //
-        // println("6%Density2 - 500x500");
+        // // 6%Density2 - 500x500
         // testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
-        // println("20%Density2 - 500x500");
+        // // 20%Density2 - 500x500
         // testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
-        // println("40%Density2 - 500x500");
+        // // 40%Density2 - 500x500
         // testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
         //
-        // println("6%Density3 - 500x500");
+        // // 6%Density3 - 500x500
         // testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
-        // println("20%Density3 - 500x500");
+        // // 20%Density3 - 500x500
         // testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
-        // println("40%Density3 - 500x500");
+        // // 40%Density3 - 500x500
         // testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
+
+        // testOnMazeData("gen_1000x1000_50_iY5U5GAC", algo, testFunction_slow);
+        // testOnMazeData("gen_1000x1000_15_iFTBETRD", algo, testFunction_slow);
+        // testOnMazeData("gen_1000x1000_7_i3WH4IJD", algo, testFunction_slow);
         //
-        // println("obst10_random512-10-7 - 512x512");
+        // testOnMazeData("gen_2000x2000_50_iK54OY1C", algo, testFunction_slow);
+        // testOnMazeData("gen_2000x2000_15_i4Z44NPC", algo, testFunction_slow);
+        // testOnMazeData("gen_2000x2000_7_iXT3AEED", algo, testFunction_slow);
+        //
+        // testOnMazeData("gen_3000x3000_50_iUE2IRAD", algo, testFunction_slow);
+        // testOnMazeData("gen_3000x3000_15_iGUM1R2C", algo, testFunction_slow);
+        // testOnMazeData("gen_3000x3000_7_iSR3L1J", algo, testFunction_slow);
+        //
+        // testOnMazeData("gen_4000x4000_50_i0GHV1UD", algo, testFunction_slow);
+        // testOnMazeData("gen_4000x4000_15_iNK5KHO", algo, testFunction_slow);
+        // testOnMazeData("gen_4000x4000_7_iNUJNZ3", algo, testFunction_slow);
+        //
+        // testOnMazeData("gen_5000x5000_50_iCFL2G3B", algo, testFunction_slow);
+        // testOnMazeData("gen_5000x5000_15_i0BTXUD", algo, testFunction_slow);
+        // testOnMazeData("gen_5000x5000_7_iHOPN1S", algo, testFunction_slow);
+        //
         // testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
-        // println("obst40_random512-40-0 - 512x512");
         // testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
-        // println("obst40_random512-40-7 - 512x512");
         // testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
         //
-        // println("corr2_maze512-2-5 - 512x512");
         // testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
-        // println("corr2_maze512-2-1 - 512x512");
         // testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
-        // println("corr2_maze512-2-7 - 512x512");
         // testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
-        // println("corr2_maze512-2-3 - 512x512");
         // testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
-        // println("corr2_maze512-2-9 - 512x512");
         // testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
 
         println("<< STORED GENERATED MAPS >>");
@@ -501,6 +463,7 @@ public class AlgoTest {
 
     public static void testOnMazeData(String mazeName, ArrayList<StartEndPointData> problems, AlgoFunction algoFunction, TestFunctionData test) {
         GridGraph gridGraph = GraphImporter.loadStoredMaze(mazeName);
+        printMazeDetails(mazeName, gridGraph);
         test.test(mazeName, gridGraph, problems, algoFunction);
     }
 
