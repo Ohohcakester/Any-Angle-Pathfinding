@@ -51,6 +51,8 @@ import main.testgen.TestDataGenerator;
 import main.testgen.TestDataLibrary;
 import main.utility.TimeCounter;
 import main.utility.Utility;
+import uiandio.BenchmarkGraphImporter;
+import uiandio.BenchmarkGraphSets;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 
@@ -210,6 +212,7 @@ public class AlgoTest {
         boolean tnitialisationTime = false;
 
         // TestFunctionData testFunction_slow = printAverageData(50, 5);
+        TestFunctionData testFunction_single = printAverageData(1,1);
         TestFunctionData testFunction_slow = printAverageData(5, 5);
         TestFunctionData testFunction_fast = printAverageData(50, 30);
         if (pathLengthOnly) {
@@ -338,6 +341,11 @@ public class AlgoTest {
         // testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
         // testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
         // testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
+        
+        testOnBenchmarkMapSet("bg512", algo, testFunction_single);
+        // testOnBenchmarkMapSet("dao", algo, testFunction_single);
+        testOnBenchmarkMapSet("sc1", algo, testFunction_single);
+        testOnBenchmarkMapSet("wc3maps512", algo, testFunction_single);
 
         println("<< STORED GENERATED MAPS >>");
         
@@ -392,6 +400,19 @@ public class AlgoTest {
         if (writeToFile) io.close();
     }
     
+    public static void testOnBenchmarkMapSet(String setName, AlgoFunction algo, TestFunctionData testFunction) {
+        String[] mapNames = BenchmarkGraphSets.getBenchmarkSet(setName);
+        for (int i=0; i<mapNames.length;++i) {
+            Utility.cleanUpPreallocatedMemory();
+            testOnBenchmarkMaze(mapNames[i], algo, testFunction);
+            Utility.cleanUpPreallocatedMemory();
+            System.gc();
+            try {Thread.sleep(2000);}
+            catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+            System.gc();
+        }
+    }
+
     public static void testScaledMazes(String mazeName, AlgoFunction algo, TestFunctionData testFunction) {
         for (int scale = 2; scale <= 12; scale += 2) {
             testOnStoredMaze(StoredTestMazes.loadScaledMaze(mazeName,scale), algo, testFunction);
@@ -462,6 +483,19 @@ public class AlgoTest {
     public static void testOnGraph(GridGraph gridGraph, ArrayList<TwoPoint> problems, AlgoFunction algoFunction,
             TestFunction test) {
         test.test("undefined", gridGraph, problems, algoFunction);
+    }
+
+    public static void testOnBenchmarkMaze(String mazeName, AlgoFunction algoFunction, TestFunctionData test) {
+        Utility.cleanUpPreallocatedMemory();
+        {
+            ArrayList<StartEndPointData> problems = BenchmarkGraphImporter.loadBenchmarkMazeProblems(mazeName);
+            GridGraph gridGraph = BenchmarkGraphImporter.loadBenchmarkMaze(mazeName);
+
+            printMazeDetails(mazeName, gridGraph);
+            
+            test.test(mazeName, gridGraph, problems, algoFunction);
+        }
+        Utility.cleanUpPreallocatedMemory();
     }
 
     public static void testOnStoredMaze(MazeAndTestCases mazeAndTestCases, AlgoFunction algoFunction, TestFunctionData test) {
