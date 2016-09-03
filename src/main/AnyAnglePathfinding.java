@@ -44,6 +44,7 @@ import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
 import main.mazes.StoredTestMazes;
 import main.testgen.TestDataGenerator;
+import uiandio.BenchmarkGraphImporter;
 import uiandio.GraphImporter;
 
 /**
@@ -276,6 +277,9 @@ public class AnyAnglePathfinding {
                 int ey = 5;                     // x-coordinate of goal point
 
                 return AutomataGenerator.generateSeededDynamicCutoff(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked, sx, sy, ex, ey);
+            }
+            case 61: {
+                return BenchmarkGraphImporter.loadBenchmark("AR0400SR").gridAndGoals(2);
             }
             default:
                 return null;
