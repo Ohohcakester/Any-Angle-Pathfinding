@@ -418,7 +418,8 @@ public class AlgoTest {
         
         StringBuilder sb = new StringBuilder();
         sb.append(mazeName);
-        sb.append(" - ").append(an.sizeX).append("x").append(an.sizeY);
+        sb.append(" - ").append(an.sizeX);
+        sb.append(" - ").append(an.sizeY);
         sb.append(" - ").append(an.blockDensity);
         sb.append(" - ").append(an.averageBlockedIslandSize);
         sb.append(" - ").append(an.averageFloatingBlockedIslandSize);
