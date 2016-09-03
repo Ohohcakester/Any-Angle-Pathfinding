@@ -368,6 +368,24 @@ public class AlgoTest {
         //     }
         // }
 
+        // for (int percentBlockedIndex=0; percentBlockedIndex<4; ++percentBlockedIndex) {
+        //     for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex++) {
+        //         for (int sizeIndex=0; sizeIndex<7; ++sizeIndex) {
+        //             testOnStoredMaze(StoredTestMazes.loadAutomataDCMaze(sizeIndex, resolutionIndex, percentBlockedIndex), algo, testFunction_slow);
+        //             System.gc();
+        //             try {Thread.sleep(2000);}
+        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+        //             System.gc();
+        //             try {Thread.sleep(2000);}
+        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+        //             System.gc();
+        //             try {Thread.sleep(2000);}
+        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+        //             System.gc();
+        //         }
+        //     }
+        // }
+
         println("=== FINISHED TEST FOR " + name + " ===");
         println();
 
