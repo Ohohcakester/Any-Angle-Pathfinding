@@ -1,5 +1,7 @@
 package uiandio;
 
+import main.mazes.MazeAndTestCases;
+
 public class BenchmarkGraphSets {
     public static String[] getSetNames() {
         return new String[] {
@@ -465,25 +467,23 @@ public class BenchmarkGraphSets {
                 "plunderisle",
                 "theglaive",
                 "hillsofglory",
-                "scen",
                 "plaguelands",
-                "harrow",
+                //"harrow",
                 "thecrucible",
                 "frostsabre",
                 "battleground",
-                "ogremound",
+                //"ogremound",
                 "gardenofwar",
                 "heart2heart",
                 "losttemple",
                 "bootybay",
-                "forestwalk",
+                //"forestwalk",
                 "stromguarde",
                 "icecrown",
                 "golemsinthemist",
                 "deadwaterdrop",
                 "darkforest",
                 "gnollwood",
-                "map",
                 "blastedlands",
                 "scorchedbasin",
                 "swampofsorrows",
@@ -495,13 +495,13 @@ public class BenchmarkGraphSets {
                 "nighthaven",
                 "isleofdread",
                 "divideandconquer",
-                "dragonmountain",
+                //"dragonmountain",
                 "dragonfire",
                 "bloodvenomfalls",
                 "drywatergulch",
                 "timbermawhold",
                 "moonglade",
-                "legends",
+                //"legends",
                 "dustwallowkeys",
                 "plainsofsnow",
                 "mysticisles",
@@ -592,5 +592,21 @@ public class BenchmarkGraphSets {
             };
         };
         return null;
+    }
+
+    public static void testMapLoading() {
+        // Test that all maps can load properly.
+        String[] setNames = getSetNames();
+        for (String setName : setNames) {
+            System.out.println("Loading set: " + setName);
+            String[] mapNames = getBenchmarkSet(setName);
+            int nProblems = 0;
+            for (String mapName : mapNames) {
+                MazeAndTestCases mazeAndTestCases = BenchmarkGraphImporter.loadBenchmark(mapName);
+                nProblems += mazeAndTestCases.problems.size();
+            }
+            System.out.println(nProblems + " problems");
+        }
+        System.out.println("Test complete: All maps loaded successfully.");
     }
 }
