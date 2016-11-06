@@ -52,7 +52,7 @@ public class AffineMapTransformation {
         
         if (smooth) {
             int scale = Math.max(Math.max(newSizeX/sizeX, newSizeY/sizeY),1);
-            smoothUpscaledMap(scale, sizeX, sizeY, grid);
+            if (scale > 1) smoothUpscaledMap(scale, sizeX, sizeY, grid);
         }
         
         GridGraph newGraph = new GridGraph(newSizeX, newSizeY);
