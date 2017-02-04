@@ -42,6 +42,8 @@ import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
 import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
+import main.graphgeneration.AffineMapTransformation;
+import main.graphgeneration.AffineTransform;
 import main.mazes.StoredTestMazes;
 import main.testgen.TestDataGenerator;
 import uiandio.BenchmarkGraphImporter;
@@ -93,7 +95,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 1; // Adjust this to choose a maze.
+        int choice = 63; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -281,6 +283,16 @@ public class AnyAnglePathfinding {
             }
             case 61: {
                 return BenchmarkGraphImporter.loadBenchmark("AR0400SR").gridAndGoals(2);
+            }
+            case 62: {
+            	return GraphImporter.importGraphFromFile("emptymap.txt", 0, 0, 0, 0); 
+            }
+            case 63: {
+                AffineTransform transform = AffineTransform.identity();
+                transform = AffineTransform.compose(transform, AffineTransform.scale(3, 2.5));
+                transform = AffineTransform.compose(transform, AffineTransform.rotate(0.2 * 3.1415926535));
+
+                return AffineMapTransformation.transform(GraphImporter.loadStoredMaze("sc1_Ramparts", "378-312_74-120"), transform, true);
             }
             default:
                 return null;
