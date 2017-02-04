@@ -30,18 +30,20 @@ import grid.StartGoalPoints;
 import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
 import main.utility.Utility;
+import uiandio.BenchmarkGraphSets;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
 
 public class Experiment {
     
     public static void run() {
-        findMapsWithLargeMainConnectedSets();
+        //findMapsWithLargeMainConnectedSets();
 //        testVisibilityGraphSize();
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
 //        findUpperBound();
 //        testAlgorithmOptimality();
+        BenchmarkGraphSets.testMapLoading();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
