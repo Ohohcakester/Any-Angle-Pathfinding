@@ -20,7 +20,7 @@ import uiandio.GraphImporter;
 
 public class StoredTestMazes {
 
-    private static final int NUM_TEST_PROBLEMS = 50;
+    private static final int NUM_TEST_PROBLEMS = 100;
     
     public static MazeAndTestCases loadAutomataMaze(int sizeIndex, int resolutionIndex) {
 
@@ -68,7 +68,7 @@ public class StoredTestMazes {
         return new MazeAndTestCases(mazeName, gridGraph, problems);
     }
 
-    public static MazeAndTestCases loadAutomataDCMaze(int sizeIndex, int resolutionIndex) {
+    public static MazeAndTestCases loadAutomataDCMaze(int sizeIndex, int resolutionIndex, int percentBlockedIndex) {
 
         int sizeX, sizeY;
         switch (sizeIndex) {
@@ -94,6 +94,15 @@ public class StoredTestMazes {
         // Standardise resolution.
         resolution = resolution * 2000 / sizeX;
 
+        float percentBlocked;
+        switch (percentBlockedIndex) {
+            case 0: percentBlocked = 0.45f; break;
+            case 1: percentBlocked = 0.30f; break;
+            case 2: percentBlocked = 0.20f; break;
+            case 3: percentBlocked = 0.10f; break;
+            default: throw new UnsupportedOperationException("Invalid percentBlockedIndex: " + resolutionIndex);
+        }
+
         // These seeds are carefully chosen so that the largest connected size is at least 10x the combined size of the remaining connected components.
         // These are chosen for 0 <= sizeIndex <= 6 and 0 <= resolutionIndex <= 4.
         int seed = (sizeIndex+1)*31 + 577*(resolutionIndex+1);
@@ -104,7 +113,6 @@ public class StoredTestMazes {
         
         int problemSeed = (resolutionIndex+1)*47 + 9127*(sizeIndex+1);
 
-        float percentBlocked = 0.45f;
         int iterations = 5;
         boolean bordersAreBlocked = false;
         int nProblems = NUM_TEST_PROBLEMS;
