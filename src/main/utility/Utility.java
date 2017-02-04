@@ -42,8 +42,12 @@ public class Utility {
     }
     
     public static double computeOptimalPathLengthOnline(GridGraph gridGraph, Point start, Point end) {
+        return computeOptimalPathLengthOnline(gridGraph, start.x, start.y, end.x, end.y);
+    }
+    
+    public static double computeOptimalPathLengthOnline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         // Optimal Online algorithm.
-        PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, start.x, start.y, end.x, end.y);
+        PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
