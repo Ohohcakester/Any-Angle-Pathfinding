@@ -202,7 +202,7 @@ public class EditorUI extends DrawCanvas {
     public void generateScen() {
         String filePath = AnyAnglePathfinding.PATH_ANALYSISDATA;
         String mapName = mazeName;
-        double shortestPath = Utility.computeOptimalPathLength(gridGraph, new Point(sx,sy), new Point(ex,ey));
+        double shortestPath = Utility.computeOptimalPathLengthOnline(gridGraph, new Point(sx,sy), new Point(ex,ey));
 
         System.out.println("-Writing to folder: " + filePath);
         FileIO.makeDirs(filePath);

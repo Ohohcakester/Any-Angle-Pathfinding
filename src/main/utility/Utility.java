@@ -11,6 +11,7 @@ import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraph;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraph;
@@ -40,9 +41,23 @@ public class Utility {
         return pathLength;
     }
     
-    public static double computeOptimalPathLength(GridGraph gridGraph, Point start, Point end) {
-        // Optimal algorithm.
+    public static double computeOptimalPathLengthOnline(GridGraph gridGraph, Point start, Point end) {
+        // Optimal Online algorithm.
         PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, start.x, start.y, end.x, end.y);
+        algo.computePath();
+        int[][] path = algo.getPath();
+        path = removeDuplicatesInPath(path);
+        return computePathLength(gridGraph, path);
+    }
+    
+    public static double computeOptimalPathLengthOffline(GridGraph gridGraph, Point start, Point end) {
+        // Optimal Offline algorithm. (preprocessing for faster pathfinding)
+        return computeOptimalPathLengthOffline(gridGraph, start.x, start.y, end.x, end.y);
+    }
+    
+    public static double computeOptimalPathLengthOffline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        // Optimal Offline algorithm. (preprocessing for faster pathfinding)
+        PathFindingAlgorithm algo = EdgeNLevelSparseVisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
@@ -53,7 +68,7 @@ public class Utility {
         ArrayList<StartEndPointData> fixedProblems = new ArrayList<>();
         for (StartEndPointData problem : problems) {
             //System.out.println(problem.start + " | " + problem.end);
-            double shortestPathLength = computeOptimalPathLength(gridGraph, problem.start, problem.end);
+            double shortestPathLength = computeOptimalPathLengthOnline(gridGraph, problem.start, problem.end);
             fixedProblems.add(new StartEndPointData(problem.start, problem.end, shortestPathLength));
             if (shortestPathLength > problem.shortestPath + 0.0001) System.out.println("REPAIRING: " + problem.shortestPath + " -> " + shortestPathLength);
         }
