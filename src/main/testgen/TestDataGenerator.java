@@ -1,22 +1,23 @@
 package main.testgen;
 
-import grid.GridGraph;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
+import algorithms.datatypes.Point;
+import grid.GridGraph;
 import main.AnyAnglePathfinding;
 import main.analysis.MazeAnalyser;
 import main.analysis.MazeAnalysis;
 import main.analysis.ProblemAnalysis;
 import main.analysis.TwoPoint;
 import main.graphgeneration.DefaultGenerator;
+import main.mazes.MazeAndTestCases;
+import main.mazes.StoredTestMazes;
 import uiandio.FileIO;
 import uiandio.GraphExporter;
 import uiandio.GraphExporterPretty;
 import uiandio.GraphImporter;
-import algorithms.datatypes.Point;
 
 public class TestDataGenerator {
 
@@ -26,7 +27,35 @@ public class TestDataGenerator {
         generateFromFolder("gamemaps/obst40/", "obst40");
         generateFromFolder("gamemaps/obst10/", "obst10");
         generateFromFolder("gamemaps/corr2/", "corr2");*/
-        generateRandom();
+        //generateRandom();
+        
+        export();
+    }
+    
+    private static void export() {
+
+        for (int scale = 4; scale <= 12; scale += 4) {
+            exportTestData(StoredTestMazes.loadScaledMaze("sc1_NovaStation",scale));
+            exportTestData(StoredTestMazes.loadScaledMaze("wc3_darkforest",scale));
+            exportTestData(StoredTestMazes.loadScaledMaze("sc1_RedCanyons",scale));
+            exportTestData(StoredTestMazes.loadScaledMaze("wc3_swampofsorrows",scale));
+            exportTestData(StoredTestMazes.loadScaledMaze("sc1_Triskelion",scale));
+            exportTestData(StoredTestMazes.loadScaledMaze("wc3_theglaive",scale));
+        }
+       
+        for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
+            for (int size = 4; size <= 12; size += 4) {
+                exportTestData(StoredTestMazes.loadTiledMaze(mazePoolIndex, size));
+            }
+        }
+
+        for (int percentBlockedIndex=0; percentBlockedIndex<2; ++percentBlockedIndex) {
+            for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex += 2) {
+                for (int sizeIndex=0; sizeIndex<5; sizeIndex += 2) { // LATER: Test sizeIndex 5 and 6 too
+                    exportTestData(StoredTestMazes.loadAutomataDCMaze(sizeIndex, resolutionIndex, percentBlockedIndex));
+                }
+            }
+        }
     }
     
     /**
@@ -134,6 +163,27 @@ public class TestDataGenerator {
             makePrettyMazeFile(gridGraph, filePath);
             makeAnalysisFile(mazeAnalyser.mazeAnalysis, filePath);
         }
+        
+        makeProblemFiles(mazeAnalyser.problemList, filePath);
+        System.out.println("-Write complete.");
+    }
+
+    
+    
+    public static void exportTestData(MazeAndTestCases mazeAndTestCases) {
+        String filePath = AnyAnglePathfinding.PATH_MAZEDATA + "export_" + mazeAndTestCases.mazeName + "/";
+        ArrayList<TwoPoint> problems = new ArrayList<>();
+        for (StartEndPointData data : mazeAndTestCases.problems) {
+            problems.add(data.toTwoPoint());
+        }
+        MazeAnalyser mazeAnalyser = new MazeAnalyser(mazeAndTestCases.gridGraph, problems, true);
+
+        System.out.println("-Writing to folder: " + filePath);
+        FileIO.makeDirs(filePath);
+
+        makeMazeFile(mazeAndTestCases.gridGraph, filePath);
+        makePrettyMazeFile(mazeAndTestCases.gridGraph, filePath);
+        makeAnalysisFile(mazeAnalyser.mazeAnalysis, filePath);
         
         makeProblemFiles(mazeAnalyser.problemList, filePath);
         System.out.println("-Write complete.");
