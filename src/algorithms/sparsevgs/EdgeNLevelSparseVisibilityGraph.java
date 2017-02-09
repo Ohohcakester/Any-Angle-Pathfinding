@@ -164,7 +164,7 @@ public class EdgeNLevelSparseVisibilityGraph {
 
         
         // STEP 2: Label edge levels in SVG.
-        computeAllEdgeLevels();
+        computeAllEdgeLevelsFast();
         addLevelWEdgesToLevelWEdgesArray();
 
         nSkipEdgess = new int[maxSize];
@@ -314,6 +314,129 @@ public class EdgeNLevelSparseVisibilityGraph {
         }
 
         // maxLevel = currentLevel;
+    }
+
+
+
+
+    private final void computeAllEdgeLevelsFast() {
+        // Note: Each edge is identified by a tuple (nodeId, edgeIndex).
+
+        //list of current level directed edges as a tuple (nodeId, edgeIndex)
+        int[] currentLevelEdgeNodes = new int[nEdges*2];
+        int[] currentLevelEdgeIndexes = new int[nEdges*2];
+        int currEdge = 0;
+        int nextLevelEnd = 0;
+
+        /**
+         *    \     neighbours are behind the current edge.
+         * '.  \
+         *   '. \     nNeighbours[vi][ei] = 2
+         *     '.\
+         *        O-----------> [next]
+         *       vi     ei
+         */
+
+
+        int[][] nNeighbours = new int[nNodes][];
+        for (int vi=0; vi<nNodes; ++vi) {
+            int currX = xPositions[vi];
+            int currY = yPositions[vi];
+
+            int nOutgoingEdges = nOutgoingEdgess[vi];
+            int[] outgoingEdges = outgoingEdgess[vi];
+            
+            int[] currNodeNNeighbours = new int[nOutgoingEdges];
+            for (int ei=0; ei<nOutgoingEdges; ++ei) {
+                // For each directed edge
+                int ni = outgoingEdges[ei];
+                int nextX = xPositions[ni];
+                int nextY = yPositions[ni];
+
+                // Count taut outgoing edges
+                int count = 0;
+
+                int nNextOutgoingEdges = nOutgoingEdgess[vi];
+                int[] nextOutgoingEdges = outgoingEdgess[vi];
+                for (int j=0; j<nNextOutgoingEdges; ++j) {
+                    int di = nextOutgoingEdges[j];
+                    if (graph.isTaut(nextX, nextY, currX, currY, xPositions[di], yPositions[di])) {
+                        ++count;
+                    }
+                }
+
+                currNodeNNeighbours[ei] = count;
+                if (count == 0) {
+                    currentLevelEdgeNodes[nextLevelEnd] = vi;
+                    currentLevelEdgeIndexes[nextLevelEnd] = ei;
+                    ++nextLevelEnd;
+                }
+            }
+            nNeighbours[vi] = currNodeNNeighbours;
+        }
+
+        
+        int currLevel = 1;
+        while (currEdge < nextLevelEnd && currLevel < levelLimit) {
+
+            int currentLevelEnd = nextLevelEnd;
+            for (; currEdge < currentLevelEnd; ++currEdge) {
+                int currNode = currentLevelEdgeNodes[currEdge];
+                int currEdgeIndex = currentLevelEdgeIndexes[currEdge];
+
+                if (edgeLevels[outgoingEdgeIndexess[currNode][currEdgeIndex]] != LEVEL_W) continue;
+                // Set edge level
+                edgeLevels[outgoingEdgeIndexess[currNode][currEdgeIndex]] = currLevel;
+
+                /**
+                 * Curr side must have no neighbours.
+                 * Opp side (next node) may have neighbours.
+                 * So remove neighbours from opposite side.
+                 *                              __
+                 *                               /|   __
+                 *                              /    .-'|
+                 * (no neighbours)             /  .-'
+                 *                            /.-'
+                 *            O-----------> [n]
+                 *           vi     ei
+                 */
+                // No need to remove neighbours from opposite edge. They are ignored automatically.
+
+
+                int nextNode = outgoingEdgess[currNode][currEdgeIndex];
+
+                int currX = xPositions[currNode];
+                int currY = yPositions[currNode];
+                int nextX = xPositions[nextNode];
+                int nextY = yPositions[nextNode];
+
+                int[] outgoingEdges = outgoingEdgess[nextNode];
+                int nOutgoingEdges = nOutgoingEdgess[nextNode];
+
+                int[] outgoingEdgeIndexes = outgoingEdgeIndexess[nextNode];
+
+                int[] nextNodeNNeighbours = nNeighbours[nextNode];
+                for (int j=0; j<nOutgoingEdges; ++j) {
+                    if (edgeLevels[outgoingEdgeIndexes[j]] != LEVEL_W) continue;
+                    int nextnextNode = outgoingEdges[j];
+                    int nextnextX = xPositions[nextnextNode];
+                    int nextnextY = yPositions[nextnextNode];
+                    if (!graph.isTaut(currX, currY, nextX, nextY, nextnextX, nextnextY)) continue;
+
+                    --nextNodeNNeighbours[j];
+                    if (nextNodeNNeighbours[j] == 0) {
+                        // push into next level's list.
+                        currentLevelEdgeNodes[nextLevelEnd] = nextNode;
+                        currentLevelEdgeIndexes[nextLevelEnd] = j;
+                        ++nextLevelEnd;
+                    }
+
+                    if (nextNodeNNeighbours[j] < 0) System.out.println("ERROR");
+                }
+            }
+
+            ++currLevel;
+        }
     }
 
     // Checks whether there is a taut exist in the graph, considering only unmarked edges.
