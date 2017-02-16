@@ -20,6 +20,7 @@ public class RPSScanner {
 
         snapshot.add(SnapshotItem.generate(new Integer[]{sx, sy, v.x, v.y}, Color.RED));
 
+        // Snapshot current state of heap
         int heapSize = edgeHeap.size();
         Edge[] edges = edgeHeap.getEdgeList();
         for (int k=0; k<heapSize; ++k) {
@@ -224,29 +225,10 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
                     //saveSnapshot(sx, sy, v); // UNCOMMENT FOR TRACING
 
-                    /*if (v.x == 11 && v.y == 22) {
-                        System.out.println(edgeHeap);
-                    }*/
-
                     Edge edge = edgeHeap.getMin();
                     if (!linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
                         addNeighbour(v.x, v.y);
-                        //System.out.println(v.x + " , " + v.y);
                     }
-
-                    // TEST CODE
-                    /*int heapSize = edgeHeap.size();
-                    boolean hasIntersection = false;
-                    for (int k=0; k<edges.length; ++k) {
-                        Edge edge = edges[k];
-                        if (linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
-                            hasIntersection = true;
-                            break;
-                        }
-                    }
-                    if (!hasIntersection) {
-                        addNeighbour(v.x, v.y);
-                    }*/
                 }
 
                 // Delete all
@@ -301,26 +283,15 @@ public class RPSScanner {
         // Special case: if an endpoint is (sx,sy), then instantly u is (sx,sy)
         int dx1 = edge.u.x - sx;
         int dy1 = edge.u.y - sy;
-        //if (dx1 == 0 && dy1 == 0) return false;
-
         int dx2 = edge.v.x - sx;
         int dy2 = edge.v.y - sy;
-        //if (dx2 == 0 && dy2 == 0) return true;
 
         int crossProd = dx1*dy2 - dx2*dy1;
-        /*if (dx1*dx2 + dy1*dy2 > 0 && crossProd == 0) {
-            // points have the same angle.
-            // vertex closer to (sx,sy) should come first.
-            return (dx2*dx2 + dy2*dy2 < dx1*dx1 + dy1*dy1);
-        }*/
         if (dx1*dx2 + dy1*dy2 < 0 && crossProd == 0) {
             // (sx, sy) is on the edge (but not at the endpoints)
             // Revert to canonical ordering.
-            //System.out.println(edge.u + " | " + edge.originalU);
-            //System.out.println(edge.u == edge.originalU);
             return edge.u == edge.originalU;
         }
-        //if (edge.u.x == 1s0 && edge.u.y == 18 && edge.v.x == 12 && edge.v.y == 18) System.out.println(dx1+","+dy1+","+dx2+","+dy2 + " " + crossProd);
         return crossProd < 0;
     }
 
@@ -360,87 +331,6 @@ public class RPSScanner {
                  e.u.angle >= Math.PI && e.v.angle < Math.PI;
     }
 
-    /*
-    private final boolean linesIntersectOld(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
-        int line1dx = x2 - x1;
-        int line1dy = y2 - y1;
-        int cross1 = (x3-x1)*line1dy - (y3-y1)*line1dx;
-        int cross2 = (x4-x1)*line1dy - (y4-y1)*line1dx;
-
-        int line2dx = x4 - x3;
-        int line2dy = y4 - y3;
-        int cross3 = (x1-x3)*line2dy - (y1-y3)*line2dx;
-        int cross4 = (x2-x3)*line2dy - (y2-y3)*line2dx;
-
-        if (cross1 != 0 && cross2 != 0 && cross3 != 0 && cross4 != 0) {
-            return ((cross1 > 0) != (cross2 > 0)) && ((cross3 > 0) != (cross4 > 0));
-        }
-
-        // Exists a cross product that is 0. One of the degenerate cases.
-        if (x1 == x3 && y1 == y3) {
-            // No swapping
-        } else if (x1 == x4 && y1 == y4) {
-            int temp;
-            // Swap points 3 and 4
-            temp = x4; x4 = x3; x3 = temp;
-            temp = y4; y4 = y3; y3 = temp;
-        } else if (x2 == x3 && y2 == y3) {
-            int temp;
-            // Swap points 1 and 2
-            temp = x1; x1 = x2; x2 = temp;
-            temp = y1; y1 = y2; y2 = temp;
-        } else if (x2 == x4 && y2 == y4) {
-            int temp;
-            // Swap points 1 and 2
-            temp = x1; x1 = x2; x2 = temp;
-            temp = y1; y1 = y2; y2 = temp;
-            // Swap points 3 and 4
-            temp = x4; x4 = x3; x3 = temp;
-            temp = y4; y4 = y3; y3 = temp;
-        } else {
-            // No equalities whatsoever.
-            // We consider this case an intersection if they intersect.
-
-            int prod1 = cross1*cross2;
-            int prod2 = cross3*cross4;
-
-            if (prod1 == 0 && prod2 == 0) {
-                // All four points collinear.
-                int minX1; int minY1; int maxX1; int maxY1;
-                int minX2; int minY2; int maxX2; int maxY2;
-                
-                if (x1 < x2) {minX1 = x1; maxX1 = x2;}
-                else {minX1 = x2; maxX1 = x1;}
-
-                if (y1 < y2) {minY1 = y1; maxY1 = y2;}
-                else {minY1 = y2; maxY1 = y1;}
-
-                if (x3 < x4) {minX2 = x3; maxX2 = x4;}
-                else {minX2 = x4; maxX2 = x3;}
-
-                if (y3 < y4) {minY2 = y3; maxY2 = y4;}
-                else {minY2 = y4; maxY2 = y3;}
-
-                return !(maxX1 < minX2 || maxY1 < minY2 || maxX2 < minX1 || maxY2 < minY1);
-            }
-
-            return (prod1 <= 0 && prod2 <= 0);
-            //return (cross1*cross2 <= 0) && (cross3*cross4 <= 0); // We consider this case an intersection if they intersect.
-        }
-
-        // Right now (x1,y1) == (x3,y3)
-        if (x2 == x4 && y2 == y4) return false;
-
-        // Return u.v > 0 ,  where u = p2-p1, v = p4-p3
-        // Need both to be in the same direction.
-        int dx1 = x2-x1;
-        int dy1 = y2-y1;
-        int dx2 = x4-x3;
-        int dy2 = y4-y3;
-        return (dx1*dx2 + dy1*dy2 > 0) && (dx1*dy2 == dx2*dy1);
-    }*/
-
-
     private final boolean linesIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
         int line1dx = x2 - x1;
         int line1dy = y2 - y1;
@@ -456,14 +346,8 @@ public class RPSScanner {
             return ((cross1 > 0) != (cross2 > 0)) && ((cross3 > 0) != (cross4 > 0));
         }
 
-        // Exists a cross product that is 0. One of the degenerate cases.
+        // There exists a cross product that is 0. One of the degenerate cases.
         // Not possible: (x1 == x3 && y1 == y3) or (x1 == x4 && y1 == y4)
-        /*if (x1 == x3 && y1 == y3) {
-            throw new UnsupportedOperationException("S");
-        } else if (x1 == x4 && y1 == y4) {
-            throw new UnsupportedOperationException("T");
-        }*/
-
         if (x2 == x3 && y2 == y3) {
             int dx1 = x1-x2;
             int dy1 = y1-y2;

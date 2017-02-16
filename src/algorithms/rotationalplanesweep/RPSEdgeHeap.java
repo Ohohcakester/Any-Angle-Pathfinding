@@ -34,8 +34,8 @@ public class RPSEdgeHeap {
     }
 
     public final void delete(RPSScanner.Edge edge) {
-        // Debugging:
-        if (edge.heapIndex >= heapSize) throw new UnsupportedOperationException("ELEMENT NOT IN HEAP: " + edge);
+        // Safety check for Debugging:
+        //if (edge.heapIndex >= heapSize) throw new UnsupportedOperationException("ELEMENT NOT IN HEAP: " + edge);
 
         int currentIndex = edge.heapIndex;
         swap(currentIndex, heapSize-1);
@@ -46,8 +46,8 @@ public class RPSEdgeHeap {
     }
 
     public final void insert(RPSScanner.Edge edge, double distance) {
-        // Debugging:
-        if (edge.heapIndex < heapSize) throw new UnsupportedOperationException("ELEMENT ALREADY EXISTS: " + edge);
+        // Safety check for Debugging:
+        //if (edge.heapIndex < heapSize) throw new UnsupportedOperationException("ELEMENT ALREADY EXISTS: " + edge);
 
         edge.distance = distance;
         swap(edge.heapIndex, heapSize);
