@@ -42,6 +42,10 @@ public class GridGraph {
         return tiles[y][x];
     }
     
+    public final boolean isBlockedRaw(int x, int y) {
+        return tiles[y][x];
+    }
+    
     public final boolean isValidCoordinate(int x, int y) {
         return (x <= sizeX && y <= sizeY &&
                 x >= 0 && y >= 0);
