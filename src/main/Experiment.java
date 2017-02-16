@@ -33,6 +33,8 @@ import main.utility.Utility;
 import uiandio.BenchmarkGraphSets;
 import uiandio.FileIO;
 import uiandio.GraphImporter;
+import algorithms.rotationalplanesweep.GridPolygonGenerator;
+import algorithms.rotationalplanesweep.RPSScanner;
 
 public class Experiment {
     
@@ -43,11 +45,11 @@ public class Experiment {
 //        findStrictThetaStarIssues();
 //        findUpperBound();
 //        testAlgorithmOptimality();
-        BenchmarkGraphSets.testMapLoading();
+//        BenchmarkGraphSets.testMapLoading();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
-//        testLOSScan();
+        testRPSScan();
     }
     
     /**
@@ -171,6 +173,65 @@ public class Experiment {
             gridPointSet.addPoint(sx, sy, Color.BLUE);
             gridObjectsList.add(new GridObjects(gridLineSet, gridPointSet));
             for (List<SnapshotItem> l : LineOfSightScanner.snapshotList) {
+                gridObjectsList.add(GridObjects.create(l));
+            }
+        }
+        
+
+        DrawCanvas drawCanvas = new DrawCanvas(gridGraph, gridLineSet);
+        Visualisation.setupMainFrame(drawCanvas, gridObjectsList);
+    }
+
+    private static void testRPSScan() {
+        testRPSScan(13, 18);
+        //testRPSScan(12, 18);
+        //testRPSScan(10, 18);
+        //testRPSScan(11, 18);
+        //testRPSScan(11, 19);
+        //testRPSScan(12, 14);
+        //testRPSScan(13, 14);
+        //testRPSScan(13, 34);
+        //testRPSScan(12, 19);
+        //testRPSScan(16, 15);
+    }
+
+    private static void testRPSScan(int sx, int sy) {
+        GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
+        GridGraph gridGraph = gridAndGoals.gridGraph;
+        ArrayList<GridObjects> gridObjectsList = new ArrayList<>();
+        GridLineSet gridLineSet = new GridLineSet();;
+        GridPointSet gridPointSet = new GridPointSet();
+        
+        int dx, dy;
+        Random rand = new Random();
+        {
+            //int sx = rand.nextInt(gridGraph.sizeX+1);
+            //int sy = rand.nextInt(gridGraph.sizeY+1);
+            //sx = gridAndGoals.startGoalPoints.sx;
+            //sy = gridAndGoals.startGoalPoints.sy;
+            //sx = 12; sy = 18;
+            dx = -1; dy = 2;
+            
+            RPSScanner losScanner = GridPolygonGenerator.createRpsScannerFromGrid(gridGraph);
+
+            try {
+                losScanner.findNeighbours(sx, sy);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            //losScanner.drawLines(gridLineSet, gridPointSet);
+
+            for (int i=0;i<losScanner.nNeighbours;++i) {
+                int x = losScanner.neighboursX[i];
+                int y = losScanner.neighboursY[i];
+                gridLineSet.addLine(sx, sy, x,y, Color.GREEN);
+                gridPointSet.addPoint(x, y, Color.RED);
+            }
+            
+            gridPointSet.addPoint(sx, sy, Color.BLUE);
+            gridObjectsList.add(new GridObjects(gridLineSet, gridPointSet));
+            for (List<SnapshotItem> l : RPSScanner.snapshotList) {
                 gridObjectsList.add(GridObjects.create(l));
             }
         }
