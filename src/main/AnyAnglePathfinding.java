@@ -5,6 +5,7 @@ import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
+import algorithms.AnyaAlgorithm;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
@@ -95,7 +96,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 63; // Adjust this to choose a maze.
+        int choice = 1; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -110,15 +111,15 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 17;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int unblockedRatio = 7;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
                 int seed = 1667327427;        // seed for the random.
                 
-                int sizeX = 40;               // x-axis size of grid
-                int sizeY = 40;               // y-axis size of grid
-                int sx = 6;                   // x-coordinate of start point
-                int sy = 10;                  // y-coordinate of start point
-                int ex = 39;                  // x-coordinate of goal point
-                int ey = 32;                  // y-coordinate of goal point
+                int sizeX = 80;               // x-axis size of grid
+                int sizeY = 80;               // y-axis size of grid
+                int sx = 9;                   // x-coordinate of start point
+                int sy = 11;                  // y-coordinate of start point
+                int ex = 59;                  // x-coordinate of goal point
+                int ey = 72;                  // y-coordinate of goal point
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -305,7 +306,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static AlgoFunction setDefaultAlgoFunction() {
-        int choice = 8; // adjust this to choose an algorithm
+        int choice = 46; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -443,6 +444,9 @@ public class AnyAnglePathfinding {
                 break;
             case 45 :
                 algoFunction = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+                break;
+            case 46 :
+                algoFunction = AnyaAlgorithm::new;
                 break;
         }
         
