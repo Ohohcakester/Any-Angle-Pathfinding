@@ -94,26 +94,54 @@ public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
 		return heuristic_;
 	}
 	
-	// we require that the cells (s.x, s.y) and (t.x, t.y) are 
-	// non-obstacle locations; i.e. the instances are valid
-	// both for the corner graph that we search and also on
-	// the cell-based graph representation of the grid.
-	// We make this decision to keep compatibility with 
-	// Nathan Sturtevant's benchmarks (http://movingai.com)
-	// i.e. every benchmark problem should be solvable and 
-	// any that isn't should also fail here
-	@Override
-	public boolean validate_instance(AnyaNode start, AnyaNode target) 
-	{
-		this.start = start;
-		this.target = target;
-		tx_ = this.target.root.x;
-		ty_ = this.target.root.y;
-		boolean result = 
-				grid_.get_cell_is_traversable((int)start.root.x, (int)start.root.y) &&
-				grid_.get_cell_is_traversable((int)target.root.x, (int)target.root.y);
-		return result;
-	}
+    // we require that the cells (s.x, s.y) and (t.x, t.y) are 
+    // non-obstacle locations; i.e. the instances are valid
+    // both for the corner graph that we search and also on
+    // the cell-based graph representation of the grid.
+    // We make this decision to keep compatibility with 
+    // Nathan Sturtevant's benchmarks (http://movingai.com)
+    // i.e. every benchmark problem should be solvable and 
+    // any that isn't should also fail here
+    //@Override
+    public boolean validate_instance_old(AnyaNode start, AnyaNode target) 
+    {
+        this.start = start;
+        this.target = target;
+        tx_ = this.target.root.x;
+        ty_ = this.target.root.y;
+        boolean result = 
+                grid_.get_cell_is_traversable((int)start.root.x, (int)start.root.y) &&
+                grid_.get_cell_is_traversable((int)target.root.x, (int)target.root.y);
+        return result;
+    }
+
+    // Revised validation to validate cases only based on the corner graph.
+    @Override
+    public boolean validate_instance(AnyaNode start, AnyaNode target) 
+    {
+        this.start = start;
+        this.target = target;
+        tx_ = this.target.root.x;
+        ty_ = this.target.root.y;
+
+        int startX = (int)start.root.x;
+        int startY = (int)start.root.y;
+        int targetX = (int)target.root.x;
+        int targetY = (int)target.root.y;
+
+        boolean startResult = grid_.get_cell_is_traversable(startX, startY) ||
+                            grid_.get_cell_is_traversable(startX-1, startY) ||
+                            grid_.get_cell_is_traversable(startX, startY-1) ||
+                            grid_.get_cell_is_traversable(startX-1, startY-1);
+
+        boolean targetResult = grid_.get_cell_is_traversable(targetX, targetY) ||
+                            grid_.get_cell_is_traversable(targetX-1, targetY) ||
+                            grid_.get_cell_is_traversable(targetX, targetY-1) ||
+                            grid_.get_cell_is_traversable(targetX-1, targetY-1);
+
+        boolean result = startResult && targetResult;
+        return result;
+    }
 	
 	public BitpackedGrid getGrid() { return grid_; }
 		
@@ -150,13 +178,13 @@ public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
     			(int)node.root.x, (int)node.root.y);
     	
     	// certain start locations are ambiguous; we don't try to solve these
-    	if(start_dc && !grid_.get_cell_is_traversable(
+    	/*if(start_dc && !grid_.get_cell_is_traversable(
     			(int)node.root.x, (int)node.root.y)) 
-    	{ return;  }
+    	{ return;  }*/
     	
     	int rootx = (int)node.root.x;
     	int rooty = (int)node.root.y;
-    			
+    		
     	// generate flat observable successors left of the start point
     	// NB: hacky implementation; we use a fake root for the projection
     	IntervalProjection projection = new IntervalProjection();
@@ -176,8 +204,8 @@ public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
     			rootx, rooty, node, retval);
     	
     	// generate conical observable successors below the start point 
-    	int max_left = grid_.scan_cells_left(rootx, rooty)+1;
-    	int max_right = grid_.scan_cells_right(rootx, rooty);
+        int max_left = grid_.scan_cells_left(rootx-1, rooty)+1;
+        int max_right = grid_.scan_cells_right(rootx, rooty);
     	if(max_left != rootx && !start_dc)
     	{
     		split_interval_make_successors(max_left, rootx, rooty+1, 
@@ -197,6 +225,7 @@ public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
     		split_interval_make_successors(max_left, rootx, rooty-1, 
     				rootx, rooty, rooty-2, node, retval);
     	}    	
+        
     	if(max_right != rootx)
     	{
     		split_interval_make_successors(rootx, max_right, rooty-1, 

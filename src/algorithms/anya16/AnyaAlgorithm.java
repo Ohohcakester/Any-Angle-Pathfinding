@@ -78,10 +78,6 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
             ++i;
         }
 
-        for (int j=0;j<path.length;++j) {
-            System.out.println(Arrays.toString(path[j]));
-        }
-
         return path;
     }
     
