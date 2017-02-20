@@ -1,6 +1,7 @@
 package pgraph.alg;
 
 import java.util.Hashtable;
+import java.util.function.Consumer;
 
 import org.jgrapht.traverse.EuclideanDistanceHeuristic;
 import org.jgrapht.traverse.Heuristic;
@@ -13,6 +14,7 @@ import pgraph.anya.AnyaNode;
 import pgraph.anya.AnyaInterval;
 import pgraph.anya.experiments.MBRunnable;
 import pgraph.grid.BitpackedGrid;
+
 
 // An implementation of the Anya search algorithm. 
 // 
@@ -31,6 +33,7 @@ public class AnyaSearch implements MBRunnable {
 	private SearchNode lastNodeParent;
 	
 	public boolean verbose = false;
+	public boolean isRecording = false;
 	
 	public int expanded;
 	public int insertions;
@@ -44,6 +47,8 @@ public class AnyaSearch implements MBRunnable {
 	public AnyaNode mb_target_;
 	public double mb_cost_;
 	
+	public Consumer<AnyaNode> snapshotInsert;
+	public Consumer<AnyaNode> snapshotExpand;
 		
 	// This class holds various bits of data needed to 
 	// drive the search
@@ -153,21 +158,8 @@ public class AnyaSearch implements MBRunnable {
 		while(!open.isEmpty())
 		{
 			SearchNode current = (SearchNode)open.removeMin();
-			if(verbose) { System.out.println("expanding (f="+current.getKey()+") "+current.toString()); }
-			/*{
-				AnyaNode node = current.getData();
-				AnyaInterval nodeint = node.interval;
-				Point2D.Double nodebase = node.root;
-				int p_y = nodeint.getRow();
-				int p_xln = (int)(nodeint.getLeft()*1000);
-				int p_xld = 1000;
-				int p_xrn = (int)(nodeint.getRight()*1000);
-				int p_xrd = 1000;
-				int p_bx = (int)nodebase.x;
-				int p_by = (int)nodebase.y;
-
-				System.out.println(p_y+" "+p_xln+" "+p_xld+" "+p_xrn+" "+p_xrd+" "+p_bx+" "+p_by);
-			}*/
+			//if(verbose) { System.out.println("expanding (f="+current.getKey()+") "+current.toString()); }
+			if (isRecording) snapshotExpand.accept(current.getData());
 
 			expander.expand(current.getData());
 			expanded++;
@@ -200,22 +192,6 @@ public class AnyaSearch implements MBRunnable {
 				SearchNode root_rep = roots_.get(root_hash);
 				double new_g_value = current.getSecondaryKey() + 
 						expander.step_cost();
-				
-				/*{
-					AnyaNode node = neighbour.getData();
-					AnyaInterval nodeint = node.interval;
-					Point2D.Double nodebase = node.root;
-					int p_y = nodeint.getRow();
-					int p_xln = (int)(nodeint.getLeft()*1000);
-					int p_xld = 1000;
-					int p_xrn = (int)(nodeint.getRight()*1000);
-					int p_xrd = 1000;
-					int p_bx = (int)nodebase.x;
-					int p_by = (int)nodebase.y;
-
-					System.out.println(p_y+" "+p_xln+" "+p_xld+" "+p_xrn+" "+p_xrd+" "+p_bx+" "+p_by);
-				}*/
-
 
 
 				// Root level pruning:
@@ -250,10 +226,8 @@ public class AnyaSearch implements MBRunnable {
 							new_g_value);
 					roots_.put(root_hash, neighbour);
 
-					if(verbose)
-					{
-						System.out.println("\tinserting with f=" + neighbour.getKey() +" (g= "+new_g_value+");" + neighbour.toString());
-					}
+					//if(verbose) {System.out.println("\tinserting with f=" + neighbour.getKey() +" (g= "+new_g_value+");" + neighbour.toString());}
+					if (isRecording) snapshotInsert.accept(neighbour.getData());
 							
 					heap_ops++;
 					insertions++;

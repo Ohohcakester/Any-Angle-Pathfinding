@@ -1,11 +1,14 @@
 package algorithms;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.awt.geom.Point2D;
 import pgraph.alg.Path;
 
 import grid.GridGraph;
+import algorithms.datatypes.SnapshotItem;
 
 import pgraph.alg.AnyaSearch;
 import pgraph.anya.AnyaExpansionPolicy;
@@ -17,6 +20,9 @@ import pgraph.grid.BitpackedGrid;
 
 public class AnyaAlgorithm extends PathFindingAlgorithm {
 
+    private static final int RES = 10000;
+    public ArrayList<SnapshotItem> currSnapshot = new ArrayList<>();
+    
     private static AnyaSearch anya = null;
     private static GridGraph storedGraph = null;
 
@@ -32,11 +38,17 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        anya.isRecording = false;
     }
 
     public AnyaAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
         initialise(graph);
+
+        anya.snapshotExpand = (a) -> snapshotExpand(a);
+        anya.snapshotInsert = (a) -> snapshotInsert(a);
+        anya.isRecording = false;
 
         AnyaNode start = new AnyaNode(null, new AnyaInterval(0, 0, 0), 0, 0);
         AnyaNode target = new AnyaNode(null, new AnyaInterval(0, 0, 0), 0, 0);
@@ -88,7 +100,52 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
     public float getPathLength() {
         return (float)anya.mb_cost_;
     }
+
+    @Override
+    public void startRecording() {
+        super.startRecording();
+        anya.isRecording = true;
+    }
     
+    @Override
+    public void stopRecording() {
+        super.stopRecording();
+        anya.isRecording = false;
+    }
+    
+    
+    private final void snapshotInsert(AnyaNode anyaNode) {
+        AnyaInterval in = anyaNode.interval;
 
+        Integer[] line = new Integer[7];
+        line[0] = in.getRow();
+        line[1] = (int)(in.getLeft()*RES);
+        line[2] = RES;
+        line[3] = (int)(in.getRight()*RES);
+        line[4] = RES;
+        line[5] = (int)anyaNode.root.getX();
+        line[6] = (int)anyaNode.root.getY();
+        currSnapshot.add(SnapshotItem.generate(line));
 
+        maybeSaveSearchSnapshot();
+    }
+
+    private final void snapshotExpand(AnyaNode anyaNode) {
+        AnyaInterval in = anyaNode.interval;
+
+        Integer[] line = new Integer[5];
+        line[0] = in.getRow();
+        line[1] = (int)(in.getLeft()*RES);
+        line[2] = RES;
+        line[3] = (int)(in.getRight()*RES);
+        line[4] = RES;
+        currSnapshot.add(SnapshotItem.generate(line));
+
+        maybeSaveSearchSnapshot();
+    }
+
+    @Override
+    protected List<SnapshotItem> computeSearchSnapshot() {
+        return new ArrayList<>(currSnapshot);
+    }
 }
