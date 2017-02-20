@@ -358,7 +358,7 @@ public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
     
     private boolean contains_target(double left, double right, int row)
     {
-		return (row == ty_) && (tx_ >= left) && (tx_ <= right);    	
+		return (row == ty_) && (tx_ >= left-BitpackedGrid.epsilon) && (tx_ <= right+BitpackedGrid.epsilon);    	
     }    
     
     // TODO: assumes vertical move to the next row is always valid.
