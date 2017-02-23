@@ -14,8 +14,11 @@ public class EdgeNLevelSparseVisibilityGraph {
     private static int storedLevelLimit;
     
     private final GridGraph graph;
-    private LineOfSightScanner losScanner;
-    private int[][] nodeIndex;
+    private LineOfSightScannerDouble losScanner;
+    private final int sizeXPlusOne;
+    private final int sizeYPlusOne;
+
+    private int[] nodeIndex; // Flattened 2D Array
     private int startIndex = -1;
     private int endIndex = -1;
     
@@ -68,6 +71,8 @@ public class EdgeNLevelSparseVisibilityGraph {
     
     private EdgeNLevelSparseVisibilityGraph(GridGraph graph) {
         this.graph = graph;
+        this.sizeXPlusOne = graph.sizeX+1;
+        this.sizeYPlusOne = graph.sizeY+1;
     }
 
     public final void setSaveSnapshotFunction(Runnable saveSnapshot) {
@@ -98,7 +103,7 @@ public class EdgeNLevelSparseVisibilityGraph {
     /// \\\ /// \\\ /// \\\ /// \\\ /// \\\ ///
 
     private final void constructGraph() {
-        losScanner = new LineOfSightScanner(graph);
+        losScanner = new LineOfSightScannerDouble(graph);
         queue = new int[11];
 
         queueSize = 0;
@@ -180,18 +185,16 @@ public class EdgeNLevelSparseVisibilityGraph {
    }
 
     private final void addNodes() {
-        nodeIndex = new int[graph.sizeY+1][];
-        for (int y=0;y<nodeIndex.length;y++) {
-            nodeIndex[y] = new int[graph.sizeX+1];
-            for (int x=0; x<nodeIndex[y].length; x++) {
+        nodeIndex = new int[sizeYPlusOne*sizeXPlusOne];
+        for (int y=0; y<sizeYPlusOne; y++) {
+            for (int x=0; x<sizeXPlusOne; x++) {
                 if (graph.isOuterCorner(x, y)) {
-                    nodeIndex[y][x] = assignNode(x, y);
+                    nodeIndex[y*sizeXPlusOne + x] = assignNode(x, y);
                 } else {
-                    nodeIndex[y][x] = -1;
+                    nodeIndex[y*sizeXPlusOne + x] = -1;
                 }
             }
         }
-
     }
 
     private final int assignNode(int x, int y) {
@@ -219,7 +222,7 @@ public class EdgeNLevelSparseVisibilityGraph {
             for (int succ=0;succ<nSuccessors;++succ) {
                 toX = losScanner.successorsX[succ];
                 toY = losScanner.successorsY[succ];
-                int j = nodeIndex[toY][toX];
+                int j = nodeIndex[toY*sizeXPlusOne + toX];
 
                 // We add both ways at the same time. So we use this to avoid duplicates
                 if (i >= j) continue;
@@ -730,29 +733,29 @@ public class EdgeNLevelSparseVisibilityGraph {
     // Uses Memory
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
         // START:
-        if (nodeIndex[sy][sx] == -1) {
+        if (nodeIndex[sy*sizeXPlusOne + sx] == -1) {
             startIndex = nNodes;
             nOutgoingEdgess[startIndex] = 0;
             xPositions[startIndex] = sx;
             yPositions[startIndex] = sy;
-            //nodeIndex[sy][sx] = startIndex;
+            //nodeIndex[sy*sizeXPlusOne + sx] = startIndex;
             ++nNodes;
         } else {
-            startIndex = nodeIndex[sy][sx];
+            startIndex = nodeIndex[sy*sizeXPlusOne + sx];
         }
         startOriginalSize = nOutgoingEdgess[startIndex];
         addTempEdgesToVisibleNeighbours(startIndex, sx, sy);
 
         // END:
-        if (nodeIndex[ey][ex] == -1) {
+        if (nodeIndex[ey*sizeXPlusOne + ex] == -1) {
             endIndex = nNodes;
             nOutgoingEdgess[endIndex] = 0;
             xPositions[endIndex] = ex;
             yPositions[endIndex] = ey;
-            //nodeIndex[ey][ex] = endIndex;
+            //nodeIndex[ey*sizeXPlusOne + ex] = endIndex;
             ++nNodes;
         } else {
-            endIndex = nodeIndex[ey][ex];
+            endIndex = nodeIndex[ey*sizeXPlusOne + ex];
         }
         endOriginalSize = nOutgoingEdgess[endIndex];
         addTempEdgesToVisibleNeighbours(endIndex, ex, ey);
@@ -780,7 +783,7 @@ public class EdgeNLevelSparseVisibilityGraph {
         for (int i=0;i<nSuccessors;++i) {
             int toX = losScanner.successorsX[i];
             int toY = losScanner.successorsY[i];
-            int targetIndex = nodeIndex[toY][toX];
+            int targetIndex = nodeIndex[toY*sizeXPlusOne + toX];
             if (Memory.visited(targetIndex)) continue;
 
             float weight = graph.distance(x, y, toX, toY);

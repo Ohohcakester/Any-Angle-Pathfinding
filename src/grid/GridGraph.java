@@ -7,7 +7,7 @@ import algorithms.datatypes.Point;
  */
 public class GridGraph {
 
-    private boolean[][] tiles;
+    private boolean[] tiles; // Flattened 2D Array
     public final int sizeX;
     public final int sizeY;
     public final int sizeXplusOne;
@@ -21,29 +21,26 @@ public class GridGraph {
         this.sizeY = sizeY;
         this.sizeXplusOne = sizeX+1;
         
-        tiles = new boolean[sizeY][sizeX];
-        for (int i = 0; i < sizeY; i++) {
-            tiles[i] = new boolean[sizeX];
-        }
+        tiles = new boolean[sizeY*sizeX];
     }
     
     public final void setBlocked(int x, int y, boolean value) {
-        tiles[y][x] = value;
+        tiles[sizeX*y + x] = value;
     }
     
     public final void trySetBlocked(int x, int y, boolean value) {
         if (isValidBlock(x,y))
-            tiles[y][x] = value;
+            tiles[sizeX*y + x] = value;
     }
     
     public final boolean isBlocked(int x, int y) {
         if (x >= sizeX || y >= sizeY) return true;
         if (x < 0 || y < 0) return true;
-        return tiles[y][x];
+        return tiles[sizeX*y + x];
     }
     
     public final boolean isBlockedRaw(int x, int y) {
-        return tiles[y][x];
+        return tiles[sizeX*y + x];
     }
     
     public final boolean isValidCoordinate(int x, int y) {
