@@ -281,4 +281,9 @@ public class SparseVisibilityGraphAlgorithmFibHeap extends PathFindingAlgorithm 
     private final void setVisited(int index, boolean value) {
         Memory.setVisited(index, value);
     }
+
+    public static void clearMemory() {
+        nodeRefs = null;
+        System.gc();
+    }
 }

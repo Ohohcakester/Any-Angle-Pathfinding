@@ -585,4 +585,9 @@ public class EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap extends PathFinding
     private final void setVisited(int index, boolean value) {
         Memory.setVisited(index, value);
     }
+    
+    public static void clearMemory() {
+        nodeRefs = null;
+        System.gc();
+    }
 }

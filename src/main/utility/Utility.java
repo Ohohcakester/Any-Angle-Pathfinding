@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import algorithms.Anya;
+import algorithms.AnyaAlgorithm;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
@@ -12,8 +13,10 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.subgoalgraphs.SubgoalGraph;
@@ -143,14 +146,17 @@ public class Utility {
     public static void cleanUpPreallocatedMemory() {
         VertexAnya.clearMemory();
         Anya.clearMemory();
+        AnyaAlgorithm.clearMemory();
         VisibilityGraph.clearMemory();
         SubgoalGraph.clearMemory();
         SparseVisibilityGraph.clearMemory();
+        SparseVisibilityGraphAlgorithmFibHeap.clearMemory();
         Memory.clearMemory();
         ReusableIndirectHeap.clearMemory();
         LineOfSightScanner.clearMemory();
         VertexNLevelSparseVisibilityGraph.clearMemory();
         EdgeNLevelSparseVisibilityGraph.clearMemory();
+        EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap.clearMemory();
         DirectedEdgeNLevelSparseVisibilityGraph.clearMemory();
         VisibilityGraphOptimised.clearMemory();
         SnapshotItem.clearCached();

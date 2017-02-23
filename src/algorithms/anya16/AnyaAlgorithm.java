@@ -148,4 +148,10 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
     protected List<SnapshotItem> computeSearchSnapshot() {
         return new ArrayList<>(currSnapshot);
     }
+
+    public static void clearMemory() {
+        anya = null;
+        storedGraph = null;
+        System.gc();
+    }
 }
