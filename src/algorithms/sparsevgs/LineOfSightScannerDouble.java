@@ -94,7 +94,7 @@ public final class LineOfSightScannerDouble {
         intervalStack[intervalStackSize] = interval;
         ++intervalStackSize;
         
-        addToSnapshot(interval); // Uncomment for debugging.
+        //addToSnapshot(interval); // Uncomment for debugging.
     }
     
     private static final void addToSnapshot(LOSIntervalDouble interval) {
