@@ -36,9 +36,9 @@ public class RPSScanner {
     }
 
 
-    public int nNeighbours;
-    public int[] neighboursX;
-    public int[] neighboursY;
+    public int nSuccessors;
+    public int[] successorsX;
+    public int[] successorsY;
 
     private Vertex[] vertices;
     private RPSEdgeHeap edgeHeap;
@@ -80,25 +80,25 @@ public class RPSScanner {
     }
 
     public RPSScanner(Vertex[] vertices, Edge[] edges) {
-        neighboursX = new int[11];
-        neighboursY = new int[11];
-        nNeighbours = 0;
+        successorsX = new int[11];
+        successorsY = new int[11];
+        nSuccessors = 0;
         this.vertices = vertices;
         edgeHeap = new RPSEdgeHeap(edges);
     }
 
     private final void clearNeighbours() {
-        nNeighbours = 0;
+        nSuccessors = 0;
     }
 
     private final void addNeighbour(int x, int y) {
-        if (nNeighbours >= neighboursX.length) {
-            neighboursX = Arrays.copyOf(neighboursX, neighboursX.length*2);
-            neighboursY = Arrays.copyOf(neighboursY, neighboursY.length*2);
+        if (nSuccessors >= successorsX.length) {
+            successorsX = Arrays.copyOf(successorsX, successorsX.length*2);
+            successorsY = Arrays.copyOf(successorsY, successorsY.length*2);
         }
-        neighboursX[nNeighbours] = x;
-        neighboursY[nNeighbours] = y;
-        ++nNeighbours;
+        successorsX[nSuccessors] = x;
+        successorsY[nSuccessors] = y;
+        ++nSuccessors;
     }
 
     private final double getAngle(int sx, int sy, Vertex v) {
@@ -152,7 +152,7 @@ public class RPSScanner {
         }
     }
 
-    public final void findNeighbours(int sx, int sy) {
+    public final void computeAllVisibleSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
 

@@ -215,16 +215,19 @@ public class Experiment {
             RPSScanner losScanner = GridPolygonGenerator.createRpsScannerFromGrid(gridGraph);
 
             try {
-                losScanner.findNeighbours(sx, sy);
+                //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
+                losScanner.computeAllVisibleSuccessors(sx, sy);
+                //losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
             //losScanner.drawLines(gridLineSet, gridPointSet);
 
-            for (int i=0;i<losScanner.nNeighbours;++i) {
-                int x = losScanner.neighboursX[i];
-                int y = losScanner.neighboursY[i];
+            for (int i=0;i<losScanner.nSuccessors;++i) {
+                int x = losScanner.successorsX[i];
+                int y = losScanner.successorsY[i];
                 gridLineSet.addLine(sx, sy, x,y, Color.GREEN);
                 gridPointSet.addPoint(x, y, Color.RED);
             }
