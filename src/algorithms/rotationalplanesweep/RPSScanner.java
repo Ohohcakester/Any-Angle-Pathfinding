@@ -152,14 +152,10 @@ public class RPSScanner {
         }
     }
 
-    public final void computeAllVisibleSuccessors(int sx, int sy) {
-        clearNeighbours();
-        if (vertices.length == 0) return;
-
-        // This arraylist has size at most 2.
-        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();;
-
-        // Compute angles
+    private final void initialiseScan(int sx, int sy, ArrayList<VertexShortcutter> shortcutters) {
+        
+        // Compute angles, apply shortcutting to cut (sx, sy).
+        // The shortcutters arraylist has size at most 2.
         for (int i=0; i<vertices.length; ++i) {
             Vertex v = vertices[i];
             if (v.x != sx || v.y != sy) {
@@ -187,6 +183,22 @@ public class RPSScanner {
                 edgeHeap.insert(edge, computeDistance(sx, sy, edge));
             }
         }
+    }
+
+    private final void restoreShortcuttedVertices(ArrayList<VertexShortcutter> shortcutters) {
+        // Restore shortcutted vertices
+        for (VertexShortcutter shortcutter : shortcutters) {
+            shortcutter.restore();
+        }
+    }
+
+    public final void computeAllVisibleSuccessors(int sx, int sy) {
+        clearNeighbours();
+        if (vertices.length == 0) return;
+
+        // This arraylist has size at most 2.
+        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
+        initialiseScan(sx, sy, shortcutters);
 
 
         // This queue is used to enforce the order:
@@ -248,10 +260,7 @@ public class RPSScanner {
             }
         }
 
-        // Restore shortcutted vertices
-        for (VertexShortcutter shortcutter : shortcutters) {
-            shortcutter.restore();
-        }
+        restoreShortcuttedVertices(shortcutters);
     }
 
     private final void sortVertices(int sx, int sy) {
