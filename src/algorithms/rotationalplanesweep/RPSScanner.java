@@ -9,6 +9,7 @@ import draw.GridLineSet;
 import draw.GridPointSet;
 
 import algorithms.datatypes.SnapshotItem;
+import grid.GridGraph;
 
 
 public class RPSScanner {
@@ -40,8 +41,9 @@ public class RPSScanner {
     public int[] successorsX;
     public int[] successorsY;
 
-    private Vertex[] vertices;
-    private RPSEdgeHeap edgeHeap;
+    private final Vertex[] vertices;
+    private final RPSEdgeHeap edgeHeap;
+    private final GridGraph graph;
 
     public static class Vertex {
         public int x;
@@ -79,12 +81,13 @@ public class RPSScanner {
         }
     }
 
-    public RPSScanner(Vertex[] vertices, Edge[] edges) {
+    public RPSScanner(Vertex[] vertices, Edge[] edges, GridGraph graph) {
         successorsX = new int[11];
         successorsY = new int[11];
         nSuccessors = 0;
         this.vertices = vertices;
-        edgeHeap = new RPSEdgeHeap(edges);
+        this.edgeHeap = new RPSEdgeHeap(edges);
+        this.graph = graph;
     }
 
     private final void clearNeighbours() {
@@ -240,6 +243,104 @@ public class RPSScanner {
                     Edge edge = edgeHeap.getMin();
                     if (!linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
                         addNeighbour(v.x, v.y);
+                    }
+                }
+
+                // Delete all
+                for (int j=0; j<vertexQueueSize; ++j) {
+                    Vertex v = vertexQueue[j];
+
+                    if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
+                        edgeHeap.delete(v.edge1);
+                    }
+                    if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
+                        edgeHeap.delete(v.edge2);
+                    }
+                }
+
+                // Clear queue
+                vertexQueueSize = 0;
+            }
+        }
+
+        restoreShortcuttedVertices(shortcutters);
+    }
+
+
+    public final void computeAllVisibleTautSuccessors(int sx, int sy) {
+        clearNeighbours();
+        if (vertices.length == 0) return;
+
+        // This arraylist has size at most 2.
+        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
+        initialiseScan(sx, sy, shortcutters);
+
+        // We exclude the non-taut region (excludeStart, excludeEnd)
+        double EPSILON = 0.00000001;
+        double excludeStart = 99999;
+        double excludeEnd = 99998;
+        // Setting the interval (excludeStart, excludeEnd)
+        if (graph.bottomLeftOfBlockedTile(sx, sy)) {
+            if (!graph.topRightOfBlockedTile(sx, sy)) {
+                excludeStart = Math.PI + EPSILON;
+                excludeEnd = 3*Math.PI/2 - EPSILON;
+            }
+        } else if (graph.bottomRightOfBlockedTile(sx, sy)) {
+            if (!graph.topLeftOfBlockedTile(sx, sy)) {
+                excludeStart = 3*Math.PI/2 + EPSILON;
+                excludeEnd = 2*Math.PI - EPSILON;
+            }
+        } else if (graph.topRightOfBlockedTile(sx, sy)) {
+            excludeStart = 0 + EPSILON;
+            excludeEnd = Math.PI/2 - EPSILON;
+        } else if (graph.topLeftOfBlockedTile(sx, sy)) {
+            excludeStart = Math.PI/2 + EPSILON;
+            excludeEnd = Math.PI - EPSILON;
+        }
+
+
+        // This queue is used to enforce the order:
+        // INSERT TO EDGEHEAP -> ADD AS NEIGHBOUR -> DELETE FROM EDGEHEAP
+        //     for all vertices with the same angle from (sx,sy).
+        Vertex[] vertexQueue = new Vertex[11];
+        int vertexQueueSize = 0;
+
+        int i = 0;
+        // Skip vertex if it is (sx,sy).
+        while (vertices[i].x == sx && vertices[i].y == sy) ++i;
+
+        for (; i<vertices.length; ++i) {
+            if (vertexQueueSize >= vertexQueue.length) {
+                vertexQueue = Arrays.copyOf(vertexQueue, vertexQueue.length*2);
+            }
+            vertexQueue[vertexQueueSize++] = vertices[i];
+            double currentAngle = vertices[i].angle;
+
+            if (i+1 == vertices.length || !isSameAngle(sx, sy, vertices[i], vertices[i+1])) {
+                // Clear queue
+
+                // Insert all first
+                for (int j=0; j<vertexQueueSize; ++j) {
+                    Vertex v = vertexQueue[j];
+
+                    if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
+                        edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
+                    }
+                    if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
+                        edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
+                    }
+                }
+
+                // Add all (if it doesn't fall within the interval (excludeStart, excludeEnd) )
+                if (currentAngle <= excludeStart || excludeEnd <= currentAngle) {
+                    for (int j=0; j<vertexQueueSize; ++j) {
+                        Vertex v = vertexQueue[j];
+                        //saveSnapshot(sx, sy, v); // UNCOMMENT FOR TRACING
+
+                        Edge edge = edgeHeap.getMin();
+                        if (!linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
+                            addNeighbour(v.x, v.y);
+                        }
                     }
                 }
 

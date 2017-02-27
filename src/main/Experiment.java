@@ -193,6 +193,8 @@ public class Experiment {
         //testRPSScan(13, 34);
         //testRPSScan(12, 19);
         //testRPSScan(16, 15);
+        //testRPSScan(16, 18);
+        //testRPSScan(15, 23);
     }
 
     private static void testRPSScan(int sx, int sy) {
@@ -216,8 +218,8 @@ public class Experiment {
 
             try {
                 //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
-                losScanner.computeAllVisibleSuccessors(sx, sy);
-                //losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleSuccessors(sx, sy);
+                losScanner.computeAllVisibleTautSuccessors(sx, sy);
                 //losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -131,7 +131,7 @@ public class GridPolygonGenerator {
         }
         tracer.postProcess();
 
-        return new RPSScanner(tracer.vertices, tracer.edges);
+        return new RPSScanner(tracer.vertices, tracer.edges, graph);
     }
 }
 
