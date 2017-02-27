@@ -266,8 +266,80 @@ public class RPSScanner {
         restoreShortcuttedVertices(shortcutters);
     }
 
-
     public final void computeAllVisibleTautSuccessors(int sx, int sy) {
+        clearNeighbours();
+        if (vertices.length == 0) return;
+
+        // This arraylist has size at most 2.
+        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
+        initialiseScan(sx, sy, shortcutters);
+
+
+        // This queue is used to enforce the order:
+        // INSERT TO EDGEHEAP -> ADD AS NEIGHBOUR -> DELETE FROM EDGEHEAP
+        //     for all vertices with the same angle from (sx,sy).
+        Vertex[] vertexQueue = new Vertex[11];
+        int vertexQueueSize = 0;
+
+        int i = 0;
+        // Skip vertex if it is (sx,sy).
+        while (vertices[i].x == sx && vertices[i].y == sy) ++i;
+
+        for (; i<vertices.length; ++i) {
+            if (vertexQueueSize >= vertexQueue.length) {
+                vertexQueue = Arrays.copyOf(vertexQueue, vertexQueue.length*2);
+            }
+            vertexQueue[vertexQueueSize++] = vertices[i];
+
+            if (i+1 == vertices.length || !isSameAngle(sx, sy, vertices[i], vertices[i+1])) {
+                // Clear queue
+
+                // Insert all first
+                for (int j=0; j<vertexQueueSize; ++j) {
+                    Vertex v = vertexQueue[j];
+
+                    if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
+                        edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
+                    }
+                    if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
+                        edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
+                    }
+                }
+
+                // Add all
+                for (int j=0; j<vertexQueueSize; ++j) {
+                    Vertex v = vertexQueue[j];
+                    if (!isTautSuccessor(sx, sy, v.x, v.y)) continue;
+                    //saveSnapshot(sx, sy, v); // UNCOMMENT FOR TRACING
+
+                    Edge edge = edgeHeap.getMin();
+                    if (!linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
+                        addNeighbour(v.x, v.y);
+                    }
+                }
+
+                // Delete all
+                for (int j=0; j<vertexQueueSize; ++j) {
+                    Vertex v = vertexQueue[j];
+
+                    if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
+                        edgeHeap.delete(v.edge1);
+                    }
+                    if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
+                        edgeHeap.delete(v.edge2);
+                    }
+                }
+
+                // Clear queue
+                vertexQueueSize = 0;
+            }
+        }
+
+        restoreShortcuttedVertices(shortcutters);
+    }
+
+
+    public final void computeAllVisibleTwoWayTautSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
 
@@ -335,6 +407,7 @@ public class RPSScanner {
                 if (currentAngle <= excludeStart || excludeEnd <= currentAngle) {
                     for (int j=0; j<vertexQueueSize; ++j) {
                         Vertex v = vertexQueue[j];
+                        if (!isTautSuccessor(sx, sy, v.x, v.y)) continue;
                         //saveSnapshot(sx, sy, v); // UNCOMMENT FOR TRACING
 
                         Edge edge = edgeHeap.getMin();
@@ -364,11 +437,35 @@ public class RPSScanner {
         restoreShortcuttedVertices(shortcutters);
     }
 
+    // Assumptions:
+    // 1. (sx, sy) != (nx, ny)
+    // 2. (sx, sy) has line of sight to (nx, ny)
+    // 3. (nx, ny) is an outer corner tile.
+    private final boolean isTautSuccessor(int sx, int sy, int nx, int ny) {
+        int dx = nx - sx;
+        int dy = ny - sy;
+        if (dx == 0 || dy == 0) return true;
+
+        if (dx > 0) {
+            if (dy > 0) {
+                return !graph.bottomLeftOfBlockedTile(nx, ny);
+            } else { // (dy < 0)
+                return !graph.topLeftOfBlockedTile(nx, ny);
+            }
+        } else { // (dx < 0)
+            if (dy > 0) {
+                return !graph.bottomRightOfBlockedTile(nx, ny);
+            } else { // (dy < 0)
+                return !graph.topRightOfBlockedTile(nx, ny);
+            }
+        }
+    }
+
     private final void sortVertices(int sx, int sy) {
         Arrays.sort(vertices, (a,b) -> Double.compare(a.angle, b.angle));
     }
 
-    private boolean isSameAngle(int sx, int sy, Vertex u, Vertex v) {
+    private final boolean isSameAngle(int sx, int sy, Vertex u, Vertex v) {
         int dx1 = u.x - sx;
         int dy1 = u.y - sy;
         int dx2 = v.x - sx;
