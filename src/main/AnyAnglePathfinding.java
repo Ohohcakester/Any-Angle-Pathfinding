@@ -18,7 +18,9 @@ import algorithms.VisibilityGraphAlgorithm;
 import algorithms.incrementalvgs.IVGAlgorithm;
 import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
@@ -68,7 +70,7 @@ public class AnyAnglePathfinding {
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) {
-        int choice = 0; // Choose an operation. 0: Visualisation.run() should be the default.
+        int choice = 2; // Choose an operation. 0: Visualisation.run() should be the default.
 
         switch(choice) {
             case 0:
@@ -96,7 +98,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 1; // Adjust this to choose a maze.
+        int choice = 35; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -111,15 +113,16 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 7;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 1667327427;        // seed for the random.
+                int unblockedRatio = 22;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = 905392638;        // seed for the random.
                 
-                int sizeX = 80;               // x-axis size of grid
-                int sizeY = 80;               // y-axis size of grid
-                int sx = 9;                   // x-coordinate of start point
-                int sy = 11;                  // y-coordinate of start point
-                int ex = 59;                  // x-coordinate of goal point
-                int ey = 72;                  // y-coordinate of goal point
+                int sizeX = 79;               // x-axis size of grid
+                int sizeY = 96;               // y-axis size of grid
+                int sx = 54;                   // x-coordinate of start point
+                int sy = 60;                  // y-coordinate of start point
+                int ex = 12;                  // x-coordinate of goal point
+                int ey = 19;                  // y-coordinate of goal point
+                
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 2 :
@@ -306,7 +309,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static AlgoFunction setDefaultAlgoFunction() {
-        int choice = 46; // adjust this to choose an algorithm
+        int choice = 43; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -447,6 +450,12 @@ public class AnyAnglePathfinding {
                 break;
             case 46 :
                 algoFunction = AnyaAlgorithm::new;
+                break;
+            case 47 :
+                algoFunction = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+                break;
+            case 48 :
+                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
                 break;
         }
         
