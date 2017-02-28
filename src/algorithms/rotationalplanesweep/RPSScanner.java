@@ -132,8 +132,8 @@ public class RPSScanner {
 
             if (edge1.u == s) end1 = edge1.v;
             else end1 = edge1.u;
-            if (edge2.u == s) end1 = edge2.v;
-            else end2 = s.edge2.u;
+            if (edge2.u == s) end2 = edge2.v;
+            else end2 = edge2.u;
 
             end2FirstEdge = (end2.edge1 == edge2);
         }
