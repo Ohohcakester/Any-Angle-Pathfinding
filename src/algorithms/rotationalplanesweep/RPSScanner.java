@@ -444,7 +444,7 @@ public class RPSScanner {
     private final boolean isTautSuccessor(int sx, int sy, int nx, int ny) {
         int dx = nx - sx;
         int dy = ny - sy;
-        if (dx == 0 || dy == 0) return true;
+        if (dx == 0 || dy == 0) return graph.isOuterCorner(nx, ny);
 
         if (dx > 0) {
             if (dy > 0) {
