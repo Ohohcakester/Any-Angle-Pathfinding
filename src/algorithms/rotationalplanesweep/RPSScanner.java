@@ -25,8 +25,9 @@ public class RPSScanner {
         int heapSize = edgeHeap.size();
         Edge[] edges = edgeHeap.getEdgeList();
         for (int k=0; k<heapSize; ++k) {
+            Color colour = (k == 0) ? Color.CYAN : Color.GREEN;
             Edge e = edges[k];
-            snapshot.add(SnapshotItem.generate(new Integer[]{e.u.x, e.u.y, e.v.x, e.v.y}, Color.GREEN));
+            snapshot.add(SnapshotItem.generate(new Integer[]{e.u.x, e.u.y, e.v.x, e.v.y}, colour));
         }
 
         snapshotList.add(new ArrayList<SnapshotItem>(snapshot));
@@ -619,8 +620,9 @@ public class RPSScanner {
     public void snapshotHeap(GridLineSet gridLineSet) {
         Edge[] edges = edgeHeap.getEdgeList();
         for (int i=0; i<edgeHeap.size(); ++i) {
+            Color colour = (i == 0) ? Color.ORANGE : Color.RED;
             Edge e = edges[i];
-            gridLineSet.addLine(e.u.x, e.u.y, e.v.x, e.v.y, Color.RED);
+            gridLineSet.addLine(e.u.x, e.u.y, e.v.x, e.v.y, colour);
         }
     }
 }
