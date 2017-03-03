@@ -33,30 +33,30 @@ public class RPSEdgeHeap {
         return edges[0];
     }
 
-    public final void delete(RPSScanner.Edge edge) {
+    public final void delete(RPSScanner.Edge edge, int sx,int sy) {
         // Safety check for Debugging:
-        //if (edge.heapIndex >= heapSize) throw new UnsupportedOperationException("ELEMENT NOT IN HEAP: " + edge);
+        if (edge.heapIndex >= heapSize) throw new UnsupportedOperationException("ELEMENT NOT IN HEAP: " + edge);
 
         int currentIndex = edge.heapIndex;
         swap(currentIndex, heapSize-1);
         --heapSize;
 
-        bubbleUp(currentIndex);
-        bubbleDown(currentIndex);
+        if (currentIndex >= heapSize) return;
+        bubbleUp(currentIndex, sx,sy);
+        bubbleDown(currentIndex, sx,sy);
     }
 
-    public final void insert(RPSScanner.Edge edge, double distance) {
+    public final void insert(RPSScanner.Edge edge, int sx,int sy) {
         // Safety check for Debugging:
-        //if (edge.heapIndex < heapSize) throw new UnsupportedOperationException("ELEMENT ALREADY EXISTS: " + edge);
+        if (edge.heapIndex < heapSize) throw new UnsupportedOperationException("ELEMENT ALREADY EXISTS: " + edge);
 
-        edge.distance = distance;
         swap(edge.heapIndex, heapSize);
         ++heapSize;
-        bubbleUp(edge.heapIndex);
+        bubbleUp(edge.heapIndex, sx,sy);
     }
 
-    private final void bubbleDown(int i) {
-        double distance = edges[i].distance;
+    private final void bubbleDown(int i, int sx,int sy) {
+        //double distance = edges[i].distance(sx,sy,midX,midY);
         while (true) {
             int left = 2*i + 1;
             if (left >= heapSize) return;
@@ -65,11 +65,13 @@ public class RPSEdgeHeap {
             
             // Swap with the smaller one
             int swapTarget = right;
-            if (right >= heapSize || edges[left].distance < edges[right].distance) {
+            //if (right >= heapSize || edges[left].distance(sx,sy,midX,midY) < edges[right].distance(sx,sy,midX,midY)) {
+            if (right >= heapSize || edges[left].isLessThan(edges[right], sx, sy)) {
                 swapTarget = left;
             }
 
-            if (edges[swapTarget].distance < distance) {
+            //if (edges[swapTarget].distance(sx,sy,midX,midY) < distance) {
+            if (edges[swapTarget].isLessThan(edges[i], sx, sy)) {
                 swap(i, swapTarget);
                 i = swapTarget;
             } else {
@@ -78,15 +80,16 @@ public class RPSEdgeHeap {
         }
     }
 
-    private final void bubbleUp(int i) {
-        double distance = edges[i].distance;
+    private final void bubbleUp(int i, int sx,int sy) {
+        //double distance = edges[i].distance(sx,sy,midX,midY);
         while (i > 0) {
             int parent = (i-1)/2;
-            if (edges[parent].distance > distance) {
+            //if (edges[parent].distance(sx,sy,midX,midY) > distance) {
+            if (edges[i].isLessThan(edges[parent], sx, sy)) {
                 swap(i, parent);
                 i = parent;
             } else {
-                return;
+                break;
             }
         }
     }
@@ -105,7 +108,7 @@ public class RPSEdgeHeap {
         StringBuilder sb = new StringBuilder();
         for (int i=0; i<heapSize; ++i) {
             RPSScanner.Edge e = edges[i];
-            sb.append(e.u.x + ", " + e.u.y + ", " + e.v.x + ", " + e.v.y + " | " + e.distance);
+            sb.append(e.heapIndex + ": " + e.u.x + ", " + e.u.y + ", " + e.v.x + ", " + e.v.y);// + " | " + e.distance(sx,sy,tx,ty));
             sb.append("\n");
         }
         return sb.toString();

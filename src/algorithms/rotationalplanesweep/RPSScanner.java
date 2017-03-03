@@ -65,15 +65,70 @@ public class RPSScanner {
     }
 
     public static class Edge {
+        private static final double EPSILON = 0.00000001;
+
         public Vertex u;
         public Vertex v;
         public Vertex originalU;
         public int heapIndex;
-        public double distance;
+        //public double distance;
 
         public Edge(RPSScanner.Vertex u, RPSScanner.Vertex v) {
             this.u = u;
             this.v = v;
+        }
+
+        public final boolean isLessThan(Edge e, int sx, int sy) {
+            /*int dux = u.x - sx;
+            int duy = u.y - sy;
+            int dvx = v.x - sx;
+            int dvy = v.y - sy;
+            if (dux*dvy - dvx*duy == 0 && dux*dvx + duy*dvy <= 0) {
+                // current edge contains (sx, sy)
+                return true;
+            }*/
+            double tx = midX();
+            double ty = midY();
+            double diff = distance(sx, sy, tx, ty) - e.distance(sx, sy, tx, ty);
+            if (Math.abs(diff) < EPSILON) {
+                // Cannot resolve using midpoint of current edge.
+                // So use midpoint of other edge. (two-way midpoint resolution)
+                tx = e.midX();
+                ty = e.midY();
+                return distance(sx, sy, tx, ty) < e.distance(sx, sy, tx, ty);
+            }
+            return diff < 0;
+        }
+
+        private final double midX() {
+            return (double)(u.x + v.x)/2;
+        }
+
+        private final double midY() {
+            return (double)(u.y + v.y)/2;
+        }
+
+        private final double distance(int sx, int sy, double tx, double ty) {
+            double dx = tx - sx;
+            double dy = ty - sy;
+            int dex = v.x - u.x;
+            int dey = v.y - u.y;
+            int dux = u.x - sx;
+            int duy = u.y - sy;
+
+            double denom = dey*dx - dex*dy;
+            if (Math.abs(denom) < EPSILON) {
+                // collinear (degenerate case)
+                int dvx = v.x - sx;
+                int dvy = v.y - sy;
+                // (sx,sy) lies between u and v
+                if (dux*dvx + duy*dvy <= 0) return 0;
+                return Math.min(dux*dux + duy*duy, dvx*dvx + dvy*dvy);
+            } else {
+                // not collinear
+                int numer = dux*dey - duy*dex;
+                return (dx*dx+dy*dy)*numer*numer/(denom*denom);
+            }
         }
 
         @Override
@@ -184,7 +239,8 @@ public class RPSScanner {
         for (int i=0; i<edges.length; ++i) {
             Edge edge = edges[i];
             if (intersectsPositiveXAxis(sx, sy, edge)) {
-                edgeHeap.insert(edge, computeDistance(sx, sy, edge));
+                edgeHeap.insert(edge, sx, sy);
+                //edgeHeap.insert(edge, sx, sy, computeDistance(sx, sy, edge));
             }
         }
     }
@@ -229,10 +285,12 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
 
                     if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
+                        edgeHeap.insert(v.edge1, sx,sy);
+                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
                     }
                     if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
+                        edgeHeap.insert(v.edge2, sx,sy);
+                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
                     }
                 }
 
@@ -252,10 +310,10 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
 
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.delete(v.edge1);
+                        edgeHeap.delete(v.edge1, sx,sy);
                     }
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.delete(v.edge2);
+                        edgeHeap.delete(v.edge2, sx,sy);
                     }
                 }
 
@@ -300,10 +358,12 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
 
                     if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
+                        edgeHeap.insert(v.edge1, sx,sy);
+                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
                     }
                     if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
+                        edgeHeap.insert(v.edge2, sx,sy);
+                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
                     }
                 }
 
@@ -324,10 +384,12 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
 
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.delete(v.edge1);
+                        //edgeHeap.delete(v.edge1);
+                        edgeHeap.delete(v.edge1, sx,sy);
                     }
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.delete(v.edge2);
+                        //edgeHeap.delete(v.edge2);
+                        edgeHeap.delete(v.edge2, sx,sy);
                     }
                 }
 
@@ -395,12 +457,13 @@ public class RPSScanner {
                 // Insert all first
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
                     if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
+                        edgeHeap.insert(v.edge1, sx,sy);
+                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
                     }
                     if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
+                        edgeHeap.insert(v.edge2, sx,sy);
+                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
                     }
                 }
 
@@ -423,10 +486,12 @@ public class RPSScanner {
                     Vertex v = vertexQueue[j];
 
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.delete(v.edge1);
+                        //edgeHeap.delete(v.edge1);
+                        edgeHeap.delete(v.edge1, sx,sy);
                     }
                     if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.delete(v.edge2);
+                        //edgeHeap.delete(v.edge2);
+                        edgeHeap.delete(v.edge2, sx,sy);
                     }
                 }
 
