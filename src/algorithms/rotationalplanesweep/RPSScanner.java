@@ -50,8 +50,8 @@ public class RPSScanner {
         public int x;
         public int y;
         public double angle;
-        public Edge edge1;
-        public Edge edge2;
+        public Edge edge1; // edge1 goes forward
+        public Edge edge2; // edge2 goes backward
 
         public Vertex(int x, int y) {
             this.x = x;
@@ -67,8 +67,8 @@ public class RPSScanner {
     public static class Edge {
         private static final double EPSILON = 0.00000001;
 
-        public Vertex u;
-        public Vertex v;
+        public Vertex u; // u goes backward
+        public Vertex v; // v goes forward
         public Vertex originalU;
         public int heapIndex;
         //public double distance;
@@ -160,61 +160,9 @@ public class RPSScanner {
         ++nSuccessors;
     }
 
-    private final double getAngle(int sx, int sy, Vertex v) {
-        if (v.x == sx && v.y == sy) return -1;
-        double angle = Math.atan2(v.y-sy, v.x-sx);
-        if (angle < 0) angle += 2*Math.PI;
-        return angle;
-    }
-
-    private class VertexShortcutter {
-        private Vertex s;
-        private Edge edge1;
-        private Edge edge2;
-        private Vertex end1;
-        private Vertex end2;
-        private boolean end2FirstEdge;
-
-        public VertexShortcutter(Vertex s) {
-            this.s = s;
-            /*         edge1
-                    s ------- end1
-                    |
-              edge2 |
-                    |
-                   end2            */
-            edge1 = s.edge1;
-            edge2 = s.edge2;
-
-            if (edge1.u == s) end1 = edge1.v;
-            else end1 = edge1.u;
-            if (edge2.u == s) end2 = edge2.v;
-            else end2 = edge2.u;
-
-            end2FirstEdge = (end2.edge1 == edge2);
-        }
-
-        public void shortcut() {
-            // Removal
-            edge1.u = end1;
-            edge1.v = end2;
-            if (end2FirstEdge) end2.edge1 = edge1;
-            else end2.edge2 = edge1;
-        }
-
-        public void restore() {
-            // Restore
-            edge1.u = s;
-            edge1.v = end1;
-            if (end2FirstEdge) end2.edge1 = edge2;
-            else end2.edge2 = edge2;
-        }
-    }
-
-    private final void initialiseScan(int sx, int sy, ArrayList<VertexShortcutter> shortcutters) {
+    private final void initialiseScan(int sx, int sy) {
         
-        // Compute angles, apply shortcutting to cut (sx, sy).
-        // The shortcutters arraylist has size at most 2.
+        // Compute angles
         for (int i=0; i<vertices.length; ++i) {
             Vertex v = vertices[i];
             if (v.x != sx || v.y != sy) {
@@ -222,16 +170,16 @@ public class RPSScanner {
                 if (v.angle < 0) v.angle += 2*Math.PI;
             } else {
                 v.angle = -1;
-                VertexShortcutter shortcutter = new VertexShortcutter(v);
-                shortcutter.shortcut();
-                shortcutters.add(shortcutter);
+                Vertex n1 = v.edge1.v;
+                Vertex n2 = v.edge2.u;
+                addNeighbour(n1.x, n1.y);
+                addNeighbour(n2.x, n2.y);
             }
         }
         sortVertices(sx, sy);
 
         edgeHeap.clear();
         Edge[] edges = edgeHeap.getEdgeList();
-        reorderEdgeEndpoints(sx, sy, edges);
         // Note: iterating through the edges like this is a very dangerous operation.
         // That's because the edges array changes as you insert the edges into the heap.
         // Reason why it works: When we swap two edges when inserting, both edges have already been checked.
@@ -240,15 +188,7 @@ public class RPSScanner {
             Edge edge = edges[i];
             if (intersectsPositiveXAxis(sx, sy, edge)) {
                 edgeHeap.insert(edge, sx, sy);
-                //edgeHeap.insert(edge, sx, sy, computeDistance(sx, sy, edge));
             }
-        }
-    }
-
-    private final void restoreShortcuttedVertices(ArrayList<VertexShortcutter> shortcutters) {
-        // Restore shortcutted vertices
-        for (VertexShortcutter shortcutter : shortcutters) {
-            shortcutter.restore();
         }
     }
 
@@ -256,10 +196,7 @@ public class RPSScanner {
         clearNeighbours();
         if (vertices.length == 0) return;
 
-        // This arraylist has size at most 2.
-        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
-        initialiseScan(sx, sy, shortcutters);
-
+        initialiseScan(sx, sy);
 
         // This queue is used to enforce the order:
         // INSERT TO EDGEHEAP -> ADD AS NEIGHBOUR -> DELETE FROM EDGEHEAP
@@ -283,15 +220,8 @@ public class RPSScanner {
                 // Insert all first
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, sx,sy);
-                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
-                    }
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, sx,sy);
-                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
-                    }
+                    maybeAddEdge(sx, sy, v, v.edge1);
+                    maybeAddEdge(sx, sy, v, v.edge2);
                 }
 
                 // Add all
@@ -308,30 +238,21 @@ public class RPSScanner {
                 // Delete all
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.delete(v.edge1, sx,sy);
-                    }
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.delete(v.edge2, sx,sy);
-                    }
+                    maybeDeleteEdge(sx, sy, v, v.edge1);
+                    maybeDeleteEdge(sx, sy, v, v.edge2);
                 }
 
                 // Clear queue
                 vertexQueueSize = 0;
             }
         }
-
-        restoreShortcuttedVertices(shortcutters);
     }
 
     public final void computeAllVisibleTautSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
 
-        // This arraylist has size at most 2.
-        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
-        initialiseScan(sx, sy, shortcutters);
+        initialiseScan(sx, sy);
 
 
         // This queue is used to enforce the order:
@@ -356,15 +277,8 @@ public class RPSScanner {
                 // Insert all first
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, sx,sy);
-                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
-                    }
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, sx,sy);
-                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
-                    }
+                    maybeAddEdge(sx, sy, v, v.edge1);
+                    maybeAddEdge(sx, sy, v, v.edge2);
                 }
 
                 // Add all
@@ -382,23 +296,14 @@ public class RPSScanner {
                 // Delete all
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        //edgeHeap.delete(v.edge1);
-                        edgeHeap.delete(v.edge1, sx,sy);
-                    }
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        //edgeHeap.delete(v.edge2);
-                        edgeHeap.delete(v.edge2, sx,sy);
-                    }
+                    maybeDeleteEdge(sx, sy, v, v.edge1);
+                    maybeDeleteEdge(sx, sy, v, v.edge2);
                 }
 
                 // Clear queue
                 vertexQueueSize = 0;
             }
         }
-
-        restoreShortcuttedVertices(shortcutters);
     }
 
 
@@ -406,9 +311,7 @@ public class RPSScanner {
         clearNeighbours();
         if (vertices.length == 0) return;
 
-        // This arraylist has size at most 2.
-        ArrayList<VertexShortcutter> shortcutters = new ArrayList<>();
-        initialiseScan(sx, sy, shortcutters);
+        initialiseScan(sx, sy);
 
         // We exclude the non-taut region (excludeStart, excludeEnd)
         double EPSILON = 0.00000001;
@@ -457,14 +360,8 @@ public class RPSScanner {
                 // Insert all first
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        edgeHeap.insert(v.edge1, sx,sy);
-                        //edgeHeap.insert(v.edge1, computeDistance(sx, sy, v.edge1));
-                    }
-                    if (isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        edgeHeap.insert(v.edge2, sx,sy);
-                        //edgeHeap.insert(v.edge2, computeDistance(sx, sy, v.edge2));
-                    }
+                    maybeAddEdge(sx, sy, v, v.edge1);
+                    maybeAddEdge(sx, sy, v, v.edge2);
                 }
 
                 // Add all (if it doesn't fall within the interval (excludeStart, excludeEnd) )
@@ -484,23 +381,14 @@ public class RPSScanner {
                 // Delete all
                 for (int j=0; j<vertexQueueSize; ++j) {
                     Vertex v = vertexQueue[j];
-
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge1)) {
-                        //edgeHeap.delete(v.edge1);
-                        edgeHeap.delete(v.edge1, sx,sy);
-                    }
-                    if (!isStartOrOriginEdge(sx, sy, v, v.edge2)) {
-                        //edgeHeap.delete(v.edge2);
-                        edgeHeap.delete(v.edge2, sx,sy);
-                    }
+                    maybeDeleteEdge(sx, sy, v, v.edge1);
+                    maybeDeleteEdge(sx, sy, v, v.edge2);
                 }
 
                 // Clear queue
                 vertexQueueSize = 0;
             }
         }
-
-        restoreShortcuttedVertices(shortcutters);
     }
 
     // Assumptions:
@@ -540,102 +428,129 @@ public class RPSScanner {
         return dx1*dx2 + dy1*dy2 > 0 && dx1*dy2 == dx2*dy1;
     }
 
-    private final void reorderEdgeEndpoints(int sx, int sy, Edge[] edges) {
-        // Reorders the endpoints of each edge so that v is anticlockwise from u.
-        for (int i=0; i<edges.length; ++i) {
-            if (isEdgeOrderReversed(sx, sy, edges[i])) {
-                Vertex temp = edges[i].u;
-                edges[i].u = edges[i].v;
-                edges[i].v = temp;
+    private final void maybeAddEdge(int sx, int sy, Vertex curr, Edge edge) {
+        if (curr != edge.v) return;
+
+        int dux = edge.u.x - sx;
+        int duy = edge.u.y - sy;
+        int dvx = edge.v.x - sx;
+        int dvy = edge.v.y - sy;
+
+        int crossProd = dux*dvy - dvx*duy;
+        if (crossProd < 0) {
+            // Add/delete
+            edgeHeap.insert(edge, sx, sy);
+        } else if (crossProd == 0) {
+            int dotProd = dux*dvx + duy*dvy;
+            if (dotProd > 0) {
+                // Don't add
+            } else if (dotProd < 0) {
+                // Add/delete
+                edgeHeap.insert(edge, sx, sy);
+            } else { // dotProd == 0
+                // Add edge and neighbour
+                edgeHeap.insert(edge, sx, sy);
+                edgeHeap.insert(edge.u.edge2, sx, sy);
             }
         }
     }
 
-    private final boolean isEdgeOrderReversed(int sx, int sy, Edge edge) {
-        // Note: No need special case with vertex shortcutting.
-        // Special case: if an endpoint is (sx,sy), then instantly u is (sx,sy)
-        int dx1 = edge.u.x - sx;
-        int dy1 = edge.u.y - sy;
-        int dx2 = edge.v.x - sx;
-        int dy2 = edge.v.y - sy;
+    private final void maybeDeleteEdge(int sx, int sy, Vertex curr, Edge edge) {
+        if (curr != edge.u) return;
 
-        int crossProd = dx1*dy2 - dx2*dy1;
-        if (dx1*dx2 + dy1*dy2 < 0 && crossProd == 0) {
-            // (sx, sy) is on the edge (but not at the endpoints)
-            // Revert to canonical ordering.
-            return edge.u == edge.originalU;
-        }
-        return crossProd < 0;
-    }
+        int dux = edge.u.x - sx;
+        int duy = edge.u.y - sy;
+        int dvx = edge.v.x - sx;
+        int dvy = edge.v.y - sy;
 
-    private final boolean isStartOrOriginEdge(int sx, int sy, Vertex v, Edge e) {
-        return v == e.u || (e.u.x == sx && e.u.y == sy);
-    }
-
-    private final double computeDistance(int sx, int sy, Edge edge) {
-        // a = v - u
-        // b = s - u
-
-        int ax = edge.v.x - edge.u.x;
-        int ay = edge.v.y - edge.u.y;
-
-        int bx = sx - edge.u.x;
-        int by = sy - edge.u.y;
-
-        int aDotb = ax*bx + ay*by;
-        int aDota = ax*ax + ay*ay;
-        if (0 <= aDotb && aDotb <= aDota) {
-            // use perpendicular distance.
-            double perpX = bx - (double)(ax * aDotb)/aDota;
-            double perpY = by - (double)(ay * aDotb)/aDota;
-
-            return perpX*perpX + perpY*perpY;
-        } else {
-            // use distance to closer point.
-            int cx = sx - edge.v.x;
-            int cy = sy - edge.v.y;
-
-            return Math.min(bx*bx + by*by, cx*cx + cy*cy);
+        int crossProd = dux*dvy - dvx*duy;
+        if (crossProd < 0) {
+            // Add/delete
+            edgeHeap.delete(edge, sx, sy);
+        } else if (crossProd == 0) {
+            int dotProd = dux*dvx + duy*dvy;
+            if (dotProd > 0) {
+                // Don't add
+            } else if (dotProd < 0) {
+                // Add/delete
+                edgeHeap.delete(edge, sx, sy);
+            } else { // dotProd == 0
+                // Delete edge and neighbour
+                edgeHeap.delete(edge, sx, sy);
+                edgeHeap.delete(edge.v.edge1, sx, sy);
+            }
         }
     }
 
-    private final boolean intersectsPositiveXAxis(int sx, int sy, Edge e) {
-        return !(e.u.x == sx && e.u.y == sy) && !(e.v.x == sx && e.v.y == sy) &&
-                 e.u.angle >= Math.PI && e.v.angle < Math.PI;
+    private final boolean intersectsPositiveXAxis(int sx, int sy, Edge edge) {
+        if (sx == edge.u.x && sy == edge.u.y) {
+            return intersectsPositiveXAxis(sx, sy, edge.u.edge2.u, edge.v);
+        } else if (sx == edge.v.x && sy == edge.v.y) {
+            return intersectsPositiveXAxis(sx, sy, edge.u, edge.v.edge1.v);
+        } else  {
+            return intersectsPositiveXAxis(sx, sy, edge.u, edge.v);
+        }
     }
 
-    private final boolean linesIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
-        int line1dx = x2 - x1;
-        int line1dy = y2 - y1;
-        int cross1 = (x3-x1)*line1dy - (y3-y1)*line1dx;
-        int cross2 = (x4-x1)*line1dy - (y4-y1)*line1dx;
+    private final boolean intersectsPositiveXAxis(int sx, int sy, Vertex edgeU, Vertex edgeV) {
+        if (edgeV.angle >= Math.PI && edgeU.angle < Math.PI) {
+            int dux = edgeU.x - sx;
+            int duy = edgeU.y - sy;
+            int dvx = edgeV.x - sx;
+            int dvy = edgeV.y - sy;
 
-        int line2dx = x4 - x3;
-        int line2dy = y4 - y3;
-        int cross3 = (x1-x3)*line2dy - (y1-y3)*line2dx;
-        int cross4 = (x2-x3)*line2dy - (y2-y3)*line2dx;
+            int crossProd = dux*dvy - dvx*duy;
+            if (crossProd < 0) {
+                return true;
+            } else if (crossProd == 0) {
+                int dotProd = dux*dvx + duy*dvy;
+                if (dotProd > 0) {
+                    // Don't add
+                } else if (dotProd < 0) {
+                    return true;
+                } else { // (dotProd == 0)
+                    // Never happens.
+                    throw new UnsupportedOperationException("This should not happen");
+                }
+            }
+        }
+        return false;
+    }
+
+    private final boolean linesIntersect(int sx, int sy, int tx, int ty, int ux, int uy, int vx, int vy) {
+        int line1dx = tx - sx;
+        int line1dy = ty - sy;
+        int cross1 = (ux-sx)*line1dy - (uy-sy)*line1dx;
+        int cross2 = (vx-sx)*line1dy - (vy-sy)*line1dx;
+
+        int line2dx = vx - ux;
+        int line2dy = vy - uy;
+        int cross3 = (sx-ux)*line2dy - (sy-uy)*line2dx;
+        int cross4 = (tx-ux)*line2dy - (ty-uy)*line2dx;
 
         if (cross1 != 0 && cross2 != 0 && cross3 != 0 && cross4 != 0) {
             return ((cross1 > 0) != (cross2 > 0)) && ((cross3 > 0) != (cross4 > 0));
         }
 
         // There exists a cross product that is 0. One of the degenerate cases.
-        // Not possible: (x1 == x3 && y1 == y3) or (x1 == x4 && y1 == y4)
-        if (x2 == x3 && y2 == y3) {
-            int dx1 = x1-x2;
-            int dy1 = y1-y2;
-            int dx2 = x4-x2;
-            int dy2 = y4-y2;
-            int dx3 = x1-x4;
-            int dy3 = y1-y4;
+        // Not possible: (sx == ux && sy == uy) or (sx == vx && sy == vy)
+        if (tx == ux && ty == uy) {
+            if (sx == vx && sy == vy) return true;
+            int dx1 = sx-tx;
+            int dy1 = sy-ty;
+            int dx2 = vx-tx;
+            int dy2 = vy-ty;
+            int dx3 = sx-vx;
+            int dy3 = sy-vy;
             return (dx1*dx2 + dy1*dy2 > 0) && (dx1*dx3 + dy1*dy3 > 0) && (dx1*dy2 == dx2*dy1);
-        } else if (x2 == x4 && y2 == y4) {
-            int dx1 = x1-x2;
-            int dy1 = y1-y2;
-            int dx2 = x3-x2;
-            int dy2 = y3-y2;
-            int dx3 = x1-x3;
-            int dy3 = y1-y3;
+        } else if (tx == vx && ty == vy) {
+            if (sx == ux && sy == uy) return true;
+            int dx1 = sx-tx;
+            int dy1 = sy-ty;
+            int dx2 = ux-tx;
+            int dy2 = uy-ty;
+            int dx3 = sx-ux;
+            int dy3 = sy-uy;
             return (dx1*dx2 + dy1*dy2 > 0) && (dx1*dx3 + dy1*dy3 > 0) && (dx1*dy2 == dx2*dy1);
         } else {
             // No equalities whatsoever.
@@ -649,17 +564,17 @@ public class RPSScanner {
                 int minX1; int minY1; int maxX1; int maxY1;
                 int minX2; int minY2; int maxX2; int maxY2;
                 
-                if (x1 < x2) {minX1 = x1; maxX1 = x2;}
-                else {minX1 = x2; maxX1 = x1;}
+                if (sx < tx) {minX1 = sx; maxX1 = tx;}
+                else {minX1 = tx; maxX1 = sx;}
 
-                if (y1 < y2) {minY1 = y1; maxY1 = y2;}
-                else {minY1 = y2; maxY1 = y1;}
+                if (sy < ty) {minY1 = sy; maxY1 = ty;}
+                else {minY1 = ty; maxY1 = sy;}
 
-                if (x3 < x4) {minX2 = x3; maxX2 = x4;}
-                else {minX2 = x4; maxX2 = x3;}
+                if (ux < vx) {minX2 = ux; maxX2 = vx;}
+                else {minX2 = vx; maxX2 = ux;}
 
-                if (y3 < y4) {minY2 = y3; maxY2 = y4;}
-                else {minY2 = y4; maxY2 = y3;}
+                if (uy < vy) {minY2 = uy; maxY2 = vy;}
+                else {minY2 = vy; maxY2 = uy;}
 
                 return !(maxX1 < minX2 || maxY1 < minY2 || maxX2 < minX1 || maxY2 < minY1);
             }
