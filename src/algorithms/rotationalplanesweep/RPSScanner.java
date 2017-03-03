@@ -78,26 +78,76 @@ public class RPSScanner {
             this.v = v;
         }
 
-        public final boolean isLessThan(Edge e, int sx, int sy) {
-            /*int dux = u.x - sx;
-            int duy = u.y - sy;
-            int dvx = v.x - sx;
-            int dvy = v.y - sy;
-            if (dux*dvy - dvx*duy == 0 && dux*dvx + duy*dvy <= 0) {
-                // current edge contains (sx, sy)
-                return true;
-            }*/
-            double tx = midX();
-            double ty = midY();
-            double diff = distance(sx, sy, tx, ty) - e.distance(sx, sy, tx, ty);
-            if (Math.abs(diff) < EPSILON) {
-                // Cannot resolve using midpoint of current edge.
-                // So use midpoint of other edge. (two-way midpoint resolution)
-                tx = e.midX();
-                ty = e.midY();
-                return distance(sx, sy, tx, ty) < e.distance(sx, sy, tx, ty);
+        // Condition: e2 comes after e1 in rotational plane sweep order.
+        private static final boolean isLessThan(Edge e1, Edge e2, int sx, int sy) {
+            // compare u and e.v
+            if (e1.u.x == e2.v.x && e1.u.y == e2.v.y) {
+                // have to do flipping
+                double m1x = e1.midX();
+                double m1y = e1.midY();
+                double e1_distance_sx_sy_m1x_m1y = e1.distance(sx, sy, m1x, m1y);
+                double diff1 = e1_distance_sx_sy_m1x_m1y - e2.distance(sx, sy, m1x, m1y);
+
+                double m2x = e2.midX();
+                double m2y = e2.midY();
+                double diff2 = e1.distance(sx, sy, m2x, m2y) - e2.distance(sx, sy, m2x, m2y);
+
+                if (diff1*diff2 < 0) {
+                    // opposite signs
+                    // need to flip m1 to the opposite side.
+                    // u1 == v2
+                    int du1x = e1.u.x - sx;
+                    int du1y = e1.u.y - sy;
+                    double dm1x = m1x - sx;
+                    double dm1y = m1y - sy;
+
+                    // m1r is the reflected midpoint about the line s,u1
+                    // m1r = m1 - 2*(dm1 - <dm1,du1>/<du1,du1> du1)
+                    double dotprodRatio = (dm1x*du1x + dm1y*du1y) / (du1x*du1x + du1y*du1y);
+                    double m1rx = m1x - 2*(dm1x - dotprodRatio*du1x);
+                    double m1ry = m1y - 2*(dm1y - dotprodRatio*du1y);
+                    return e1_distance_sx_sy_m1x_m1y < e2.distance(sx, sy, m1rx, m1ry);
+                }
+                return diff1 < 0;
+            } else {
+                // Find a ray (sx,sy)->(tx,ty) that crosses both line segments
+                int du1x = e1.u.x - sx;
+                int du1y = e1.u.y - sy;
+                int du2x = e2.u.x - sx;
+                int du2y = e2.u.y - sy;
+                int crossProd = du1x*du2y - du1y*du2x;
+
+                double tx, ty;
+                if (crossProd >= 0) {
+                    tx = (double)(e1.u.x + e2.v.x)/2;
+                    ty = (double)(e1.u.y + e2.v.y)/2;
+                } else {
+                    tx = (double)(e2.u.x + e2.v.x)/2;
+                    ty = (double)(e2.u.y + e2.v.y)/2;
+                }
+                //System.out.println("Ray -> " + tx + ", " + ty);
+
+                return e1.distance(sx, sy, tx, ty) < e2.distance(sx, sy, tx, ty);
             }
-            return diff < 0;
+        }
+
+        public final boolean isLessThan(Edge e, int sx, int sy) {
+            if ((u.x == sx && u.y == sy) || (v.x == sx && v.y == sy)) return true;
+            if ((e.u.x == sx && e.u.y == sy) || (e.v.x == sx && e.v.y == sy)) return false;
+
+            int dv1x = v.x - sx;
+            int dv1y = v.y - sy;
+            int dv2x = e.v.x - sx;
+            int dv2y = e.v.y - sy;
+
+            int crossProd = dv1x*dv2y - dv1y*dv2x;
+            if (crossProd >= 0) {
+                // this -> e
+                return isLessThan(this, e, sx, sy);
+            } else {
+                // e -> this
+                return !isLessThan(e, this, sx, sy);
+            }
         }
 
         private final double midX() {
