@@ -25,7 +25,8 @@ public class GridPolygonGenerator {
     /**
      * Marking blocked tiles: rightmost tile is representative
      * Marking unblocked tiles: leftmost tile is representative
-     *
+     * (and of the rightmost/leftmost tiles, we pick the lowest one.
+     * This is important for the process of merging collinear edges into one)
      */
     public void markAndGetRepresentativeTile(boolean[] visited, int sx, int sy, int[] tile, boolean isBlocked) {
         tile[0] = sx;
@@ -56,7 +57,12 @@ public class GridPolygonGenerator {
 
         // isBlocked: rightmost tile
         // !isBlocked: leftmost tile
-        if ((px > tile[0]) == isBlocked) {
+        if (px == tile[0]) {
+            if (py < tile[1]) {
+                tile[0] = px;
+                tile[1] = py;
+            }
+        } else if ((px > tile[0]) == isBlocked) {
             tile[0] = px;
             tile[1] = py;
         }
