@@ -222,8 +222,8 @@ public class RPSScanner {
                 v.angle = -1;
                 Vertex n1 = v.edge1.v;
                 Vertex n2 = v.edge2.u;
-                addNeighbour(n1.x, n1.y);
-                addNeighbour(n2.x, n2.y);
+                if (graph.isOuterCorner(n1.x, n1.y)) addNeighbour(n1.x, n1.y);
+                if (graph.isOuterCorner(n2.x, n2.y)) addNeighbour(n2.x, n2.y);
             }
         }
         sortVertices(sx, sy);
@@ -442,13 +442,14 @@ public class RPSScanner {
     }
 
     // Assumptions:
+    // 0. (nx, ny) is not vertically/horizontally away from (sx, sy)
     // 1. (sx, sy) != (nx, ny)
     // 2. (sx, sy) has line of sight to (nx, ny)
     // 3. (nx, ny) is an outer corner tile.
     private final boolean isTautSuccessor(int sx, int sy, int nx, int ny) {
         int dx = nx - sx;
         int dy = ny - sy;
-        if (dx == 0 || dy == 0) return graph.isOuterCorner(nx, ny);
+        // if (dx == 0 || dy == 0) return graph.isOuterCorner(nx, ny); ASSUMPTION 0
 
         if (dx > 0) {
             if (dy > 0) {
