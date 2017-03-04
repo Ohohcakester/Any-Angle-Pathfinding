@@ -445,14 +445,13 @@ public class RPSScanner {
     }
 
     // Assumptions:
-    // 0. (nx, ny) is not vertically/horizontally away from (sx, sy)
     // 1. (sx, sy) != (nx, ny)
     // 2. (sx, sy) has line of sight to (nx, ny)
     // 3. (nx, ny) is an outer corner tile.
     private final boolean isTautSuccessor(int sx, int sy, int nx, int ny) {
         int dx = nx - sx;
         int dy = ny - sy;
-        // if (dx == 0 || dy == 0) return graph.isOuterCorner(nx, ny); ASSUMPTION 0
+        if (dx == 0 || dy == 0) return graph.isOuterCorner(nx, ny);
 
         if (dx > 0) {
             if (dy > 0) {
@@ -538,16 +537,16 @@ public class RPSScanner {
 
     private final boolean intersectsPositiveXAxis(int sx, int sy, Edge edge) {
         if (sx == edge.u.x && sy == edge.u.y) {
-            return intersectsPositiveXAxis(sx, sy, edge.u.edge2.u, edge.v);
+            return anglesIntersectPositiveXAxis(sx, sy, edge.u.edge2.u, edge.v);
         } else if (sx == edge.v.x && sy == edge.v.y) {
-            return intersectsPositiveXAxis(sx, sy, edge.u, edge.v.edge1.v);
+            return anglesIntersectPositiveXAxis(sx, sy, edge.u, edge.v.edge1.v);
         } else  {
             return intersectsPositiveXAxis(sx, sy, edge.u, edge.v);
         }
     }
 
     private final boolean intersectsPositiveXAxis(int sx, int sy, Vertex edgeU, Vertex edgeV) {
-        if (edgeV.angle >= Math.PI && edgeU.angle < Math.PI) {
+        if (anglesIntersectPositiveXAxis(sx, sy, edgeU, edgeV)) {
             int dux = edgeU.x - sx;
             int duy = edgeU.y - sy;
             int dvx = edgeV.x - sx;
@@ -569,6 +568,10 @@ public class RPSScanner {
             }
         }
         return false;
+    }
+
+    private final boolean anglesIntersectPositiveXAxis(int sx, int sy, Vertex edgeU, Vertex edgeV) {
+        return edgeU.angle <= edgeV.angle && !isSameAngle(sx, sy, edgeU, edgeV);
     }
 
     private final boolean linesIntersect(int sx, int sy, int tx, int ty, int ux, int uy, int vx, int vy) {
