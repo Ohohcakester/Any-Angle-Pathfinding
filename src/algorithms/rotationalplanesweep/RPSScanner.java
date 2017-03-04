@@ -245,6 +245,7 @@ public class RPSScanner {
     public final void computeAllVisibleSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
+        if (!graph.isUnblockedCoordinate(sx, sy)) return;
 
         initialiseScan(sx, sy);
 
@@ -301,6 +302,7 @@ public class RPSScanner {
     public final void computeAllVisibleTautSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
+        if (!graph.isUnblockedCoordinate(sx, sy)) return;
 
         initialiseScan(sx, sy);
 
@@ -360,6 +362,7 @@ public class RPSScanner {
     public final void computeAllVisibleTwoWayTautSuccessors(int sx, int sy) {
         clearNeighbours();
         if (vertices.length == 0) return;
+        if (!graph.isUnblockedCoordinate(sx, sy)) return;
 
         initialiseScan(sx, sy);
 
