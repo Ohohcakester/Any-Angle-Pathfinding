@@ -22,10 +22,14 @@ public class GridPolygonGenerator {
         queueY = new int[11];
     }
 
-
-    public void markAndGetRightmostTile(boolean[] visited, int sx, int sy, int[] rightmostTile) {
-        rightmostTile[0] = sx;
-        rightmostTile[1] = sy;
+    /**
+     * Marking blocked tiles: rightmost tile is representative
+     * Marking unblocked tiles: leftmost tile is representative
+     *
+     */
+    public void markAndGetRepresentativeTile(boolean[] visited, int sx, int sy, int[] tile, boolean isBlocked) {
+        tile[0] = sx;
+        tile[1] = sy;
 
         queueStart = 0;
         queueEnd = 0;
@@ -37,38 +41,41 @@ public class GridPolygonGenerator {
             int cy = queueY[queueStart];
             dequeue();
 
-            if (canGoUp(cx,cy)) explore(visited, cx, cy+1, rightmostTile);
-            if (canGoDown(cx,cy)) explore(visited, cx, cy-1, rightmostTile);
-            if (canGoLeft(cx,cy)) explore(visited, cx-1, cy, rightmostTile);
-            if (canGoRight(cx,cy)) explore(visited, cx+1, cy, rightmostTile);
+            if (canGoUp(cx,cy,isBlocked)) explore(visited, cx, cy+1, tile, isBlocked);
+            if (canGoDown(cx,cy,isBlocked)) explore(visited, cx, cy-1, tile, isBlocked);
+            if (canGoLeft(cx,cy,isBlocked)) explore(visited, cx-1, cy, tile, isBlocked);
+            if (canGoRight(cx,cy,isBlocked)) explore(visited, cx+1, cy, tile, isBlocked);
         }
     }
 
-    private final void explore(boolean[] visited, int px, int py, int[] rightmostTile) {
+    private final void explore(boolean[] visited, int px, int py, int[] tile, boolean isBlocked) {
         int index = py*sizeX + px;
         if (visited[index]) return;
         visited[index] = true;
         enqueue(px, py);
-        if (px > rightmostTile[0]) {
-            rightmostTile[0] = px;
-            rightmostTile[1] = py;
+
+        // isBlocked: rightmost tile
+        // !isBlocked: leftmost tile
+        if ((px > tile[0]) == isBlocked) {
+            tile[0] = px;
+            tile[1] = py;
         }
     }
 
-    private final boolean canGoDown(int x, int y) {
-        return y > 0 && graph.isBlocked(x,y-1);
+    private final boolean canGoDown(int x, int y, boolean isBlocked) {
+        return (y > 0) && (graph.isBlocked(x,y-1) == isBlocked);
     }
 
-    private final boolean canGoUp(int x, int y) {
-        return y+1 < graph.sizeY && graph.isBlocked(x,y+1);
+    private final boolean canGoUp(int x, int y, boolean isBlocked) {
+        return (y+1 < graph.sizeY) && (graph.isBlocked(x,y+1) == isBlocked);
     }
     
-    private final boolean canGoLeft(int x, int y) {
-        return x > 0 && graph.isBlocked(x-1,y);
+    private final boolean canGoLeft(int x, int y, boolean isBlocked) {
+        return (x > 0) && (graph.isBlocked(x-1,y) == isBlocked);
     }
     
-    private final boolean canGoRight(int x, int y) {
-        return x+1 < graph.sizeX && graph.isBlocked(x+1,y);
+    private final boolean canGoRight(int x, int y, boolean isBlocked) {
+        return (x+1 < graph.sizeX) && (graph.isBlocked(x+1,y) == isBlocked);
     }
     
     private final void enqueue(int x, int y) {
@@ -117,15 +124,19 @@ public class GridPolygonGenerator {
 
         boolean[] visited = new boolean[sizeX*sizeY];
 
-        int[] rightmostTile = new int[2]; // x, y
+        int[] tile = new int[2]; // x, y
 
         int index = -1;
         for (int y=0; y<sizeY; ++y) {
             for (int x=0; x<sizeX; ++x) {
                 ++index;
-                if (!visited[index] && graph.isBlocked(x,y)) {
-                    generator.markAndGetRightmostTile(visited, x, y, rightmostTile);
-                    tracer.traceFromBlock(rightmostTile[0], rightmostTile[1]);
+                if (!visited[index]) {
+                    generator.markAndGetRepresentativeTile(visited, x, y, tile, graph.isBlocked(x,y));
+                    if (graph.isBlocked(x,y)) {
+                        tracer.traceFromBlock(tile[0], tile[1]);
+                    } else {
+                        if (tile[0] > 0) tracer.traceFromBlock(tile[0]-1, tile[1]);
+                    }
                 }
             }
         }
