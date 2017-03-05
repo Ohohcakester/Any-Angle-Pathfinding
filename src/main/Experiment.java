@@ -198,13 +198,20 @@ public class Experiment {
         testRPSScan(16, 15);
         testRPSScan(16, 18);
         testRPSScan(15, 23);
+        testRPSScan(3, 19);
+        testRPSScan(0, 17);
+        testRPSScan(21, 14);
+        testRPSScan(4, 2);
+        testRPSScan(3, 34);
+        testRPSScan(21, 1);
+        testRPSScan(22, 35);
     }
 
     private static void testRPSScan(int sx, int sy) {
         GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
         GridGraph gridGraph = gridAndGoals.gridGraph;
         ArrayList<GridObjects> gridObjectsList = new ArrayList<>();
-        GridLineSet gridLineSet = new GridLineSet();;
+        GridLineSet gridLineSet = new GridLineSet();
         GridPointSet gridPointSet = new GridPointSet();
         
         int dx, dy;
@@ -219,7 +226,13 @@ public class Experiment {
             
             RPSScanner losScanner = GridPolygonGenerator.createRpsScannerFromGrid(gridGraph);
 
+
             try {
+                int iterations = 1000;
+                for (int i=0;i<iterations;++i) {
+                    //losScanner.computeAllVisibleTwoWayTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
+                }
+
                 //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
                 //losScanner.computeAllVisibleSuccessors(sx, sy);
                 losScanner.computeAllVisibleTautSuccessors(sx, sy);
