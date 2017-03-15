@@ -51,9 +51,11 @@ public class GraphImporter {
             sc.close();
         } catch (FileNotFoundException e) {
             System.out.println("File " + fileName + " not found!");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        /* Commented out because of Unreachable Catch Clause warning.
+        catch (IOException e) {
+            e.printStackTrace();
+        }*/
         
         create(result);          
     }

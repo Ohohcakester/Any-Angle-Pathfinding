@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Random;
 
 import algorithms.AStar;
+import algorithms.AnyaAlgorithm;
 import algorithms.BasicThetaStar;
 import algorithms.JumpPointSearch;
 import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.sparsevgs.LineOfSightScanner;
+import algorithms.sparsevgs.LineOfSightScannerDouble;
 import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
@@ -44,11 +46,12 @@ public class Experiment {
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
 //        findUpperBound();
-//        testAlgorithmOptimality();
+        //testAlgorithmOptimality();
 //        BenchmarkGraphSets.testMapLoading();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
+//        testLOSScan();
         testRPSScan();
     }
     
@@ -137,7 +140,7 @@ public class Experiment {
             int sy = rand.nextInt(gridGraph.sizeY+1);
             sx = gridAndGoals.startGoalPoints.sx;
             sy = gridAndGoals.startGoalPoints.sy;
-            sx = 24; sy = 24;
+            sx = 13; sy = 18;
             dx = -1; dy = 2;
             
             LineOfSightScanner losScanner = new LineOfSightScanner(gridGraph);
@@ -146,7 +149,7 @@ public class Experiment {
                 int iterations = 30000;
                 long start = System.nanoTime();
                 for (int i=0;i<iterations;++i) {
-                    //losScanner.computeAllVisibleTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
+                    losScanner.computeAllVisibleTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
                     //losScanner.clearSnapshots();
                 }
                 long end = System.nanoTime();
@@ -155,8 +158,8 @@ public class Experiment {
                 System.out.println("Per iteration time: " + (totalTime/iterations));
                 
                 //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
-                losScanner.computeAllVisibleSuccessors(sx, sy);
-                //losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleSuccessors(sx, sy);
+                losScanner.computeAllVisibleTautSuccessors(sx, sy);
                 //losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -184,22 +187,31 @@ public class Experiment {
 
     private static void testRPSScan() {
         testRPSScan(13, 18);
-        //testRPSScan(12, 18);
-        //testRPSScan(10, 18);
-        //testRPSScan(11, 18);
-        //testRPSScan(11, 19);
-        //testRPSScan(12, 14);
-        //testRPSScan(13, 14);
-        //testRPSScan(13, 34);
-        //testRPSScan(12, 19);
-        //testRPSScan(16, 15);
+        testRPSScan(12, 18);
+        testRPSScan(10, 18);
+        testRPSScan(11, 18);
+        testRPSScan(11, 19);
+        testRPSScan(12, 14);
+        testRPSScan(13, 14);
+        testRPSScan(13, 34);
+        testRPSScan(12, 19);
+        testRPSScan(16, 15);
+        testRPSScan(16, 18);
+        testRPSScan(15, 23);
+        testRPSScan(3, 19);
+        testRPSScan(0, 17);
+        testRPSScan(21, 14);
+        testRPSScan(4, 2);
+        testRPSScan(3, 34);
+        testRPSScan(21, 1);
+        testRPSScan(22, 35);
     }
 
     private static void testRPSScan(int sx, int sy) {
         GridAndGoals gridAndGoals = AnyAnglePathfinding.loadMaze();
         GridGraph gridGraph = gridAndGoals.gridGraph;
         ArrayList<GridObjects> gridObjectsList = new ArrayList<>();
-        GridLineSet gridLineSet = new GridLineSet();;
+        GridLineSet gridLineSet = new GridLineSet();
         GridPointSet gridPointSet = new GridPointSet();
         
         int dx, dy;
@@ -214,17 +226,26 @@ public class Experiment {
             
             RPSScanner losScanner = GridPolygonGenerator.createRpsScannerFromGrid(gridGraph);
 
+
             try {
-                losScanner.findNeighbours(sx, sy);
+                int iterations = 1000;
+                for (int i=0;i<iterations;++i) {
+                    //losScanner.computeAllVisibleTwoWayTautSuccessors(rand.nextInt(gridGraph.sizeX+1), rand.nextInt(gridGraph.sizeY+1));
+                }
+
+                //losScanner.computeAllVisibleTwoWayTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleSuccessors(sx, sy);
+                losScanner.computeAllVisibleTautSuccessors(sx, sy);
+                //losScanner.computeAllVisibleIncrementalTautSuccessors(sx, sy, dx, dy);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
             //losScanner.drawLines(gridLineSet, gridPointSet);
 
-            for (int i=0;i<losScanner.nNeighbours;++i) {
-                int x = losScanner.neighboursX[i];
-                int y = losScanner.neighboursY[i];
+            for (int i=0;i<losScanner.nSuccessors;++i) {
+                int x = losScanner.successorsX[i];
+                int y = losScanner.successorsY[i];
                 gridLineSet.addLine(sx, sy, x,y, Color.GREEN);
                 gridPointSet.addPoint(x, y, Color.RED);
             }
@@ -521,19 +542,20 @@ public class Experiment {
         }
     }
     
-private static void testAlgorithmOptimality() {
-    AlgoFunction refAlgo = VertexAnya::new;
-//    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
-//    AlgoFunction testAlgo = VertexAnyaMarkingV3::new;
-//    AlgoFunction testAlgo = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-    AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
-        
+    private static void testAlgorithmOptimality() {
+        AlgoFunction refAlgo = VertexAnya::new;
+    //    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
+    //    AlgoFunction testAlgo = VertexAnyaMarkingV3::new;
+    //    AlgoFunction testAlgo = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+        //AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
+        AlgoFunction testAlgo = AnyaAlgorithm::new;
+
         //printSeed = false; // keep this commented out.
-        Random seedRand = new Random(-373603124);
+        Random seedRand = new Random(1241);
         int initial = seedRand.nextInt();
         for (int i=0; i<50000000; i++) {
-            int sizeX = seedRand.nextInt(500) + 5;
-            int sizeY = seedRand.nextInt(500) + 5;
+            int sizeX = seedRand.nextInt(150) + 5;
+            int sizeY = seedRand.nextInt(150) + 5;
             int seed = i+initial;
             int ratio = seedRand.nextInt(50) + 5;
             
@@ -578,7 +600,7 @@ private static void testAlgorithmOptimality() {
                 System.out.println("============");
                 throw new UnsupportedOperationException("DISCREPANCY!!");
             } else {
-                if (i%10000 == 9999) {
+                if (i%1000 == 999) {
                     System.out.println("Count: " + (i+1));
                     System.out.println("OK: Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
                     System.out.println("Actual: " + restPathLength + " , Expected: " + normalPathLength);

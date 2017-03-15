@@ -10,8 +10,11 @@ public class SparseVisibilityGraph {
     private static GridGraph storedGridGraph;
     
     private final GridGraph graph;
-    private LineOfSightScanner losScanner;
-    private int[][] nodeIndex;
+    private LineOfSightScannerDouble losScanner;
+    private final int sizeXPlusOne;
+    private final int sizeYPlusOne;
+
+    private int[] nodeIndex; // Flattened 2D Array
     private int startIndex = -1;
     private int endIndex = -1;
     
@@ -31,6 +34,8 @@ public class SparseVisibilityGraph {
 
     public SparseVisibilityGraph(GridGraph graph) {
         this.graph = graph;
+        this.sizeXPlusOne = graph.sizeX+1;
+        this.sizeYPlusOne = graph.sizeY+1;
     }
 
     public final void setSaveSnapshotFunction(Runnable saveSnapshot) {
@@ -41,7 +46,7 @@ public class SparseVisibilityGraph {
         // Check if graph already initialised
         if (nodes == null) {
             long _st = System.nanoTime();
-            losScanner = new LineOfSightScanner(graph);
+            losScanner = new LineOfSightScannerDouble(graph);
             
             nodes = new SVGNode[11];
             nNodes = 0;
@@ -63,14 +68,13 @@ public class SparseVisibilityGraph {
     }
 
     private final void addNodes() {
-        nodeIndex = new int[graph.sizeY+1][];
-        for (int y=0;y<nodeIndex.length;y++) {
-            nodeIndex[y] = new int[graph.sizeX+1];
-            for (int x=0; x<nodeIndex[y].length; x++) {
+        nodeIndex = new int[sizeYPlusOne*sizeXPlusOne];
+        for (int y=0; y<sizeYPlusOne; y++) {
+            for (int x=0; x<sizeXPlusOne; x++) {
                 if (graph.isOuterCorner(x, y)) {
-                    nodeIndex[y][x] = assignNode(x, y);
+                    nodeIndex[y*sizeXPlusOne + x] = assignNode(x, y);
                 } else {
-                    nodeIndex[y][x] = -1;
+                    nodeIndex[y*sizeXPlusOne + x] = -1;
                 }
             }
         }
@@ -93,7 +97,7 @@ public class SparseVisibilityGraph {
         // PostCondition: hasEdgeToGoal has all values == false.
         if (endIndex >= originalSize) {
             SVGNode e = nodes[endIndex];
-            nodeIndex[e.y][e.x] = -1;
+            nodeIndex[e.y*sizeXPlusOne + e.x] = -1;
         } else {
             SVGNode endNode = nodes[endIndex];
             endNode.outgoingEdges = endStoredNeighbours;
@@ -105,7 +109,7 @@ public class SparseVisibilityGraph {
         
         if (startIndex >= originalSize) {
             SVGNode s = nodes[startIndex];
-            nodeIndex[s.y][s.x] = -1;
+            nodeIndex[s.y*sizeXPlusOne + s.x] = -1;
         } else {
             SVGNode startNode = nodes[startIndex];
             startNode.outgoingEdges = startStoredNeighbours;
@@ -125,14 +129,14 @@ public class SparseVisibilityGraph {
     public final void addStartAndEnd(int sx, int sy, int ex, int ey) {
         
         // START:
-        if (nodeIndex[sy][sx] == -1) {
+        if (nodeIndex[sy*sizeXPlusOne + sx] == -1) {
             startIndex = nNodes;
             ++nNodes;
             
-            nodeIndex[sy][sx] = startIndex;
+            nodeIndex[sy*sizeXPlusOne + sx] = startIndex;
             nodes[startIndex] = new SVGNode(sx, sy);
         } else {
-            startIndex = nodeIndex[sy][sx];
+            startIndex = nodeIndex[sy*sizeXPlusOne + sx];
             SVGNode startNode = nodes[startIndex];
             startStoredNeighbours = startNode.outgoingEdges;
             startStoredWeights = startNode.edgeWeights;
@@ -144,15 +148,15 @@ public class SparseVisibilityGraph {
         addEdgesToVisibleNeighbours(startIndex, sx, sy);
         
         // END:
-        if (nodeIndex[ey][ex] == -1) {
+        if (nodeIndex[ey*sizeXPlusOne + ex] == -1) {
             endIndex = nNodes;
             ++nNodes;
 
-            nodeIndex[ey][ex] = endIndex;
+            nodeIndex[ey*sizeXPlusOne + ex] = endIndex;
             nodes[endIndex] = new SVGNode(ex, ey);
             
         } else {
-            endIndex = nodeIndex[ey][ex];
+            endIndex = nodeIndex[ey*sizeXPlusOne + ex];
             SVGNode endNode = nodes[endIndex];
             endStoredNeighbours = endNode.outgoingEdges;
             endStoredWeights = endNode.edgeWeights;
@@ -173,7 +177,7 @@ public class SparseVisibilityGraph {
         for (int i=0;i<nSuccessors;++i) {
             int toX = losScanner.successorsX[i];
             int toY = losScanner.successorsY[i];
-            int targetIndex = nodeIndex[toY][toX];
+            int targetIndex = nodeIndex[toY*sizeXPlusOne + toX];
 
             float weight = graph.distance(x, y, toX, toY);
             addEdge(index, targetIndex, weight);
@@ -201,7 +205,7 @@ public class SparseVisibilityGraph {
             for (int j=0;j<nSuccessors;++j) {
                 toX = losScanner.successorsX[j];
                 toY = losScanner.successorsY[j];
-                int toIndex = nodeIndex[toY][toX];
+                int toIndex = nodeIndex[toY*sizeXPlusOne + toX];
 
                 float weight = graph.distance(fromX, fromY, toX, toY);
                 addEdge(i, toIndex, weight);

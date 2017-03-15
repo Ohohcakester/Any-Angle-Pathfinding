@@ -7,6 +7,7 @@ import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.Anya;
+import algorithms.AnyaAlgorithm;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
@@ -21,7 +22,9 @@ import algorithms.datatypes.Point;
 import algorithms.incrementalvgs.IVGAlgorithm;
 import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
+import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
@@ -83,6 +86,7 @@ public class AlgoTest {
         AlgoFunction dijkstra = AStar::dijkstra;
         AlgoFunction accAStar = AcceleratedAStar::new;
         AlgoFunction anya = Anya::new;
+        AlgoFunction anya16 = AnyaAlgorithm::new;
 
         AlgoFunction subgoalGraphs = SubgoalGraphsAlgorithm::new;
         AlgoFunction _2LevelSubgoalGraphs = NLevelSubgoalGraphsAlgorithm.levels(2);
@@ -109,8 +113,10 @@ public class AlgoTest {
         AlgoFunction recStrictThetaStar_2 = (a, b, c, d, e) -> RecursiveStrictThetaStar.depthLimit(a, b, c, d, e, 2);
 
         AlgoFunction sparseVGA = SparseVisibilityGraphAlgorithm::graphReuse;
+        AlgoFunction sparseVGAFib = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
         AlgoFunction vertexNLevelSparseVGA = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
         AlgoFunction edgeNLevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+        AlgoFunction edgeNLevelSparseVGAFib = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
         AlgoFunction edge1LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
         AlgoFunction edge2LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(2);
         AlgoFunction edge3LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(3);
@@ -159,6 +165,7 @@ public class AlgoTest {
         // testSequence(vga, "VisibilityGraphs");
         // testSequence(vga, "VISIBILITY GRAPHS PART 2");
         // testSequence(anya, "Anya");
+        // testSequence(anya16, "Anya16");
 
         // testSequence(subgoalGraphs, "SubgoalGraphs");
         // testSequence(_2LevelSubgoalGraphs, "2LevelSubgoalGraphs");
@@ -191,8 +198,10 @@ public class AlgoTest {
 
         // testSequence(sVGAv2, "StrictVisibilityGraphsV2");
         // testSequence(sparseVGA, "SparseVisibilityGraphs");
+        // testSequence(sparseVGAFib, "SparseVisibilityGraphsFibHeap");
         // testSequence(vertexNLevelSparseVGA, "VertexNLevelSparseVisibilityGraphs");
         // testSequence(edgeNLevelSparseVGA, "EdgeNLevelSparseVisibilityGraphs");
+        // testSequence(edgeNLevelSparseVGAFib, "EdgeNLevelSparseVisibilityGraphsFibHeap");
         // testSequence(edge1LevelSparseVGA, "Edge1LevelSparseVisibilityGraphs");
         // testSequence(edge2LevelSparseVGA, "Edge2LevelSparseVisibilityGraphs");
         // testSequence(edge3LevelSparseVGA, "Edge3LevelSparseVisibilityGraphs");
