@@ -69,7 +69,6 @@ public class RPSScanner {
 
         public Vertex u; // u goes backward
         public Vertex v; // v goes forward
-        public Vertex originalU;
         public int heapIndex;
         //public double distance;
 
