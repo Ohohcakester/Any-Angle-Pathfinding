@@ -5,7 +5,7 @@ import java.util.Arrays;
 import grid.GridGraph;
 
 import algorithms.datatypes.Memory;
-import algorithms.rotationalplanesweep.RPSScanner;
+import algorithms.rotationalplanesweep.ConvexHullRPSScanner;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 
 public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
@@ -21,7 +21,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
     @Override
     public void computePath() {
-        
+
         // 1. Generate convex hulls
         convexHullGraph = new ConvexHullVG(graph);
         convexHullGraph.initialise(sx, sy, ex, ey);
@@ -34,8 +34,6 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
         pq = new ReusableIndirectHeap(size, memorySize);
         this.initialiseMemory(size, Float.POSITIVE_INFINITY, -1, false);
         
-        RPSScanner scanner = convexHullGraph.getRPSScanner();
-
         // 2. Search
         if (graph.lineOfSight(sx, sy, ex, ey)) {
             // There is a direct path from (sx, sy) to (ex, ey).
@@ -47,7 +45,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
         // Initialise Start
         setVisited(start, true);
-        expand(scanner, start, sx ,sy);
+        expand(start, sx ,sy);
 
         // pq
         while (!pq.isEmpty())
@@ -62,13 +60,13 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
             int currX = convexHullGraph.getX(current);
             int currY = convexHullGraph.getY(current);
             
-            expand(scanner, current, currX, currY);
+            expand(current, currX, currY);
         }
     }
 
-    private final void expand(RPSScanner scanner, int currIndex, int currX, int currY) {
+    private final void expand(int currIndex, int currX, int currY) {
         // find neighbours
-        scanner.computeAllVisibleSuccessors(currX, currY);
+        ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY);
 
         int nNeighbours = scanner.nSuccessors;
         for (int i=0; i<nNeighbours; ++i)
