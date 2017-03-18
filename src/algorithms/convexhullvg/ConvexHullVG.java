@@ -1,4 +1,4 @@
-package algorithms;
+package algorithms.convexhullvg;
 
 import java.util.Arrays;
 
@@ -39,7 +39,7 @@ public class ConvexHullVG {
     }
     
     private void initialiseConvexHulls() {
-
+        convexHulls = ConvexHullSplitGenerator.generate(graph);
     }
 
     private void initialiseNodes() {

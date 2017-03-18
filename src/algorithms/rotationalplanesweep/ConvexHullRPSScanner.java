@@ -8,7 +8,7 @@ import java.awt.Color;
 import draw.GridLineSet;
 import draw.GridPointSet;
 
-import algorithms.ConvexHullVG;
+import algorithms.convexhullvg.ConvexHullVG;
 import algorithms.datatypes.SnapshotItem;
 import grid.GridGraph;
 

@@ -1,12 +1,14 @@
-package algorithms;
+package algorithms.convexhullvg;
 
 import java.util.Arrays;
 
 import grid.GridGraph;
 
+import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.rotationalplanesweep.ConvexHullRPSScanner;
 import algorithms.priorityqueue.ReusableIndirectHeap;
+
 
 public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
