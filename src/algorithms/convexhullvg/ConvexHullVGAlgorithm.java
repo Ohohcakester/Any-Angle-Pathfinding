@@ -17,8 +17,8 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
     private int start;
     private int finish;
 
-    public ConvexHullVGAlgorithm(GridGraph graph, int sizeX, int sizeY, int sx, int sy, int ex, int ey) {
-        super(graph, sizeX, sizeY, sx, sy, ex, ey);
+    public ConvexHullVGAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
+        super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
     }
 
     @Override

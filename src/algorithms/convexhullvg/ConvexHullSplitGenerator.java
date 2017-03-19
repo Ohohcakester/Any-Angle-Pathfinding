@@ -30,24 +30,23 @@ public class ConvexHullSplitGenerator {
     private int floodFillSize;
 
     // Generates a convex hull in an anticlockwise fashion.
-    private static class ConvexHullGenerator {
-        private int lastVertX;
-        private int lastVertY;
-        private int prevX;
-        private int prevY;
-
+    private static class ConvexHullBuilder {
         private int[] xVertices;
         private int[] yVertices;
         private int size;
 
         // (sx, sy) is the first vertex
-        public ConvexHullGenerator(int sx, int sy) {
+        public ConvexHullBuilder(int sx, int sy) {
+            xVertices = new int[11];
+            yVertices = new int[11];
+            size = 0;
+
             appendToList(sx, sy);
         }
 
         // returns false iff it is the final vertex that closes the convex hull.
         public boolean addVertex(int x, int y) {
-            while (size <= 1 || isNotAntiClockwise(xVertices[size-2], yVertices[size-2],
+            while (size >= 2 && isNotAntiClockwise(xVertices[size-2], yVertices[size-2],
                 xVertices[size-1], yVertices[size-1], x, y)) {
                 removeLastVertex();
             }
@@ -108,6 +107,9 @@ public class ConvexHullSplitGenerator {
         floodFillY = new int[11];
         floodFillSize = 0;
 
+        convexHulls = new ConvexHullVG.ConvexHull[11];
+        nHulls = 0;
+
         generateConvexHulls();
     }
 
@@ -121,6 +123,7 @@ public class ConvexHullSplitGenerator {
     }
 
     private final void generateConvexHulls() {
+        initialiseLabels();
         int totalSize = sizeX*sizeY;
         
         for (int i=0; i<totalSize; ++i) {
@@ -135,7 +138,7 @@ public class ConvexHullSplitGenerator {
             floodFillMarkEqual(x, y);
 
             ConvexHullVG.ConvexHull convexHull = generateConvexHull(x, y);
-            boolean hasIntersection = checkIntersectionAndMaybeSplit(x, y, convexHull);
+            boolean hasIntersection = false;//checkIntersectionAndMaybeSplit(x, y, convexHull);
             if (!hasIntersection) {
                 markInteriorAsDone(convexHull, x, y);
                 addConvexHull(convexHull);
@@ -163,9 +166,9 @@ public class ConvexHullSplitGenerator {
         int nextX = px+1;
         int nextY = py;
 
-        ConvexHullGenerator hullGenerator = new ConvexHullGenerator(prevX, prevY);
+        ConvexHullBuilder hullBuilder = new ConvexHullBuilder(prevX, prevY);
 
-        while (hullGenerator.addVertex(nextX, nextY)) {
+        while (hullBuilder.addVertex(nextX, nextY)) {
             int nextPrevX = nextX;
             int nextPrevY = nextY;
 
@@ -319,7 +322,7 @@ public class ConvexHullSplitGenerator {
             prevY = nextPrevY;
         }
 
-        return hullGenerator.makeHull();
+        return hullBuilder.makeHull();
     }
 
     private final boolean topRightOfLabelledTile(int x, int y, int label) {
@@ -605,7 +608,7 @@ public class ConvexHullSplitGenerator {
             int currY = floodFillY[queueHead];
             ++queueHead;
 
-            setLabel(x, y, MARKED);
+            setLabel(currX, currY, MARKED);
             int nx, ny, label;
 
             nx = x-1; ny = y;
@@ -644,6 +647,6 @@ public class ConvexHullSplitGenerator {
 
     public static ConvexHullVG.ConvexHull[] generate(GridGraph graph) {
         ConvexHullSplitGenerator generator = new ConvexHullSplitGenerator(graph);
-        return generator.convexHulls;
+        return Arrays.copyOf(generator.convexHulls, generator.nHulls);
     }
 }

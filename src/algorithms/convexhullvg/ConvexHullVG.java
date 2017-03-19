@@ -30,12 +30,12 @@ public class ConvexHullVG {
         this.sizeXPlusOne = graph.sizeX+1;
         this.sizeYPlusOne = graph.sizeY+1;
         nodeIndex = new int[sizeYPlusOne*sizeXPlusOne];
-        scanner = new ConvexHullRPSScanner(graph, convexHulls, convexHulls.length);
     }
 
     public void initialise(int sx, int sy, int ex, int ey) {
         initialiseConvexHulls();
         initialiseNodes();
+        scanner = new ConvexHullRPSScanner(graph, convexHulls, convexHulls.length);
     }
     
     private void initialiseConvexHulls() {
@@ -49,6 +49,7 @@ public class ConvexHullVG {
             for (int j=0; j<hull.size; ++j) {
                 int x = hull.xVertices[j];
                 int y = hull.yVertices[j];
+                
                 nodeIndex[y*sizeXPlusOne + x] = nNodes;
                 ++nNodes;
             }
@@ -63,7 +64,7 @@ public class ConvexHullVG {
                 nodeX[index] = hull.xVertices[j];
                 nodeY[index] = hull.yVertices[j];
 
-                if (nodeIndex[hull.yVertices[j]*sizeXPlusOne + hull.xVertices[j]] != index) throw new UnsupportedOperationException("ERROR");
+                if (nodeIndex[hull.yVertices[j]*sizeXPlusOne + hull.xVertices[j]] != index) throw new UnsupportedOperationException("ERROR " + nodeIndex[hull.yVertices[j]*sizeXPlusOne + hull.xVertices[j]] + " - " + index);
                 ++index;
             }
         }
