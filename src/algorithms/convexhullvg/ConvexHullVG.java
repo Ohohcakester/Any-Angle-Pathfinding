@@ -1,11 +1,19 @@
 package algorithms.convexhullvg;
 
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 
 import algorithms.rotationalplanesweep.ConvexHullRPSScanner;
 import grid.GridGraph;
 
+import algorithms.datatypes.SnapshotItem;
+
 public class ConvexHullVG {
+
+    private Runnable snapshotAction;
 
     private final GridGraph graph;
     private final int sizeXPlusOne;
@@ -32,8 +40,13 @@ public class ConvexHullVG {
         nodeIndex = new int[sizeYPlusOne*sizeXPlusOne];
     }
 
+    public final void setSnapshotAction(Runnable action) {
+        snapshotAction = action;
+    }
+
     public void initialise(int sx, int sy, int ex, int ey) {
         initialiseConvexHulls();
+        if (snapshotAction != null) snapshotAction.run();
         initialiseNodes();
         scanner = new ConvexHullRPSScanner(graph, convexHulls, convexHulls.length);
     }
@@ -49,7 +62,7 @@ public class ConvexHullVG {
             for (int j=0; j<hull.size; ++j) {
                 int x = hull.xVertices[j];
                 int y = hull.yVertices[j];
-                
+
                 nodeIndex[y*sizeXPlusOne + x] = nNodes;
                 ++nNodes;
             }
@@ -90,4 +103,32 @@ public class ConvexHullVG {
     public final int getY(int index) {
         return nodeY[index];
     }
+
+
+    public final List<SnapshotItem> generateConvexHullSnapshot() {
+        List<SnapshotItem> snapshotItemList = new ArrayList<>();
+
+        for (int i=0; i<convexHulls.length; ++i) {
+            ConvexHull hull = convexHulls[i];
+            int size = hull.size;
+            int prevX = hull.xVertices[size-1];
+            int prevY = hull.yVertices[size-1];
+
+            for (int j=0; j<size; ++j) {
+                int currX = hull.xVertices[j];
+                int currY = hull.yVertices[j];
+
+                Integer[] path = new Integer[]{prevX, prevY, currX, currY};
+
+                SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+                snapshotItemList.add(snapshotItem);
+
+                prevX = currX;
+                prevY = currY;
+            }
+        }
+
+        return snapshotItemList;
+    }
+    
 }

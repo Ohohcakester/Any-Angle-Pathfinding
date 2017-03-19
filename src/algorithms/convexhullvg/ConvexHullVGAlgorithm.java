@@ -26,6 +26,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
         // 1. Generate convex hulls
         convexHullGraph = new ConvexHullVG(graph);
+        convexHullGraph.setSnapshotAction(() -> generateConvexHullSnapshot());
         convexHullGraph.initialise(sx, sy, ex, ey);
 
         int size = convexHullGraph.size();
@@ -164,4 +165,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
         Memory.setVisited(index, value);
     }
 
+    private final void generateConvexHullSnapshot() {
+        addSnapshot(convexHullGraph.generateConvexHullSnapshot());
+    }
 }
