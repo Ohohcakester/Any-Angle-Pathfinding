@@ -599,41 +599,33 @@ public class ConvexHullSplitGenerator {
 
     // != -1: (0, MAX_INT)
     // == k: (k,k)
-    private final void floodFillMark(int x, int y, int min, int max) {
+    private final void floodFillMark(int px, int py, int min, int max) {
         clearFloodFill();
-        addToFloodFill(x, y);
+        addToFloodFill(px, py);
+        
         int queueHead = 0;
         while (queueHead < floodFillSize) {
-            int currX = floodFillX[queueHead];
-            int currY = floodFillY[queueHead];
+            int x = floodFillX[queueHead];
+            int y = floodFillY[queueHead];
             ++queueHead;
 
-            setLabel(currX, currY, MARKED);
-            int nx, ny, label;
+            int label = getLabel(x, y);
+            if (min > label || label > max) continue;
+
+            setLabel(x, y, MARKED);
+            int nx, ny;
 
             nx = x-1; ny = y;
-            if (nx >= 0) {
-                label = getLabel(nx, ny);
-                if (min <= label && label <= max) addToFloodFill(nx, ny);
-            }
+            if (nx >= 0) addToFloodFill(nx, ny);
 
             nx = x+1; ny = y;
-            if (nx < sizeX) {
-                label = getLabel(nx, ny);
-                if (min <= label && label <= max) addToFloodFill(nx, ny);
-            }
+            if (nx < sizeX) addToFloodFill(nx, ny);
 
             nx = x; ny = y-1;
-            if (ny >= 0) {
-                label = getLabel(nx, ny);
-                if (min <= label && label <= max) addToFloodFill(nx, ny);
-            }
+            if (ny >= 0) addToFloodFill(nx, ny);
 
             nx = x; ny = y+1;
-            if (ny < sizeY) {
-                label = getLabel(nx, ny);
-                if (min <= label && label <= max) addToFloodFill(nx, ny);
-            }
+            if (ny < sizeY) addToFloodFill(nx, ny);
         }
     }
 
