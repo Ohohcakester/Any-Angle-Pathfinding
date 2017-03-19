@@ -67,8 +67,8 @@ public class ConvexHullSplitGenerator {
 
         private final void appendToList(int x, int y) {
             if (size >= xVertices.length) {
-                xVertices = Arrays.copyOf(xVertices, xVertices.length);
-                yVertices = Arrays.copyOf(yVertices, yVertices.length);
+                xVertices = Arrays.copyOf(xVertices, xVertices.length*2);
+                yVertices = Arrays.copyOf(yVertices, yVertices.length*2);
             }
             xVertices[size] = x;
             yVertices[size] = y;
