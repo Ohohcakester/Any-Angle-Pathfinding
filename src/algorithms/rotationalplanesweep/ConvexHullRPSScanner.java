@@ -43,6 +43,7 @@ public class ConvexHullRPSScanner {
     public int[] successorsX;
     public int[] successorsY;
 
+    private final RPSScanner.Vertex[] verticesUnsorted;
     private final RPSScanner.Vertex[] vertices;
     private final RPSScanner.Edge[] edges;
     private final RPSEdgeHeap edgeHeap;
@@ -57,6 +58,7 @@ public class ConvexHullRPSScanner {
         this.nHulls = nHulls;
         this.convexHulls = convexHulls;
         this.vertices = new RPSScanner.Vertex[nHulls*2];
+        this.verticesUnsorted = new RPSScanner.Vertex[nHulls*2];
         this.edges = new RPSScanner.Edge[nHulls];
         nSuccessors = 0;
         this.graph = graph;
@@ -75,6 +77,8 @@ public class ConvexHullRPSScanner {
 
             vertices[2*i] = u;
             vertices[2*i+1] = v;
+            verticesUnsorted[2*i] = u;
+            verticesUnsorted[2*i+1] = v;
             edges[i] = e;
         }
     }
@@ -108,6 +112,8 @@ public class ConvexHullRPSScanner {
             for (int j=0; j<hull.size; ++j) {
                 int dx = hull.xVertices[j] - sx;
                 int dy = hull.yVertices[j] - sy;
+                if (dx == 0 && dy == 0) continue;
+
                 int dist = dx*dx*dy*dy;
                 int crossProdMin = dx*mindy - dy*mindx;
                 int crossProdMax = dx*maxdy - dy*maxdx;
@@ -126,8 +132,8 @@ public class ConvexHullRPSScanner {
                 }
             }
 
-            RPSScanner.Vertex minVertex = vertices[currIndex++];
-            RPSScanner.Vertex maxVertex = vertices[currIndex++];
+            RPSScanner.Vertex minVertex = verticesUnsorted[currIndex++];
+            RPSScanner.Vertex maxVertex = verticesUnsorted[currIndex++];
             minVertex.x = mindx + sx;
             minVertex.y = mindy + sy;
             maxVertex.x = maxdx + sx;
@@ -259,8 +265,8 @@ public class ConvexHullRPSScanner {
                 edgeHeap.insert(edge, sx, sy);
             } else { // dotProd == 0
                 // Add edge and neighbour
-                edgeHeap.insert(edge, sx, sy);
-                edgeHeap.insert(edge.u.edge2, sx, sy);
+                //edgeHeap.insert(edge, sx, sy);
+                //edgeHeap.insert(edge.u.edge2, sx, sy);
             }
         }
     }
@@ -286,8 +292,8 @@ public class ConvexHullRPSScanner {
                 edgeHeap.delete(edge, sx, sy);
             } else { // dotProd == 0
                 // Delete edge and neighbour
-                edgeHeap.delete(edge, sx, sy);
-                edgeHeap.delete(edge.v.edge1, sx, sy);
+                //edgeHeap.delete(edge, sx, sy);
+                //edgeHeap.delete(edge.v.edge1, sx, sy);
             }
         }
     }
@@ -314,7 +320,7 @@ public class ConvexHullRPSScanner {
                     return true;
                 } else { // (dotProd == 0)
                     // Never happens.
-                    throw new UnsupportedOperationException("This should not happen");
+                    //throw new UnsupportedOperationException("This should not happen");
                 }
             }
         }

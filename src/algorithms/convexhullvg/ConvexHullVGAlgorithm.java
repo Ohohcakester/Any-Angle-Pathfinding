@@ -48,6 +48,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
         // Initialise Start
         setVisited(start, true);
+        setDistance(start, 0);
         expand(start, sx ,sy);
 
         // pq
@@ -77,9 +78,11 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
         {
             int succX = scanner.successorsX[i];
             int succY = scanner.successorsY[i];
+            if (!graph.lineOfSight(currX, currY, succX, succY)) continue;
+
             int succ = convexHullGraph.indexOf(succX, succY); // index of successor
 
-            float newWeight = graph.distance(currX, currY, succX, succY);
+            float newWeight = distance(currIndex) + graph.distance(currX, currY, succX, succY);
             if (newWeight < distance(succ)) {
                 setDistance(succ, newWeight);
                 setParent(succ, currIndex);
