@@ -91,6 +91,18 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
                 maybeSaveSearchSnapshot();
             }
         }
+
+        // Check if the goal node is a successor
+        if (graph.lineOfSight(currX, currY, ex, ey)) {
+            float newWeight = distance(currIndex) + graph.distance(currX, currY, ex, ey);
+            if (newWeight < distance(finish)) {
+                setDistance(finish, newWeight);
+                setParent(finish, currIndex);
+                pq.decreaseKey(finish, newWeight + heuristic(ex, ey));
+
+                maybeSaveSearchSnapshot();
+            }
+        }
     }
 
     private final float heuristic(int nx, int ny) {
