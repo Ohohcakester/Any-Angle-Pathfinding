@@ -38,6 +38,7 @@ public class ConvexHullVG {
         this.sizeXPlusOne = graph.sizeX+1;
         this.sizeYPlusOne = graph.sizeY+1;
         nodeIndex = new int[sizeYPlusOne*sizeXPlusOne];
+        Arrays.fill(nodeIndex, -1);
     }
 
     public final void setSnapshotAction(Runnable action) {
@@ -62,6 +63,7 @@ public class ConvexHullVG {
             for (int j=0; j<hull.size; ++j) {
                 int x = hull.xVertices[j];
                 int y = hull.yVertices[j];
+                if (nodeIndex[y*sizeXPlusOne +x] != -1) continue;
 
                 nodeIndex[y*sizeXPlusOne + x] = nNodes;
                 ++nNodes;
@@ -70,15 +72,16 @@ public class ConvexHullVG {
 
         nodeX = new int[nNodes];
         nodeY = new int[nNodes];
-        int index = 0;
+        
         for (int i=0; i<convexHulls.length; ++i) {
             ConvexHull hull = convexHulls[i];
             for (int j=0; j<hull.size; ++j) {
-                nodeX[index] = hull.xVertices[j];
-                nodeY[index] = hull.yVertices[j];
+                int x = hull.xVertices[j];
+                int y = hull.yVertices[j];
+                int index = nodeIndex[y*sizeXPlusOne + x];
 
-                if (nodeIndex[hull.yVertices[j]*sizeXPlusOne + hull.xVertices[j]] != index) throw new UnsupportedOperationException("ERROR " + nodeIndex[hull.yVertices[j]*sizeXPlusOne + hull.xVertices[j]] + " - " + index);
-                ++index;
+                nodeX[index] = x;
+                nodeY[index] = y;
             }
         }
     }
