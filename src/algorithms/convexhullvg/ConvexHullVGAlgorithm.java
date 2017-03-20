@@ -71,7 +71,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
     private final void expand(int currIndex, int currX, int currY) {
         // find neighbours
         ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY);
-        addSnapshot(scanner.snapshotLines());
+        if (isRecording()) addSnapshot(scanner.snapshotLines());
 
         int nNeighbours = scanner.nSuccessors;
         for (int i=0; i<nNeighbours; ++i)
