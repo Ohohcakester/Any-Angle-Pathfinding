@@ -29,54 +29,65 @@ public class ConvexHullSplitGenerator {
     private int[] floodFillY;
     private int floodFillSize;
 
-    // Generates a convex hull in an anticlockwise fashion.
+
+    /**
+     * Builds a convex hull form vertices in an anticlockwise fashion.
+     *
+     * This is the algorithm described in the paper by [Melkman, 1987]
+     * "Online Construction of the Convex Hull of a Simple Polyline"
+     * I used the tutorial from http://geomalgorithms.com/a12-_hull-3.html
+     */
     private static class ConvexHullBuilder {
+        private final int sx;
+        private final int sy;
+
+        // Deque data structure
         private int[] xVertices;
         private int[] yVertices;
+        private int head; // start index: head
+        private int tail; // end index: tail
         private int size;
 
         // (sx, sy) is the first vertex
         public ConvexHullBuilder(int sx, int sy) {
             xVertices = new int[11];
             yVertices = new int[11];
-            size = 0;
+            head = 0;
+            tail = -1;
 
-            appendToList(sx, sy);
+            this.sx = sx;
+            this.sy = sy;
+            addLast(sx, sy);
         }
 
         // returns false iff it is the final vertex that closes the convex hull.
-        public boolean addVertex(int x, int y) {
-            while (size >= 2 && isNotAntiClockwise(xVertices[size-2], yVertices[size-2],
-                xVertices[size-1], yVertices[size-1], x, y)) {
-                removeLastVertex();
+        public final boolean addVertex(int x, int y) {
+            if (size <= 2) {
+                addLast(x,y);
+                if (size == 2) addFirst(x,y);
+                return notLastVertex(x,y);
             }
-            // Close the convex hull.
-            if (size >= 1 && x == xVertices[0] && y == yVertices[0]) return false;
 
-            appendToList(x, y);
-            return true;
-        }
-
-        public final ConvexHullVG.ConvexHull makeHull() {
-            ConvexHullVG.ConvexHull hull = new ConvexHullVG.ConvexHull();
-            hull.xVertices = Arrays.copyOf(xVertices, size);
-            hull.yVertices = Arrays.copyOf(yVertices, size);
-            hull.size = size;
-            return hull;
-        }
-
-        private final void appendToList(int x, int y) {
-            if (size >= xVertices.length) {
-                xVertices = Arrays.copyOf(xVertices, xVertices.length*2);
-                yVertices = Arrays.copyOf(yVertices, yVertices.length*2);
+            boolean didSomething = false;
+            while (size >= 3 && isAntiClockwise(headNext(), head, x, y)) {
+                didSomething = true;
+                popFirst();
             }
-            xVertices[size] = x;
-            yVertices[size] = y;
-            ++size;
+
+            while (size >= 3 && isClockwise(tailPrev(), tail, x, y)) {
+                didSomething = true;
+                popLast();
+            }
+
+            if (didSomething) {
+                addFirst(x,y);
+                addLast(x,y);
+            }
+            return notLastVertex(x,y);
         }
 
-        private final void removeLastVertex() {
-            --size;
+        private final boolean notLastVertex(int x, int y) {
+            return x != sx || y != sy;
         }
 
         /**             __.
@@ -85,13 +96,153 @@ public class ConvexHullSplitGenerator {
          *      (1)    /        Anticlockwise: (1)x(2) > 0
          *  o-------->o
          */
-        private final boolean isNotAntiClockwise(int x1, int y1, int x2, int y2, int x3, int y3) {
+        private final boolean isAntiClockwise(int index1, int index2, int x3, int y3) {
+            int x1 = xVertices[index1];
+            int y1 = yVertices[index1];
+            int x2 = xVertices[index2];
+            int y2 = yVertices[index2];
+
+            int dx1 = x2 - x1;
+            int dy1 = y2 - y1;
+            int dx2 = x3 - x2;
+            int dy2 = y3 - y2;
+
+            return dx1*dy2 - dy1*dx2 >= 0;
+        }
+
+        private final boolean isClockwise(int index1, int index2, int x3, int y3) {
+            int x1 = xVertices[index1];
+            int y1 = yVertices[index1];
+            int x2 = xVertices[index2];
+            int y2 = yVertices[index2];
+
             int dx1 = x2 - x1;
             int dy1 = y2 - y1;
             int dx2 = x3 - x2;
             int dy2 = y3 - y2;
 
             return dx1*dy2 - dy1*dx2 <= 0;
+        }
+
+        private final void addFirst(int x, int y) {
+            maybeExpandArrays();
+            --head;
+            if (head < 0) head += xVertices.length;
+            xVertices[head] = x;
+            yVertices[head] = y;
+            ++size;
+        }
+
+        private final void addLast(int x, int y) {
+            maybeExpandArrays();
+            ++tail;
+            if (tail >= xVertices.length) tail -= xVertices.length;
+            xVertices[tail] = x;
+            yVertices[tail] = y;
+            ++size;
+        }
+
+        private final void popFirst() {
+            ++head;
+            if (head >= xVertices.length) head -= xVertices.length;
+            --size;
+        }
+
+        private final void popLast() {
+            --tail;
+            if (tail < 0) tail += xVertices.length;
+            --size;
+        }
+
+        private final int headNext() {
+            int index = head+1;
+            if (index >= xVertices.length) index -= xVertices.length;
+            return index;
+        }
+
+        private final int tailPrev() {
+            int index = tail-1;
+            if (index < 0) index += xVertices.length;
+            return index;
+        }
+
+        private final void maybeExpandArrays() {
+            if (size < xVertices.length) return;
+            int[] newX = new int[xVertices.length*2];
+            int[] newY = new int[yVertices.length*2];
+
+            int index = 0;
+            if (head <= tail) {
+                for (int i=head; i<=tail; ++i) {
+                    newX[index] = xVertices[i];
+                    newY[index] = yVertices[i];
+                    ++index;
+                }
+            } else {
+                for (int i=head; i<xVertices.length; ++i) {
+                    newX[index] = xVertices[i];
+                    newY[index] = yVertices[i];
+                    ++index;
+                }
+                for (int i=0; i<=tail; ++i) {
+                    newX[index] = xVertices[i];
+                    newY[index] = yVertices[i];
+                    ++index;
+                }
+            }
+            xVertices = newX;
+            yVertices = newY;
+
+            head = 0;
+            tail = size-1;
+        }
+
+        public final ConvexHullVG.ConvexHull makeHull() {
+            ConvexHullVG.ConvexHull hull = new ConvexHullVG.ConvexHull();
+            hull.xVertices = new int[size-1];
+            hull.yVertices = new int[size-1];
+            hull.size = size-1;
+
+            // Note we exclude the tail because tail == head.
+            int index = 0;
+            if (head <= tail) {
+                for (int i=head; i<tail; ++i) {
+                    hull.xVertices[index] = xVertices[i];
+                    hull.yVertices[index] = yVertices[i];
+                    ++index;
+                }
+            } else {
+                for (int i=head; i<xVertices.length; ++i) {
+                    hull.xVertices[index] = xVertices[i];
+                    hull.yVertices[index] = yVertices[i];
+                    ++index;
+                }
+                for (int i=0; i<tail; ++i) {
+                    hull.xVertices[index] = xVertices[i];
+                    hull.yVertices[index] = yVertices[i];
+                    ++index;
+                }
+            }
+
+            return hull;
+        }
+
+        private final void printArrays() {
+            System.out.println(xVertices.length + " | " + size);
+            StringBuilder sb = new StringBuilder();
+            if (head <= tail) {
+                for (int i=head; i<=tail; ++i) {
+                    sb.append("(" + xVertices[i] + ", " + yVertices[i] + ")");
+                }
+            } else {
+                for (int i=head; i<xVertices.length; ++i) {
+                    sb.append("(" + xVertices[i] + ", " + yVertices[i] + ")");
+                }
+                for (int i=0; i<=tail; ++i) {
+                    sb.append("(" + xVertices[i] + ", " + yVertices[i] + ")");
+                }
+            }
+            System.out.println(sb);
         }
     }
 
