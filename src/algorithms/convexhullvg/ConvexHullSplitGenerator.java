@@ -228,7 +228,6 @@ public class ConvexHullSplitGenerator {
         }
 
         private final void printArrays() {
-            System.out.println(xVertices.length + " | " + size);
             StringBuilder sb = new StringBuilder();
             if (head <= tail) {
                 for (int i=head; i<=tail; ++i) {
@@ -289,7 +288,7 @@ public class ConvexHullSplitGenerator {
             floodFillMarkEqual(x, y);
 
             ConvexHullVG.ConvexHull convexHull = generateConvexHull(x, y);
-            boolean hasIntersection = false;//checkIntersectionAndMaybeSplit(x, y, convexHull);
+            boolean hasIntersection = checkIntersectionAndMaybeSplit(x, y, convexHull);
             if (!hasIntersection) {
                 markInteriorAsDone(convexHull, x, y);
                 addConvexHull(convexHull);
@@ -513,7 +512,7 @@ public class ConvexHullSplitGenerator {
 
     // Same as above, but for a specific line in the convex hull.
     private final boolean checkIntersectionAndMaybeSplit(int x1, int y1, int x2, int y2, int px, int py) {
-        if (graph.lineOfSight(x1, y1, x2, y2)) return false;
+        if (lineOfSightIgnoringMarked(x1, y1, x2, y2)) return false;
         // Note: x1, y1, x2, y2 are in grid vertex coordinates.
         // px, py are in tile coordinates.
 
@@ -587,6 +586,70 @@ public class ConvexHullSplitGenerator {
                 setLabel(x, y, newLabel2);
             }
         }
+    }
+
+    public final boolean lineOfSightIgnoringMarked(int x1, int y1, int x2, int y2) {
+        int dy = y2 - y1;
+        int dx = x2 - x1;
+
+        int f = 0;
+
+        int signY = 1;
+        int signX = 1;
+        int offsetX = 0;
+        int offsetY = 0;
+        
+        if (dy < 0) {
+            dy *= -1;
+            signY = -1;
+            offsetY = -1;
+        }
+        if (dx < 0) {
+            dx *= -1;
+            signX = -1;
+            offsetX = -1;
+        }
+        
+        if (dx >= dy) {
+            while (x1 != x2) {
+                f += dy;
+                if (f >= dx) {
+                    if (isBlockedIgnoringMarked(x1 + offsetX, y1 + offsetY))
+                        return false;
+                    y1 += signY;
+                    f -= dx;
+                }
+                if (f != 0 && isBlockedIgnoringMarked(x1 + offsetX, y1 + offsetY))
+                    return false;
+                if (dy == 0 && isBlockedIgnoringMarked(x1 + offsetX, y1) && isBlockedIgnoringMarked(x1 + offsetX, y1 - 1))
+                    return false;
+                
+                x1 += signX;
+            }
+        }
+        else {
+            while (y1 != y2) {
+                f += dx;
+                if (f >= dy) {
+                    if (isBlockedIgnoringMarked(x1 + offsetX, y1 + offsetY))
+                        return false;
+                    x1 += signX;
+                    f -= dy;
+                }
+                if (f != 0 && isBlockedIgnoringMarked(x1 + offsetX, y1 + offsetY))
+                    return false;
+                if (dx == 0 && isBlockedIgnoringMarked(x1, y1 + offsetY) && isBlockedIgnoringMarked(x1 - 1, y1 + offsetY))
+                    return false;
+                
+                y1 += signY;
+            }
+        }
+        return true;
+    }
+
+    private final boolean isBlockedIgnoringMarked(int x, int y) {
+        // A blocked tile must be blocked and unmarked.
+        return graph.isBlocked(x, y) && !(x >= 0 && x < sizeX && y >= 0 && y < sizeY && getLabel(x, y) == MARKED);
     }
 
     private final void markInteriorAsDone(ConvexHullVG.ConvexHull hull, int px, int py) {
