@@ -17,6 +17,11 @@ public class ConvexHullSplitGenerator {
     private final int sizeXPlusOne;
     private final int sizeYPlusOne;
 
+    private final int startX;
+    private final int startY;
+    private final int endX;
+    private final int endY;
+
     // How labels work:
     // Labels are attached to tiles.
     // Label 0: an unblocked tile or an already visited blocked tile.
@@ -245,7 +250,12 @@ public class ConvexHullSplitGenerator {
         }
     }
 
-    public ConvexHullSplitGenerator(GridGraph graph) {
+    public ConvexHullSplitGenerator(GridGraph graph, int startX, int startY, int endX, int endY) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
+
         this.graph = graph;
         this.sizeXPlusOne = graph.sizeX+1;
         this.sizeYPlusOne = graph.sizeY+1;
@@ -288,7 +298,7 @@ public class ConvexHullSplitGenerator {
             floodFillMarkEqual(x, y);
 
             ConvexHullVG.ConvexHull convexHull = generateConvexHull(x, y);
-            boolean hasIntersection = checkIntersectionAndMaybeSplit(x, y, convexHull);
+            boolean hasIntersection = checkIntersectionAndMaybeSplit(convexHull);
             if (!hasIntersection) {
                 markInteriorAsDone(convexHull, x, y);
                 addConvexHull(convexHull);
@@ -493,14 +503,17 @@ public class ConvexHullSplitGenerator {
 
     // Checks if the convex hull intersects any blocked tile.
     // If it does, it splits the island's labels (the island is denoted by (px, py).
-    private final boolean checkIntersectionAndMaybeSplit(int px, int py, ConvexHullVG.ConvexHull hull) {
+    private final boolean checkIntersectionAndMaybeSplit(ConvexHullVG.ConvexHull hull) {
+        if (checkIfContainsPointAndMaybeSplit(startX, startY, hull)) return true;
+        if (checkIfContainsPointAndMaybeSplit(endX, endY, hull)) return true;
+
         int size = hull.size;
         int prevX = hull.xVertices[size-1];
         int prevY = hull.yVertices[size-1];
         for (int i=0; i<size; ++i) {
             int currX = hull.xVertices[i];
             int currY = hull.yVertices[i];
-            if (checkIntersectionAndMaybeSplit(prevX, prevY, currX, currY, px, py)) {
+            if (checkIntersectionAndMaybeSplit(prevX, prevY, currX, currY)) {
                 return true;
             }
             prevX = currX;
@@ -510,8 +523,47 @@ public class ConvexHullSplitGenerator {
         return false;
     }
 
+    private final boolean checkIfContainsPointAndMaybeSplit(int pointX, int pointY, ConvexHullVG.ConvexHull hull) {
+
+        // Check each half-line that makes up the polygon.
+        int size = hull.size;
+        int prevX = hull.xVertices[size-1];
+        int prevY = hull.yVertices[size-1];
+        for (int i=0; i<size; ++i) {
+            int currX = hull.xVertices[i];
+            int currY = hull.yVertices[i];
+            
+            int dx1 = currX - prevX;
+            int dy1 = currY - prevY;
+            int dx2 = pointX - prevX;
+            int dy2 = pointY - prevY;
+            int crossProd = dx1*dy2 - dy1*dx2; // (1)x(2)
+            if (crossProd <= 0) return false; // point is outside polygon.
+
+            prevX = currX;
+            prevY = currY;
+        }
+
+        // Point is within all halfspace. Point must be in polygon.
+
+        // Split
+        int newLabel1 = nextUnusedLabel++;
+        int newLabel2 = nextUnusedLabel++;
+
+        for (int i=0; i<floodFillSize; ++i) {
+            int x = floodFillX[i];
+            int y = floodFillY[i];
+            int dx = x - pointX;
+            int dy = y - pointY;
+
+            setLabel(x, y, ((2*dx+1)*(2*dy+1) > 0) ? newLabel1 : newLabel2);
+        }
+
+        return true;
+    }
+
     // Same as above, but for a specific line in the convex hull.
-    private final boolean checkIntersectionAndMaybeSplit(int x1, int y1, int x2, int y2, int px, int py) {
+    private final boolean checkIntersectionAndMaybeSplit(int x1, int y1, int x2, int y2) {
         if (lineOfSightIgnoringMarked(x1, y1, x2, y2)) return false;
         // Note: x1, y1, x2, y2 are in grid vertex coordinates.
         // px, py are in tile coordinates.
@@ -863,8 +915,8 @@ public class ConvexHullSplitGenerator {
         return labels[y*sizeX + x];
     }
 
-    public static ConvexHullVG.ConvexHull[] generate(GridGraph graph) {
-        ConvexHullSplitGenerator generator = new ConvexHullSplitGenerator(graph);
+    public static ConvexHullVG.ConvexHull[] generate(GridGraph graph, int sx, int sy, int ex, int ey) {
+        ConvexHullSplitGenerator generator = new ConvexHullSplitGenerator(graph, sx, sy, ex, ey);
         return Arrays.copyOf(generator.convexHulls, generator.nHulls);
     }
 }

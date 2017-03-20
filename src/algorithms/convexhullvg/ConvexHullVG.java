@@ -46,14 +46,14 @@ public class ConvexHullVG {
     }
 
     public void initialise(int sx, int sy, int ex, int ey) {
-        initialiseConvexHulls();
+        initialiseConvexHulls(sx, sy, ex, ey);
         if (snapshotAction != null) snapshotAction.run();
         initialiseNodes();
         scanner = new ConvexHullRPSScanner(graph, convexHulls, convexHulls.length);
     }
     
-    private void initialiseConvexHulls() {
-        convexHulls = ConvexHullSplitGenerator.generate(graph);
+    private void initialiseConvexHulls(int sx, int sy, int ex, int ey) {
+        convexHulls = ConvexHullSplitGenerator.generate(graph, sx, sy, ex, ey);
     }
 
     private void initialiseNodes() {
