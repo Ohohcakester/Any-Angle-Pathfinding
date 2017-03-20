@@ -101,13 +101,19 @@ public class ConvexHullRPSScanner {
         int currIndex = 0;
         for (int hi=0; hi<nHulls; ++hi) {
             ConvexHullVG.ConvexHull hull = convexHulls[hi];
-            int mindx = hull.xVertices[0] - sx;
-            int mindy = hull.yVertices[0] - sy;
-            int mindist = mindx*mindx + mindy*mindy;
 
-            int maxdx = hull.xVertices[0] - sx;
-            int maxdy = hull.yVertices[0] - sy;
-            int maxdist = maxdx*maxdx + maxdy*maxdy;
+            // mindx/mindx/mindist: point with minimum angle.
+            // maxdx/maxdx/maxdist: point with maximum angle.
+            // Initial values: crossProd will always be 0, so we will tiebreak by distance.
+            // Because initial distance is MAX_INT, the initial values will be replaced immediately.
+            int mindx = 0;
+            int mindy = 0;
+            int mindist = Integer.MAX_VALUE;
+
+            int maxdx = 0;
+            int maxdy = 0;
+            int maxdist = Integer.MAX_VALUE;
+
             // We use cross products, due to periodic boundary conditions.
             for (int j=0; j<hull.size; ++j) {
                 int dx = hull.xVertices[j] - sx;
