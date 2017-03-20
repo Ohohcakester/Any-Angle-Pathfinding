@@ -31,8 +31,8 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
         int size = convexHullGraph.size();
         int memorySize = size+2;
-        start = size+1;
-        finish = size+2;
+        start = size;
+        finish = size+1;
 
         pq = new ReusableIndirectHeap(size, memorySize);
         this.initialiseMemory(memorySize, Float.POSITIVE_INFINITY, -1, false);
@@ -70,6 +70,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
     private final void expand(int currIndex, int currX, int currY) {
         // find neighbours
         ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY);
+        addSnapshot(scanner.snapshotLines());
 
         int nNeighbours = scanner.nSuccessors;
         for (int i=0; i<nNeighbours; ++i)
@@ -83,7 +84,8 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
                 setDistance(succ, newWeight);
                 setParent(succ, currIndex);
                 pq.decreaseKey(succ, newWeight + heuristic(succX, succY));
-                // maybeSaveSearchSnapshot();
+
+                maybeSaveSearchSnapshot();
             }
         }
     }
@@ -167,5 +169,45 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
     private final void generateConvexHullSnapshot() {
         addSnapshot(convexHullGraph.generateConvexHullSnapshot());
+    }
+
+    @Override
+    protected int goalParentIndex() {
+        return finish;
+    }
+
+    @Override
+    protected Integer[] snapshotEdge(int endIndex) {
+        Integer[] edge = new Integer[4];
+        int startIndex = parent(endIndex);
+        edge[0] = getX(startIndex);
+        edge[1] = getY(startIndex);
+        edge[2] = getX(endIndex);
+        edge[3] = getY(endIndex);
+        return edge;
+    }
+
+    @Override
+    protected Integer[] snapshotVertex(int index) {
+        if (selected(index)) {
+            Integer[] edge = new Integer[2];
+            edge[0] = getX(index);
+            edge[1] = getY(index);
+            return edge;
+        }
+        return null;
+    }
+
+    private final int getX(int index) {
+        if (index == start) return sx;
+        else if (index == finish) return ex;
+        return convexHullGraph.getX(index);
+    }
+
+    private final int getY(int index) {
+        if (index == start) return sy;
+        else if (index == finish) return ey;
+        return convexHullGraph.getY(index);
+
     }
 }

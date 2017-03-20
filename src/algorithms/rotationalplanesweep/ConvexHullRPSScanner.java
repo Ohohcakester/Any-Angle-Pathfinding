@@ -145,10 +145,10 @@ public class ConvexHullRPSScanner {
                 if (v.angle < 0) v.angle += 2*Math.PI;
             } else {
                 v.angle = -1;
-                RPSScanner.Vertex n1 = v.edge1.v;
+                /*RPSScanner.Vertex n1 = v.edge1.v;
                 RPSScanner.Vertex n2 = v.edge2.u;
                 if (graph.isOuterCorner(n1.x, n1.y)) addNeighbour(n1.x, n1.y);
-                if (graph.isOuterCorner(n2.x, n2.y)) addNeighbour(n2.x, n2.y);
+                if (graph.isOuterCorner(n2.x, n2.y)) addNeighbour(n2.x, n2.y);*/
             }
         }
         sortVertices(sx, sy);
@@ -239,7 +239,7 @@ public class ConvexHullRPSScanner {
     }
 
     private final void maybeAddEdge(int sx, int sy, RPSScanner.Vertex curr, RPSScanner.Edge edge) {
-        if (curr != edge.v) return;
+        if (edge == null || curr != edge.v) return;
 
         int dux = edge.u.x - sx;
         int duy = edge.u.y - sy;
@@ -266,7 +266,7 @@ public class ConvexHullRPSScanner {
     }
 
     private final void maybeDeleteEdge(int sx, int sy, RPSScanner.Vertex curr, RPSScanner.Edge edge) {
-        if (curr != edge.u) return;
+        if (edge == null || curr != edge.u) return;
 
         int dux = edge.u.x - sx;
         int duy = edge.u.y - sy;
@@ -293,13 +293,7 @@ public class ConvexHullRPSScanner {
     }
 
     private final boolean intersectsPositiveXAxis(int sx, int sy, RPSScanner.Edge edge) {
-        if (sx == edge.u.x && sy == edge.u.y) {
-            return anglesIntersectPositiveXAxis(sx, sy, edge.u.edge2.u, edge.v);
-        } else if (sx == edge.v.x && sy == edge.v.y) {
-            return anglesIntersectPositiveXAxis(sx, sy, edge.u, edge.v.edge1.v);
-        } else  {
-            return intersectsPositiveXAxis(sx, sy, edge.u, edge.v);
-        }
+        return intersectsPositiveXAxis(sx, sy, edge.u, edge.v);
     }
 
     private final boolean intersectsPositiveXAxis(int sx, int sy, RPSScanner.Vertex edgeU, RPSScanner.Vertex edgeV) {
@@ -409,6 +403,21 @@ public class ConvexHullRPSScanner {
             RPSScanner.Edge e = edges[i];
             gridLineSet.addLine(e.u.x, e.u.y, e.v.x, e.v.y, Color.RED);
         }
+    }
+
+    public final ArrayList<SnapshotItem> snapshotLines() {
+        ArrayList<SnapshotItem> snapshotItemList = new ArrayList<>();
+        
+        RPSScanner.Edge[] edges = edgeHeap.getEdgeList();
+        for (int i=0; i<edges.length; ++i) {
+            RPSScanner.Edge e = edges[i];
+            Integer[] path = new Integer[] {e.u.x, e.u.y, e.v.x, e.v.y};
+
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.BLUE);
+            snapshotItemList.add(snapshotItem);
+        }
+
+        return snapshotItemList;
     }
 
     public void snapshotHeap(GridLineSet gridLineSet) {
