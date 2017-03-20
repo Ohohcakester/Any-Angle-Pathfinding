@@ -761,22 +761,34 @@ public class ConvexHullSplitGenerator {
             ++queueHead;
 
             int label = getLabel(x, y);
-            if (min > label || label > max) continue;
+            if (label == MARKED) continue;
 
             setLabel(x, y, MARKED);
             int nx, ny;
 
             nx = x-1; ny = y;
-            if (nx >= 0) addToFloodFill(nx, ny);
+            if (nx >= 0) {
+                label = getLabel(nx, ny);
+                if (min <= label && label <= max) addToFloodFill(nx, ny);
+            }
 
             nx = x+1; ny = y;
-            if (nx < sizeX) addToFloodFill(nx, ny);
+            if (nx < sizeX) {
+                label = getLabel(nx, ny);
+                if (min <= label && label <= max) addToFloodFill(nx, ny);
+            }
 
             nx = x; ny = y-1;
-            if (ny >= 0) addToFloodFill(nx, ny);
+            if (ny >= 0) {
+                label = getLabel(nx, ny);
+                if (min <= label && label <= max) addToFloodFill(nx, ny);
+            }
 
             nx = x; ny = y+1;
-            if (ny < sizeY) addToFloodFill(nx, ny);
+            if (ny < sizeY) {
+                label = getLabel(nx, ny);
+                if (min <= label && label <= max) addToFloodFill(nx, ny);
+            }
         }
     }
 
