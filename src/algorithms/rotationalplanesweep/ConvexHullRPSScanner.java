@@ -58,11 +58,11 @@ public class ConvexHullRPSScanner {
         this.convexHulls = convexHulls;
         this.vertices = new RPSScanner.Vertex[nHulls*2];
         this.edges = new RPSScanner.Edge[nHulls];
-        this.edgeHeap = new RPSEdgeHeap(edges);
         nSuccessors = 0;
         this.graph = graph;
 
         setupInitialVertices();
+        this.edgeHeap = new RPSEdgeHeap(edges);
     }
 
     private void setupInitialVertices() {

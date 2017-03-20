@@ -57,7 +57,7 @@ public class ConvexHullVG {
     }
 
     private void initialiseNodes() {
-        int nNodes = 0;
+        nNodes = 0;
         for (int i=0; i<convexHulls.length; ++i) {
             ConvexHull hull = convexHulls[i];
             for (int j=0; j<hull.size; ++j) {
@@ -72,7 +72,7 @@ public class ConvexHullVG {
 
         nodeX = new int[nNodes];
         nodeY = new int[nNodes];
-        
+
         for (int i=0; i<convexHulls.length; ++i) {
             ConvexHull hull = convexHulls[i];
             for (int j=0; j<hull.size; ++j) {
