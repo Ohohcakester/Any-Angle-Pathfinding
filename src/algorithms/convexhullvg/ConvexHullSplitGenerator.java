@@ -594,10 +594,10 @@ public class ConvexHullSplitGenerator {
         // Use Bresenham algorithm to find first intersection.
         float xProgress = currX - midX;
         float yProgress = currY - midY;
-        float xRelProgress = xProgress*dy - yProgress*dx;
-
+        
         int moveX, moveY;
-        while (getLabel(currX, currY) != MARKED) {
+        while (!withinTileBounds(currX, currY) || getLabel(currX, currY) != MARKED) {
+            float xRelProgress = xProgress*dy - yProgress*dx;
 
             if (xRelProgress < 0) {
                 moveX = signX;
@@ -622,6 +622,10 @@ public class ConvexHullSplitGenerator {
         splitCurrentlyMarkedIsland(currX, currY, signX, signY);
 
         return true;
+    }
+
+    private final boolean withinTileBounds(int x, int y) {
+        return x >= 0 && y >= 0 && x < sizeX && y < sizeY;
     }
 
     private final void splitCurrentlyMarkedIsland(int splitX, int splitY, int signX, int signY) {
