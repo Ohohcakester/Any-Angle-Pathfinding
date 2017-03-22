@@ -120,7 +120,7 @@ public class ConvexHullRPSScanner {
                 int dy = hull.yVertices[j] - sy;
                 if (dx == 0 && dy == 0) continue;
 
-                int dist = dx*dx*dy*dy;
+                int dist = dx*dx+dy*dy;
                 int crossProdMin = dx*mindy - dy*mindx;
                 int crossProdMax = dx*maxdy - dy*maxdx;
                 // tiebreak by choosing the nearer one.
