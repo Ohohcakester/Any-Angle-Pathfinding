@@ -381,7 +381,8 @@ public class ConvexHullRPSScanner {
 
             if (prod1 == 0 && prod2 == 0) {
                 // All four points collinear.
-                int minX1; int minY1; int maxX1; int maxY1;
+                return false;
+                /*int minX1; int minY1; int maxX1; int maxY1;
                 int minX2; int minY2; int maxX2; int maxY2;
                 
                 if (sx < tx) {minX1 = sx; maxX1 = tx;}
@@ -396,7 +397,7 @@ public class ConvexHullRPSScanner {
                 if (uy < vy) {minY2 = uy; maxY2 = vy;}
                 else {minY2 = vy; maxY2 = uy;}
 
-                return !(maxX1 < minX2 || maxY1 < minY2 || maxX2 < minX1 || maxY2 < minY1);
+                return !(maxX1 < minX2 || maxY1 < minY2 || maxX2 < minX1 || maxY2 < minY1);*/
             }
 
             return (prod1 <= 0 && prod2 <= 0);
