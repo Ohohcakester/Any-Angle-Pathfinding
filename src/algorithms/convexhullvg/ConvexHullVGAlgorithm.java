@@ -109,10 +109,10 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
     private final float heuristic(int nx, int ny) {
         // SLD heuristic (naive)
-        //return graph.distance(nx, ny, ex, ey);
+        return graph.distance(nx, ny, ex, ey);
         // Convex hull heuristic
-        if (isRecording() && (nx!=ex||ny!=ey)) addSnapshot(convexHullHeuristic.snapshotLines(nx, ny));
-        return (float)convexHullHeuristic.heuristic(nx, ny);
+        //if (isRecording() && (nx!=ex||ny!=ey)) addSnapshot(convexHullHeuristic.snapshotLines(nx, ny));
+        //return (float)convexHullHeuristic.heuristic(nx, ny);
     }
 
     private int pathLength() {
