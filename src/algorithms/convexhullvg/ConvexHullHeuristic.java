@@ -31,6 +31,32 @@ public class ConvexHullHeuristic {
             for (int hi=0; hi<nHulls; ++hi) {
                 ConvexHullVG.ConvexHull hull = convexHulls[hi];
 
+                {
+                    boolean isOnVector = false;
+                    int prevdx = hull.xVertices[hull.size-1] - ex;
+                    int prevdy = hull.yVertices[hull.size-1] - ey;
+                    for (int j=0; j<hull.size; ++j) {
+                        int currdx = hull.xVertices[j] - ex;
+                        int currdy = hull.yVertices[j] - ey;
+                        int crossProd = prevdx*currdy - prevdy*currdx;
+                        int dotProd = prevdx*currdx + prevdy*currdy;
+                        if (crossProd == 0 && dotProd < 0) {
+                            isOnVector = true;
+
+                            edgex1[currIndex] = prevdx;
+                            edgey1[currIndex] = prevdy;
+                            edgex2[currIndex] = currdx;
+                            edgey2[currIndex] = currdy;
+                            ++currIndex;
+                            break;
+                        }
+
+                        prevdx = currdx;
+                        prevdy = currdy;
+                    }
+                    if (isOnVector) continue;
+                }
+
                 // mindx/mindx/mindist: point with minimum angle.
                 // maxdx/maxdx/maxdist: point with maximum angle.
                 // Initial values: crossProd will always be 0, so we will tiebreak by distance.

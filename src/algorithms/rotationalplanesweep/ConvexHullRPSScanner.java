@@ -102,6 +102,34 @@ public class ConvexHullRPSScanner {
         for (int hi=0; hi<nHulls; ++hi) {
             ConvexHullVG.ConvexHull hull = convexHulls[hi];
 
+            // Special case: Check whether you are on a vector
+            {
+                boolean isOnVector = false;
+                int prevdx = hull.xVertices[hull.size-1] - sx;
+                int prevdy = hull.yVertices[hull.size-1] - sy;
+                for (int j=0; j<hull.size; ++j) {
+                    int currdx = hull.xVertices[j] - sx;
+                    int currdy = hull.yVertices[j] - sy;
+                    int crossProd = prevdx*currdy - prevdy*currdx;
+                    int dotProd = prevdx*currdx + prevdy*currdy;
+                    if (crossProd == 0 && dotProd < 0) {
+                        isOnVector = true;
+
+                        RPSScanner.Vertex minVertex = verticesUnsorted[currIndex++];
+                        RPSScanner.Vertex maxVertex = verticesUnsorted[currIndex++];
+                        minVertex.x = prevdx + sx;
+                        minVertex.y = prevdy + sy;
+                        maxVertex.x = currdx + sx;
+                        maxVertex.y = currdy + sy;
+                        break;
+                    }
+
+                    prevdx = currdx;
+                    prevdy = currdy;
+                }
+                if (isOnVector) continue;
+            }
+
             // mindx/mindx/mindist: point with minimum angle.
             // maxdx/maxdx/maxdist: point with maximum angle.
             // Initial values: crossProd will always be 0, so we will tiebreak by distance.
