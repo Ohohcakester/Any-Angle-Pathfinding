@@ -12,6 +12,7 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 
 public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
+    private ConvexHullHeuristic convexHullHeuristic;
     private ConvexHullVG convexHullGraph;
     private ReusableIndirectHeap pq; 
     private int start;
@@ -28,6 +29,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
         convexHullGraph = new ConvexHullVG(graph);
         if (isRecording()) convexHullGraph.setSnapshotAction(() -> generateConvexHullSnapshot());
         convexHullGraph.initialise(sx, sy, ex, ey);
+        convexHullHeuristic = convexHullGraph.getConvexHullHeuristic();
 
         int size = convexHullGraph.size();
         int memorySize = size+2;
@@ -107,9 +109,10 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
     private final float heuristic(int nx, int ny) {
         // SLD heuristic (naive)
-        return graph.distance(nx, ny, ex, ey);
+        //return graph.distance(nx, ny, ex, ey);
         // Convex hull heuristic
-        // ????
+        if (isRecording() && (nx!=ex||ny!=ey)) addSnapshot(convexHullHeuristic.snapshotLines(nx, ny));
+        return (float)convexHullHeuristic.heuristic(nx, ny);
     }
 
     private int pathLength() {

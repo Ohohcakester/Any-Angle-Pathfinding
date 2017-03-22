@@ -19,6 +19,7 @@ public class ConvexHullVG {
     private final int sizeXPlusOne;
     private final int sizeYPlusOne;
     private ConvexHullRPSScanner scanner;
+    private ConvexHullHeuristic convexHullHeuristic;
 
     private final int[] nodeIndex; // Flattened 2D Array
     private int[] nodeX;
@@ -50,6 +51,7 @@ public class ConvexHullVG {
         if (snapshotAction != null) snapshotAction.run();
         initialiseNodes();
         scanner = new ConvexHullRPSScanner(graph, convexHulls, convexHulls.length);
+        convexHullHeuristic = new ConvexHullHeuristic(convexHulls, convexHulls.length, ex, ey);
     }
     
     private void initialiseConvexHulls(int sx, int sy, int ex, int ey) {
@@ -89,6 +91,10 @@ public class ConvexHullVG {
     public final ConvexHullRPSScanner computeAllVisibleSuccessors(int currX, int currY) {
         scanner.computeAllVisibleSuccessors(currX, currY);
         return scanner;
+    }
+
+    public final ConvexHullHeuristic getConvexHullHeuristic() {
+        return convexHullHeuristic;
     }
 
     public final int indexOf(int x, int y) {
