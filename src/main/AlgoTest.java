@@ -179,12 +179,10 @@ public class AlgoTest {
     public static void testSequence(AlgoFunction algo, String name, String mapSetName, String testType) {
         String path = "testResults/" + name.replace(" ", "_") + ".txt";
         if (writeToFile) io = new FileIO(path);
-        boolean didSomething = true; // only used when testing == true
 
         boolean pathLengthOnly = false;
         boolean runningTimeOnly = false;
-        boolean tnitialisationTime = false;
-        boolean testing = false;
+        boolean initialisationTime = false;
 
         // TestFunctionData testFunction_slow = printAverageData(50, 5);
         TestFunctionData testFunction_single = printAverageData(1,1);
@@ -206,25 +204,26 @@ public class AlgoTest {
                 testFunction_slow = testIndividualRunningTimes(20, 1);
                 testFunction_fast = testIndividualRunningTimes(50, 5);
                 break;
-            case "tnitialisationTime":
+            case "initialisationTime":
                 testFunction_single = testInitialisationTime;
                 testFunction_slow = testInitialisationTime;
                 testFunction_fast = testInitialisationTime;
-                break;
             case "testing":
-                didSomething = false;
-                testFunction_single =  = (a,b,c,d) -> {didSomething = true;};
-                testFunction_slow = (a,b,c,d) -> {didSomething = true;};
-                testFunction_fast = (a,b,c,d) -> {didSomething = true;};
+                testFunction_single = (a,b,c,d) -> {};
+                testFunction_slow = (a,b,c,d) -> {};
+                testFunction_fast = (a,b,c,d) -> {};
+                break;
+            case "":
                 break;
             default:
-                break;
+                throw new UnsupportedOperationException("Invalid Test Type");
         }
 
 
         println("=== Testing " + name + " === " + mapSetName + " ===");
         
-        if (mapSetName.equals("gamemaps")) {
+        switch (mapSetName) {
+        case "gamemaps": {
             testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
             testOnMazeData("sc2_losttemple", algo, testFunction_slow);
             testOnMazeData("sc2_extinction", algo, testFunction_slow);
@@ -248,9 +247,10 @@ public class AlgoTest {
             testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
             
             testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
+            break;
         }
 
-        if (mapSetName.equals("generatedmaps")) {
+        case "generatedmaps": {
             // Low Density - 6% - 50x50
             testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, testFunction_slow);
             // Medium Density - 20% - 50x50
@@ -333,18 +333,20 @@ public class AlgoTest {
             testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
             testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
             testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
+            break;
         }
         
 
-        if (mapSetName.equals("benchmarks")) {
-            testOnBenchmarkMapSetName("bg512", algo, testFunction_single);
-            // testOnBenchmarkMapSetName("dao", algo, testFunction_single);
-            testOnBenchmarkMapSetName("sc1", algo, testFunction_single);
-            testOnBenchmarkMapSetName("wc3maps512", algo, testFunction_single);
+        case "benchmarks": {
+            testOnBenchmarkMapSet("bg512", algo, testFunction_single);
+            // testOnBenchmarkMapSet("dao", algo, testFunction_single);
+            testOnBenchmarkMapSet("sc1", algo, testFunction_single);
+            testOnBenchmarkMapSet("wc3maps512", algo, testFunction_single);
+            break;
         }
         
 
-        if (mapSetName.equals("automataoriginal")) {
+        case "automataoriginal": {
             for (int resolutionIndex=0; resolutionIndex<10; resolutionIndex++) {
                 for (int scaleIndex=0; scaleIndex<7; ++scaleIndex) {
                     testOnStoredMaze(StoredTestMazes.loadAutomataMaze(scaleIndex, resolutionIndex), algo, testFunction_slow);
@@ -354,20 +356,22 @@ public class AlgoTest {
                     System.gc();System.gc();
                 }
             }
+            break;
         }
         
 
-        if (mapSetName.equals("scaledmazes")) {
+        case "scaledmazes": {
             testScaledMazes("sc1_NovaStation", algo, testFunction_slow);
             testScaledMazes("wc3_darkforest", algo, testFunction_slow);
             testScaledMazes("sc1_RedCanyons", algo, testFunction_slow);
             testScaledMazes("wc3_swampofsorrows", algo, testFunction_slow);
             testScaledMazes("sc1_Triskelion", algo, testFunction_slow);
             testScaledMazes("wc3_theglaive", algo, testFunction_slow);
+            break;
         }
         
 
-        if (mapSetName.equals("tiledmazes")) {
+        case "tiledmazes": {
             for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
                 for (int size = 4; size <= 12; ++size) {
                     testOnStoredMaze(StoredTestMazes.loadTiledMaze(mazePoolIndex, size), algo, testFunction_slow);
@@ -377,10 +381,11 @@ public class AlgoTest {
                     System.gc();System.gc();
                 }
             }
+            break;
         }
 
 
-        if (mapSetName.equals("automatadcmazes")) {
+        case "automatadcmazes": {
             for (int percentBlockedIndex=0; percentBlockedIndex<2; ++percentBlockedIndex) {
                 for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex+=2) {
                     for (int sizeIndex=0; sizeIndex<5; sizeIndex+=2) {
@@ -398,13 +403,18 @@ public class AlgoTest {
                     }
                 }
             }
+            break;
+        }
+
+        default:
+            throw new UnsupportedOperationException("Invalid Map Set Name!");
+
         }
 
         println("=== FINISHED TEST FOR " + name + " === " + mapSetName + " ===");
         println();
 
         if (writeToFile) io.close();
-        if (!didSomething) throw new UnsupportedOperationException("Invalid Map Set Name!");
     }
     
     public static void testOnBenchmarkMapSet(String setName, AlgoFunction algo, TestFunctionData testFunction) {
