@@ -21,6 +21,7 @@ import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.vertexanya.VertexAnya;
+import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
@@ -46,13 +47,13 @@ public class Experiment {
 //        testAbilityToFindGoal();
 //        findStrictThetaStarIssues();
 //        findUpperBound();
-        //testAlgorithmOptimality();
+        testAlgorithmOptimality();
 //        BenchmarkGraphSets.testMapLoading();
         //testAgainstReferenceAlgorithm();
         //countTautPaths();
 //        other();
 //        testLOSScan();
-        testRPSScan();
+        //testRPSScan();
     }
     
     /**
@@ -548,7 +549,8 @@ public class Experiment {
     //    AlgoFunction testAlgo = VertexAnyaMarkingV3::new;
     //    AlgoFunction testAlgo = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
         //AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
-        AlgoFunction testAlgo = AnyaAlgorithm::new;
+        //AlgoFunction testAlgo = AnyaAlgorithm::new;
+        AlgoFunction testAlgo = ConvexHullVGAlgorithm::new;
 
         //printSeed = false; // keep this commented out.
         Random seedRand = new Random(1241);
