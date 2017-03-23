@@ -62,7 +62,7 @@ import uiandio.GraphImporter;
 
 public class AlgoTest {
     private static FileIO io;
-    private static boolean writeToFile = false;
+    private static boolean writeToFile = true;
 
     private static boolean pleaseTurnOffAssertions() {
         System.out.println("Please turn off assertions during tests (Run -> Run Configurations -> Arguments -> remove -ea)");
@@ -94,9 +94,9 @@ public class AlgoTest {
         // 1. Algorithm Name
         // 2. Map Set
         // 3. Test Type
-        String algoName = args[0];
-        String mapSetName = args[1];
-        String testType = args.length >= 3 ? args[2] : "";
+        String algoName = args[1];
+        String mapSetName = args[2];
+        String testType = args.length >= 4 ? args[3] : "";
 
         FileIO.makeDirs("testResults/");
         System.gc(); System.gc();
@@ -109,7 +109,7 @@ public class AlgoTest {
 
         switch (algoName) {
             case "AStar": return AStar::new;
-            case "AStar SLD": return AStarStaticMemory::new;
+            case "AStarSLD": return AStarStaticMemory::new;
             case "AStarPS": return AStar::postSmooth;
             case "AStar Octile": return AStarOctileHeuristic::new;
             case "AStarOctile PostSmooth": return AStarOctileHeuristic::postSmooth;
@@ -125,8 +125,8 @@ public class AlgoTest {
             case "Anya16": return AnyaAlgorithm::new;
 
             case "VisibilityGraphs": return VisibilityGraphAlgorithm::new;
-            case "VisibilityGraph Reuse": return VisibilityGraphAlgorithm::graphReuse;
-            case "VisibilityGraph Reuse Optimised": return VisibilityGraphAlgorithmOptimised::graphReuse;
+            case "VisibilityGraphReuse": return VisibilityGraphAlgorithm::graphReuse;
+            case "VisibilityGraphReuseOptimised": return VisibilityGraphAlgorithmOptimised::graphReuse;
 
             case "RestrictedVisibilityGraphs": return RestrictedVisibilityGraphAlgorithm::new;
             case "StrictVisibilityGraphs": return StrictVisibilityGraphAlgorithm::new;
@@ -342,6 +342,14 @@ public class AlgoTest {
             // testOnBenchmarkMapSet("dao", algo, testFunction_single);
             testOnBenchmarkMapSet("sc1", algo, testFunction_single);
             testOnBenchmarkMapSet("wc3maps512", algo, testFunction_single);
+            break;
+        }
+
+        case "benchmarksrandom": {
+            testOnBenchmarkMapSet("random10", algo, testFunction_single);
+            testOnBenchmarkMapSet("random20", algo, testFunction_single);
+            testOnBenchmarkMapSet("random30", algo, testFunction_single);
+            testOnBenchmarkMapSet("random40", algo, testFunction_single);
             break;
         }
         

@@ -71,7 +71,7 @@ public class AnyAnglePathfinding {
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) {
-        int choice = 1; // Choose an operation. 0: Visualisation.run() should be the default.
+        int choice = 6; // Choose an operation. 0: Visualisation.run() should be the default.
 
         switch(choice) {
             case 0:
