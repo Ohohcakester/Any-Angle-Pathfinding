@@ -217,6 +217,7 @@ public class AlgoTest {
                 testFunction_single = testInitialisationTime;
                 testFunction_slow = testInitialisationTime;
                 testFunction_fast = testInitialisationTime;
+                break;
             case "testing":
                 testFunction_single = (a,b,c,d) -> {};
                 testFunction_slow = (a,b,c,d) -> {};
