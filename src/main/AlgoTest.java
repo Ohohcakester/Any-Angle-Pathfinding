@@ -63,6 +63,11 @@ import uiandio.GraphImporter;
 public class AlgoTest {
     private static FileIO io;
     private static boolean writeToFile = true;
+    private static String outputdir = "testResults/";
+
+    private static void setOutputdir(String postfix) {
+        outputdir = "testResults_" + postfix + "/";
+    }
 
     private static boolean pleaseTurnOffAssertions() {
         System.out.println("Please turn off assertions during tests (Run -> Run Configurations -> Arguments -> remove -ea)");
@@ -70,7 +75,9 @@ public class AlgoTest {
     }
 
     public static void run() {
-        FileIO.makeDirs("testResults/");
+        assert pleaseTurnOffAssertions();
+
+        FileIO.makeDirs(outputdir);
         System.gc(); System.gc();
 
         String[] algoNames = new String[]{
@@ -94,11 +101,13 @@ public class AlgoTest {
         // 1. Algorithm Name
         // 2. Map Set
         // 3. Test Type
+        // 4. Output Directory name postfix
         String algoName = args[1];
         String mapSetName = args[2];
         String testType = args.length >= 4 ? args[3] : "";
+        if (args.length >= 5) setOutputdir(args[4]);
 
-        FileIO.makeDirs("testResults/");
+        FileIO.makeDirs(outputdir);
         System.gc(); System.gc();
 
         AlgoFunction algo = getAlgo(algoName);
@@ -177,7 +186,7 @@ public class AlgoTest {
 
 
     public static void testSequence(AlgoFunction algo, String name, String mapSetName, String testType) {
-        String path = "testResults/" + name.replace(" ", "_") + ".txt";
+        String path = outputdir + name.replace(" ", "_") + ".txt";
         if (writeToFile) io = new FileIO(path);
 
         boolean pathLengthOnly = false;
@@ -214,6 +223,7 @@ public class AlgoTest {
                 testFunction_fast = (a,b,c,d) -> {};
                 break;
             case "":
+            case "default":
                 break;
             default:
                 throw new UnsupportedOperationException("Invalid Test Type");
