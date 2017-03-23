@@ -98,7 +98,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 35; // Adjust this to choose a maze.
+        int choice = 64; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -113,15 +113,15 @@ public class AnyAnglePathfinding {
                 return DefaultGenerator.generateUnseeded(sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
             case 1 : { // SEEDED
-                int unblockedRatio = 22;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
-                int seed = 905392638;        // seed for the random.
+                int unblockedRatio = 11;      // chance of spawning a cluster of blocked tiles is 1 in unblockedRatio.
+                int seed = -1522148590;        // seed for the random.
                 
-                int sizeX = 79;               // x-axis size of grid
-                int sizeY = 96;               // y-axis size of grid
-                int sx = 54;                   // x-coordinate of start point
-                int sy = 60;                  // y-coordinate of start point
-                int ex = 12;                  // x-coordinate of goal point
-                int ey = 19;                  // y-coordinate of goal point
+                int sizeX = 16;               // x-axis size of grid
+                int sizeY = 29;               // y-axis size of grid
+                int sx = 6;                   // x-coordinate of start point
+                int sy = 19;                  // y-coordinate of start point
+                int ex = 15;                  // x-coordinate of goal point
+                int ey = 5;                  // y-coordinate of goal point
                 
                 return DefaultGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, sx, sy, ex, ey);
             }
@@ -219,18 +219,18 @@ public class AnyAnglePathfinding {
                 return GraphImporter.loadStoredMaze("sc1_EbonLakes", "139-13_321-470");
             case 47: { // SEEDED
                 int unblockedRatio = 5;          // chance of spawning a blocked tile is 1 in unblockedRatio.
-                int iterations = 3;              // number of iterations for cellular automata
-                int cutoffOffset = -1;           // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
-                float resolution = 1f;          // (Larger -> bigger islands)
-                boolean bordersAreBlocked = false;
-                int seed = -44556930;           // seed for the random.
+                int iterations = 5;              // number of iterations for cellular automata
+                int cutoffOffset = 0;           // offset for the default cutoff value used for cellular automata.  (Higher = Less blocked)
+                float resolution = 0.4f;          // (Larger -> bigger islands)
+                boolean bordersAreBlocked = true;
+                int seed = -124112421;           // seed for the random.
 
-                int sizeX = 600;               // x-axis size of grid
-                int sizeY = 600;               // y-axis size of grid
-                int sx = 19;                     // y-coordinate of start point
-                int sy = 148;                     // x-coordinate of start point
-                int ex = 203;                     // y-coordinate of goal point
-                int ey = 145;                     // x-coordinate of goal point
+                int sizeX = 500;               // x-axis size of grid
+                int sizeY = 500;               // y-axis size of grid
+                int sx = 14;                     // y-coordinate of start point
+                int sy = 11;                     // x-coordinate of start point
+                int ex = 74;                     // y-coordinate of goal point
+                int ey = 63;                     // x-coordinate of goal point
 
                 return AutomataGenerator.generateSeeded(seed, sizeX, sizeY, unblockedRatio, iterations, resolution, cutoffOffset, bordersAreBlocked, sx, sy, ex, ey);
             }
@@ -270,18 +270,18 @@ public class AnyAnglePathfinding {
                         GraphImporter.loadStoredMaze("sc1_EbonLakes"),
                 }, 3, 2);
             case 60: { // SEEDED
-                float percentBlocked = 0.45f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
-                float resolution = 0.1f;              // (Larger -> bigger islands)
+                float percentBlocked = 0.4f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
+                float resolution = 2f;              // (Larger -> bigger islands)
                 int iterations = 5;                  // number of iterations for cellular automata
-                boolean bordersAreBlocked = true;
+                boolean bordersAreBlocked = false;
                 int seed = 5231;           // seed for the random.
 
                 int sizeX = 3000;               // x-axis size of grid
                 int sizeY = 3000;               // y-axis size of grid
-                int sx = 5;                     // y-coordinate of start point
-                int sy = 5;                     // x-coordinate of start point
-                int ex = 19;                     // y-coordinate of goal point
-                int ey = 5;                     // x-coordinate of goal point
+                int sx = 0;                     // y-coordinate of start point
+                int sy = 0;                     // x-coordinate of start point
+                int ex = 3000;                     // y-coordinate of goal point
+                int ey = 3000;                     // x-coordinate of goal point
 
                 return AutomataGenerator.generateSeededDynamicCutoff(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked, sx, sy, ex, ey);
             }
@@ -297,6 +297,10 @@ public class AnyAnglePathfinding {
                 transform = AffineTransform.compose(transform, AffineTransform.rotate(0.2 * 3.1415926535));
 
                 return AffineMapTransformation.transform(GraphImporter.loadStoredMaze("sc1_Ramparts", "378-312_74-120"), transform, true);
+            }
+            case 64: {
+                // Counterexample for ConvexHullVGAlgorithm Convex Hull Triangular Heuristic.
+                return DefaultGenerator.generateSeeded(-1522150246, 36, 25, 6, 2, 15, 18, 24);
             }
             default:
                 return null;
