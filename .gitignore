@@ -15,6 +15,7 @@ gamemaps/
 mazedata/
 snapshots/
 testresults/
+testresults_*
 originalbenchmarks/
 pyscripts/output.txt
 
