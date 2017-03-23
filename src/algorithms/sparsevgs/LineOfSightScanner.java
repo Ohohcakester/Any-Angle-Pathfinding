@@ -891,7 +891,7 @@ public final class LineOfSightScanner {
                     
                     if (graph.isOuterCorner(x, y)) {
                         addSuccessor(x, y);
-                        //leftInclusive = false;
+                        leftInclusive = false;
                     }
                 }
                 if (rightInclusive && currState.xR.isWholeNumber()) {
@@ -907,7 +907,7 @@ public final class LineOfSightScanner {
                     
                     if (graph.isOuterCorner(x, y)) {
                         addSuccessor(x, y);
-                        //rightInclusive = false;
+                        rightInclusive = false;
                     }
                 }
                 
@@ -971,7 +971,7 @@ public final class LineOfSightScanner {
                     
                     if (graph.isOuterCorner(x, y)) {
                         addSuccessor(x, y);
-                        //leftInclusive = false;
+                        leftInclusive = false;
                     }
                 }
                 if (rightInclusive && currState.xR.isWholeNumber()) {
@@ -986,7 +986,7 @@ public final class LineOfSightScanner {
                     int y = currState.y;
                     if (graph.isOuterCorner(x, y)) {
                         addSuccessor(x, y);
-                        //rightInclusive = false;
+                        rightInclusive = false;
                     }
                 }
 
