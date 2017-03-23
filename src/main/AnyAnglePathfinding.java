@@ -309,7 +309,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static AlgoFunction setDefaultAlgoFunction() {
-        int choice = 43; // adjust this to choose an algorithm
+        int choice = 49; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
@@ -456,6 +456,9 @@ public class AnyAnglePathfinding {
                 break;
             case 48 :
                 algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+                break;
+            case 49 :
+                algoFunction = ConvexHullVGAlgorithm::new;
                 break;
         }
         
