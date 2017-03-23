@@ -281,7 +281,9 @@ public class RPSScanner {
 
                     Edge edge = edgeHeap.getMin();
                     if (!linesIntersect(sx, sy, v.x, v.y, edge.u.x, edge.u.y, edge.v.x, edge.v.y)) {
-                        addNeighbour(v.x, v.y);
+                        if (graph.isOuterCorner(v.x, v.y)) {
+                            addNeighbour(v.x, v.y);
+                        }
                     }
                 }
 
