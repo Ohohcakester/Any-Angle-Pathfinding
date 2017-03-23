@@ -317,7 +317,6 @@ class GridRPSPolygonTracer {
             RPSScanner.Edge e = edges[i];
             e.u.edge1 = e;
             e.v.edge2 = e;
-            e.originalU = e.u;
         }
     }
 }
