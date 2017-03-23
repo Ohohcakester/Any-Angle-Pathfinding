@@ -38,6 +38,7 @@ import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.vertexanya.VertexAnyaNoExtents;
 import algorithms.vertexanya.VisibilityScanSearchEager;
 import algorithms.vertexanya.VisibilityScanSearchSemiEager;
+import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
 import grid.GridGraph;
@@ -70,7 +71,7 @@ public class AnyAnglePathfinding {
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) {
-        int choice = 2; // Choose an operation. 0: Visualisation.run() should be the default.
+        int choice = 1; // Choose an operation. 0: Visualisation.run() should be the default.
 
         switch(choice) {
             case 0:
@@ -90,6 +91,9 @@ public class AnyAnglePathfinding {
                 break;
             case 5:
                 TextOutputVisualisation.run();
+                break;
+            case 6:
+                AlgoTest.runWithArgs(args);
                 break;
         }
     }

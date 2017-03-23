@@ -42,6 +42,7 @@ import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.vertexanya.VertexAnyaNoExtents;
 import algorithms.vertexanya.VisibilityScanSearchEager;
 import algorithms.vertexanya.VisibilityScanSearchSemiEager;
+import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
@@ -67,346 +68,343 @@ public class AlgoTest {
         System.out.println("Please turn off assertions during tests (Run -> Run Configurations -> Arguments -> remove -ea)");
         return false;
     }
-    
+
     public static void run() {
+        FileIO.makeDirs("testResults/");
+        System.gc(); System.gc();
+
+        String[] algoNames = new String[]{
+            "ConvexHullVGA",
+        };
+
+        String[] mapSetNames = new String[]{
+            "automatadcmazes",
+        };
+
+        for (int i=0; i<algoNames.length; ++i) {
+            for (int j=0; j<mapSetNames.length; ++j) {
+                testSequence(getAlgo(algoNames[i]), algoNames[i], mapSetNames[j], "");
+            }
+        }
+    }
+    
+    public static void runWithArgs(String[] args) {
         assert pleaseTurnOffAssertions();
-        //runTestAllAlgos();
-       
-        AlgoFunction aStar = AStar::new;
-        AlgoFunction aStarStatic = AStarStaticMemory::new;
-        AlgoFunction aStarOctile = AStarOctileHeuristic::new;
-        AlgoFunction aStarOctilePS = AStarOctileHeuristic::postSmooth;
-        AlgoFunction bfs = BreadthFirstSearch::new;
-        AlgoFunction jumpPointSearch = JumpPointSearch::new;
-        AlgoFunction jpsPS = JumpPointSearch::postSmooth;
-        AlgoFunction lazyThetaStar = LazyThetaStar::new;
-        AlgoFunction basicThetaStar = BasicThetaStar::new;
-        AlgoFunction basicThetaStarPS = BasicThetaStar::postSmooth;
-        AlgoFunction aStarPS = AStar::postSmooth;
-        AlgoFunction dijkstra = AStar::dijkstra;
-        AlgoFunction accAStar = AcceleratedAStar::new;
-        AlgoFunction anya = Anya::new;
-        AlgoFunction anya16 = AnyaAlgorithm::new;
 
-        AlgoFunction subgoalGraphs = SubgoalGraphsAlgorithm::new;
-        AlgoFunction _2LevelSubgoalGraphs = NLevelSubgoalGraphsAlgorithm.levels(2);
-        AlgoFunction _3LevelSubgoalGraphs = NLevelSubgoalGraphsAlgorithm.levels(3);
-        AlgoFunction nLevelSubgoalGraphs = NLevelSubgoalGraphsAlgorithm::new;
-
-        AlgoFunction anyAngleSubgoalGraphs = AnyAngleSubgoalGraphsAlgorithm::new;
-        AlgoFunction anyAngleNLevelSubgoalGraphs = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
-
-        AlgoFunction strictAnyAngleSubgoalGraphs = StrictAnyAngleSubgoalGraphsAlgorithm::new;
-        AlgoFunction recursiveStrictAnyAngleSubgoalGraphs = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
-
-        AlgoFunction vga = VisibilityGraphAlgorithm::new;
-        AlgoFunction vgaReuse = VisibilityGraphAlgorithm::graphReuse;
-        AlgoFunction vgaReuseOptimised = VisibilityGraphAlgorithmOptimised::graphReuse;
-        AlgoFunction rVGA = RestrictedVisibilityGraphAlgorithm::new;
-        AlgoFunction sVGA = StrictVisibilityGraphAlgorithm::new;
-        AlgoFunction sVGAv2 = StrictVisibilityGraphAlgorithmV2::new;
-
-        AlgoFunction strictThetaStar = StrictThetaStar::new;
-        AlgoFunction strictThetaStarPS = StrictThetaStar::postSmooth;
-        AlgoFunction recStrictThetaStar = RecursiveStrictThetaStar::new;
-        AlgoFunction recStrictThetaStarPS = RecursiveStrictThetaStar::postSmooth;
-        AlgoFunction recStrictThetaStar_2 = (a, b, c, d, e) -> RecursiveStrictThetaStar.depthLimit(a, b, c, d, e, 2);
-
-        AlgoFunction sparseVGA = SparseVisibilityGraphAlgorithm::graphReuse;
-        AlgoFunction sparseVGAFib = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
-        AlgoFunction vertexNLevelSparseVGA = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-        AlgoFunction edgeNLevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-        AlgoFunction edgeNLevelSparseVGAFib = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
-        AlgoFunction edge1LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
-        AlgoFunction edge2LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(2);
-        AlgoFunction edge3LevelSparseVGA = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(3);
-        AlgoFunction directedEdgeNLevelSparseVGA = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-
-        AlgoFunction incrementalVGA = IVGAlgorithm::new;
-        AlgoFunction vertexAnya = VertexAnya::new;
-        AlgoFunction vertexAnyaNoExtents = VertexAnyaNoExtents::new;
-        AlgoFunction vertexAnyaMarking = VertexAnyaMarking::new;
-        AlgoFunction vertexAnyaMarkingV2 = VertexAnyaMarkingV2::new;
-        AlgoFunction vertexAnyaMarkingV3 = VertexAnyaMarkingV3::new;
-        AlgoFunction visibilityScanSearchEager = VisibilityScanSearchEager::new;
-        AlgoFunction visibilityScanSearchSemiEager = VisibilityScanSearchSemiEager::new;
-
-        AlgoFunction recursiveThetaStar = RecursiveThetaStar::new;
+        // 1. Algorithm Name
+        // 2. Map Set
+        // 3. Test Type
+        String algoName = args[0];
+        String mapSetName = args[1];
+        String testType = args.length >= 3 ? args[2] : "";
 
         FileIO.makeDirs("testResults/");
         System.gc(); System.gc();
 
-        // float[] buffers = new float[]{0f,0.01f,0.1f,0.2f,0.4f,0.6f,0.8f,1f,1.2f,1.5f,2f,3f,5f,8f,10f,20f,30f,50f};
-        // for (float buffer : buffers) {
-        //     AlgoFunction algo = (a,b,c,d,e) ->
-        //     StrictThetaStarV2e.setBuffer(a,b,c,d,e,buffer);
-        //     testSequence(algo, "StrictThetaStarV2e_"+buffer);
-        // }
-        // for (float buffer : buffers) {
-        //     AlgoFunction algo = (a,b,c,d,e) ->
-        //     StrictThetaStarV1.setBuffer(a,b,c,d,e,buffer);
-        //     testSequence(algo, "StrictThetaStarV1_"+buffer);
-        // }
-        // testSequence(aStar, "AStar");
-        // testSequence(aStarPS, "AStarPS");
-        // testSequence(aStarStatic, "AStar SLD");
-        // testSequence(aStarOctile, "AStar Octile");
-        // testSequence(bfs, "BreadthFirstSearch");
-        // testSequence(jumpPointSearch, "JumpPointSearch");
-        // testSequence(basicThetaStar, "BasicThetaStar");
-        // testSequence(basicThetaStarPS, "BasicThetaStar_PS");
-        // testSequence(lazyThetaStar, "LazyThetaStar");
-        // testSequence(accAStar, "AcceleratedAStar");
-        // testSequence(aStarOctilePS, "AStarOctile PostSmooth");
-        // testSequence(jpsPS, "JPS PostSmooth");
-        // testSequence(dijkstra, "Dijkstra");
-        // testSequence(vgaReuse, "VisibilityGraph Reuse");
-        // testSequence(vgaReuseOptimised, "VisibilityGraph Reuse Optimised");
-        // testSequence(vga, "VisibilityGraphs");
-        // testSequence(vga, "VISIBILITY GRAPHS PART 2");
-        // testSequence(anya, "Anya");
-        // testSequence(anya16, "Anya16");
-
-        // testSequence(subgoalGraphs, "SubgoalGraphs");
-        // testSequence(_2LevelSubgoalGraphs, "2LevelSubgoalGraphs");
-        // testSequence(_3LevelSubgoalGraphs, "3LevelSubgoalGraphs");
-        // testSequence(nLevelSubgoalGraphs, "NLevelSubgoalGraphs");
-
-        // testSequence(anyAngleSubgoalGraphs, "AnyAngleSubgoalGraphs");
-        // testSequence(anyAngleNLevelSubgoalGraphs,
-        // "AnyAngleNLevelSubgoalGraphs");
-
-        // testSequence(strictAnyAngleSubgoalGraphs, "StrictAnyAngleSubgoalGraphs");
-        // testSequence(recursiveStrictAnyAngleSubgoalGraphs, "RecursiveStrictAnyAngleSubgoalGraphs");
-
-        // testSequence(vertexAnya, "VertexAnya");
-        // testSequence(vertexAnyaNoExtents, "VertexAnyaNoExtents");
-        // testSequence(vertexAnyaMarking, "VertexAnyaMarking");
-        // testSequence(vertexAnyaMarkingV2, "VertexAnyaMarkingV2");
-        // testSequence(vertexAnyaMarkingV3, "VertexAnyaMarkingV3");
-        // testSequence(visibilityScanSearchEager, "VisibilityScanSearchEager");
-        // testSequence(visibilityScanSearchSemiEager,
-        // "VisibilityScanSearchSemiEager");
-
-        // testSequence(recursiveThetaStar, "RecursiveThetaStar");
-        // testSequence(strictThetaStar, "StrictThetaStar");
-        // testSequence(strictThetaStarPS, "StrictThetaStarPS");
-        // testSequence(recStrictThetaStar, "RecStrictThetaStar");
-        // testSequence(recStrictThetaStarPS, "RecStrictThetaStarPS");
-        // testSequence(recStrictThetaStar_2, "RecStrictThetaStar_2");
-        // testSequence(sVGA, "StrictVisibilityGraphs");
-
-        // testSequence(sVGAv2, "StrictVisibilityGraphsV2");
-        // testSequence(sparseVGA, "SparseVisibilityGraphs");
-        // testSequence(sparseVGAFib, "SparseVisibilityGraphsFibHeap");
-        // testSequence(vertexNLevelSparseVGA, "VertexNLevelSparseVisibilityGraphs");
-        // testSequence(edgeNLevelSparseVGA, "EdgeNLevelSparseVisibilityGraphs");
-        // testSequence(edgeNLevelSparseVGAFib, "EdgeNLevelSparseVisibilityGraphsFibHeap");
-        // testSequence(edge1LevelSparseVGA, "Edge1LevelSparseVisibilityGraphs");
-        // testSequence(edge2LevelSparseVGA, "Edge2LevelSparseVisibilityGraphs");
-        // testSequence(edge3LevelSparseVGA, "Edge3LevelSparseVisibilityGraphs");
-        // testSequence(directedEdgeNLevelSparseVGA, "DirectedEdgeNLevelSparseVisibilityGraphs");
-        // testSequence(incrementalVGA, "IncrementalVisibilityGraphs");
-
-        // testSequence(rVGA, "RestrictedVisibilityGraphs");
-        // testSequence(vga, "VisibilityGraphs");
+        AlgoFunction algo = getAlgo(algoName);
+        testSequence(algo, algoName, mapSetName, testType);
     }
 
-    public static void testSequence(AlgoFunction algo, String name) {
+    public static AlgoFunction getAlgo(String algoName) {
+
+        switch (algoName) {
+            case "AStar": return AStar::new;
+            case "AStar SLD": return AStarStaticMemory::new;
+            case "AStarPS": return AStar::postSmooth;
+            case "AStar Octile": return AStarOctileHeuristic::new;
+            case "AStarOctile PostSmooth": return AStarOctileHeuristic::postSmooth;
+            case "BreadthFirstSearch": return BreadthFirstSearch::new;
+            case "JumpPointSearch": return JumpPointSearch::new;
+            case "JPS PostSmooth": return JumpPointSearch::postSmooth;
+            case "LazyThetaStar": return LazyThetaStar::new;
+            case "BasicThetaStar": return BasicThetaStar::new;
+            case "BasicThetaStar_PS": return BasicThetaStar::postSmooth;
+            case "Dijkstra": return AStar::dijkstra;
+            case "AcceleratedAStar": return AcceleratedAStar::new;
+            case "Anya": return Anya::new;
+            case "Anya16": return AnyaAlgorithm::new;
+
+            case "VisibilityGraphs": return VisibilityGraphAlgorithm::new;
+            case "VisibilityGraph Reuse": return VisibilityGraphAlgorithm::graphReuse;
+            case "VisibilityGraph Reuse Optimised": return VisibilityGraphAlgorithmOptimised::graphReuse;
+
+            case "RestrictedVisibilityGraphs": return RestrictedVisibilityGraphAlgorithm::new;
+            case "StrictVisibilityGraphs": return StrictVisibilityGraphAlgorithm::new;
+            case "StrictVisibilityGraphsV2": return StrictVisibilityGraphAlgorithmV2::new;
+            case "IncrementalVisibilityGraphs": return IVGAlgorithm::new;
+
+            case "SubgoalGraphs": return SubgoalGraphsAlgorithm::new;
+            case "2LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(2);
+            case "3LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(3);
+            case "NLevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm::new;
+
+            case "AnyAngleSubgoalGraphs": return AnyAngleSubgoalGraphsAlgorithm::new;
+            case "AnyAngleNLevelSubgoalGraphs": return AnyAngleNLevelSubgoalGraphsAlgorithm::new;
+
+            case "StrictAnyAngleSubgoalGraphs": return StrictAnyAngleSubgoalGraphsAlgorithm::new;
+            case "RecursiveStrictAnyAngleSubgoalGraphs": return RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
+
+            case "VertexAnya": return VertexAnya::new;
+            case "VertexAnyaNoExtents": return VertexAnyaNoExtents::new;
+            case "VertexAnyaMarking": return VertexAnyaMarking::new;
+            case "VertexAnyaMarkingV2": return VertexAnyaMarkingV2::new;
+            case "VertexAnyaMarkingV3": return VertexAnyaMarkingV3::new;
+            case "VisibilityScanSearchEager": return VisibilityScanSearchEager::new;
+            case "VisibilityScanSearchSemiEager": return VisibilityScanSearchSemiEager::new;
+
+            case "StrictThetaStar": return StrictThetaStar::new;
+            case "StrictThetaStarPS": return StrictThetaStar::postSmooth;
+            case "RecStrictThetaStar": return RecursiveStrictThetaStar::new;
+            case "RecStrictThetaStarPS": return RecursiveStrictThetaStar::postSmooth;
+            case "RecStrictThetaStar_2": return (a, b, c, d, e) -> RecursiveStrictThetaStar.depthLimit(a, b, c, d, e, 2);
+            case "RecursiveThetaStar": return RecursiveThetaStar::new;
+
+            case "SparseVisibilityGraphs": return SparseVisibilityGraphAlgorithm::graphReuse;
+            case "SparseVisibilityGraphsFibHeap": return SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+            case "VertexNLevelSparseVisibilityGraphs": return VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+            case "EdgeNLevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+            case "EdgeNLevelSparseVisibilityGraphsFibHeap": return EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+            case "Edge1LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
+            case "Edge2LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(2);
+            case "Edge3LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(3);
+            case "DirectedEdgeNLevelSparseVisibilityGraphs": return DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+
+            case "ConvexHullVGA": return ConvexHullVGAlgorithm::new;
+        }
+
+        throw new UnsupportedOperationException("Invalid Algorithm! " + algoName);
+    }
+
+
+    public static void testSequence(AlgoFunction algo, String name, String mapSetName, String testType) {
         String path = "testResults/" + name.replace(" ", "_") + ".txt";
         if (writeToFile) io = new FileIO(path);
+        boolean didSomething = true; // only used when testing == true
 
         boolean pathLengthOnly = false;
         boolean runningTimeOnly = false;
         boolean tnitialisationTime = false;
+        boolean testing = false;
 
         // TestFunctionData testFunction_slow = printAverageData(50, 5);
         TestFunctionData testFunction_single = printAverageData(1,1);
         TestFunctionData testFunction_slow = printAverageData(5, 5);
         TestFunctionData testFunction_fast = printAverageData(50, 30);
-        if (pathLengthOnly) {
-            testFunction_slow = testPathLengthOnly;
-            testFunction_fast = testPathLengthOnly;
-            // testFunction_slow = analyseIndividualPaths;
-            // testFunction_fast = analyseIndividualPaths;
+        switch (testType) {
+            case "pathLengthOnly":
+                testFunction_single = testPathLengthOnly;
+                testFunction_slow = testPathLengthOnly;
+                testFunction_fast = testPathLengthOnly;
+                break;
+            case "individualPathLengthOnly":
+                testFunction_single = analyseIndividualPaths;
+                testFunction_slow = analyseIndividualPaths;
+                testFunction_fast = analyseIndividualPaths;
+                break;
+            case "runningTimeOnly":
+                testFunction_single = testIndividualRunningTimes(1, 1);
+                testFunction_slow = testIndividualRunningTimes(20, 1);
+                testFunction_fast = testIndividualRunningTimes(50, 5);
+                break;
+            case "tnitialisationTime":
+                testFunction_single = testInitialisationTime;
+                testFunction_slow = testInitialisationTime;
+                testFunction_fast = testInitialisationTime;
+                break;
+            case "testing":
+                didSomething = false;
+                testFunction_single =  = (a,b,c,d) -> {didSomething = true;};
+                testFunction_slow = (a,b,c,d) -> {didSomething = true;};
+                testFunction_fast = (a,b,c,d) -> {didSomething = true;};
+                break;
+            default:
+                break;
         }
-        if (runningTimeOnly) {
-            testFunction_slow = testIndividualRunningTimes(20, 1);
-            testFunction_fast = testIndividualRunningTimes(50, 5);
+
+
+        println("=== Testing " + name + " === " + mapSetName + " ===");
+        
+        if (mapSetName.equals("gamemaps")) {
+            testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
+            testOnMazeData("sc2_losttemple", algo, testFunction_slow);
+            testOnMazeData("sc2_extinction", algo, testFunction_slow);
+            
+            testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
+            testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
+            testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
+            
+            testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
+            testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
+            
+            testOnMazeData("wc3_icecrown", algo, testFunction_slow);
+            testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
+            
+            testOnMazeData("sc1_Legacy", algo, testFunction_slow);
+            
+            testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
+            
+            testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
+            
+            testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
+            
+            testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
         }
-        if (tnitialisationTime) {
-            testFunction_slow = testInitialisationTime;
+
+        if (mapSetName.equals("generatedmaps")) {
+            // Low Density - 6% - 50x50
+            testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, testFunction_slow);
+            // Medium Density - 20% - 50x50
+            testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, testFunction_slow);
+            // High Density - 40% - 50x50
+            testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, testFunction_slow);
+           
+            // Low Density - 6% - 300x300
+            testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, testFunction_slow);
+            // Medium Density - 20% - 300x300
+            testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, testFunction_slow);
+            // High Density - 40% - 300x300
+            testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, testFunction_slow);
+           
+            // Low Density - 6% - 500x500
+            testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+            // Medium Density - 20% - 500x500
+            testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
+           
+            // LowDensity2 - 6% - 300x300
+            testOnMazeData("def_iMJWB0QC_iMJ_iMJ_iSB", algo, testFunction_slow);
+            // MediumDensity2 - 20% - 300x300
+            testOnMazeData("def_iBCA5SS_iMJ_iMJ_iP", algo, testFunction_slow);
+            // HighDensity2 - 40% - 300x300
+            testOnMazeData("def_i11AHREB_iMJ_iMJ_iH", algo, testFunction_slow);
+           
+            // LowDensity3 - 6% - 300x300
+            testOnMazeData("def_iOH1TZ0D_iMJ_iMJ_iSB", algo, testFunction_slow);
+            // MediumDensity3 - 20% - 300x300
+            testOnMazeData("def_iAN3IE0C_iMJ_iMJ_iP", algo, testFunction_slow);
+            // HighDensity3 - 40% - 300x300
+            testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
+           
+            // 6%Density - 500x500
+            testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
+            // 20%Density - 500x500
+            testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
+            // 40%Density - 500x500
+            testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
+           
+            // 6%Density2 - 500x500
+            testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
+            // 20%Density2 - 500x500
+            testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
+            // 40%Density2 - 500x500
+            testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
+           
+            // 6%Density3 - 500x500
+            testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
+            // 20%Density3 - 500x500
+            testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
+            // 40%Density3 - 500x500
+            testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
+            testOnMazeData("gen_1000x1000_50_iY5U5GAC", algo, testFunction_slow);
+            testOnMazeData("gen_1000x1000_15_iFTBETRD", algo, testFunction_slow);
+            testOnMazeData("gen_1000x1000_7_i3WH4IJD", algo, testFunction_slow);
+           
+            testOnMazeData("gen_2000x2000_50_iK54OY1C", algo, testFunction_slow);
+            testOnMazeData("gen_2000x2000_15_i4Z44NPC", algo, testFunction_slow);
+            testOnMazeData("gen_2000x2000_7_iXT3AEED", algo, testFunction_slow);
+           
+            testOnMazeData("gen_3000x3000_50_iUE2IRAD", algo, testFunction_slow);
+            testOnMazeData("gen_3000x3000_15_iGUM1R2C", algo, testFunction_slow);
+            testOnMazeData("gen_3000x3000_7_iSR3L1J", algo, testFunction_slow);
+           
+            testOnMazeData("gen_4000x4000_50_i0GHV1UD", algo, testFunction_slow);
+            testOnMazeData("gen_4000x4000_15_iNK5KHO", algo, testFunction_slow);
+            testOnMazeData("gen_4000x4000_7_iNUJNZ3", algo, testFunction_slow);
+           
+            testOnMazeData("gen_5000x5000_50_iCFL2G3B", algo, testFunction_slow);
+            testOnMazeData("gen_5000x5000_15_i0BTXUD", algo, testFunction_slow);
+            testOnMazeData("gen_5000x5000_7_iHOPN1S", algo, testFunction_slow);
+           
+            testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
+            testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
+            testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
+           
+            testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
+            testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
+            testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
+            testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
+            testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
+        }
+        
+
+        if (mapSetName.equals("benchmarks")) {
+            testOnBenchmarkMapSetName("bg512", algo, testFunction_single);
+            // testOnBenchmarkMapSetName("dao", algo, testFunction_single);
+            testOnBenchmarkMapSetName("sc1", algo, testFunction_single);
+            testOnBenchmarkMapSetName("wc3maps512", algo, testFunction_single);
+        }
+        
+
+        if (mapSetName.equals("automataoriginal")) {
+            for (int resolutionIndex=0; resolutionIndex<10; resolutionIndex++) {
+                for (int scaleIndex=0; scaleIndex<7; ++scaleIndex) {
+                    testOnStoredMaze(StoredTestMazes.loadAutomataMaze(scaleIndex, resolutionIndex), algo, testFunction_slow);
+                    System.gc();System.gc();
+                    try {Thread.sleep(2000);}
+                    catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                    System.gc();System.gc();
+                }
+            }
+        }
+        
+
+        if (mapSetName.equals("scaledmazes")) {
+            testScaledMazes("sc1_NovaStation", algo, testFunction_slow);
+            testScaledMazes("wc3_darkforest", algo, testFunction_slow);
+            testScaledMazes("sc1_RedCanyons", algo, testFunction_slow);
+            testScaledMazes("wc3_swampofsorrows", algo, testFunction_slow);
+            testScaledMazes("sc1_Triskelion", algo, testFunction_slow);
+            testScaledMazes("wc3_theglaive", algo, testFunction_slow);
+        }
+        
+
+        if (mapSetName.equals("tiledmazes")) {
+            for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
+                for (int size = 4; size <= 12; ++size) {
+                    testOnStoredMaze(StoredTestMazes.loadTiledMaze(mazePoolIndex, size), algo, testFunction_slow);
+                    System.gc();System.gc();
+                    try {Thread.sleep(2000);}
+                    catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                    System.gc();System.gc();
+                }
+            }
         }
 
-        println("=== Testing " + name + " ===");
-        println("<< GAME MAPS >>");
 
-        // testOnMazeData("sc2_steppesofwar", algo, testFunction_slow);
-        // testOnMazeData("sc2_losttemple", algo, testFunction_slow);
-        // testOnMazeData("sc2_extinction", algo, testFunction_slow);
-        //
-        // testOnMazeData("baldursgate_AR0070SR", algo, testFunction_slow);
-        // testOnMazeData("baldursgate_AR0705SR", algo, testFunction_slow);
-        // testOnMazeData("baldursgate_AR0418SR", algo, testFunction_slow);
-        //
-        // testOnMazeData("sc1_TheFrozenSea", algo, testFunction_slow);
-        // testOnMazeData("sc1_SpaceDebris", algo, testFunction_slow);
-        //
-        // testOnMazeData("wc3_icecrown", algo, testFunction_slow);
-        // testOnMazeData("wc3_dragonfire", algo, testFunction_slow);
-        //
-        // testOnMazeData("sc1_Legacy", algo, testFunction_slow);
-        //
-        // testOnMazeData("sc1_GreenerPastures", algo, testFunction_slow);
-        //
-        // testOnMazeData("baldursgate_AR0603SR", algo, testFunction_slow);
-        //
-        // testOnMazeData("wc3_mysticisles", algo, testFunction_slow);
-        //
-        // testOnMazeData("wc3_petrifiedforest", algo, testFunction_slow);
+        if (mapSetName.equals("automatadcmazes")) {
+            for (int percentBlockedIndex=0; percentBlockedIndex<2; ++percentBlockedIndex) {
+                for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex+=2) {
+                    for (int sizeIndex=0; sizeIndex<5; sizeIndex+=2) {
+                        testOnStoredMaze(StoredTestMazes.loadAutomataDCMaze(sizeIndex, resolutionIndex, percentBlockedIndex), algo, testFunction_single);
+                        System.gc();
+                        try {Thread.sleep(2000);}
+                        catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                        System.gc();
+                        try {Thread.sleep(2000);}
+                        catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                        System.gc();
+                        try {Thread.sleep(2000);}
+                        catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                        System.gc();
+                    }
+                }
+            }
+        }
 
-        println("<< GENERATED MAPS >>");
-        //
-        // // Low Density - 6% - 50x50
-        // testOnMazeData("def_iCUZANYD_iSB_iSB_iSB", algo, testFunction_slow);
-        // // Medium Density - 20% - 50x50
-        // testOnMazeData("def_i10VA3PD_iSB_iSB_iP", algo, testFunction_slow);
-        // // High Density - 40% - 50x50
-        // testOnMazeData("def_i3ML5FBD_iSB_iSB_iH", algo, testFunction_slow);
-        //
-        // // Low Density - 6% - 300x300
-        // testOnMazeData("def_iHHLNUOB_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // // Medium Density - 20% - 300x300
-        // testOnMazeData("def_iZLPIX5B_iMJ_iMJ_iP", algo, testFunction_slow);
-        // // High Density - 40% - 300x300
-        // testOnMazeData("def_iVVJKDR_iMJ_iMJ_iH", algo, testFunction_slow);
-        //
-        // // Low Density - 6% - 500x500
-        // testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
-        // // Medium Density - 20% - 500x500
-        // testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
-        //
-        // // LowDensity2 - 6% - 300x300
-        // testOnMazeData("def_iMJWB0QC_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // // MediumDensity2 - 20% - 300x300
-        // testOnMazeData("def_iBCA5SS_iMJ_iMJ_iP", algo, testFunction_slow);
-        // // HighDensity2 - 40% - 300x300
-        // testOnMazeData("def_i11AHREB_iMJ_iMJ_iH", algo, testFunction_slow);
-        //
-        // // LowDensity3 - 6% - 300x300
-        // testOnMazeData("def_iOH1TZ0D_iMJ_iMJ_iSB", algo, testFunction_slow);
-        // // MediumDensity3 - 20% - 300x300
-        // testOnMazeData("def_iAN3IE0C_iMJ_iMJ_iP", algo, testFunction_slow);
-        // // HighDensity3 - 40% - 300x300
-        // testOnMazeData("def_iI0RFKYC_iMJ_iMJ_iH", algo, testFunction_slow);
-        //
-        // // 6%Density - 500x500
-        // testOnMazeData("def_iIRXXUKC_iUP_iUP_iSB", algo, testFunction_slow);
-        // // 20%Density - 500x500
-        // testOnMazeData("def_iOMJ14Z_iUP_iUP_iP", algo, testFunction_slow);
-        // // 40%Density - 500x500
-        // testOnMazeData("def_iREPZHKB_iUP_iUP_iH", algo, testFunction_slow);
-        //
-        // // 6%Density2 - 500x500
-        // testOnMazeData("def_i5QEPQ2C_iUP_iUP_iSB", algo, testFunction_slow);
-        // // 20%Density2 - 500x500
-        // testOnMazeData("def_iKMRKFCD_iUP_iUP_iP", algo, testFunction_slow);
-        // // 40%Density2 - 500x500
-        // testOnMazeData("def_i5GM4YH_iUP_iUP_iH", algo, testFunction_slow);
-        //
-        // // 6%Density3 - 500x500
-        // testOnMazeData("def_iFOLAODC_iUP_iUP_iSB", algo, testFunction_slow);
-        // // 20%Density3 - 500x500
-        // testOnMazeData("def_i5GZXLUD_iUP_iUP_iP", algo, testFunction_slow);
-        // // 40%Density3 - 500x500
-        // testOnMazeData("def_iA0VKRW_iUP_iUP_iH", algo, testFunction_slow);
-
-        // testOnMazeData("gen_1000x1000_50_iY5U5GAC", algo, testFunction_slow);
-        // testOnMazeData("gen_1000x1000_15_iFTBETRD", algo, testFunction_slow);
-        // testOnMazeData("gen_1000x1000_7_i3WH4IJD", algo, testFunction_slow);
-        //
-        // testOnMazeData("gen_2000x2000_50_iK54OY1C", algo, testFunction_slow);
-        // testOnMazeData("gen_2000x2000_15_i4Z44NPC", algo, testFunction_slow);
-        // testOnMazeData("gen_2000x2000_7_iXT3AEED", algo, testFunction_slow);
-        //
-        // testOnMazeData("gen_3000x3000_50_iUE2IRAD", algo, testFunction_slow);
-        // testOnMazeData("gen_3000x3000_15_iGUM1R2C", algo, testFunction_slow);
-        // testOnMazeData("gen_3000x3000_7_iSR3L1J", algo, testFunction_slow);
-        //
-        // testOnMazeData("gen_4000x4000_50_i0GHV1UD", algo, testFunction_slow);
-        // testOnMazeData("gen_4000x4000_15_iNK5KHO", algo, testFunction_slow);
-        // testOnMazeData("gen_4000x4000_7_iNUJNZ3", algo, testFunction_slow);
-        //
-        // testOnMazeData("gen_5000x5000_50_iCFL2G3B", algo, testFunction_slow);
-        // testOnMazeData("gen_5000x5000_15_i0BTXUD", algo, testFunction_slow);
-        // testOnMazeData("gen_5000x5000_7_iHOPN1S", algo, testFunction_slow);
-        //
-        // testOnMazeData("obst10_random512-10-7", algo, testFunction_slow);
-        // testOnMazeData("obst40_random512-40-0", algo, testFunction_slow);
-        // testOnMazeData("obst40_random512-40-7", algo, testFunction_slow);
-        //
-        // testOnMazeData("corr2_maze512-2-5", algo, testFunction_slow);
-        // testOnMazeData("corr2_maze512-2-1", algo, testFunction_slow);
-        // testOnMazeData("corr2_maze512-2-7", algo, testFunction_slow);
-        // testOnMazeData("corr2_maze512-2-3", algo, testFunction_slow);
-        // testOnMazeData("corr2_maze512-2-9", algo, testFunction_slow);
-        
-        testOnBenchmarkMapSet("bg512", algo, testFunction_single);
-        // testOnBenchmarkMapSet("dao", algo, testFunction_single);
-        testOnBenchmarkMapSet("sc1", algo, testFunction_single);
-        testOnBenchmarkMapSet("wc3maps512", algo, testFunction_single);
-
-        println("<< STORED GENERATED MAPS >>");
-        
-        // for (int resolutionIndex=0; resolutionIndex<10; resolutionIndex++) {
-        //     for (int scaleIndex=0; scaleIndex<7; ++scaleIndex) {
-        //         testOnStoredMaze(StoredTestMazes.loadAutomataMaze(scaleIndex, resolutionIndex), algo, testFunction_slow);
-        //         System.gc();System.gc();
-        //         try {Thread.sleep(2000);}
-        //         catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
-        //         System.gc();System.gc();
-        //     }
-        // }
-        
-        // testScaledMazes("sc1_NovaStation", algo, testFunction_slow);
-        // testScaledMazes("wc3_darkforest", algo, testFunction_slow);
-        // testScaledMazes("sc1_RedCanyons", algo, testFunction_slow);
-        // testScaledMazes("wc3_swampofsorrows", algo, testFunction_slow);
-        // testScaledMazes("sc1_Triskelion", algo, testFunction_slow);
-        // testScaledMazes("wc3_theglaive", algo, testFunction_slow);
-        
-        // for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
-        //     for (int size = 4; size <= 12; ++size) {
-        //         testOnStoredMaze(StoredTestMazes.loadTiledMaze(mazePoolIndex, size), algo, testFunction_slow);
-        //         System.gc();System.gc();
-        //         try {Thread.sleep(2000);}
-        //         catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
-        //         System.gc();System.gc();
-        //     }
-        // }
-
-        // for (int percentBlockedIndex=0; percentBlockedIndex<4; ++percentBlockedIndex) {
-        //     for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex++) {
-        //         for (int sizeIndex=0; sizeIndex<7; ++sizeIndex) {
-        //             testOnStoredMaze(StoredTestMazes.loadAutomataDCMaze(sizeIndex, resolutionIndex, percentBlockedIndex), algo, testFunction_slow);
-        //             System.gc();
-        //             try {Thread.sleep(2000);}
-        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
-        //             System.gc();
-        //             try {Thread.sleep(2000);}
-        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
-        //             System.gc();
-        //             try {Thread.sleep(2000);}
-        //             catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
-        //             System.gc();
-        //         }
-        //     }
-        // }
-
-        println("=== FINISHED TEST FOR " + name + " ===");
+        println("=== FINISHED TEST FOR " + name + " === " + mapSetName + " ===");
         println();
 
         if (writeToFile) io.close();
+        if (!didSomething) throw new UnsupportedOperationException("Invalid Map Set Name!");
     }
     
     public static void testOnBenchmarkMapSet(String setName, AlgoFunction algo, TestFunctionData testFunction) {
