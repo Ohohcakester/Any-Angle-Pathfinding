@@ -224,7 +224,7 @@ public class ConvexHullHeuristic {
         {
             Integer[] path = new Integer[] {ex,ey,px,py};
 
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.ORANGE);
             snapshotItemList.add(snapshotItem);
         }
 
@@ -242,7 +242,7 @@ public class ConvexHullHeuristic {
         for (int i=0; i<nEdges; ++i) {
             boolean intersects = intersectsEdge(px, py, i);
 
-            Color colour = intersects ? Color.RED : Color.BLUE;
+            Color colour = intersects ? Color.BLUE : Color.CYAN;
             Integer[] path = new Integer[] {ex+edgex1[i], ey+edgey1[i], ex+edgex2[i], ey+edgey2[i]};
 
             SnapshotItem snapshotItem = SnapshotItem.generate(path, colour);
@@ -271,22 +271,22 @@ public class ConvexHullHeuristic {
 
         {
             Integer[] path = new Integer[] {ex,ey,closestLeftX+ex,closestLeftY+ey};
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.ORANGE);
             snapshotItemList.add(snapshotItem);
         }
         {
             Integer[] path = new Integer[] {ex,ey,closestRightX+ex,closestRightY+ey};
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.ORANGE);
             snapshotItemList.add(snapshotItem);
         }
         {
             Integer[] path = new Integer[] {px+ex,py+ey,closestLeftX+ex,closestLeftY+ey};
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.ORANGE);
             snapshotItemList.add(snapshotItem);
         }
         {
             Integer[] path = new Integer[] {px+ex,py+ey,closestRightX+ex,closestRightY+ey};
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.ORANGE);
             snapshotItemList.add(snapshotItem);
         }
 

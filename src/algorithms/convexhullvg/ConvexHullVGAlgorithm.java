@@ -1,6 +1,8 @@
 package algorithms.convexhullvg;
 
+import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
 
 import grid.GridGraph;
 
@@ -9,6 +11,7 @@ import algorithms.datatypes.Memory;
 import algorithms.rotationalplanesweep.ConvexHullRPSScanner;
 import algorithms.priorityqueue.ReusableIndirectHeap;
 
+import algorithms.datatypes.SnapshotItem;
 
 public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
@@ -73,7 +76,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
     private final void expand(int currIndex, int currX, int currY) {
         // find neighbours
         ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY);
-        if (isRecording()) addSnapshot(scanner.snapshotLines());
+        //maybeSaveSearchSnapshot(scanner, currX, currY);
 
         int nNeighbours = scanner.nSuccessors;
         for (int i=0; i<nNeighbours; ++i)
@@ -90,7 +93,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
                 setParent(succ, currIndex);
                 pq.decreaseKey(succ, newWeight + heuristic(succX, succY));
 
-                maybeSaveSearchSnapshot();
+                //maybeSaveSearchSnapshot(scanner, currX, currY);
             }
         }
 
@@ -102,17 +105,24 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
                 setParent(finish, currIndex);
                 pq.decreaseKey(finish, newWeight + heuristic(ex, ey));
 
-                maybeSaveSearchSnapshot();
+                //maybeSaveSearchSnapshot();
             }
         }
+
+        maybeSaveSearchSnapshotWithSuccessors(scanner, currX, currY);
     }
 
     private final float heuristic(int nx, int ny) {
         // SLD heuristic (naive)
-        return graph.distance(nx, ny, ex, ey);
+        //return graph.distance(nx, ny, ex, ey);
         // Convex hull heuristic
-        //if (isRecording() && (nx!=ex||ny!=ey)) addSnapshot(convexHullHeuristic.snapshotLines(nx, ny));
-        //return (float)convexHullHeuristic.heuristic(nx, ny);
+        if (isRecording() && (nx!=ex||ny!=ey)) {
+            List<SnapshotItem> snapshot = computeSearchSnapshot();
+            snapshot.add(SnapshotItem.generate(new Integer[]{nx, ny}, Color.ORANGE));
+            snapshot.addAll(convexHullHeuristic.snapshotLines(nx, ny));
+            addSnapshot(snapshot);
+        }
+        return (float)convexHullHeuristic.heuristic(nx, ny);
     }
 
     private int pathLength() {
@@ -226,6 +236,28 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
         if (index == start) return sy;
         else if (index == finish) return ey;
         return convexHullGraph.getY(index);
+    }
 
+    @Override
+    protected List<SnapshotItem> computeSearchSnapshot() {
+        List<SnapshotItem> snapshot = convexHullGraph.generateConvexHullSnapshot();
+        snapshot.addAll(super.computeSearchSnapshot());
+        return snapshot;
+    }
+
+    private final void maybeSaveSearchSnapshot(ConvexHullRPSScanner scanner, int currX, int currY) {
+        if (!isRecording()) return;
+        List<SnapshotItem> snapshot = computeSearchSnapshot();
+        snapshot.addAll(scanner.snapshotLines());
+        snapshot.add(SnapshotItem.generate(new Integer[]{currX, currY}, Color.BLUE));
+        addSnapshot(snapshot);
+    }
+
+    private final void maybeSaveSearchSnapshotWithSuccessors(ConvexHullRPSScanner scanner, int currX, int currY) {
+        if (!isRecording()) return;
+        List<SnapshotItem> snapshot = computeSearchSnapshot();
+        snapshot.addAll(scanner.snapshotLinesAndSuccessors(currX, currY));
+        snapshot.add(SnapshotItem.generate(new Integer[]{currX, currY}, Color.BLUE));
+        addSnapshot(snapshot);
     }
 }

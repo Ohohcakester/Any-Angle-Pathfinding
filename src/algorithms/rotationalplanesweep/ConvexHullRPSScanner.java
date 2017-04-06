@@ -454,7 +454,23 @@ public class ConvexHullRPSScanner {
             RPSScanner.Edge e = edges[i];
             Integer[] path = new Integer[] {e.u.x, e.u.y, e.v.x, e.v.y};
 
-            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.BLUE);
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.CYAN);
+            snapshotItemList.add(snapshotItem);
+        }
+
+        return snapshotItemList;
+    }
+
+    public final ArrayList<SnapshotItem> snapshotLinesAndSuccessors(int currX, int currY) {
+        ArrayList<SnapshotItem> snapshotItemList = snapshotLines();
+        
+        for (int i=0; i<nSuccessors; ++i) {
+            int succX = successorsX[i];
+            int succY = successorsY[i];
+            if (!graph.lineOfSight(currX, currY, succX, succY)) continue;
+            Integer[] path = new Integer[] {currX, currY, succX, succY};
+
+            SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.MAGENTA);
             snapshotItemList.add(snapshotItem);
         }
 
