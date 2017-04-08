@@ -306,6 +306,10 @@ public class AnyAnglePathfinding {
                 // Counterexample for ConvexHullVGAlgorithm Convex Hull Triangular Heuristic.
                 return DefaultGenerator.generateSeeded(-1522150246, 36, 25, 6, 2, 15, 18, 24);
             }
+            case 65: {
+                // Issue with ConvexHullVGAlgorithm Focused Search
+                return GraphImporter.importGraphFromFile("focusedsearchissue.txt", 45, 25, 5, 25);
+            }
             default:
                 return null;
         }
