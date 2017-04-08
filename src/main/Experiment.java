@@ -593,6 +593,7 @@ public class Experiment {
             }
             
             if (Math.abs(restPathLength - normalPathLength) > 0.000001f) {
+            //if ((restPathLength == 0.f) != (normalPathLength == 0.f)) {
                 System.out.println("============");
                 System.out.println("Discrepancy Discovered!");
                 System.out.println("Seed = " + seed +" , Ratio = " + ratio + " , Size: x=" + sizeX + " y=" + sizeY);
