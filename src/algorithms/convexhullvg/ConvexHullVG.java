@@ -32,6 +32,7 @@ public class ConvexHullVG {
         public int[] xVertices;
         public int[] yVertices;
         public int size;
+        public int obstacleIndex;
     }
     
     public ConvexHullVG(GridGraph graph) {
@@ -88,8 +89,8 @@ public class ConvexHullVG {
         }
     }
 
-    public final ConvexHullRPSScanner computeAllVisibleSuccessors(int currX, int currY) {
-        scanner.computeAllVisibleSuccessors(currX, currY);
+    public final ConvexHullRPSScanner computeAllVisibleSuccessors(int currX, int currY, int ex, int ey) {
+        scanner.computeAllVisibleSuccessors(currX, currY, ex, ey);
         return scanner;
     }
 
@@ -128,7 +129,7 @@ public class ConvexHullVG {
                 int currY = hull.yVertices[j];
 
                 Integer[] path = new Integer[]{prevX, prevY, currX, currY};
-
+                
                 SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.GREEN);
                 snapshotItemList.add(snapshotItem);
 

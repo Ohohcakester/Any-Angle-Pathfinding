@@ -45,12 +45,16 @@ public class ConvexHullRPSScanner {
 
     private final RPSScanner.Vertex[] verticesUnsorted;
     private final RPSScanner.Vertex[] vertices;
+    private int nVertices;
     private final RPSScanner.Edge[] edges;
     private final RPSEdgeHeap edgeHeap;
     private final GridGraph graph;
+    private final int FOCUSED_SEARCH_RANGE;
 
     private final ConvexHullVG.ConvexHull[] convexHulls;
     private final int nHulls;
+
+    private final boolean[] obstacleIsMarked;
 
     public ConvexHullRPSScanner(GridGraph graph, ConvexHullVG.ConvexHull[] convexHulls, int nHulls) {
         successorsX = new int[11];
@@ -65,6 +69,15 @@ public class ConvexHullRPSScanner {
 
         setupInitialVertices();
         this.edgeHeap = new RPSEdgeHeap(edges);
+
+        int maxObstacleIndex = -1;
+        for (int i=0;i<nHulls;++i) {
+            maxObstacleIndex = Math.max(convexHulls[i].obstacleIndex, maxObstacleIndex);
+        }
+        obstacleIsMarked = new boolean[maxObstacleIndex+1];
+
+        int focusedSearchRadius = (graph.sizeX+graph.sizeY)/20;
+        FOCUSED_SEARCH_RANGE = focusedSearchRadius*focusedSearchRadius;
     }
 
     private void setupInitialVertices() {
@@ -97,10 +110,22 @@ public class ConvexHullRPSScanner {
         ++nSuccessors;
     }
 
-    private final void setupVerticesAndEdges(int sx, int sy) {
+    /**
+     * returns number of vertices.
+     */
+    private final void setupVerticesAndEdges(int sx, int sy, int ex, int ey) {
+
+        // Use vertices array for temporary storage.
+        System.arraycopy(verticesUnsorted, 0, vertices, 0, verticesUnsorted.length);
+
+        for (int oi=0; oi<obstacleIsMarked.length; ++oi) {
+            obstacleIsMarked[oi] = false;
+        }
+
         int currIndex = 0;
         for (int hi=0; hi<nHulls; ++hi) {
             ConvexHullVG.ConvexHull hull = convexHulls[hi];
+            int oi = hull.obstacleIndex;
 
             // Special case: Check whether you are on a vector
             {
@@ -112,22 +137,53 @@ public class ConvexHullRPSScanner {
                     int currdy = hull.yVertices[j] - sy;
                     int crossProd = prevdx*currdy - prevdy*currdx;
                     int dotProd = prevdx*currdx + prevdy*currdy;
-                    if (crossProd == 0 && dotProd < 0) {
+                    //if (crossProd == 0 && dotProd < 0) {
+                    if (crossProd == 0 && dotProd <= 0) {
                         isOnVector = true;
+                        RPSScanner.Vertex minVertex = vertices[currIndex++];
+                        RPSScanner.Vertex maxVertex = vertices[currIndex++];
 
-                        RPSScanner.Vertex minVertex = verticesUnsorted[currIndex++];
-                        RPSScanner.Vertex maxVertex = verticesUnsorted[currIndex++];
-                        minVertex.x = prevdx + sx;
-                        minVertex.y = prevdy + sy;
-                        maxVertex.x = currdx + sx;
-                        maxVertex.y = currdy + sy;
+                        if (dotProd < 0) {
+                            minVertex.x = prevdx + sx;
+                            minVertex.y = prevdy + sy;
+                            maxVertex.x = currdx + sx;
+                            maxVertex.y = currdy + sy;
+
+                        } else { // dotProd == 0
+                            if (currdx == 0 && currdy == 0) {
+                                // (sx, sy) == curr
+                                // pick prev and next
+                                int next = (j+1)%hull.size;
+                                int nextX = hull.xVertices[next];
+                                int nextY = hull.yVertices[next];
+
+                                minVertex.x = prevdx + sx;
+                                minVertex.y = prevdy + sy;
+                                maxVertex.x = nextX;
+                                maxVertex.y = nextY;
+                            } else {
+                                // (sx, sy) == prev
+                                // pick curr and prev.prev
+                                int prevprev = (j+hull.size-2)%hull.size;
+                                int prevprevX = hull.xVertices[prevprev];
+                                int prevprevY = hull.yVertices[prevprev];
+
+                                minVertex.x = prevprevX;
+                                minVertex.y = prevprevY;
+                                maxVertex.x = currdx + sx;
+                                maxVertex.y = currdy + sy;
+                            }
+                        }
                         break;
                     }
 
                     prevdx = currdx;
                     prevdy = currdy;
                 }
-                if (isOnVector) continue;
+                if (isOnVector) {
+                    obstacleIsMarked[oi] = true;
+                    continue;
+                }
             }
 
             // mindx/mindx/mindist: point with minimum angle.
@@ -165,20 +221,53 @@ public class ConvexHullRPSScanner {
                     maxdist = dist;
                 }
             }
+            obstacleIsMarked[oi] = obstacleIsMarked[oi] || onLineToGoal(0, 0, ex-sx, ey-sy, mindx, mindy, maxdx, maxdy);
 
-            RPSScanner.Vertex minVertex = verticesUnsorted[currIndex++];
-            RPSScanner.Vertex maxVertex = verticesUnsorted[currIndex++];
+            RPSScanner.Vertex minVertex = vertices[currIndex++];
+            RPSScanner.Vertex maxVertex = vertices[currIndex++];
             minVertex.x = mindx + sx;
             minVertex.y = mindy + sy;
             maxVertex.x = maxdx + sx;
             maxVertex.y = maxdy + sy;
         }
+
+        int backIndex = vertices.length;
+        currIndex = 0;
+        // Assumption: vertices has the same sort order as convexHulls.
+        // Endpoints of convexHulls[i] is vertices[2*i] and vertices[2*i+1]
+        for (int hi=0; hi<nHulls; ++hi) {
+            ConvexHullVG.ConvexHull hull = convexHulls[hi];
+            int index = hi*2;
+
+            int mindx = vertices[index].x - sx;
+            int mindy = vertices[index].y - sy;
+            int maxdx = vertices[index+1].x - sx;
+            int maxdy = vertices[index+1].y - sy;
+            int minDist = mindx*mindx + mindy*mindy;
+            int maxDist = maxdx*maxdx + maxdy*maxdy;
+
+            // Note: we can't set the x,y coordinates because it will affect the vertices array too.
+            // So all we can do is rearrange the vertex pointers in verticesUnsorted.
+            if (minDist > FOCUSED_SEARCH_RANGE && maxDist > FOCUSED_SEARCH_RANGE && !obstacleIsMarked[hull.obstacleIndex]) {
+                // Exclude vertex
+                verticesUnsorted[--backIndex] = vertices[index+1];
+                verticesUnsorted[--backIndex] = vertices[index];
+            } else {
+                // Include vertex
+                verticesUnsorted[currIndex++] = vertices[index];
+                verticesUnsorted[currIndex++] = vertices[index+1];
+            }
+        }
+        if (currIndex != backIndex) throw new UnsupportedOperationException("Counting Error!");
+
+        nVertices = currIndex;
     }
 
     private final void initialiseScan(int sx, int sy) {
+        System.arraycopy(verticesUnsorted, 0, vertices, 0, nVertices);
         
         // Compute angles
-        for (int i=0; i<vertices.length; ++i) {
+        for (int i=0; i<nVertices; ++i) {
             RPSScanner.Vertex v = vertices[i];
             if (v.x != sx || v.y != sy) {
                 v.angle = Math.atan2(v.y-sy, v.x-sx);
@@ -194,25 +283,20 @@ public class ConvexHullRPSScanner {
         sortVertices(sx, sy);
 
         edgeHeap.clear();
-        RPSScanner.Edge[] edges = edgeHeap.getEdgeList();
-        // Note: iterating through the edges like this is a very dangerous operation.
-        // That's because the edges array changes as you insert the edges into the heap.
-        // Reason why it works: When we swap two edges when inserting, both edges have already been checked.
-        //                      That's because we only swap with edges in the heap, which have a lower index than i.
-        for (int i=0; i<edges.length; ++i) {
-            RPSScanner.Edge edge = edges[i];
+        for (int i=0; i<nVertices; i+=2) {
+            RPSScanner.Edge edge = verticesUnsorted[i].edge1;
             if (intersectsPositiveXAxis(sx, sy, edge)) {
                 edgeHeap.insert(edge, sx, sy);
             }
         }
     }
 
-    public final void computeAllVisibleSuccessors(int sx, int sy) {
+    public final void computeAllVisibleSuccessors(int sx, int sy, int ex, int ey) {
         clearNeighbours();
         if (nHulls == 0) return;
         if (!graph.isUnblockedCoordinate(sx, sy)) return;
 
-        setupVerticesAndEdges(sx, sy);
+        setupVerticesAndEdges(sx, sy, ex, ey);
         initialiseScan(sx, sy);
 
         // This queue is used to enforce the order:
@@ -225,7 +309,7 @@ public class ConvexHullRPSScanner {
         // Skip vertex if it is (sx,sy).
         while (vertices[i].x == sx && vertices[i].y == sy) ++i;
 
-        for (; i<vertices.length; ++i) {
+        for (; i<nVertices; ++i) {
             if (vertexQueueSize >= vertexQueue.length) {
                 vertexQueue = Arrays.copyOf(vertexQueue, vertexQueue.length*2);
             }
@@ -266,7 +350,7 @@ public class ConvexHullRPSScanner {
     }
 
     private final void sortVertices(int sx, int sy) {
-        Arrays.sort(vertices, (a,b) -> Double.compare(a.angle, b.angle));
+        Arrays.sort(vertices, 0, nVertices, (a,b) -> Double.compare(a.angle, b.angle));
     }
 
     private final boolean isSameAngle(int sx, int sy, RPSScanner.Vertex u, RPSScanner.Vertex v) {
@@ -432,6 +516,22 @@ public class ConvexHullRPSScanner {
         }
     }
 
+    private final boolean onLineToGoal(int sx, int sy, int ex, int ey, int ux, int uy, int vx, int vy) {
+        int line1dx = ex - sx;
+        int line1dy = ey - sy;
+        int cross1 = (ux-sx)*line1dy - (uy-sy)*line1dx;
+        int cross2 = (vx-sx)*line1dy - (vy-sy)*line1dx;
+
+        int line2dx = vx - ux;
+        int line2dy = vy - uy;
+        int cross3 = (sx-ux)*line2dy - (sy-uy)*line2dx;
+        int cross4 = (ex-ux)*line2dy - (ey-uy)*line2dx;
+
+        //return cross1*cross2 <= 0 && cross3*cross4 <= 0;
+        return ((cross1<=0 && cross2 >=0) || (cross1>=0 && cross2<=0)) &&
+               ((cross3<=0 && cross4 >=0) || (cross3>=0 && cross4<=0));
+    }
+
 
     public void drawLines(GridLineSet gridLineSet, GridPointSet gridPointSet) {
         for (int i=0; i<vertices.length; ++i) {
@@ -448,10 +548,9 @@ public class ConvexHullRPSScanner {
 
     public final ArrayList<SnapshotItem> snapshotLines() {
         ArrayList<SnapshotItem> snapshotItemList = new ArrayList<>();
-        
-        RPSScanner.Edge[] edges = edgeHeap.getEdgeList();
-        for (int i=0; i<edges.length; ++i) {
-            RPSScanner.Edge e = edges[i];
+
+        for (int i=0; i<nVertices; i+=2) {
+            RPSScanner.Edge e = verticesUnsorted[i].edge1;
             Integer[] path = new Integer[] {e.u.x, e.u.y, e.v.x, e.v.y};
 
             SnapshotItem snapshotItem = SnapshotItem.generate(path, Color.CYAN);

@@ -75,7 +75,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
     private final void expand(int currIndex, int currX, int currY) {
         // find neighbours
-        ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY);
+        ConvexHullRPSScanner scanner = convexHullGraph.computeAllVisibleSuccessors(currX, currY, ex, ey);
         //maybeSaveSearchSnapshot(scanner, currX, currY);
 
         int nNeighbours = scanner.nSuccessors;
@@ -87,42 +87,50 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
 
             int succ = convexHullGraph.indexOf(succX, succY); // index of successor
 
-            float newWeight = distance(currIndex) + graph.distance(currX, currY, succX, succY);
-            if (newWeight < distance(succ)) {
-                setDistance(succ, newWeight);
-                setParent(succ, currIndex);
-                pq.decreaseKey(succ, newWeight + heuristic(succX, succY));
-
-                //maybeSaveSearchSnapshot(scanner, currX, currY);
-            }
+            relax(currIndex, currX, currY, succ, succX, succY);
         }
 
         // Check if the goal node is a successor
         if (graph.lineOfSight(currX, currY, ex, ey)) {
-            float newWeight = distance(currIndex) + graph.distance(currX, currY, ex, ey);
-            if (newWeight < distance(finish)) {
-                setDistance(finish, newWeight);
-                setParent(finish, currIndex);
-                pq.decreaseKey(finish, newWeight + heuristic(ex, ey));
-
-                //maybeSaveSearchSnapshot();
-            }
+            relax(currIndex, currX, currY, finish, ex, ey);
         }
 
         maybeSaveSearchSnapshotWithSuccessors(scanner, currX, currY);
     }
 
+    private final void relax(int u, int ux, int uy, int v, int vx, int vy) {
+        // Theta*-style relaxations
+        int par = parent(u);
+        if (par != -1) {
+            int parX = getX(par);
+            int parY = getY(par);
+            if (graph.lineOfSight(parX, parY, vx, vy)) {
+                u = par;
+                ux = parX;
+                uy = parY;
+            }
+        }
+            
+        float newWeight = distance(u) + graph.distance(ux, uy, vx, vy);
+        if (newWeight < distance(v)) {
+            setDistance(v, newWeight);
+            setParent(v, u);
+            pq.decreaseKey(v, newWeight + heuristic(vx, vy));
+        }
+    }
+
+
     private final float heuristic(int nx, int ny) {
         // SLD heuristic (naive)
-        //return graph.distance(nx, ny, ex, ey);
+        return graph.distance(nx, ny, ex, ey);
         // Convex hull heuristic
-        if (isRecording() && (nx!=ex||ny!=ey)) {
-            List<SnapshotItem> snapshot = computeSearchSnapshot();
-            snapshot.add(SnapshotItem.generate(new Integer[]{nx, ny}, Color.ORANGE));
-            snapshot.addAll(convexHullHeuristic.snapshotLines(nx, ny));
-            addSnapshot(snapshot);
-        }
-        return (float)convexHullHeuristic.heuristic(nx, ny);
+        //if (isRecording() && (nx!=ex||ny!=ey)) {
+            //List<SnapshotItem> snapshot = computeSearchSnapshot();
+            //snapshot.add(SnapshotItem.generate(new Integer[]{nx, ny}, Color.ORANGE));
+            //snapshot.addAll(convexHullHeuristic.snapshotLines(nx, ny));
+            //addSnapshot(snapshot);
+        //}
+        //return (float)convexHullHeuristic.heuristic(nx, ny);
     }
 
     private int pathLength() {

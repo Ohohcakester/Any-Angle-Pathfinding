@@ -30,6 +30,8 @@ public class ConvexHullSplitGenerator {
     private final int[] labels;
     private int nextUnusedLabel = 2;
 
+    private final int[] obstacleIndexes;
+
     private int[] floodFillX;
     private int[] floodFillY;
     private int floodFillSize;
@@ -262,6 +264,7 @@ public class ConvexHullSplitGenerator {
         this.sizeX = graph.sizeX;
         this.sizeY = graph.sizeY;
         labels = new int[sizeY*sizeX];
+        obstacleIndexes = new int[sizeY*sizeX];
 
         floodFillX = new int[11];
         floodFillY = new int[11];
@@ -282,15 +285,78 @@ public class ConvexHullSplitGenerator {
         nextUnusedLabel = 2;
     }
 
-    private final void generateConvexHulls() {
-        initialiseLabels();
+    private final void initialiseObstacleIndexes() {
+        for (int y=0; y<sizeY; ++y) {
+            for (int x=0; x<sizeX; ++x) {
+                obstacleIndexes[y*sizeX + x] = graph.isBlockedRaw(x, y) ? -1 : -2;
+            }
+        }
+
         int totalSize = sizeX*sizeY;
-        
+
+        int obstacleIndex = 0;
         for (int i=0; i<totalSize; ++i) {
-            if (labels[i] == 0) continue; // visited
+            if (obstacleIndexes[i] != -1) continue; // visited
 
             int x = i%sizeX;
             int y = i/sizeX;
+            markObstacle(x, y, obstacleIndex);
+            
+            ++obstacleIndex;
+        }
+    }
+
+    private final void markObstacle(int px, int py, int index) {
+        clearFloodFill();
+        addToFloodFill(px, py);
+        obstacleIndexes[py*sizeX + px] = index;
+        
+        int queueHead = 0;
+        while (queueHead < floodFillSize) {
+            int x = floodFillX[queueHead];
+            int y = floodFillY[queueHead];
+            ++queueHead;
+
+            int nx, ny;
+
+            nx = x-1; ny = y;
+            if (nx >= 0 && obstacleIndexes[ny*sizeX + nx] == -1) {
+                obstacleIndexes[ny*sizeX + nx] = index;
+                addToFloodFill(nx, ny);
+            }
+
+            nx = x+1; ny = y;
+            if (nx < sizeX && obstacleIndexes[ny*sizeX + nx] == -1) {
+                obstacleIndexes[ny*sizeX + nx] = index;
+                addToFloodFill(nx, ny);
+            }
+
+            nx = x; ny = y-1;
+            if (ny >= 0 && obstacleIndexes[ny*sizeX + nx] == -1) {
+                obstacleIndexes[ny*sizeX + nx] = index;
+                addToFloodFill(nx, ny);
+            }
+
+            nx = x; ny = y+1;
+            if (ny < sizeY && obstacleIndexes[ny*sizeX + nx] == -1) {
+                obstacleIndexes[ny*sizeX + nx] = index;
+                addToFloodFill(nx, ny);
+            }
+        }
+    }
+
+    private final void generateConvexHulls() {
+        initialiseObstacleIndexes();
+        initialiseLabels();
+        int totalSize = sizeX*sizeY;
+
+        for (int i=0; i<totalSize; ++i) {
+            if (labels[i] == 0) continue; // visited
+            int obstacleIndex = obstacleIndexes[i];
+
+            int x = i%sizeX;
+            int y = i/sizeX;
+
 
             // We mark the entire blocked tile island as -1 (MARKED)
             // if hasIntersection, the island will be unmarked by the splitting process.
@@ -298,6 +364,8 @@ public class ConvexHullSplitGenerator {
             floodFillMarkEqual(x, y);
 
             ConvexHullVG.ConvexHull convexHull = generateConvexHull(x, y);
+            convexHull.obstacleIndex = obstacleIndex;
+
             boolean hasIntersection = checkIntersectionAndMaybeSplit(convexHull);
             if (!hasIntersection) {
                 markInteriorAsDone(convexHull, x, y);
