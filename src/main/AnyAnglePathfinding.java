@@ -362,115 +362,115 @@ public class AnyAnglePathfinding {
                 algoFunction = VisibilityGraphAlgorithmOptimised::graphReuse;
                 break;
             case 13 :
-                algoFunction = AdjustmentThetaStar::new;
-                break;
-            case 14 :
                 algoFunction = StrictThetaStar::new;
                 break;
-            case 15 :
+            case 14 :
                 algoFunction = RecursiveStrictThetaStar::new;
                 break;
-            case 16 :
+            case 15 :
                 algoFunction = BFSVisibilityGraph::graphReuse;
                 break;
-            case 17 :
-                algoFunction = RestrictedVisibilityGraphAlgorithm::new;
-                break;
-            case 18 :
-                algoFunction = StrictVisibilityGraphAlgorithm::new;
-                break;
-            case 19 :
+            case 16 :
                 algoFunction = LazyThetaStar::new;
                 break;
-            case 20 :
+            case 17 :
                 algoFunction = AStarOctileHeuristic::new;
                 break;
-            case 21 :
+            case 18 :
                 algoFunction = AStarOctileHeuristic::postSmooth;
                 break;
-            case 22 :
+            case 19 :
                 algoFunction = JumpPointSearch::new;
                 break;
-            case 23 :
+            case 20 :
                 algoFunction = JumpPointSearch::postSmooth;
                 break;
-            case 24 :
+            case 21 :
                 algoFunction = AStarStaticMemory::new;
                 break;
-            case 25 :
-                algoFunction = StrictVisibilityGraphAlgorithmV2::new;
-                break;
-            case 26 :
+            case 22 :
                 algoFunction = RecursiveThetaStar::new;
                 break;
-            case 27 :
+            case 23 :
                 algoFunction = SparseVisibilityGraphAlgorithm::graphReuse;
                 break;
-            case 28 :
-                algoFunction = IVGAlgorithm::new;
-                break;
-            case 29 :
-                algoFunction = VertexAnya::new;
-                break;
-            case 30 :
-                algoFunction = VertexAnyaNoExtents::new;
-                break;
-            case 31 :
-                algoFunction = VisibilityScanSearchEager::new;
-                break;
-            case 32 :
-                algoFunction = VisibilityScanSearchSemiEager::new;
-                break;
-            case 33 :
-                algoFunction = VertexAnyaMarking::new;
-                break;
-            case 34 :
-                algoFunction = VertexAnyaMarkingV2::new;
-                break;
-            case 35 :
-                algoFunction = VertexAnyaMarkingV3::new;
-                break;
-            case 36 :
-                algoFunction = SubgoalGraphsAlgorithm::new;
-                break;
-            case 37 :
-                algoFunction = NLevelSubgoalGraphsAlgorithm::new;
-                break;
-            case 38 :
-                algoFunction = AnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 39 :
-                algoFunction = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
-                break;
-            case 40 :
-                algoFunction = StrictAnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 41 :
-                algoFunction = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 42 :
-                algoFunction = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-                break;
-            case 43 :
+            case 24 :
                 algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
                 break;
-            case 44 :
+            case 25 :
                 algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
                 break;
-            case 45 :
-                algoFunction = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-                break;
-            case 46 :
+            case 26 :
                 algoFunction = AnyaAlgorithm::new;
                 break;
+            case 27 :
+                algoFunction = ConvexHullVGAlgorithm::new;
+                break;
+            case 28 :
+                algoFunction = SubgoalGraphsAlgorithm::new;
+                break;
+            case 29 :
+                algoFunction = NLevelSubgoalGraphsAlgorithm::new;
+                break;
+            case 30 :
+                algoFunction = AnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 31 :
+                algoFunction = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
+                break;
+            case 32 :
+                algoFunction = AdjustmentThetaStar::new;
+                break;
+            case 33 :
+                algoFunction = RestrictedVisibilityGraphAlgorithm::new;
+                break;
+            case 34 :
+                algoFunction = StrictVisibilityGraphAlgorithm::new;
+                break;
+            case 35 :
+                algoFunction = StrictVisibilityGraphAlgorithmV2::new;
+                break;
+            case 36 :
+                algoFunction = IVGAlgorithm::new;
+                break;
+            case 37 :
+                algoFunction = VertexAnya::new;
+                break;
+            case 38 :
+                algoFunction = VertexAnyaNoExtents::new;
+                break;
+            case 39 :
+                algoFunction = VisibilityScanSearchEager::new;
+                break;
+            case 40 :
+                algoFunction = VisibilityScanSearchSemiEager::new;
+                break;
+            case 41 :
+                algoFunction = VertexAnyaMarking::new;
+                break;
+            case 42 :
+                algoFunction = VertexAnyaMarkingV2::new;
+                break;
+            case 43 :
+                algoFunction = VertexAnyaMarkingV3::new;
+                break;
+            case 44 :
+                algoFunction = StrictAnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 45 :
+                algoFunction = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
+                break;
+            case 46 :
+                algoFunction = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
+                break;
             case 47 :
-                algoFunction = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+                algoFunction = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
                 break;
             case 48 :
-                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
+                algoFunction = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
                 break;
             case 49 :
-                algoFunction = ConvexHullVGAlgorithm::new;
+                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
                 break;
         }
         
