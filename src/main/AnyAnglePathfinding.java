@@ -3,7 +3,6 @@ import algorithms.AStar;
 import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
-import algorithms.AdjustmentThetaStar;
 import algorithms.Anya;
 import algorithms.AnyaAlgorithm;
 import algorithms.BasicThetaStar;
@@ -11,33 +10,18 @@ import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.RecursiveThetaStar;
-import algorithms.RestrictedVisibilityGraphAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.incrementalvgs.IVGAlgorithm;
-import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
-import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.RecursiveStrictAnyAngleSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.StrictAnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
-import algorithms.vertexanya.VertexAnya;
-import algorithms.vertexanya.VertexAnyaMarking;
-import algorithms.vertexanya.VertexAnyaMarkingV2;
-import algorithms.vertexanya.VertexAnyaMarkingV3;
-import algorithms.vertexanya.VertexAnyaNoExtents;
-import algorithms.vertexanya.VisibilityScanSearchEager;
-import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
@@ -417,60 +401,6 @@ public class AnyAnglePathfinding {
                 break;
             case 31 :
                 algoFunction = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
-                break;
-            case 32 :
-                algoFunction = AdjustmentThetaStar::new;
-                break;
-            case 33 :
-                algoFunction = RestrictedVisibilityGraphAlgorithm::new;
-                break;
-            case 34 :
-                algoFunction = StrictVisibilityGraphAlgorithm::new;
-                break;
-            case 35 :
-                algoFunction = StrictVisibilityGraphAlgorithmV2::new;
-                break;
-            case 36 :
-                algoFunction = IVGAlgorithm::new;
-                break;
-            case 37 :
-                algoFunction = VertexAnya::new;
-                break;
-            case 38 :
-                algoFunction = VertexAnyaNoExtents::new;
-                break;
-            case 39 :
-                algoFunction = VisibilityScanSearchEager::new;
-                break;
-            case 40 :
-                algoFunction = VisibilityScanSearchSemiEager::new;
-                break;
-            case 41 :
-                algoFunction = VertexAnyaMarking::new;
-                break;
-            case 42 :
-                algoFunction = VertexAnyaMarkingV2::new;
-                break;
-            case 43 :
-                algoFunction = VertexAnyaMarkingV3::new;
-                break;
-            case 44 :
-                algoFunction = StrictAnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 45 :
-                algoFunction = RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 46 :
-                algoFunction = VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-                break;
-            case 47 :
-                algoFunction = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
-                break;
-            case 48 :
-                algoFunction = SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
-                break;
-            case 49 :
-                algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
                 break;
         }
         

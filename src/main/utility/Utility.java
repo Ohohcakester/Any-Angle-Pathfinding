@@ -10,18 +10,14 @@ import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.priorityqueue.ReusableIndirectHeap;
-import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
-import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraph;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.subgoalgraphs.SubgoalGraph;
-import algorithms.vertexanya.VertexAnya;
-import algorithms.vertexanya.VertexAnyaMarking;
 import algorithms.visibilitygraph.VisibilityGraph;
 import grid.GridGraph;
 import main.AlgoFunction;
@@ -55,7 +51,7 @@ public class Utility {
     
     public static int[][] computeOptimalPathOnline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         // Optimal Online algorithm.
-        PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, sx, sy, ex, ey);
+        PathFindingAlgorithm algo = new AnyaAlgorithm(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
@@ -153,9 +149,7 @@ public class Utility {
     }
     
     public static void cleanUpPreallocatedMemory() {
-        VertexAnya.clearMemory();
         Anya.clearMemory();
-        AnyaAlgorithm.clearMemory();
         VisibilityGraph.clearMemory();
         SubgoalGraph.clearMemory();
         SparseVisibilityGraph.clearMemory();
@@ -163,10 +157,8 @@ public class Utility {
         Memory.clearMemory();
         ReusableIndirectHeap.clearMemory();
         LineOfSightScanner.clearMemory();
-        VertexNLevelSparseVisibilityGraph.clearMemory();
         EdgeNLevelSparseVisibilityGraph.clearMemory();
         EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap.clearMemory();
-        DirectedEdgeNLevelSparseVisibilityGraph.clearMemory();
         VisibilityGraphOptimised.clearMemory();
         SnapshotItem.clearCached();
         //IVGAlgorithm.clearCached();

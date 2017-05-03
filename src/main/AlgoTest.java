@@ -14,34 +14,19 @@ import algorithms.JumpPointSearch;
 import algorithms.LazyThetaStar;
 import algorithms.PathFindingAlgorithm;
 import algorithms.RecursiveThetaStar;
-import algorithms.RestrictedVisibilityGraphAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithm;
-import algorithms.StrictVisibilityGraphAlgorithmV2;
 import algorithms.VisibilityGraphAlgorithm;
 import algorithms.datatypes.Point;
-import algorithms.incrementalvgs.IVGAlgorithm;
-import algorithms.sparsevgs.DirectedEdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
-import algorithms.sparsevgs.VertexNLevelSparseVisibilityGraphAlgorithm;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
 import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.RecursiveStrictAnyAngleSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.StrictAnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
-import algorithms.vertexanya.VertexAnya;
-import algorithms.vertexanya.VertexAnyaMarking;
-import algorithms.vertexanya.VertexAnyaMarkingV2;
-import algorithms.vertexanya.VertexAnyaMarkingV3;
-import algorithms.vertexanya.VertexAnyaNoExtents;
-import algorithms.vertexanya.VisibilityScanSearchEager;
-import algorithms.vertexanya.VisibilityScanSearchSemiEager;
 import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import grid.GridGraph;
 import main.analysis.MazeAnalysis;
@@ -137,11 +122,6 @@ public class AlgoTest {
             case "VisibilityGraphReuse": return VisibilityGraphAlgorithm::graphReuse;
             case "VisibilityGraphReuseOptimised": return VisibilityGraphAlgorithmOptimised::graphReuse;
 
-            case "RestrictedVisibilityGraphs": return RestrictedVisibilityGraphAlgorithm::new;
-            case "StrictVisibilityGraphs": return StrictVisibilityGraphAlgorithm::new;
-            case "StrictVisibilityGraphsV2": return StrictVisibilityGraphAlgorithmV2::new;
-            case "IncrementalVisibilityGraphs": return IVGAlgorithm::new;
-
             case "SubgoalGraphs": return SubgoalGraphsAlgorithm::new;
             case "2LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(2);
             case "3LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(3);
@@ -149,17 +129,6 @@ public class AlgoTest {
 
             case "AnyAngleSubgoalGraphs": return AnyAngleSubgoalGraphsAlgorithm::new;
             case "AnyAngleNLevelSubgoalGraphs": return AnyAngleNLevelSubgoalGraphsAlgorithm::new;
-
-            case "StrictAnyAngleSubgoalGraphs": return StrictAnyAngleSubgoalGraphsAlgorithm::new;
-            case "RecursiveStrictAnyAngleSubgoalGraphs": return RecursiveStrictAnyAngleSubgoalGraphsAlgorithm::new;
-
-            case "VertexAnya": return VertexAnya::new;
-            case "VertexAnyaNoExtents": return VertexAnyaNoExtents::new;
-            case "VertexAnyaMarking": return VertexAnyaMarking::new;
-            case "VertexAnyaMarkingV2": return VertexAnyaMarkingV2::new;
-            case "VertexAnyaMarkingV3": return VertexAnyaMarkingV3::new;
-            case "VisibilityScanSearchEager": return VisibilityScanSearchEager::new;
-            case "VisibilityScanSearchSemiEager": return VisibilityScanSearchSemiEager::new;
 
             case "StrictThetaStar": return StrictThetaStar::new;
             case "StrictThetaStarPS": return StrictThetaStar::postSmooth;
@@ -170,13 +139,11 @@ public class AlgoTest {
 
             case "SparseVisibilityGraphs": return SparseVisibilityGraphAlgorithm::graphReuse;
             case "SparseVisibilityGraphsFibHeap": return SparseVisibilityGraphAlgorithmFibHeap::graphReuse;
-            case "VertexNLevelSparseVisibilityGraphs": return VertexNLevelSparseVisibilityGraphAlgorithm::graphReuse;
             case "EdgeNLevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
             case "EdgeNLevelSparseVisibilityGraphsFibHeap": return EdgeNLevelSparseVisibilityGraphAlgorithmFibHeap::graphReuse;
             case "Edge1LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
             case "Edge2LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(2);
             case "Edge3LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(3);
-            case "DirectedEdgeNLevelSparseVisibilityGraphs": return DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
 
             case "ConvexHullVGA": return ConvexHullVGAlgorithm::new;
         }
