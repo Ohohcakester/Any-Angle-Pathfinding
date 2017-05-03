@@ -18,10 +18,6 @@ import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
 import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
@@ -389,18 +385,6 @@ public class AnyAnglePathfinding {
                 break;
             case 27 :
                 algoFunction = ConvexHullVGAlgorithm::new;
-                break;
-            case 28 :
-                algoFunction = SubgoalGraphsAlgorithm::new;
-                break;
-            case 29 :
-                algoFunction = NLevelSubgoalGraphsAlgorithm::new;
-                break;
-            case 30 :
-                algoFunction = AnyAngleSubgoalGraphsAlgorithm::new;
-                break;
-            case 31 :
-                algoFunction = AnyAngleNLevelSubgoalGraphsAlgorithm::new;
                 break;
         }
         
