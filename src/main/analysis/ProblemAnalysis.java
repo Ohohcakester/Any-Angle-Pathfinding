@@ -2,7 +2,6 @@ package main.analysis;
 
 import algorithms.PathFindingAlgorithm;
 import algorithms.VisibilityGraphAlgorithm;
-import algorithms.vertexanya.VertexAnyaMarkingV3;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import algorithms.visibilitygraph.VisibilityGraph;
 import grid.GridGraph;
@@ -61,12 +60,10 @@ public class ProblemAnalysis {
     }
     
     public static ProblemAnalysis computeFast(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
-        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, sx, sy, ex, ey);
-        algo.computePath();
-        int[][] path = algo.getPath();
         int sizeX = gridGraph.sizeX;
         int sizeY = gridGraph.sizeY;
         
+        int[][] path = Utility.computeOptimalPathOnline(gridGraph, sx, sy, ex, ey);
         double shortestPathLength = Utility.computePathLength(gridGraph, path);
         double straightLineDistance = gridGraph.distance(sx, sy, ex, ey);
         double directness = computeDirectness(shortestPathLength, straightLineDistance);
@@ -80,10 +77,7 @@ public class ProblemAnalysis {
     }
     
     public static ProblemAnalysis computePathOnly(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
-        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, sx, sy, ex, ey);
-        algo.computePath();
-        int[][] path = algo.getPath();
-        
+        int[][] path = Utility.computeOptimalPathOnline(gridGraph, sx, sy, ex, ey);
         double shortestPathLength = Utility.computePathLength(gridGraph, path);
         double straightLineDistance = -1;
         double directness = -1;

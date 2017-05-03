@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
-import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Point;
-import algorithms.vertexanya.VertexAnyaMarkingV3;
 import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
@@ -257,10 +255,7 @@ public class StoredTestMazes {
     }
 
     private static StartEndPointData computeStartEndPointData(GridGraph gridGraph, Point p1, Point p2) {
-        PathFindingAlgorithm algo = new VertexAnyaMarkingV3(gridGraph, p1.x, p1.y, p2.x, p2.y);
-        algo.computePath();
-        int[][] path = algo.getPath();
-        double shortestPathLength = Utility.computePathLength(gridGraph, path);
+        double shortestPathLength = Utility.computeOptimalPathLengthOnline(gridGraph, p1.x, p1.y, p2.x, p2.y);
         return new StartEndPointData(p1, p2, shortestPathLength);
     }
     

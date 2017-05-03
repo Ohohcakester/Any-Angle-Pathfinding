@@ -49,26 +49,35 @@ public class Utility {
     }
     
     public static double computeOptimalPathLengthOnline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        int[][] path = computeOptimalPathOnline(gridGraph, sx, sy, ex, ey);
+        return computePathLength(gridGraph, path);
+    }
+    
+    public static int[][] computeOptimalPathOnline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         // Optimal Online algorithm.
         PathFindingAlgorithm algo = new VertexAnyaMarking(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
-        return computePathLength(gridGraph, path);
+        return path;
     }
     
     public static double computeOptimalPathLengthOffline(GridGraph gridGraph, Point start, Point end) {
-        // Optimal Offline algorithm. (preprocessing for faster pathfinding)
         return computeOptimalPathLengthOffline(gridGraph, start.x, start.y, end.x, end.y);
     }
     
     public static double computeOptimalPathLengthOffline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
+        int[][] path = computeOptimalPathOffline(gridGraph, sx, sy, ex, ey);
+        return computePathLength(gridGraph, path);
+    }
+    
+    public static int[][] computeOptimalPathOffline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         // Optimal Offline algorithm. (preprocessing for faster pathfinding)
         PathFindingAlgorithm algo = EdgeNLevelSparseVisibilityGraphAlgorithm.graphReuse(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);
-        return computePathLength(gridGraph, path);
+        return path;
     }
     
     public static ArrayList<StartEndPointData> fixProblemPathLength(GridGraph gridGraph, ArrayList<StartEndPointData> problems) {
