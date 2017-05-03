@@ -18,7 +18,7 @@ import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.convexhullvg.ConvexHullVGAlgorithm;
+import algorithms.sg16.SG16Algorithm;
 import draw.DrawCanvas;
 import draw.GridLineSet;
 import draw.GridObjects;
@@ -543,7 +543,7 @@ public class Experiment {
     //    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
         //AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
         //AlgoFunction testAlgo = Anya16::new;
-        AlgoFunction testAlgo = ConvexHullVGAlgorithm::new;
+        AlgoFunction testAlgo = SG16Algorithm::new;
 
         //printSeed = false; // keep this commented out.
         Random seedRand = new Random(1241);

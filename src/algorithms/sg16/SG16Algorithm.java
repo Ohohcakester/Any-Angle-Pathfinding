@@ -1,4 +1,4 @@
-package algorithms.convexhullvg;
+package algorithms.sg16;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -13,15 +13,15 @@ import algorithms.priorityqueue.ReusableIndirectHeap;
 
 import algorithms.datatypes.SnapshotItem;
 
-public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
+public class SG16Algorithm extends PathFindingAlgorithm {
 
     private ConvexHullHeuristic convexHullHeuristic;
-    private ConvexHullVG convexHullGraph;
+    private SG16VisibilityGraph convexHullGraph;
     private ReusableIndirectHeap pq; 
     private int start;
     private int finish;
 
-    public ConvexHullVGAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public SG16Algorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
     }
 
@@ -29,7 +29,7 @@ public class ConvexHullVGAlgorithm extends PathFindingAlgorithm {
     public void computePath() {
 
         // 1. Generate convex hulls
-        convexHullGraph = new ConvexHullVG(graph);
+        convexHullGraph = new SG16VisibilityGraph(graph);
         if (isRecording()) convexHullGraph.setSnapshotAction(() -> generateConvexHullSnapshot());
         convexHullGraph.initialise(sx, sy, ex, ey);
         convexHullHeuristic = convexHullGraph.getConvexHullHeuristic();

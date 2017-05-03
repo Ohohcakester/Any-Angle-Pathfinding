@@ -1,4 +1,4 @@
-package algorithms.convexhullvg;
+package algorithms.sg16;
 
 
 import java.awt.Color;
@@ -11,7 +11,7 @@ import grid.GridGraph;
 
 import algorithms.datatypes.SnapshotItem;
 
-public class ConvexHullVG {
+public class SG16VisibilityGraph {
 
     private Runnable snapshotAction;
 
@@ -35,7 +35,7 @@ public class ConvexHullVG {
         public int obstacleIndex;
     }
     
-    public ConvexHullVG(GridGraph graph) {
+    public SG16VisibilityGraph(GridGraph graph) {
         this.graph = graph;
         this.sizeXPlusOne = graph.sizeX+1;
         this.sizeYPlusOne = graph.sizeY+1;

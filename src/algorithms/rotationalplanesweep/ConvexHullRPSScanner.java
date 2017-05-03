@@ -8,7 +8,7 @@ import java.awt.Color;
 import draw.GridLineSet;
 import draw.GridPointSet;
 
-import algorithms.convexhullvg.ConvexHullVG;
+import algorithms.sg16.SG16VisibilityGraph;
 import algorithms.datatypes.SnapshotItem;
 import grid.GridGraph;
 
@@ -51,12 +51,12 @@ public class ConvexHullRPSScanner {
     private final GridGraph graph;
     private final int FOCUSED_SEARCH_RANGE;
 
-    private final ConvexHullVG.ConvexHull[] convexHulls;
+    private final SG16VisibilityGraph.ConvexHull[] convexHulls;
     private final int nHulls;
 
     private final boolean[] obstacleIsMarked;
 
-    public ConvexHullRPSScanner(GridGraph graph, ConvexHullVG.ConvexHull[] convexHulls, int nHulls) {
+    public ConvexHullRPSScanner(GridGraph graph, SG16VisibilityGraph.ConvexHull[] convexHulls, int nHulls) {
         successorsX = new int[11];
         successorsY = new int[11];
         this.nHulls = nHulls;
@@ -124,7 +124,7 @@ public class ConvexHullRPSScanner {
 
         int currIndex = 0;
         for (int hi=0; hi<nHulls; ++hi) {
-            ConvexHullVG.ConvexHull hull = convexHulls[hi];
+            SG16VisibilityGraph.ConvexHull hull = convexHulls[hi];
             int oi = hull.obstacleIndex;
 
             // Special case: Check whether you are on a vector
@@ -236,7 +236,7 @@ public class ConvexHullRPSScanner {
         // Assumption: vertices has the same sort order as convexHulls.
         // Endpoints of convexHulls[i] is vertices[2*i] and vertices[2*i+1]
         for (int hi=0; hi<nHulls; ++hi) {
-            ConvexHullVG.ConvexHull hull = convexHulls[hi];
+            SG16VisibilityGraph.ConvexHull hull = convexHulls[hi];
             int index = hi*2;
 
             int mindx = vertices[index].x - sx;

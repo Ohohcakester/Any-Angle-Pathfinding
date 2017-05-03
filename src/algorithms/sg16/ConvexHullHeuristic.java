@@ -1,4 +1,4 @@
-package algorithms.convexhullvg;
+package algorithms.sg16;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class ConvexHullHeuristic {
     private final int ex;
     private final int ey;
 
-    public ConvexHullHeuristic(ConvexHullVG.ConvexHull[] convexHulls, int nHulls, int ex, int ey) {
+    public ConvexHullHeuristic(SG16VisibilityGraph.ConvexHull[] convexHulls, int nHulls, int ex, int ey) {
         this.ex = ex;
         this.ey = ey;
 
@@ -29,7 +29,7 @@ public class ConvexHullHeuristic {
         {
             int currIndex = 0;
             for (int hi=0; hi<nHulls; ++hi) {
-                ConvexHullVG.ConvexHull hull = convexHulls[hi];
+                SG16VisibilityGraph.ConvexHull hull = convexHulls[hi];
 
                 {
                     boolean isOnVector = false;

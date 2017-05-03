@@ -27,7 +27,7 @@ import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
 import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
-import algorithms.convexhullvg.ConvexHullVGAlgorithm;
+import algorithms.sg16.SG16Algorithm;
 import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
@@ -66,7 +66,7 @@ public class AlgoTest {
         System.gc(); System.gc();
 
         String[] algoNames = new String[]{
-            "ConvexHullVGA",
+            "SG16A",
         };
 
         String[] mapSetNames = new String[]{
@@ -145,7 +145,7 @@ public class AlgoTest {
             case "Edge2LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(2);
             case "Edge3LevelSparseVisibilityGraphs": return EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(3);
 
-            case "ConvexHullVGA": return ConvexHullVGAlgorithm::new;
+            case "SG16A": return SG16Algorithm::new;
         }
 
         throw new UnsupportedOperationException("Invalid Algorithm! " + algoName);

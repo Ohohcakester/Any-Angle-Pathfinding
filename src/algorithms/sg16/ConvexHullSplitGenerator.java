@@ -1,4 +1,4 @@
-package algorithms.convexhullvg;
+package algorithms.sg16;
 
 import java.util.Arrays;
 
@@ -8,7 +8,7 @@ public class ConvexHullSplitGenerator {
 
     private static final int MARKED = -1;
 
-    private ConvexHullVG.ConvexHull[] convexHulls;    
+    private SG16VisibilityGraph.ConvexHull[] convexHulls;    
     private int nHulls;
 
     private final GridGraph graph;
@@ -204,8 +204,8 @@ public class ConvexHullSplitGenerator {
             tail = size-1;
         }
 
-        public final ConvexHullVG.ConvexHull makeHull() {
-            ConvexHullVG.ConvexHull hull = new ConvexHullVG.ConvexHull();
+        public final SG16VisibilityGraph.ConvexHull makeHull() {
+            SG16VisibilityGraph.ConvexHull hull = new SG16VisibilityGraph.ConvexHull();
             hull.xVertices = new int[size-1];
             hull.yVertices = new int[size-1];
             hull.size = size-1;
@@ -270,7 +270,7 @@ public class ConvexHullSplitGenerator {
         floodFillY = new int[11];
         floodFillSize = 0;
 
-        convexHulls = new ConvexHullVG.ConvexHull[11];
+        convexHulls = new SG16VisibilityGraph.ConvexHull[11];
         nHulls = 0;
 
         generateConvexHulls();
@@ -363,7 +363,7 @@ public class ConvexHullSplitGenerator {
             // if !hasIntersection, the island will be unmarked by the markInteriorAsDone process.
             floodFillMarkEqual(x, y);
 
-            ConvexHullVG.ConvexHull convexHull = generateConvexHull(x, y);
+            SG16VisibilityGraph.ConvexHull convexHull = generateConvexHull(x, y);
             convexHull.obstacleIndex = obstacleIndex;
 
             boolean hasIntersection = checkIntersectionAndMaybeSplit(convexHull);
@@ -377,7 +377,7 @@ public class ConvexHullSplitGenerator {
         }
     }
 
-    private final ConvexHullVG.ConvexHull generateConvexHull(int px, int py) {
+    private final SG16VisibilityGraph.ConvexHull generateConvexHull(int px, int py) {
         int label = getLabel(px, py);
 
         // guaranteed to be the bottom-left most tile? (smallest y, then smallest x)
@@ -571,7 +571,7 @@ public class ConvexHullSplitGenerator {
 
     // Checks if the convex hull intersects any blocked tile.
     // If it does, it splits the island's labels (the island is denoted by (px, py).
-    private final boolean checkIntersectionAndMaybeSplit(ConvexHullVG.ConvexHull hull) {
+    private final boolean checkIntersectionAndMaybeSplit(SG16VisibilityGraph.ConvexHull hull) {
         if (checkIfContainsPointAndMaybeSplit(startX, startY, hull)) return true;
         if (checkIfContainsPointAndMaybeSplit(endX, endY, hull)) return true;
 
@@ -591,7 +591,7 @@ public class ConvexHullSplitGenerator {
         return false;
     }
 
-    private final boolean checkIfContainsPointAndMaybeSplit(int pointX, int pointY, ConvexHullVG.ConvexHull hull) {
+    private final boolean checkIfContainsPointAndMaybeSplit(int pointX, int pointY, SG16VisibilityGraph.ConvexHull hull) {
 
         // Check each half-line that makes up the polygon.
         int size = hull.size;
@@ -776,7 +776,7 @@ public class ConvexHullSplitGenerator {
         return graph.isBlocked(x, y) && !(x >= 0 && x < sizeX && y >= 0 && y < sizeY && getLabel(x, y) == MARKED);
     }
 
-    private final void markInteriorAsDone(ConvexHullVG.ConvexHull hull, int px, int py) {
+    private final void markInteriorAsDone(SG16VisibilityGraph.ConvexHull hull, int px, int py) {
         int size = hull.size;
         int prevX = hull.xVertices[size-1];
         int prevY = hull.yVertices[size-1];
@@ -904,7 +904,7 @@ public class ConvexHullSplitGenerator {
     }
 
 
-    private final void addConvexHull(ConvexHullVG.ConvexHull hull) {
+    private final void addConvexHull(SG16VisibilityGraph.ConvexHull hull) {
         if (nHulls >= convexHulls.length) convexHulls = Arrays.copyOf(convexHulls, convexHulls.length*2);
         convexHulls[nHulls++] = hull;
     }
@@ -987,7 +987,7 @@ public class ConvexHullSplitGenerator {
         return labels[y*sizeX + x];
     }
 
-    public static ConvexHullVG.ConvexHull[] generate(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public static SG16VisibilityGraph.ConvexHull[] generate(GridGraph graph, int sx, int sy, int ex, int ey) {
         ConvexHullSplitGenerator generator = new ConvexHullSplitGenerator(graph, sx, sy, ex, ey);
         return Arrays.copyOf(generator.convexHulls, generator.nHulls);
     }

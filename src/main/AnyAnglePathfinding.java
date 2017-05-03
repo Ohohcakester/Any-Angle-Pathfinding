@@ -18,7 +18,7 @@ import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.convexhullvg.ConvexHullVGAlgorithm;
+import algorithms.sg16.SG16Algorithm;
 import algorithms.visibilitygraph.BFSVisibilityGraph;
 import grid.GridAndGoals;
 import grid.GridGraph;
@@ -283,11 +283,11 @@ public class AnyAnglePathfinding {
                 return AffineMapTransformation.transform(GraphImporter.loadStoredMaze("sc1_Ramparts", "378-312_74-120"), transform, true);
             }
             case 64: {
-                // Counterexample for ConvexHullVGAlgorithm Convex Hull Triangular Heuristic.
+                // Counterexample for SG16Algorithm Convex Hull Triangular Heuristic.
                 return DefaultGenerator.generateSeeded(-1522150246, 36, 25, 6, 2, 15, 18, 24);
             }
             case 65: {
-                // Issue with ConvexHullVGAlgorithm Focused Search
+                // Issue with SG16Algorithm Focused Search
                 return GraphImporter.importGraphFromFile("focusedsearchissue.txt", 45, 25, 5, 25);
             }
             default:
@@ -384,7 +384,7 @@ public class AnyAnglePathfinding {
                 algoFunction = Anya16::new;
                 break;
             case 27 :
-                algoFunction = ConvexHullVGAlgorithm::new;
+                algoFunction = SG16Algorithm::new;
                 break;
         }
         
