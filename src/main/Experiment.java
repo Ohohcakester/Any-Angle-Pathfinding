@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Random;
 
 import algorithms.AStar;
-import algorithms.AnyaAlgorithm;
 import algorithms.BasicThetaStar;
 import algorithms.JumpPointSearch;
-import algorithms.StrictVisibilityGraphAlgorithm;
 import algorithms.datatypes.Point;
 import algorithms.datatypes.SnapshotItem;
 import algorithms.sparsevgs.LineOfSightScanner;
@@ -20,7 +18,6 @@ import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.vertexanya.VertexAnya;
 import algorithms.convexhullvg.ConvexHullVGAlgorithm;
 import draw.DrawCanvas;
 import draw.GridLineSet;
@@ -405,7 +402,6 @@ public class Experiment {
     private static void findUpperBound() {
         System.out.println("Strict Theta Star");
         AlgoFunction testAlgo = (gridGraph, sx, sy, ex, ey) -> new RecursiveStrictThetaStar(gridGraph, sx, sy, ex, ey);
-        AlgoFunction optimalAlgo = (gridGraph, sx, sy, ex, ey) -> new StrictVisibilityGraphAlgorithm(gridGraph, sx, sy, ex, ey);
 
         double upperBound = 1.5;
         double maxRatio = 1;
@@ -445,7 +441,7 @@ public class Experiment {
             int[][] path = Utility.generatePath(testAlgo, gridGraph, sx, sy, ex, ey);
             double testPathLength = Utility.computePathLength(gridGraph, path);
 
-            path = Utility.generatePath(optimalAlgo, gridGraph, sx, sy, ex, ey);
+            path = Utility.computeOptimalPathOnline(gridGraph, sx, sy, ex, ey);
             double optimalPathLength = Utility.computePathLength(gridGraph, path);
             
             if (testPathLength > optimalPathLength*upperBound) {
@@ -544,10 +540,7 @@ public class Experiment {
     }
     
     private static void testAlgorithmOptimality() {
-        AlgoFunction refAlgo = VertexAnya::new;
     //    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
-    //    AlgoFunction testAlgo = VertexAnyaMarkingV3::new;
-    //    AlgoFunction testAlgo = DirectedEdgeNLevelSparseVisibilityGraphAlgorithm::graphReuse;
         //AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
         //AlgoFunction testAlgo = AnyaAlgorithm::new;
         AlgoFunction testAlgo = ConvexHullVGAlgorithm::new;
@@ -581,7 +574,7 @@ public class Experiment {
             path = Utility.removeDuplicatesInPath(path);
             restPathLength = Utility.computePathLength(gridGraph, path);
             
-            path = Utility.generatePath(refAlgo, gridGraph, sx, sy, ex, ey);
+            path = Utility.computeOptimalPathOnline(gridGraph, sx, sy, ex, ey);
             path = Utility.removeDuplicatesInPath(path);
             normalPathLength = Utility.computePathLength(gridGraph, path);
             }catch (Exception e) {
