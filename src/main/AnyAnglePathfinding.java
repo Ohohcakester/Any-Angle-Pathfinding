@@ -4,7 +4,7 @@ import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.Anya;
-import algorithms.AnyaAlgorithm;
+import algorithms.Anya16;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
@@ -381,7 +381,7 @@ public class AnyAnglePathfinding {
                 algoFunction = EdgeNLevelSparseVisibilityGraphAlgorithm.withLevelLimit(1);
                 break;
             case 26 :
-                algoFunction = AnyaAlgorithm::new;
+                algoFunction = Anya16::new;
                 break;
             case 27 :
                 algoFunction = ConvexHullVGAlgorithm::new;

@@ -18,7 +18,7 @@ import pgraph.grid.BitpackedGrid;
 //import pgraph.grid.BitpackedGridExpansionPolicy;
 
 
-public class AnyaAlgorithm extends PathFindingAlgorithm {
+public class Anya16 extends PathFindingAlgorithm {
 
     private static final int RES = 10000;
     public ArrayList<SnapshotItem> currSnapshot = new ArrayList<>();
@@ -32,8 +32,8 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
         if (graph == storedGraph) return;
         try {
             BitpackedGrid grid = new BitpackedGrid(graph);
-            AnyaAlgorithm.anya = new AnyaSearch(new AnyaExpansionPolicy(grid));
-            AnyaAlgorithm.storedGraph = graph;
+            Anya16.anya = new AnyaSearch(new AnyaExpansionPolicy(grid));
+            Anya16.storedGraph = graph;
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,7 +42,7 @@ public class AnyaAlgorithm extends PathFindingAlgorithm {
         anya.isRecording = false;
     }
 
-    public AnyaAlgorithm(GridGraph graph, int sx, int sy, int ex, int ey) {
+    public Anya16(GridGraph graph, int sx, int sy, int ex, int ey) {
         super(graph, graph.sizeX, graph.sizeY, sx, sy, ex, ey);
         initialise(graph);
 

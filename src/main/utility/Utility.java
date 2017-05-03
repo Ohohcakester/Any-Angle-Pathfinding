@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import algorithms.Anya;
-import algorithms.AnyaAlgorithm;
+import algorithms.Anya16;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;
@@ -51,7 +51,7 @@ public class Utility {
     
     public static int[][] computeOptimalPathOnline(GridGraph gridGraph, int sx, int sy, int ex, int ey) {
         // Optimal Online algorithm.
-        PathFindingAlgorithm algo = new AnyaAlgorithm(gridGraph, sx, sy, ex, ey);
+        PathFindingAlgorithm algo = new Anya16(gridGraph, sx, sy, ex, ey);
         algo.computePath();
         int[][] path = algo.getPath();
         path = removeDuplicatesInPath(path);

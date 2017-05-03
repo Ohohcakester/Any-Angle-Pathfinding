@@ -542,7 +542,7 @@ public class Experiment {
     private static void testAlgorithmOptimality() {
     //    AlgoFunction testAlgo = SparseVisibilityGraphAlgorithm::graphReuse;
         //AlgoFunction testAlgo = VisibilityGraphAlgorithmOptimised::graphReuse;
-        //AlgoFunction testAlgo = AnyaAlgorithm::new;
+        //AlgoFunction testAlgo = Anya16::new;
         AlgoFunction testAlgo = ConvexHullVGAlgorithm::new;
 
         //printSeed = false; // keep this commented out.

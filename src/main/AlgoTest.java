@@ -7,7 +7,7 @@ import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.Anya;
-import algorithms.AnyaAlgorithm;
+import algorithms.Anya16;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;
@@ -116,7 +116,7 @@ public class AlgoTest {
             case "Dijkstra": return AStar::dijkstra;
             case "AcceleratedAStar": return AcceleratedAStar::new;
             case "Anya": return Anya::new;
-            case "Anya16": return AnyaAlgorithm::new;
+            case "Anya16": return Anya16::new;
 
             case "VisibilityGraphs": return VisibilityGraphAlgorithm::new;
             case "VisibilityGraphReuse": return VisibilityGraphAlgorithm::graphReuse;
