@@ -51,7 +51,7 @@ public class AnyAnglePathfinding {
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) {
-        int choice = 6; // Choose an operation. 0: Visualisation.run() should be the default.
+        int choice = 0; // Choose an operation. 0: Visualisation.run() should be the default.
 
         switch(choice) {
             case 0:
@@ -82,7 +82,7 @@ public class AnyAnglePathfinding {
      * Choose a maze. (a gridGraph setting)
      */
     static GridAndGoals loadMaze() {
-        int choice = 64; // Adjust this to choose a maze.
+        int choice = 60; // Adjust this to choose a maze.
         
         switch(choice) {
             case 0 : {// UNSEEDED
@@ -255,7 +255,7 @@ public class AnyAnglePathfinding {
                 }, 3, 2);
             case 60: { // SEEDED
                 float percentBlocked = 0.4f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
-                float resolution = 2f;              // (Larger -> bigger islands)
+                float resolution = 0.4f;              // (Larger -> bigger islands)
                 int iterations = 5;                  // number of iterations for cellular automata
                 boolean bordersAreBlocked = false;
                 int seed = 5231;           // seed for the random.
@@ -301,7 +301,7 @@ public class AnyAnglePathfinding {
      * Choose an algorithm.
      */
     static AlgoFunction setDefaultAlgoFunction() {
-        int choice = 49; // adjust this to choose an algorithm
+        int choice = 24; // adjust this to choose an algorithm
         
         switch (choice) {
             case 1 :
