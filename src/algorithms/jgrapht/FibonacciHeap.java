@@ -1,4 +1,4 @@
-package org.jgrapht.util;
+package algorithms.jgrapht;
 
 import java.util.*;
 

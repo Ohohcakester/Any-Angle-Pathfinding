@@ -1,22 +1,14 @@
-package algorithms;
+package algorithms.anya16;
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
 import java.awt.geom.Point2D;
-import pgraph.alg.Path;
 
 import grid.GridGraph;
 import algorithms.datatypes.SnapshotItem;
-
-import pgraph.alg.AnyaSearch;
-import pgraph.anya.AnyaExpansionPolicy;
-import pgraph.anya.AnyaInterval;
-import pgraph.anya.AnyaNode;
-import pgraph.grid.BitpackedGrid;
-//import pgraph.grid.BitpackedGridExpansionPolicy;
-
+import algorithms.PathFindingAlgorithm;
 
 public class Anya16 extends PathFindingAlgorithm {
 

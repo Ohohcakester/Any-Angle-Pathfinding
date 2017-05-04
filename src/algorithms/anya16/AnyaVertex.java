@@ -1,7 +1,4 @@
-package pgraph.anya;
-
-import pgraph.base.BaseVertex;
-import pgraph.grid.GridPosition;
+package algorithms.anya16;
 
 import java.awt.geom.Point2D;
 

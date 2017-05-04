@@ -1,4 +1,4 @@
-package pgraph.anya.experiments;
+package algorithms.anya16;
 
 /**
  * Created by Dindar on 21.9.2014.

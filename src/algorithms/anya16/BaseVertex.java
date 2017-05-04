@@ -1,4 +1,4 @@
-package pgraph.base;
+package algorithms.anya16;
 
 import java.awt.geom.Point2D;
 

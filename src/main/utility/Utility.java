@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import algorithms.Anya;
-import algorithms.Anya16;
+import algorithms.anya16.Anya16;
 import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.Point;

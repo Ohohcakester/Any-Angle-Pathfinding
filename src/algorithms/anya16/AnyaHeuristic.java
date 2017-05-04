@@ -1,9 +1,4 @@
-package pgraph.anya;
-
-import org.jgrapht.traverse.EuclideanDistanceHeuristic;
-import org.jgrapht.traverse.Heuristic;
-
-import pgraph.grid.BitpackedGrid;
+package algorithms.anya16;
 
 // AnyaHeuristic.h
 //

@@ -10,8 +10,8 @@ import algorithms.PathFindingAlgorithm;
 import algorithms.datatypes.Memory;
 import algorithms.datatypes.SnapshotItem;
 
-import org.jgrapht.util.FibonacciHeap;
-import org.jgrapht.util.FibonacciHeapNode;
+import algorithms.jgrapht.FibonacciHeap;
+import algorithms.jgrapht.FibonacciHeapNode;
 
 
 public class SparseVisibilityGraphAlgorithmFibHeap extends PathFindingAlgorithm {

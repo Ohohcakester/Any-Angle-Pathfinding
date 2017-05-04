@@ -1,13 +1,7 @@
-package pgraph.anya;
+package algorithms.anya16;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-
-import org.jgrapht.traverse.EuclideanDistanceHeuristic;
-import org.jgrapht.traverse.Heuristic;
-
-import pgraph.base.ExpansionPolicy;
-import pgraph.grid.BitpackedGrid;
 
 public class AnyaExpansionPolicy implements ExpansionPolicy<AnyaNode> {
 

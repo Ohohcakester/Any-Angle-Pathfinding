@@ -1,4 +1,4 @@
-package pgraph.grid;
+package algorithms.anya16;
 
 import grid.GridGraph;
 
@@ -6,9 +6,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-
-import pgraph.anya.AnyaInterval;
-import pgraph.anya.AnyaVertex;
 
 // A simple uniform-cost lattice / cell grid.
 // This implementation uses a bitpacked representation

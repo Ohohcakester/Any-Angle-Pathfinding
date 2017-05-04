@@ -1,4 +1,4 @@
-package org.jgrapht.traverse;
+package algorithms.anya16;
 
 /**
  * Created with IntelliJ IDEA.

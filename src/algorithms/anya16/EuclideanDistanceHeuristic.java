@@ -1,6 +1,4 @@
-package org.jgrapht.traverse;
-
-import pgraph.base.BaseVertex;
+package algorithms.anya16;
 
 // A heuristic for computing Euclidean distances in the plane.
 //

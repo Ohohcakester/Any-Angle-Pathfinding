@@ -1,6 +1,4 @@
-package pgraph.base;
-
-import org.jgrapht.traverse.Heuristic;
+package algorithms.anya16;
 
 // ExpansionPolicy.java
 // 

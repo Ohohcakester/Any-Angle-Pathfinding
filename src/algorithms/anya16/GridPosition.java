@@ -1,4 +1,4 @@
-package pgraph.grid;
+package algorithms.anya16;
 
 /**
  * Created with IntelliJ IDEA.

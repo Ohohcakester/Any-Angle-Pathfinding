@@ -1,6 +1,4 @@
-package pgraph.anya;
-
-import pgraph.grid.BitpackedGrid;
+package algorithms.anya16;
 
 // IntervalProjection.java
 //

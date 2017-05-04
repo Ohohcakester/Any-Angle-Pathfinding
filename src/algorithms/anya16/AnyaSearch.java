@@ -1,20 +1,12 @@
-package pgraph.alg;
+package algorithms.anya16;
 
 import java.util.Hashtable;
 import java.util.function.Consumer;
 
-import org.jgrapht.traverse.EuclideanDistanceHeuristic;
-import org.jgrapht.traverse.Heuristic;
-import org.jgrapht.util.FibonacciHeap;
-import org.jgrapht.util.FibonacciHeapNode;
+import algorithms.jgrapht.FibonacciHeap;
+import algorithms.jgrapht.FibonacciHeapNode;
 
 import java.awt.geom.Point2D;
-import pgraph.anya.AnyaExpansionPolicy;
-import pgraph.anya.AnyaNode;
-import pgraph.anya.AnyaInterval;
-import pgraph.anya.experiments.MBRunnable;
-import pgraph.grid.BitpackedGrid;
-
 
 // An implementation of the Anya search algorithm. 
 // 

@@ -7,7 +7,7 @@ import algorithms.AStarOctileHeuristic;
 import algorithms.AStarStaticMemory;
 import algorithms.AcceleratedAStar;
 import algorithms.Anya;
-import algorithms.Anya16;
+import algorithms.anya16.Anya16;
 import algorithms.BasicThetaStar;
 import algorithms.BreadthFirstSearch;
 import algorithms.JumpPointSearch;

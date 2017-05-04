@@ -1,4 +1,4 @@
-package org.jgrapht.util;
+package algorithms.jgrapht;
 
 /**
  * Implements a node of the Fibonacci heap. It holds the information necessary

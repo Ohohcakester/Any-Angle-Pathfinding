@@ -1,4 +1,4 @@
-package pgraph.alg;
+package algorithms.anya16;
 
 // Path.java
 // 
