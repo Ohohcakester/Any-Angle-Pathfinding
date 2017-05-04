@@ -149,6 +149,7 @@ public class Utility {
     
     public static void cleanUpPreallocatedMemory() {
         Anya.clearMemory();
+        Anya16.clearMemory();
         VisibilityGraph.clearMemory();
         SparseVisibilityGraph.clearMemory();
         SparseVisibilityGraphAlgorithmFibHeap.clearMemory();
