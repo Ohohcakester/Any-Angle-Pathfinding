@@ -23,10 +23,6 @@ import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VisibilityGraphAlgorithmOptimised;
 import algorithms.strictthetastar.RecursiveStrictThetaStar;
 import algorithms.strictthetastar.StrictThetaStar;
-import algorithms.subgoalgraphs.AnyAngleNLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.AnyAngleSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.NLevelSubgoalGraphsAlgorithm;
-import algorithms.subgoalgraphs.SubgoalGraphsAlgorithm;
 import algorithms.sg16.SG16Algorithm;
 import grid.GridGraph;
 import main.analysis.MazeAnalysis;
@@ -121,14 +117,6 @@ public class AlgoTest {
             case "VisibilityGraphs": return VisibilityGraphAlgorithm::new;
             case "VisibilityGraphReuse": return VisibilityGraphAlgorithm::graphReuse;
             case "VisibilityGraphReuseOptimised": return VisibilityGraphAlgorithmOptimised::graphReuse;
-
-            case "SubgoalGraphs": return SubgoalGraphsAlgorithm::new;
-            case "2LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(2);
-            case "3LevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm.levels(3);
-            case "NLevelSubgoalGraphs": return NLevelSubgoalGraphsAlgorithm::new;
-
-            case "AnyAngleSubgoalGraphs": return AnyAngleSubgoalGraphsAlgorithm::new;
-            case "AnyAngleNLevelSubgoalGraphs": return AnyAngleNLevelSubgoalGraphsAlgorithm::new;
 
             case "StrictThetaStar": return StrictThetaStar::new;
             case "StrictThetaStarPS": return StrictThetaStar::postSmooth;

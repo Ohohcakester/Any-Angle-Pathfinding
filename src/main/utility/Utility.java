@@ -17,7 +17,6 @@ import algorithms.sparsevgs.LineOfSightScanner;
 import algorithms.sparsevgs.SparseVisibilityGraph;
 import algorithms.sparsevgs.SparseVisibilityGraphAlgorithmFibHeap;
 import algorithms.sparsevgs.VisibilityGraphOptimised;
-import algorithms.subgoalgraphs.SubgoalGraph;
 import algorithms.visibilitygraph.VisibilityGraph;
 import grid.GridGraph;
 import main.AlgoFunction;
@@ -151,7 +150,6 @@ public class Utility {
     public static void cleanUpPreallocatedMemory() {
         Anya.clearMemory();
         VisibilityGraph.clearMemory();
-        SubgoalGraph.clearMemory();
         SparseVisibilityGraph.clearMemory();
         SparseVisibilityGraphAlgorithmFibHeap.clearMemory();
         Memory.clearMemory();
