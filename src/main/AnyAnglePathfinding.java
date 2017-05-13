@@ -48,6 +48,7 @@ public class AnyAnglePathfinding {
     public static final String PATH_TESTDATA = "testdata/";
     public static final String PATH_MAZEDATA = "mazedata/";
     public static final String PATH_ANALYSISDATA = "analysisdata/";
+    public static final String PATH_GRAPHIMPORT = "predefinedgrids/";
     private static AlgoFunction algoFunction; // The algorithm is stored in this function.
 
     public static void main(String[] args) {

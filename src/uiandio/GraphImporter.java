@@ -35,7 +35,7 @@ public class GraphImporter {
     private GraphImporter(String fileName) {
         boolean[][] result = null;
 
-        File file = new File(fileName);
+        File file = new File(AnyAnglePathfinding.PATH_GRAPHIMPORT + fileName);
         try {
             FileReader fileReader = new FileReader(file);
             Scanner sc = new Scanner(fileReader);
@@ -50,7 +50,7 @@ public class GraphImporter {
             }
             sc.close();
         } catch (FileNotFoundException e) {
-            System.out.println("File " + fileName + " not found!");
+            System.out.println("File " + fileName + " not found in " + AnyAnglePathfinding.PATH_GRAPHIMPORT);
         }
         /* Commented out because of Unreachable Catch Clause warning.
         catch (IOException e) {
