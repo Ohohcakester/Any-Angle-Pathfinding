@@ -31,7 +31,6 @@ Features
       * included is an option to reuse an existing visibility graph instead of regenerating it.
       * Includes three algorithms to construct Visibility Graphs over grids:
         1. All-pairs Bresenham Line-of-Sight Checks
-            - Bresenham, J. E. 1965. Algorithm for computer control of a digital plotter. IBM Systems journal 4(1):25–30.
         2. Rotational Plane Sweep Algorithm
             - Choset, H. M. 2005. Principles of robot motion: theory, algorithms, and implementation. MIT press.
         3. Line-of-Sight Scans. (fastest)
