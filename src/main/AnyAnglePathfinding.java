@@ -255,18 +255,18 @@ public class AnyAnglePathfinding {
                         GraphImporter.loadStoredMaze("sc1_EbonLakes"),
                 }, 3, 2);
             case 60: { // SEEDED
-                float percentBlocked = 0.4f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
-                float resolution = 0.4f;              // (Larger -> bigger islands)
+                float percentBlocked = 0.45f;   // chance of spawning a blocked tile is 1 in unblockedRatio.
+                float resolution = 0.7f;              // (Larger -> bigger islands)
                 int iterations = 5;                  // number of iterations for cellular automata
                 boolean bordersAreBlocked = false;
                 int seed = 5231;           // seed for the random.
 
-                int sizeX = 3000;               // x-axis size of grid
-                int sizeY = 3000;               // y-axis size of grid
-                int sx = 0;                     // y-coordinate of start point
-                int sy = 0;                     // x-coordinate of start point
-                int ex = 3000;                     // y-coordinate of goal point
-                int ey = 3000;                     // x-coordinate of goal point
+                int sizeX = 1000;               // x-axis size of grid
+                int sizeY = 800;               // y-axis size of grid
+                int sx = 225;                     // y-coordinate of start point
+                int sy = 691;                     // x-coordinate of start point
+                int ex = 911;                     // y-coordinate of goal point
+                int ey = 177;                     // x-coordinate of goal point
 
                 return AutomataGenerator.generateSeededDynamicCutoff(seed, sizeX, sizeY, percentBlocked, iterations, resolution, bordersAreBlocked, sx, sy, ex, ey);
             }
