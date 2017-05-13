@@ -51,6 +51,7 @@ Features
       * gives optimal solutions. Much faster than other implementation of Anya.
       * http://jair.org/media/5007/live-5007-9321-jair.pdf
     * SG16: Speeding Up A* Search on Visibility Graphs Defined over Quadtrees
+      * implemented over grids instead of over quadtrees.
       * https://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13155/12717
 
 2.	Testing functions that test computed path lengths and running times.
@@ -59,7 +60,7 @@ Features
     * DefaultGenerator
       * Generates random grid maps. A random seed can be set for determinstic map generation.
     * AutomataGenerator
-      * Generates random cave-maps using cellular automata.
+      * Generates random cave-maps using cellular automata. (modified from original algorithm)
       * https://pdfs.semanticscholar.org/5f05/6b9bb84015cdd650f043e07f6e7d7d193ae6.pdf
     * TiledMapGenerator
       * Generates maps from tiling a set of existing maps
