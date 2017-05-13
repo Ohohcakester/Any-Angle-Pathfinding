@@ -24,15 +24,28 @@ Features
     * Strict Theta* Algorithm
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13049/12685
     * Accelerated A* Algorithm
-      * Note: not very well  optimised.
+      * Note: not very well optimised.
       * https://agents.felk.cvut.cz/publications/download/76
     * Visibility Graph Algorithm
-      * gives optimal solutions, but very slow
+      * gives optimal solutions, but very slow.
       * included is an option to reuse an existing visibility graph instead of regenerating it.
+    * Sparse Visibility Graph Algorithm
+      * similar to Visibility Graph Algorithm, but a lot faster.
+      * requires preprocessing.
+    * Edge N-Level Sparse Visibility Graph Algorithm
+      * fastest Any-Angle Pathfinding algorithm, but requires preprocessing unlike Anya16.
+      * millisecond runtimes on 6000x6000 maps.
     * Anya
       * gives optimal solutions. Much faster than Visibility Graphs.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
       * Implementation based on [this paper](http://idm-lab.org/bib/abstracts/papers/socs15a.pdf)
+    * Anya16
+      * NOT IMPLEMENTED BY ME. (other than the visualisations)
+      * Implementation taken from [Daniel Harabor's Code Repository](https://bitbucket.org/dharabor/pathfinding)
+      * gives optimal solutions. Much faster than other implementation of Anya.
+      * http://jair.org/media/5007/live-5007-9321-jair.pdf
+    * SG16: Speeding Up A* Search on Visibility Graphs Defined over Quadtrees
+      * https://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13155/12717
 
 2.	Testing functions that test computed path lengths and running times.
 
@@ -41,7 +54,7 @@ Features
 
 Information
 =====================
-Language: Java 8 Required (uses Eclipse)
+Language: Java 8 Required
 
 Visualisation: Java Swing
 
