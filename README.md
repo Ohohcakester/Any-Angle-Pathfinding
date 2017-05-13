@@ -29,6 +29,12 @@ Features
     * Visibility Graph Algorithm
       * gives optimal solutions, but very slow.
       * included is an option to reuse an existing visibility graph instead of regenerating it.
+      * Includes three algorithms to construct Visibility Graphs over grids:
+        1. All-pairs Bresenham Line-of-Sight Checks
+            - Bresenham, J. E. 1965. Algorithm for computer control of a digital plotter. IBM Systems journal 4(1):25–30.
+        2. Rotational Plane Sweep Algorithm
+            - Choset, H. M. 2005. Principles of robot motion: theory, algorithms, and implementation. MIT press.
+        3. Line-of-Sight Scans. (fastest)
     * Sparse Visibility Graph Algorithm
       * similar to Visibility Graph Algorithm, but a lot faster.
       * requires preprocessing.
@@ -49,8 +55,21 @@ Features
 
 2.	Testing functions that test computed path lengths and running times.
 
-3.	Ability to generate pseudo-random graphs from a seed and graph specifications, as well as load graphs from a file. Refer to the uiandio/GraphImporter.java comments for details on how to create a grid file.
+3. Map Generators:
+    * DefaultGenerator
+      * Generates random grid maps. A random seed can be set for determinstic map generation.
+    * AutomataGenerator
+      * Generates random cave-maps using cellular automata.
+      * https://pdfs.semanticscholar.org/5f05/6b9bb84015cdd650f043e07f6e7d7d193ae6.pdf
+    * TiledMapGenerator
+      * Generates maps from tiling a set of existing maps
+    * UpscaledMapGenerator
+      * Generates maps from upscaling an existing map
+      * Post-processing (smoothing) is done after upscaling with cellular automata iterations
+    * AffineMapTransformation
+      * Applies affine transformations (scaling/rotation/shear) to an existing map to generate new maps.
 
+4. Maps can also be imported from files. Refer to the uiandio/GraphImporter.java comments for details on how to create a grid file.
 
 Information
 =====================
