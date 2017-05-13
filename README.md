@@ -77,8 +77,19 @@ Language: Java 8 Required
 
 Visualisation: Java Swing
 
-Dependencies: JUnit
+Dependencies: JUnit (not required if using ant build script)
 
+Build using Apache Ant
+=====================
+To build and run the code, run the following from the base directory (where build.xml is).
+```
+ant
+java -jar dist/AAP.jar -Xmx4096m
+```
+To clean up generated files from the build script,
+```
+ant clean
+```
 
 How to use
 =====================
