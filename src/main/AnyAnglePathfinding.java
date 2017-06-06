@@ -24,6 +24,7 @@ import grid.GridAndGoals;
 import grid.GridGraph;
 import main.graphgeneration.AutomataGenerator;
 import main.graphgeneration.DefaultGenerator;
+import main.graphgeneration.MazeMapGenerator;
 import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
 import main.graphgeneration.AffineMapTransformation;
@@ -290,6 +291,20 @@ public class AnyAnglePathfinding {
             case 65: {
                 // Issue with SG16Algorithm Focused Search
                 return GraphImporter.importGraphFromFile("focusedsearchissue.txt", 45, 25, 5, 25);
+            }
+            case 66: {
+                int seed = 3131;                        // seed for the random.
+                int sizeX = 600;                        // x-axis size of grid
+                int sizeY = 400;                        // y-axis size of grid
+                int corridorWidth = 2;                  // width of a maze corridor in tiles
+                float connectednessRatio = 0.01f;       // value in (0,1).  0: spanning tree. 1: max. number of edges.
+
+                int sx = 0;                             // y-coordinate of start point
+                int sy = 0;                             // x-coordinate of start point
+                int ex = 5;                             // y-coordinate of goal point
+                int ey = 5;                             // x-coordinate of goal point
+
+                return MazeMapGenerator.generateSeeded(seed, sizeX, sizeY, corridorWidth, connectednessRatio, sx, sy, ex, ey);
             }
             default:
                 return null;
