@@ -4,7 +4,6 @@ import grid.GridAndGoals;
 import grid.GridGraph;
 
 import java.util.Random;
-import java.util.Arrays;
 import java.util.ArrayList;
 
 public class MazeMapGenerator {
