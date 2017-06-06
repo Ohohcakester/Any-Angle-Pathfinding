@@ -13,26 +13,51 @@ public class MazeMapGenerator {
      *   0: n-1 edges
      *   1: max possible number of edges.
      */
+    public static GridAndGoals generateUnseeded(int sizeX, int sizeY,
+            int corridorWidth, float connectednessRatio, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, corridorWidth, connectednessRatio);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+
+    public static GridGraph generateUnseededGraphOnly(int sizeX, int sizeY,
+            int corridorWidth, float connectednessRatio) {
+        GridGraph gridGraph = generate(false, 0, sizeX, sizeY, corridorWidth, connectednessRatio);
+        return gridGraph;
+    }
+
     public static GridAndGoals generateSeeded(long seed, int sizeX, int sizeY,
             int corridorWidth, float connectednessRatio, int sx, int sy, int ex, int ey) {
-        GridGraph gridGraph = generateSeededGraphOnly(seed, sizeX, sizeY, corridorWidth, connectednessRatio);
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, corridorWidth, connectednessRatio);
         return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 
     public static GridGraph generateSeededGraphOnly(long seed, int sizeX, int sizeY,
             int corridorWidth, float connectednessRatio) {
+        GridGraph gridGraph = generate(true, seed, sizeX, sizeY, corridorWidth, connectednessRatio);
+        return gridGraph;
+    }
+
+    private static GridGraph generate(boolean seededRandom, long seed,
+            int sizeX, int sizeY, int corridorWidth, float connectednessRatio) {
         GridGraph gridGraph = new GridGraph(sizeX, sizeY);
-        //System.out.println("Maze Map with predefined seed = " + seed);
-        Random rand = new Random(seed);
+
+        Random rand = new Random();
+        if (!seededRandom) {
+            seed = rand.nextInt();
+            System.out.println("Maze Map with random seed = " + seed);
+        } else {
+            System.out.println("Maze Map with predefined seed = " + seed);
+        }
+        rand = new Random(seed);
 
         MazeMapGenerator generator = new MazeMapGenerator(rand, sizeX, sizeY, corridorWidth, connectednessRatio);
         generator.writeToGridGraph(gridGraph);
         return gridGraph;
     }
 
-
-
-    /*
+    /* Diagram of how we index vertices, horizontal edges and vertical edges
+     * used in the algorithm below.
+     *
      *(0,0) ___________________ (2,0)
      *     |  [0,0]  |  [1,0]  |
      *     |         |         |
