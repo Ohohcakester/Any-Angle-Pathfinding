@@ -11,7 +11,7 @@ A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 
 Features
 =====================
-1.	Visualisations of the [implemented algorithms](https://github.com/Ohohcakester/Any-Angle-Pathfinding/tree/master/src/algorithms):
+1.	Visualisations of the [implemented algorithms](./src/algorithms):
     *	Breadth-First Search
     * Dijkstra’s Algorithm
     * A* Search Algorithm (optionally with Post-Smoothing)
@@ -55,12 +55,14 @@ Features
 
 2.	Testing functions that test computed path lengths and running times.
 
-3. Map Generators:
+3. [Map Generators](./src/main/graphgeneration) to generate grid maps:
     * DefaultGenerator
       * Generates random grid maps. A random seed can be set for determinstic map generation.
     * AutomataGenerator
       * Generates random cave-maps using cellular automata. (modified from original algorithm)
       * https://pdfs.semanticscholar.org/5f05/6b9bb84015cdd650f043e07f6e7d7d193ae6.pdf
+    * MazeMapGenerator
+      * Generates random maze-maps using a modification of Kruskal's algorithm.
     * TiledMapGenerator
       * Generates maps from tiling a set of existing maps
     * UpscaledMapGenerator
