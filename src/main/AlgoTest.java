@@ -380,6 +380,23 @@ public class AlgoTest {
             break;
         }
 
+
+        case "mazemaps": {
+            int[] connectednessRatioIndexes = new int[] {0,1,3};
+            for (int sizeIndex=0; sizeIndex<5; sizeIndex+=2) {
+                int corridorWidthIndex = 1;
+                for (int j=0; j<connectednessRatioIndexes.length; ++j) {
+                    int connectednessRatioIndex = connectednessRatioIndexes[j];
+                    testOnStoredMaze(StoredTestMazes.loadMazeMaze(sizeIndex, corridorWidthIndex, connectednessRatioIndex), algo, testFunction_slow);
+                    System.gc();System.gc();
+                    try {Thread.sleep(2000);}
+                    catch (Exception e) {throw new UnsupportedOperationException(e.getMessage());}
+                    System.gc();System.gc();
+                }
+            }
+            break;
+        }
+
         default:
             throw new UnsupportedOperationException("Invalid Map Set Name!");
 

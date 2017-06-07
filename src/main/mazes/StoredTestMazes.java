@@ -9,6 +9,7 @@ import grid.GridGraph;
 import main.analysis.MazeAnalysis;
 import main.analysis.TwoPoint;
 import main.graphgeneration.AutomataGenerator;
+import main.graphgeneration.MazeMapGenerator;
 import main.graphgeneration.TiledMapGenerator;
 import main.graphgeneration.UpscaledMapGenerator;
 import main.testgen.StartEndPointData;
@@ -162,8 +163,48 @@ public class StoredTestMazes {
         
         return new MazeAndTestCases(newMazeName, newGridGraph, newProblems);
     }
-    
-    
+
+    public static MazeAndTestCases loadMazeMaze(int sizeIndex, int corridorWidthIndex, int connectednessIndex) {
+
+        int sizeX, sizeY;
+        switch (sizeIndex) {
+            case 0: sizeX = sizeY = 2000; break;
+            case 1: sizeX = sizeY = 3000; break;
+            case 2: sizeX = sizeY = 4000; break;
+            case 3: sizeX = sizeY = 5000; break;
+            case 4: sizeX = sizeY = 6000; break;
+            default: throw new UnsupportedOperationException("Invalid sizeIndex: " + sizeIndex);
+        }
+
+        int corridorWidth;
+        switch (corridorWidthIndex) {
+            case 0: corridorWidth = 1; break;
+            case 1: corridorWidth = 2; break;
+            case 2: corridorWidth = 4; break;
+            default: throw new UnsupportedOperationException("Invalid corridorWidthIndex: " + corridorWidthIndex);
+        }
+
+        float connectednessRatio;
+        switch (connectednessIndex) {
+            case 0: connectednessRatio = 0f; break;
+            case 1: connectednessRatio = 0.0001f; break;
+            case 2: connectednessRatio = 0.001f; break;
+            case 3: connectednessRatio = 0.01f; break;
+            case 4: connectednessRatio = 0.1f; break;
+            default: throw new UnsupportedOperationException("Invalid connectednessIndex: " + connectednessIndex);
+        }
+
+        int nProblems = NUM_TEST_PROBLEMS;
+        int seed = (sizeIndex+1)*197;
+        seed = (seed + connectednessIndex+1)*53;
+        seed = (seed + corridorWidthIndex+1)*131;
+        int problemSeed = (seed + sizeIndex+1)*13;
+        
+        GridGraph gridGraph = MazeMapGenerator.generateSeededGraphOnly(seed, sizeX, sizeY, corridorWidth, connectednessRatio);
+        ArrayList<StartEndPointData> problems = generateProblemsInLargestSetOffline(gridGraph, nProblems, problemSeed); 
+        String mazeName = Stringifier.mazeMapToString(seed, sizeX, sizeY, corridorWidth, connectednessRatio);
+        return new MazeAndTestCases(mazeName, gridGraph, problems);
+    }
     
     private static GridGraph[] getMazePool(int mazePoolIndex) {
         switch (mazePoolIndex) {
@@ -231,9 +272,16 @@ public class StoredTestMazes {
     }
 
     private static ArrayList<StartEndPointData> generateProblemsInLargestSet(GridGraph gridGraph, int nProblems, int seed) {
+        return generateProblemsInLargestSet(gridGraph, nProblems, seed, true);
+    }
+
+    private static ArrayList<StartEndPointData> generateProblemsInLargestSetOffline(GridGraph gridGraph, int nProblems, int seed) {
+        return generateProblemsInLargestSet(gridGraph, nProblems, seed, false);
+    }
+
+    private static ArrayList<StartEndPointData> generateProblemsInLargestSet(GridGraph gridGraph, int nProblems, int seed, boolean online) {
         ArrayList<ArrayList<Point>> connectedSets = MazeAnalysis.findConnectedSetsFast(gridGraph);
         ArrayList<Point> largestSet = MazeAnalysis.getLargestSet(connectedSets);
-        
         
         Random rand = new Random(seed);
         ArrayList<StartEndPointData> problemList = new ArrayList<>();
@@ -248,14 +296,24 @@ public class StoredTestMazes {
             }
             chosenProblems.add(tp);
             
-            problemList.add(computeStartEndPointData(gridGraph, tp.p1, tp.p2));
+            problemList.add(computeStartEndPointData(gridGraph, tp.p1, tp.p2, online));
         }
         
         return problemList;
     }
 
     private static StartEndPointData computeStartEndPointData(GridGraph gridGraph, Point p1, Point p2) {
-        double shortestPathLength = Utility.computeOptimalPathLengthOnline(gridGraph, p1.x, p1.y, p2.x, p2.y);
+        return computeStartEndPointData(gridGraph, p1, p2, true);
+    }
+
+    private static StartEndPointData computeStartEndPointDataOffline(GridGraph gridGraph, Point p1, Point p2) {
+        return computeStartEndPointData(gridGraph, p1, p2, false);
+    }
+
+    private static StartEndPointData computeStartEndPointData(GridGraph gridGraph, Point p1, Point p2, boolean online) {
+        double shortestPathLength = online ?
+            Utility.computeOptimalPathLengthOnline(gridGraph, p1.x, p1.y, p2.x, p2.y) :
+            Utility.computeOptimalPathLengthOffline(gridGraph, p1.x, p1.y, p2.x, p2.y);
         return new StartEndPointData(p1, p2, shortestPathLength);
     }
     

@@ -241,9 +241,10 @@ public class AnyAnglePathfinding {
             case 57:
                 //return StoredTestMazes.loadAutomataMaze(0, 7).gridAndGoals(0);
                 //return StoredTestMazes.loadAutomataDCMaze(2, 4, 0).gridAndGoals(0);
-                return StoredTestMazes.loadAutomataDCMaze(2, 4, 1).gridAndGoals(0);
+                //return StoredTestMazes.loadAutomataDCMaze(2, 4, 1).gridAndGoals(0);
                 //return StoredTestMazes.loadScaledMaze("wc3_theglaive", 8).gridAndGoals(0);
                 //return StoredTestMazes.loadTiledMaze(1, 8).gridAndGoals(0);
+                return StoredTestMazes.loadMazeMaze(0, 1, 2).gridAndGoals(0);
             case 58:
                 return UpscaledMapGenerator.upscale(GraphImporter.loadStoredMaze("wc3_gardenofwar", "378-312_74-120"), 9, true);
             case 59:

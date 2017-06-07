@@ -39,6 +39,16 @@ public class Stringifier {
         sb.append(longToStr(seed));
         return sb.toString();
     }
+    
+    public static String mazeMapToString(long seed, int sizeX, int sizeY, int corridorWidth, float connectednessRatio) {
+        StringBuilder sb = new StringBuilder("maze_");
+        sb.append(sizeX).append("x");
+        sb.append(sizeY).append("_");
+        sb.append(corridorWidth).append("_");
+        sb.append((int)(connectednessRatio*1000)).append("_");
+        sb.append(longToStr(seed));
+        return sb.toString();
+    }
 
     public static String defaultToStringReadable(int seed, int sizeX, int sizeY, int unblockedRatio) {
         StringBuilder sb = new StringBuilder("gen_");
