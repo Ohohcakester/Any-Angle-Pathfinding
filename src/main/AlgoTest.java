@@ -383,7 +383,7 @@ public class AlgoTest {
 
         case "mazemaps": {
             int[] connectednessRatioIndexes = new int[] {0,1,3};
-            for (int sizeIndex=0; sizeIndex<5; sizeIndex+=2) {
+            for (int sizeIndex=0; sizeIndex<7; sizeIndex+=2) {
                 int corridorWidthIndex = 1;
                 for (int j=0; j<connectednessRatioIndexes.length; ++j) {
                     int connectednessRatioIndex = connectednessRatioIndexes[j];

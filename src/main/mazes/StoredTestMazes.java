@@ -168,11 +168,13 @@ public class StoredTestMazes {
 
         int sizeX, sizeY;
         switch (sizeIndex) {
-            case 0: sizeX = sizeY = 2000; break;
-            case 1: sizeX = sizeY = 3000; break;
-            case 2: sizeX = sizeY = 4000; break;
-            case 3: sizeX = sizeY = 5000; break;
-            case 4: sizeX = sizeY = 6000; break;
+            case 0: sizeX = sizeY = 500; break;
+            case 1: sizeX = sizeY = 1000; break;
+            case 2: sizeX = sizeY = 2000; break;
+            case 3: sizeX = sizeY = 3000; break;
+            case 4: sizeX = sizeY = 4000; break;
+            case 5: sizeX = sizeY = 5000; break;
+            case 6: sizeX = sizeY = 6000; break;
             default: throw new UnsupportedOperationException("Invalid sizeIndex: " + sizeIndex);
         }
 
