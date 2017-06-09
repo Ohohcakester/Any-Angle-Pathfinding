@@ -45,7 +45,7 @@ public class Stringifier {
         sb.append(sizeX).append("x");
         sb.append(sizeY).append("_");
         sb.append(corridorWidth).append("_");
-        sb.append("e").append((int)(-Math.log(connectednessRatio)*10)).append("_");
+        sb.append("e").append((int)(-Math.log(connectednessRatio+0.00000001f)*10)).append("_");
         sb.append(longToStr(seed));
         return sb.toString();
     }
