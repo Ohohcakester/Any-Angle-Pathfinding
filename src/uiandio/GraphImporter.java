@@ -32,10 +32,10 @@ import main.testgen.StartEndPointData;
 public class GraphImporter {
     private GridGraph gridGraph;
     
-    private GraphImporter(String fileName) {
+    private GraphImporter(String filepath) {
         boolean[][] result = null;
 
-        File file = new File(AnyAnglePathfinding.PATH_GRAPHIMPORT + fileName);
+        File file = new File(filepath);
         try {
             FileReader fileReader = new FileReader(file);
             Scanner sc = new Scanner(fileReader);
@@ -50,7 +50,7 @@ public class GraphImporter {
             }
             sc.close();
         } catch (FileNotFoundException e) {
-            System.out.println("File " + fileName + " not found in " + AnyAnglePathfinding.PATH_GRAPHIMPORT);
+            System.out.println("File " + filepath + " not found");
         }
         /* Commented out because of Unreachable Catch Clause warning.
         catch (IOException e) {
@@ -98,25 +98,51 @@ public class GraphImporter {
     }
 
     /**
-     * Import a graph from a file in the AnyAnglePathFinding directory.
+     * Import a graph from a file in the predefinedgrids directory.
      * Look into the GraphImporter documentation for details on how to create a grid file.
      */
     public static GridGraph importGraphFromFile(String filename) {
+        String filepath = AnyAnglePathfinding.PATH_GRAPHIMPORT + filename;
+        return importGraphFromFilePath(filepath);
+    }
+
+    /**
+     * Import a graph from a file in the predefinedgrids directory,
+     * and also set the start and goal points.
+     */
+    public static GridAndGoals importGraphFromFile(String filename, int sx, int sy, int ex, int ey) {
+        String filepath = AnyAnglePathfinding.PATH_GRAPHIMPORT + filename;
+        return importGraphFromFilePath(filepath, sx, sy, ex, ey);
+    }
+
+    /**
+     * Import a graph from a file in the AnyAnglePathfinding directory.
+     */
+    public static GridGraph importGraphFromFilePath(String filepath) {
         GridGraph gridGraph;
-        GraphImporter graphImporter = new GraphImporter(filename);
+        GraphImporter graphImporter = new GraphImporter(filepath);
         gridGraph = graphImporter.retrieve();
         return gridGraph;
     }
-    
+
+    /**
+     * Import a graph from a file in the AnyAnglePathfinding directory,
+     * and also set the start and goal points.
+     */
+    public static GridAndGoals importGraphFromFilePath(String filepath, int sx, int sy, int ex, int ey) {
+        GridGraph gridGraph = GraphImporter.importGraphFromFilePath(filepath);
+        return new GridAndGoals(gridGraph, sx, sy, ex, ey);
+    }
+
     public static GridAndGoals loadStoredMaze(String mazeName, String problemName) {
-        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        String filepath = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
         TwoPoint tp = readProblem(problemName);
-        return importGraphFromFile(path, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
+        return importGraphFromFilePath(filepath, tp.p1.x, tp.p1.y, tp.p2.x, tp.p2.y);
     }
     
     public static GridGraph loadStoredMaze(String mazeName) {
-        String path = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
-        return importGraphFromFile(path);
+        String filepath = AnyAnglePathfinding.PATH_MAZEDATA + mazeName + "/maze.txt";
+        return importGraphFromFilePath(filepath);
     }
 
     public static ArrayList<TwoPoint> loadStoredMazeProblems(String mazeName) {
@@ -187,15 +213,5 @@ public class GraphImporter {
     private static void put(HashMap<String,String> dict, String input) {
         String[] args = input.split(":", 2);
         dict.put(args[0].trim(), args[1].trim());
-    }
-       
-
-    /**
-     * Import a graph from a file in the AnyAnglePathFinding directory,
-     * and also set the start and goal points.
-     */
-    public static GridAndGoals importGraphFromFile(String filename, int sx, int sy, int ex, int ey) {
-    	GridGraph gridGraph = GraphImporter.importGraphFromFile(filename);
-    	return new GridAndGoals(gridGraph, sx, sy, ex, ey);
     }
 }
