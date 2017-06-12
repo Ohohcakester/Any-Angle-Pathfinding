@@ -7,6 +7,8 @@ A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 
 [Slides for Strict Theta* - ICAPS 2016](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/StrictTheta_ICAPS16.pdf)
 
+[Slides for ENLSVGs (Edge N-Level Sparse Visibility Graph Algorithm) - SoCS 2017](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf)
+
 [Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
 Features
