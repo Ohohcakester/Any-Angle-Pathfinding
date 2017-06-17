@@ -15,45 +15,58 @@ Features
 =====================
 1.	Visualisations of the [implemented algorithms](./src/algorithms):
     *	Breadth-First Search
+        * optimal 4-directional path (not any-angle)
     * Dijkstra’s Algorithm
+      * optimal 8-directional path (not any-angle)
     * A* Search Algorithm (optionally with Post-Smoothing)
+      * optimal 8 directional path
+      * with post-smoothing, sub-optimal any-angle path
     * Jump Point Search Algorithm (optionally with Post-Smoothing)
+      * optimal 8 directional path, much faster than A*
       * http://users.cecs.anu.edu.au/~dharabor/data/papers/harabor-grastien-aaai11.pdf
     * Theta* Algorithm
+      * sub-optimal any-angle path, very close to optimal
       * http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf
     * Lazy Theta* Algorithm
+      * sub-optimal any-angle path, runs faster than Theta* with slightly longer path lengths
       * http://aigamedev.com/open/tutorial/lazy-theta-star/
     * Strict Theta* Algorithm
+      * sub-optimal any-angle paths, much shorter path lengths with (very) slightly longer search times
       * https://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13049
     * Accelerated A* Algorithm
+      * sub-optimal any-angle paths
       * Note: not very well optimised.
       * https://agents.felk.cvut.cz/publications/download/76
     * Visibility Graph Algorithm
-      * gives optimal solutions, but very slow.
-      * included is an option to reuse an existing visibility graph instead of regenerating it.
+      * gives optimal solutions, but can be quite slow.
+      * included is an option to reuse an existing visibility graph instead of regenerating it. (preprocessing)
       * Includes three algorithms to construct Visibility Graphs over grids:
         1. All-pairs Bresenham Line-of-Sight Checks
         2. Rotational Plane Sweep Algorithm
             - Choset, H. M. 2005. Principles of robot motion: theory, algorithms, and implementation. MIT press.
         3. Line-of-Sight Scans. (fastest)
     * Sparse Visibility Graph Algorithm
-      * similar to Visibility Graph Algorithm, but a lot faster.
+      * works similarly to Visibility Graph Algorithm, but a lot faster (and still optimal).
       * requires preprocessing.
       * described in same paper as the Edge N-Level Sparse Visibility Graph Algorithm
     * Edge N-Level Sparse Visibility Graph Algorithm
-      * fastest Any-Angle Pathfinding algorithm, but requires preprocessing unlike Anya16.
+      * gives optimal solutions, and also the fastest Any-Angle Pathfinding algorithm.
+      * requires preprocessing (unlike Anya16).
       * millisecond runtimes on 6000x6000 maps.
       * https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790
     * Anya
       * gives optimal solutions. Much faster than Visibility Graphs.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
-      * Implementation based on [this paper](http://idm-lab.org/bib/abstracts/papers/socs15a.pdf)
+      * implementation based on [this paper](http://idm-lab.org/bib/abstracts/papers/socs15a.pdf)
     * Anya16
       * NOT IMPLEMENTED BY ME. (other than the visualisations)
-      * Implementation taken from [Daniel Harabor's Code Repository](https://bitbucket.org/dharabor/pathfinding)
-      * gives optimal solutions. Much faster than other implementation of Anya.
+      * implementation taken from [Daniel Harabor's Code Repository](https://bitbucket.org/dharabor/pathfinding)
+      * gives optimal solutions. Fastest online Any-Angle Pathfinding algorithm.
+      * Much faster than other implementation of Anya.
       * http://jair.org/media/5007/live-5007-9321-jair.pdf
     * SG16: Speeding Up A* Search on Visibility Graphs Defined over Quadtrees
+      * originally optimal, but includes some sub-optimal optimisations
+      * unsure about completeness due to some of the optimisations
       * implemented over grids instead of over quadtrees.
       * https://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13155/12717
 
