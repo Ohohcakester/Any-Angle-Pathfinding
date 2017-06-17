@@ -237,7 +237,7 @@ The following formats can be used in the trace:
 **Similar to AlgoTest, but we run with test parameters from the command line instead.**
 
 The arguments are as follows:
-* `java -jar AAP.jar <algorithmName> <mapSetName> <testType> <outputDirectory>`
+* `java -jar dist/AAP.jar <algorithmName> <mapSetName> <testType> <outputDirectory>`
 
 Example bash script used for running tests:
 ```
