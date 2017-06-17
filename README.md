@@ -24,7 +24,7 @@ Features
     * Lazy Theta* Algorithm
       * http://aigamedev.com/open/tutorial/lazy-theta-star/
     * Strict Theta* Algorithm
-      * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13049/12685
+      * https://www.aaai.org/ocs/index.php/ICAPS/ICAPS16/paper/view/13049
     * Accelerated A* Algorithm
       * Note: not very well optimised.
       * https://agents.felk.cvut.cz/publications/download/76
@@ -39,9 +39,11 @@ Features
     * Sparse Visibility Graph Algorithm
       * similar to Visibility Graph Algorithm, but a lot faster.
       * requires preprocessing.
+      * described in same paper as the Edge N-Level Sparse Visibility Graph Algorithm
     * Edge N-Level Sparse Visibility Graph Algorithm
       * fastest Any-Angle Pathfinding algorithm, but requires preprocessing unlike Anya16.
       * millisecond runtimes on 6000x6000 maps.
+      * https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790
     * Anya
       * gives optimal solutions. Much faster than Visibility Graphs.
       * http://www.aaai.org/ocs/index.php/ICAPS/ICAPS13/paper/viewFile/6060/6194
