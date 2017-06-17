@@ -2,14 +2,14 @@ Any-Angle Pathfinding
 =====================
 
 A collection of algorithms used for Any-Angle Pathfinding with visualisations.
+* [My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/AnyAnglePathfindingPresentation.pdf)
+* [My Slides for Strict Theta* *- ICAPS 2016*](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/StrictTheta_ICAPS16.pdf)
+* [My Slides for ENLSVGs (Edge N-Level Sparse Visibility Graph Algorithm) *- SoCS 2017*](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf)
+* [Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
-[My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/AnyAnglePathfindingPresentation.pdf)
-
-[Slides for Strict Theta* - ICAPS 2016](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/StrictTheta_ICAPS16.pdf)
-
-[Slides for ENLSVGs (Edge N-Level Sparse Visibility Graph Algorithm) - SoCS 2017](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf)
-
-[Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
+#### Some useful papers that include comparisons of Any-Angle Pathfinding algorithms:
+1. https://www.aaai.org/ocs/index.php/SOCS/SOCS15/paper/view/11295
+2. https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790
 
 Features
 =====================
