@@ -242,7 +242,7 @@ The arguments are as follows:
 Example bash script used for running tests:
 ```
 runtest() {
-java -jar AAP.jar -Xmx4096m  "$@"
+java -jar dist/AAP.jar -Xmx4096m  "$@"
 }
 
 runtest Anya16 benchmarks default output_benchmarks
