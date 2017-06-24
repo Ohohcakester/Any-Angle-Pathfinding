@@ -62,13 +62,17 @@ public class AlgoTest {
         System.gc(); System.gc();
 
         String[] algoNames = new String[]{
-            "SG16A",
+            // Define algorithms to test here
+            "Anya16",
+            "BasicThetaStar",
         };
 
         String[] mapSetNames = new String[]{
+            // Define the map sets to test on here
+            "benchmarks",
             "automatadcmazes",
         };
-
+        
         for (int i=0; i<algoNames.length; ++i) {
             for (int j=0; j<mapSetNames.length; ++j) {
                 testSequence(getAlgo(algoNames[i]), algoNames[i], mapSetNames[j], "");
