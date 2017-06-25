@@ -34,6 +34,7 @@ public class TestDataGenerator {
     
     private static void export() {
 
+        // "scaledmazes"
         for (int scale = 4; scale <= 12; scale += 4) {
             exportTestData(StoredTestMazes.loadScaledMaze("sc1_NovaStation",scale));
             exportTestData(StoredTestMazes.loadScaledMaze("wc3_darkforest",scale));
@@ -42,17 +43,31 @@ public class TestDataGenerator {
             exportTestData(StoredTestMazes.loadScaledMaze("sc1_Triskelion",scale));
             exportTestData(StoredTestMazes.loadScaledMaze("wc3_theglaive",scale));
         }
-       
+
+        // "tiledmazes"
         for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
-            for (int size = 4; size <= 12; size += 4) {
+            for (int size = 4; size <= 12; size+=4) {
                 exportTestData(StoredTestMazes.loadTiledMaze(mazePoolIndex, size));
             }
         }
 
+        // "automatadcmazes"
         for (int percentBlockedIndex=0; percentBlockedIndex<2; ++percentBlockedIndex) {
-            for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex += 2) {
-                for (int sizeIndex=0; sizeIndex<5; sizeIndex += 2) { // LATER: Test sizeIndex 5 and 6 too
+            for (int resolutionIndex=0; resolutionIndex<5; resolutionIndex+=2) {
+                for (int sizeIndex=0; sizeIndex<5; sizeIndex+=2) {
                     exportTestData(StoredTestMazes.loadAutomataDCMaze(sizeIndex, resolutionIndex, percentBlockedIndex));
+                }
+            }
+        }
+
+        // "mazemaps"
+        {
+            int[] connectednessRatioIndexes = new int[] {0,1,2};
+            for (int sizeIndex=0; sizeIndex<7; sizeIndex+=2) {
+                int corridorWidthIndex = 1;
+                for (int j=0; j<connectednessRatioIndexes.length; ++j) {
+                    int connectednessRatioIndex = connectednessRatioIndexes[j];
+                    exportTestData(StoredTestMazes.loadMazeMaze(sizeIndex, corridorWidthIndex, connectednessRatioIndex));
                 }
             }
         }

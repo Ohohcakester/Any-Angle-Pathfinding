@@ -351,7 +351,7 @@ public class AlgoTest {
 
         case "tiledmazes": {
             for (int mazePoolIndex=0;mazePoolIndex<4;++mazePoolIndex) {
-                for (int size = 4; size <= 12; ++size) {
+                for (int size = 4; size <= 12; size+=4) {
                     testOnStoredMaze(StoredTestMazes.loadTiledMaze(mazePoolIndex, size), algo, testFunction_slow);
                     System.gc();System.gc();
                     try {Thread.sleep(2000);}
@@ -386,7 +386,7 @@ public class AlgoTest {
 
 
         case "mazemaps": {
-            int[] connectednessRatioIndexes = new int[] {0,1,3};
+            int[] connectednessRatioIndexes = new int[] {0,1,2};
             for (int sizeIndex=0; sizeIndex<7; sizeIndex+=2) {
                 int corridorWidthIndex = 1;
                 for (int j=0; j<connectednessRatioIndexes.length; ++j) {
@@ -426,7 +426,7 @@ public class AlgoTest {
     }
 
     public static void testScaledMazes(String mazeName, AlgoFunction algo, TestFunctionData testFunction) {
-        for (int scale = 2; scale <= 12; scale += 2) {
+        for (int scale = 4; scale <= 12; scale += 4) {
             testOnStoredMaze(StoredTestMazes.loadScaledMaze(mazeName,scale), algo, testFunction);
             System.gc();System.gc();
             try {Thread.sleep(2000);}
