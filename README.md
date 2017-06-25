@@ -98,6 +98,15 @@ Visualisation: Java Swing
 
 Dependencies: JUnit (not required if using ant build script)
 
+Pre-Generated Maps
+=====================
+If you want to load existing pre-generated maps, the maps can be downloaded here:
+
+* [mazedata.7z](https://drive.google.com/open?id=0B3uasjmPSIjIdHpOWUtwVkFlQms): Maps with pre-generated test cases
+* [originalbenchmarks.7z](https://drive.google.com/open?id=0B3uasjmPSIjIZUstM0NkU19xOHc): Benchmarks from the [Moving AI Lab](http://www.movingai.com/benchmarks/)
+
+To use them, unzip them and place the `mazedata/` and `originalbenchmarks/` directories in the root of the repository.
+
 Build using Apache Ant
 =====================
 To build and run the code, run the following from the base directory (where build.xml is).
