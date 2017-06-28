@@ -107,6 +107,13 @@ If you want to load existing pre-generated maps, the maps can be downloaded here
 
 To use them, unzip them and place the `mazedata/` and `originalbenchmarks/` directories in the root of the repository.
 
+### Larger Maps
+
+The larger maps used for the comparison in [these slides](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf) and [this paper](https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790) are stored only as code in [StoredTestMazes](./src/main/mazes/StoredTestMazes.java) (they are loaded by running the respective generation code). The exact maps used for the tests are found in [AlgoTest](src/main/AlgoTest.java). The large maps come from these four test sets: **"scaledmazes"**, **"tiledmazes"**, **"automatadcmazes"**, **"mazemaps"**.
+
+I have also pre-generated the above maps for convenience. They are available here:
+* [largemaps.7z](https://drive.google.com/open?id=0B3uasjmPSIjISFZVVFpMRWt6MVk) (Note: large file size when decompressed)
+
 Build using Apache Ant
 =====================
 To build and run the code, run the following from the base directory (where build.xml is).
@@ -178,20 +185,28 @@ L: Same as P, but jumps multiple steps at a time.
 
 The test to be run is specified in the function `AlgoTest.run()` in `main/Algotest.java`. The test parameters can be edited there.
 ```
-        String[] algoNames = new String[]{
-            // Define algorithms to test here
-            "Anya16",
-            "BasicThetaStar",
-        };
+String[] algoNames = new String[]{
+    // Define algorithms to test here
+    "Anya16",
+    "BasicThetaStar",
+};
 
-        String[] mapSetNames = new String[]{
-            // Define the map sets to test on here
-            "benchmarks",
-            "automatadcmazes",
-        };
+String[] mapSetNames = new String[]{
+    // Define the map sets to test on here
+    "benchmarks",
+    "automatadcmazes",
+};
 ```
 
 The list of algorithm names can be found in `AlgoTest.getAlgo()` and the list of map sets can be found in `AlgoTest.testSequence`.
+
+The following map sets are used for the tests in [these slides](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf):
+* benchmarks
+* benchmarksrandom
+* scaledmazes
+* tiledmazes
+* automatadcmazes
+* mazemaps
 
 ## [2] Experiment
 **Used to run various experiments on the algorithm. Check `Experiment.run()` for details**
