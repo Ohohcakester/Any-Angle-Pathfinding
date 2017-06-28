@@ -45,7 +45,7 @@ public class Stringifier {
         sb.append(sizeX).append("x");
         sb.append(sizeY).append("_");
         sb.append(corridorWidth).append("_");
-        sb.append("e").append((int)(-Math.log(connectednessRatio+0.00000001f)*10)).append("_");
+        sb.append(floatToOneDigitStandardFormStr(connectednessRatio)).append("_");
         sb.append(longToStr(seed));
         return sb.toString();
     }
@@ -86,6 +86,23 @@ public class Stringifier {
             i = i>>>5;
         }
         return sb.toString();
+    }
+
+    public static String floatToOneDigitStandardFormStr(float f) {
+        float EPS = 0.0000001f;
+
+        if (f == 0) return "0E0";
+        int digits = 0;
+    
+        while (Math.abs(f) > 1+EPS) {
+            f /= 10;
+            digits++;
+        }
+        while (Math.abs(f) < 1-EPS) {
+            f *= 10;
+            digits--;
+        }
+        return (int)(f > 0 ? f+EPS : f-EPS) + "E" + digits;
     }
     
     public static int strToInt(String s) {
