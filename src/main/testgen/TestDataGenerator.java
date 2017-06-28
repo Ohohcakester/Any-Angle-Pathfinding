@@ -197,7 +197,7 @@ public class TestDataGenerator {
         FileIO.makeDirs(filePath);
 
         makeMazeFile(mazeAndTestCases.gridGraph, filePath);
-        makePrettyMazeFile(mazeAndTestCases.gridGraph, filePath);
+        //makePrettyMazeFile(mazeAndTestCases.gridGraph, filePath);
         makeAnalysisFile(mazeAnalyser.mazeAnalysis, filePath);
         
         makeProblemFiles(mazeAnalyser.problemList, filePath);
