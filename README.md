@@ -2,9 +2,9 @@ Any-Angle Pathfinding
 =====================
 
 A collection of algorithms used for Any-Angle Pathfinding with visualisations.
-* [My Slides explaining Any-Angle Pathfinding and the Algorithms](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/AnyAnglePathfindingPresentation.pdf)
-* [My Slides for Strict Theta* *- ICAPS 2016*](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/StrictTheta_ICAPS16.pdf)
-* [My Slides for ENLSVGs (Edge N-Level Sparse Visibility Graph Algorithm) *- SoCS 2017*](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf)
+* [My Slides explaining Any-Angle Pathfinding and the Algorithms](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286723/AnyAnglePathfindingPresentation.pdf)
+* [My Slides for Strict Theta* *- ICAPS 2016*](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286725/StrictTheta_ICAPS16.pdf)
+* [My Slides for ENLSVGs (Edge N-Level Sparse Visibility Graph Algorithm) *- SoCS 2017*](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286724/ENLSVG_SoCS17.pdf)
 * [Wikipedia](http://en.wikipedia.org/wiki/Any-angle_path_planning)
 
 #### Some useful papers that include comparisons of Any-Angle Pathfinding algorithms:
@@ -109,7 +109,7 @@ To use them, unzip them and place the `mazedata/` and `originalbenchmarks/` dire
 
 ### Larger Maps
 
-The larger maps used for the comparison in [these slides](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf) and [this paper](https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790) are stored only as code in [StoredTestMazes](./src/main/mazes/StoredTestMazes.java) (they are loaded by running the respective generation code). The exact maps used for the tests are found in [AlgoTest](src/main/AlgoTest.java). The large maps come from these four test sets: **"scaledmazes"**, **"tiledmazes"**, **"automatadcmazes"**, **"mazemaps"**.
+The larger maps used for the comparison in [these slides](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286724/ENLSVG_SoCS17.pdf) and [this paper](https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790) are stored only as code in [StoredTestMazes](./src/main/mazes/StoredTestMazes.java) (they are loaded by running the respective generation code). The exact maps used for the tests are found in [AlgoTest](src/main/AlgoTest.java). The large maps come from these four test sets: **"scaledmazes"**, **"tiledmazes"**, **"automatadcmazes"**, **"mazemaps"**.
 
 I have also pre-generated the above maps for convenience. They are available here:
 * [largemaps.7z](https://drive.google.com/open?id=0B3uasjmPSIjISFZVVFpMRWt6MVk) (Note: large file size when decompressed)
@@ -200,7 +200,7 @@ String[] mapSetNames = new String[]{
 
 The list of algorithm names can be found in `AlgoTest.getAlgo()` and the list of map sets can be found in `AlgoTest.testSequence`.
 
-The following map sets are used for the tests in [these slides](http://ohoh.byethost7.com/Contents/Projects/AnyAnglePathfinding/ENLSVG_SoCS17.pdf):
+The following map sets are used for the tests in [these slides](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286724/ENLSVG_SoCS17.pdf):
 * benchmarks
 * benchmarksrandom
 * scaledmazes
