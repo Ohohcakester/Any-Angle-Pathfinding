@@ -11,6 +11,13 @@ A collection of algorithms used for Any-Angle Pathfinding with visualisations.
 1. https://www.aaai.org/ocs/index.php/SOCS/SOCS15/paper/view/11295
 2. https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790
 
+Licensing of Source Code
+=====================
+The implementation of [Anya 2016](./src/algorithms/anya16), from [here](https://bitbucket.org/dharabor/pathfinding), and [JGraphT](./src/algorithms/jgrapht), from [here](http://jgrapht.org/), are licensed under their respective licenses.
+
+Everything else is [unlicensed](http://unlicense.org/).
+
+
 Features
 =====================
 1.	Visualisations of the [implemented algorithms](./src/algorithms):
