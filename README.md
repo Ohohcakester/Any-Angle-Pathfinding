@@ -81,7 +81,7 @@ Features
 
 3. [Map Generators](./src/main/graphgeneration) to generate grid maps:
     * DefaultGenerator
-      * Generates random grid maps. A random seed can be set for determinstic map generation.
+      * Generates random grid maps. A random seed can be set for deterministic map generation.
     * AutomataGenerator
       * Generates random cave-maps using cellular automata. (modified from original algorithm)
       * https://pdfs.semanticscholar.org/5f05/6b9bb84015cdd650f043e07f6e7d7d193ae6.pdf
@@ -269,7 +269,7 @@ The trace is terminated with a `#` character.
 
 The trace should be printed in chronological order for the visualisation to make sense.
 
-Each line of the trace is sequence of *integers*, seperated by spaces.
+Each line of the trace is sequence of *integers*, separated by spaces.
 
 The following formats can be used in the trace:
 * `<x1> <y1> <x2> <y2>`: Draws a line from `(x1,y1)` to `(x2,y2)`
