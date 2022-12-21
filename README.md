@@ -109,8 +109,8 @@ Pre-Generated Maps
 =====================
 If you want to load existing pre-generated maps, the maps can be downloaded here:
 
-* [mazedata.7z](https://drive.google.com/open?id=0B3uasjmPSIjIdHpOWUtwVkFlQms): Maps with pre-generated test cases
-* [originalbenchmarks.7z](https://drive.google.com/open?id=0B3uasjmPSIjIZUstM0NkU19xOHc): Benchmarks from the [Moving AI Lab](http://www.movingai.com/benchmarks/)
+* [mazedata.7z](https://drive.google.com/file/d/0B3uasjmPSIjIdHpOWUtwVkFlQms/view?resourcekey=0-i9bjPUvp4FjET3se7oVkxw): Maps with pre-generated test cases
+* [originalbenchmarks.7z](https://drive.google.com/file/d/0B3uasjmPSIjIZUstM0NkU19xOHc/view?resourcekey=0-ZSgnLQk_qxjZDsSyMqKyUw): Benchmarks from the [Moving AI Lab](http://www.movingai.com/benchmarks/)
 
 To use them, unzip them and place the `mazedata/` and `originalbenchmarks/` directories in the root of the repository.
 
@@ -119,7 +119,7 @@ To use them, unzip them and place the `mazedata/` and `originalbenchmarks/` dire
 The larger maps used for the comparison in [these slides](https://github.com/Ohohcakester/Any-Angle-Pathfinding/files/1286724/ENLSVG_SoCS17.pdf) and [this paper](https://aaai.org/ocs/index.php/SOCS/SOCS17/paper/view/15790) are stored only as code in [StoredTestMazes](./src/main/mazes/StoredTestMazes.java) (they are loaded by running the respective generation code). The exact maps used for the tests are found in [AlgoTest](src/main/AlgoTest.java). The large maps come from these four test sets: **"scaledmazes"**, **"tiledmazes"**, **"automatadcmazes"**, **"mazemaps"**.
 
 I have also pre-generated the above maps for convenience. They are available here:
-* [largemaps.7z](https://drive.google.com/open?id=0B3uasjmPSIjISFZVVFpMRWt6MVk) (Note: large file size when decompressed)
+* [largemaps.7z](https://drive.google.com/file/d/0B3uasjmPSIjISFZVVFpMRWt6MVk/view?resourcekey=0-L0FDdiWpJZbOEXCC2mqOYg) (Note: large file size when decompressed)
 
 Build using Apache Ant
 =====================
